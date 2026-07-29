@@ -123,9 +123,14 @@ Editorial gallery aesthetic — closer to a design portfolio or magazine than a
 SaaS template. Serif or high-contrast display font for headings (self-hosted
 via `@fontsource`, no external font-loading dependency), clean sans for body/
 UI text, generous whitespace, restrained neutral palette (paper background,
-ink-black text, one accent color). Cards: preview image on top, name +
-tagline, small colorful tool-badge pills, subtle rating indicator (dots or
-stars, not loud).
+ink-black text, one accent color). The UI chrome itself stays achromatic —
+nav, borders, buttons — so that color enters the page through the skill
+preview images and tool badges rather than the interface, and separation
+between cards/sections comes from spacing rather than boxes or heavy
+borders. Homepage hero takes a confident, oversized headline treatment with
+real breathing room around it rather than a cramped SaaS hero. Cards: preview
+image on top, name + tagline, small colorful tool-badge pills, subtle rating
+indicator (dots or stars, not loud).
 
 `ToolBadge.astro` takes a `tool` prop and renders an SVG logo from
 `public/logos/` if one exists, else falls back to a text pill. Placeholder
