@@ -60,7 +60,6 @@ src/
     newsletter.astro
 public/
   previews/             # per-skill preview images
-  logos/                # tool SVG logos (claude, cursor, codex, copilot, figma, miro)
 ```
 
 ## Content schema (`src/content/config.ts`)
@@ -133,10 +132,13 @@ real breathing room around it rather than a cramped SaaS hero. Cards: preview
 image on top, name + tagline, small colorful tool-badge pills, subtle rating
 indicator (dots or stars, not loud).
 
-`ToolBadge.astro` takes a `tool` prop and renders an SVG logo from
-`public/logos/` if one exists, else falls back to a text pill. Placeholder
-SVGs will be created for claude, cursor, codex, copilot, figma, miro — real
-logo assets can be swapped in later.
+`ToolBadge.astro` takes a `tool` prop. No real tool logos have been supplied,
+so per the original brief it renders a colored text pill for every tool for
+now (not a fabricated placeholder logo — recreating third-party marks like
+Claude, Cursor, or Figma's actual logos without being given the assets isn't
+appropriate). The component is structured so a `public/logos/` lookup can be
+added later without changing its interface, once real SVG assets are
+supplied.
 
 ## Seed content (8 entries)
 
