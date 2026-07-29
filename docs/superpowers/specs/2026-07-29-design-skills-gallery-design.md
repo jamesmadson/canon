@@ -104,9 +104,10 @@ install it, gotchas.
   `addedDate` desc, excluding `status: 'archived'` (kept in the repo for
   history but off the visible grid; `superseded` still shows since that's
   informative). The full list serializes as a small JSON payload; `FilterBar`
-  filters it client-side — AND within a facet group, OR across groups (e.g.
-  checking "cursor" + "codex" shows either; checking "cursor" + "motion"
-  requires both). No backend, no re-fetch.
+  filters it client-side — OR within a facet group, AND across groups (e.g.
+  checking "cursor" + "codex", both `tools`, shows either; checking "cursor"
+  + "motion", a `tools` value and a `categories` value, requires both). No
+  backend, no re-fetch.
 - **`/skills/[slug]`** — `getStaticPaths()` over the collection; renders the
   MDX write-up plus a metadata sidebar (source link, tool badges, rating,
   last verified date).
