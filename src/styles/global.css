@@ -1,1 +1,10 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-paper: #faf9f5;
+  --color-ink: #141413;
+  --color-accent: #c1666b;
+}

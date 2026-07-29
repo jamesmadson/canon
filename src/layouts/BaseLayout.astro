@@ -1,0 +1,43 @@
+---
+import '@fontsource/fraunces/400.css';
+import '@fontsource/fraunces/600.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'A curated gallery of design and design-engineering skills for AI agents.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · Design Skills</title>
+    <meta name="description" content={description} />
+  </head>
+  <body class="bg-paper font-sans text-ink antialiased">
+    <header class="mx-auto flex max-w-6xl items-center justify-between px-6 py-8">
+      <a href="/" class="font-serif text-xl">Design Skills</a>
+      <nav class="flex gap-6 text-sm">
+        <a href="/skills">Gallery</a>
+        <a href="/submit">Submit</a>
+        <a href="/newsletter">Newsletter</a>
+      </nav>
+    </header>
+    <main class="mx-auto max-w-6xl px-6 pb-24">
+      <slot />
+    </main>
+    <footer class="mx-auto max-w-6xl px-6 py-12 text-sm text-stone-500">
+      <p>A hand-picked gallery of design and design-engineering skills.</p>
+    </footer>
+  </body>
+</html>
