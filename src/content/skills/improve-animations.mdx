@@ -1,0 +1,24 @@
+---
+slug: improve-animations
+name: Improve Animations
+tagline: "Turns \"the app feels off\" into a prioritized, execute-anywhere motion audit."
+sourceUrl: https://github.com/emilkowalski/skills/tree/main/skills/improve-animations
+sourceAuthor: Emil Kowalski
+tools: [claude-code, cursor, generic]
+categories: [motion]
+previewType: image
+previewAssets: ["/previews/improve-animations.svg"]
+rating: 5
+addedDate: 2026-07-15
+lastVerified: 2026-07-29
+status: active
+featured: true
+---
+
+Emil Kowalski's audit-then-plan skill for motion. It never touches source code — it surveys a codebase's animation surface (transitions, keyframes, Framer Motion/GSAP/WAAPI usage), scores findings against eight categories (easing, physicality, interruptibility, performance, accessibility, cohesion, and more), and writes fully self-contained fix plans that a *different*, cheaper agent can execute with zero context and zero taste of its own.
+
+That last part is the interesting design decision: it treats "deciding what's wrong" and "typing out the fix" as separable work, and only spends the expensive model on the former. The output is a `plans/` directory of numbered, git-stamped implementation plans, not a diff.
+
+**Install**: no `.claude-plugin` manifest in `emilkowalski/skills` — copy `skills/improve-animations/` (plus its `AUDIT.md` and `PLAN-TEMPLATE.md`) into your `.claude/skills/` directory.
+
+**Gotcha**: it's read-only by hard rule — if you ask it to "just fix it," it will decline and point you at running the plan it wrote instead. Don't reach for this when you want an immediate patch; reach for it when you want a prioritized backlog.

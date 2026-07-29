@@ -1,0 +1,24 @@
+---
+slug: frontend-design
+name: Frontend Design
+tagline: "Claude's actual design-lead persona — useful for turning \"clean and modern\" into an actual point of view."
+sourceUrl: https://github.com/anthropics/skills/tree/main/skills/frontend-design
+sourceAuthor: Anthropic
+tools: [claude, claude-code, generic]
+categories: [ui-aesthetics]
+previewType: image
+previewAssets: ["/previews/frontend-design.svg"]
+rating: 5
+addedDate: 2026-07-25
+lastVerified: 2026-07-29
+status: active
+featured: true
+---
+
+Claude's own design-lead persona, distilled into a skill file. Rather than a checklist, it's a point of view: name the subject before designing anything, treat the hero section as a thesis rather than a template slot, and work in two passes — a compact token plan (color, type, layout, signature), a self-critique against three named "AI-generated" defaults, then the build.
+
+The named defaults are the useful part: cream-and-terracotta, near-black-with-one-accent, and broadsheet-hairline-newspaper. Naming them doesn't ban them — it just means picking one has to be a choice, not a reflex. That's the difference between "clean and modern" as a brief and an actual creative decision.
+
+**Install**: this ships inside Anthropic's public `skills` repo, which bundles a `.claude-plugin` marketplace manifest — add it as a Claude Code plugin source, or copy `skills/frontend-design/` straight into your own `.claude/skills/` directory.
+
+**Gotcha**: it explicitly tells the model to watch for CSS specificity collisions between type-based and element-based selectors (`.section` vs `.cta`) — a real, specific failure mode, not generic advice. Expect it to ask more brief-clarifying questions than a typical UI prompt; that's by design.

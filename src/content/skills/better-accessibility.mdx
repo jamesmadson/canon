@@ -1,0 +1,24 @@
+---
+slug: better-accessibility
+name: Better Accessibility
+tagline: "The a11y reference you actually want cited inline — focus rings to ARIA, with real before/afters."
+sourceUrl: https://github.com/jakubkrehel/skills/tree/main/skills/better-accessibility
+sourceAuthor: Jakub Krehel
+tools: [claude, cursor, codex, generic]
+categories: [accessibility]
+previewType: image
+previewAssets: ["/previews/better-accessibility.svg"]
+rating: 5
+addedDate: 2026-07-10
+lastVerified: 2026-07-29
+status: active
+featured: true
+---
+
+The most citation-dense accessibility reference in this gallery: fourteen numbered principles (focus-visible over bare focus, roving tabindex on composite widgets, `aria-describedby` wiring for form errors, minimum 24×24px hit targets per WCAG 2.5.8) each paired with a "common mistakes" table of real before/after code, not just prose rules.
+
+It's structured to be skimmed under pressure — a quick-reference table routes to per-topic files (focus-and-keyboard, semantics-and-aria, forms, screen-readers, hit-areas, motion-and-zoom) so a review doesn't have to load everything at once. The review output format itself is opinionated: findings grouped by principle, a Block/Needs-changes/Approve verdict gated strictly on whether any HIGH-severity finding survives.
+
+**Install**: `jakubkrehel/skills` ships a `.claude-plugin` manifest — install as a plugin, or copy `skills/better-accessibility/` (with its reference files) manually.
+
+**Gotcha**: several principles explicitly hand off to sibling skills in the same repo (contrast math to `better-colors`, input-zoom sizing to `better-typography`) — install those alongside it if you want the cross-references to resolve to real skills rather than dead ends.

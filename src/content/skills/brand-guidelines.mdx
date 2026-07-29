@@ -1,0 +1,24 @@
+---
+slug: brand-guidelines
+name: Brand Guidelines
+tagline: "A tight, portable pattern for baking exact brand colors and type rules into anything Claude touches."
+sourceUrl: https://github.com/anthropics/skills/tree/main/skills/brand-guidelines
+sourceAuthor: Anthropic
+tools: [claude, claude-code]
+categories: [design-systems]
+previewType: image
+previewAssets: ["/previews/brand-guidelines.svg"]
+rating: 4
+addedDate: 2026-07-20
+lastVerified: 2026-07-29
+status: active
+featured: false
+---
+
+A short, mechanical skill: apply Anthropic's own brand colors (dark `#141413`, light `#faf9f5`, plus orange/blue/green accents) and typography (Poppins headings, Lora body) to whatever artifact you hand it — decks, docs, exported assets. It's less a design philosophy than a stylesheet Claude can carry between formats.
+
+What makes it worth including isn't the specific palette — it's the shape. A skill that pins exact hex values, named font roles, and a fallback chain is a clean, portable pattern for baking *your own* brand into any agent workflow: swap the values, keep the structure.
+
+**Install**: bundled in `anthropics/skills`'s `.claude-plugin` marketplace, or copy `skills/brand-guidelines/` into `.claude/skills/` directly.
+
+**Gotcha**: it assumes Poppins and Lora are already installed in the environment it's running in, falling back to Arial/Georgia otherwise — if you fork this for your own brand, check your target environment actually has your fonts before relying on the primary pairing.

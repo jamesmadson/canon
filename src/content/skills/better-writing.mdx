@@ -1,0 +1,24 @@
+---
+slug: better-writing
+name: Better Writing
+tagline: "Microcopy rules that catch \"Oops, something went wrong\" before it ships."
+sourceUrl: https://github.com/jakubkrehel/skills/tree/main/skills/better-writing
+sourceAuthor: Jakub Krehel
+tools: [claude, cursor, codex, generic]
+categories: [copywriting]
+previewType: image
+previewAssets: ["/previews/better-writing.svg"]
+rating: 4
+addedDate: 2026-06-20
+lastVerified: 2026-07-29
+status: active
+featured: false
+---
+
+UX copy rules pitched at the writing that's easiest to get wrong under deadline: verb-first buttons ("Delete project," never bare "OK"), one capitalization policy applied consistently, settings labeled for their ON state, and — the rule most worth stealing — never concatenate strings around a variable (`"You have " + n + " messages"`), because word order isn't stable across languages.
+
+Its error-copy rule is the sharpest thing in it: an error is an instruction, sited next to the field that broke, with no "Oops" and no blame. The before/after table format (used across this author's whole skill set) makes every rule falsifiable against real code rather than aspirational.
+
+**Install**: bundled in `jakubkrehel/skills`'s `.claude-plugin` marketplace, or copy `skills/better-writing/` directly.
+
+**Gotcha**: principle #1 is "recon the existing voice" before changing anything — it's designed to defer to a product's established terminology, not overwrite it with generic plain-language defaults. Skipping that recon step is the most common way to misuse it.

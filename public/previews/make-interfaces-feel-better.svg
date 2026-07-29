@@ -1,0 +1,7 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#faf9f5"/>
+  <rect x="0" y="0" width="800" height="10" fill="#6a9bcc"/>
+  <text x="60" y="270" font-family="Georgia, 'Times New Roman', serif" font-size="40" fill="#141413">Make Interfaces</text>
+  <text x="60" y="320" font-family="Georgia, 'Times New Roman', serif" font-size="40" fill="#141413">Feel Better</text>
+  <text x="60" y="365" font-family="Helvetica, Arial, sans-serif" font-size="18" letter-spacing="2" fill="#8d8a7d">MOTION</text>
+</svg>

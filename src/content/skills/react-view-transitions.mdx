@@ -1,0 +1,24 @@
+---
+slug: react-view-transitions
+name: React View Transitions
+tagline: "The missing manual for React's View Transition API — when to animate, when not to, copy-paste CSS included."
+sourceUrl: https://github.com/vercel-labs/agent-skills/tree/main/skills/react-view-transitions
+sourceAuthor: Vercel
+tools: [claude, claude-code, cursor, codex, copilot, generic]
+categories: [motion]
+previewType: image
+previewAssets: ["/previews/react-view-transitions.svg"]
+rating: 4
+addedDate: 2026-06-01
+lastVerified: 2026-07-29
+status: active
+featured: false
+---
+
+The clearest explanation of React's `<ViewTransition>` API available anywhere right now: a priority-ordered list of five animation patterns (shared element, Suspense reveal, list identity, state change, route change), a rule for when *not* to use directional slides (lateral tab-to-tab navigation has no depth to communicate, so don't fake one), and copy-paste CSS recipes instead of hand-rolled keyframes.
+
+The placement rule alone — a `<ViewTransition>` only fires enter/exit if it appears before any DOM nodes, not wrapped inside a `<div>` — is the kind of gotcha that costs an hour of confused debugging without this skill in the room.
+
+**Install**: from `vercel-labs/agent-skills` — copy `skills/react-view-transitions/` (with its `references/implementation.md` and `references/css-recipes.md`) into `.claude/skills/`.
+
+**Gotcha**: outside of Next.js's App Router (which already bundles a canary React internally), this requires `react@canary react-dom@canary` — `ViewTransition` isn't in stable React yet. Don't reach for this on a stable-React project without planning for that upgrade.

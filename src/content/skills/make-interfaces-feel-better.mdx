@@ -1,0 +1,24 @@
+---
+slug: make-interfaces-feel-better
+name: Make Interfaces Feel Better
+tagline: "Nineteen small physical details — concentric radii, tabular numbers, scale-on-press — that add up to \"feels expensive.\""
+sourceUrl: https://github.com/jakubkrehel/make-interfaces-feel-better
+sourceAuthor: Jakub Krehel
+tools: [claude, cursor, codex, generic]
+categories: [motion, ui-aesthetics]
+previewType: image
+previewAssets: ["/previews/make-interfaces-feel-better.svg"]
+rating: 5
+addedDate: 2026-07-05
+lastVerified: 2026-07-29
+status: active
+featured: true
+---
+
+Nineteen small, extremely specific physical-detail rules — the kind that don't show up in a style guide but that your eye clocks instantly when they're missing. Concentric border radius (outer = inner + padding). Scale-on-press pinned to exactly `0.96`, never below `0.95`. Icon stroke width matched to adjacent text weight. A pure-black-or-white 10% outline on images, explicitly *not* a tinted neutral, because a tinted outline "reads as dirt on the image edge."
+
+The instruction to slow every animation to 10% speed in the browser's Animations panel before judging it is the kind of concrete, repeatable check that makes a review skill actually useful rather than vibes-based.
+
+**Install**: standalone repo, no plugin manifest — copy `skills/make-interfaces-feel-better/` (with its five reference files: typography, surfaces, animations, icons, performance) into `.claude/skills/`.
+
+**Gotcha**: several rules assume a specific motion library convention (`motion`/`framer-motion` in `package.json`) and branch behavior accordingly — read the animations reference before applying its icon-transition guidance to a project with no motion library installed.
