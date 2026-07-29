@@ -1,7 +1,35 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SkillCard from '../components/SkillCard.astro';
+
+const allSkills = await getCollection('skills', ({ data }) => data.status !== 'archived');
+const sorted = [...allSkills].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
+const featured = sorted.filter((s) => s.data.featured).slice(0, 5);
 ---
 
 <BaseLayout title="Home">
-  <h1 class="text-2xl font-bold">Coming soon</h1>
+  <section class="py-16 sm:py-24">
+    <h1 class="max-w-2xl font-serif text-5xl font-semibold leading-tight sm:text-6xl">
+      A curated gallery of design skills for AI agents.
+    </h1>
+    <p class="mt-6 max-w-xl text-lg text-stone-600">
+      Hand-picked SKILL.md files and design-tool instructions — Sidebar.io meets an
+      awesome-list, not a scraped registry.
+    </p>
+  </section>
+
+  <section class="mb-20">
+    <h2 class="mb-6 font-serif text-2xl font-semibold">This month's picks</h2>
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+      {featured.map((skill) => <SkillCard skill={skill} />)}
+    </div>
+  </section>
+
+  <section>
+    <h2 class="mb-6 font-serif text-2xl font-semibold">All skills</h2>
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+      {sorted.map((skill) => <SkillCard skill={skill} />)}
+    </div>
+  </section>
 </BaseLayout>
