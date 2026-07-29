@@ -1,0 +1,17 @@
+---
+import { TOOL_META } from '../lib/toolMeta';
+
+interface Props {
+  tool: string;
+}
+
+const { tool } = Astro.props;
+const meta = TOOL_META[tool] ?? TOOL_META.generic;
+---
+
+<span
+  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
+  style={`background-color: ${meta.color}`}
+>
+  {meta.label}
+</span>
