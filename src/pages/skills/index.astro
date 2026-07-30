@@ -1,0 +1,13 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilterBar from '../../components/FilterBar.astro';
+
+const allSkills = await getCollection('skills', ({ data }) => data.status !== 'archived');
+const sorted = [...allSkills].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
+---
+
+<BaseLayout title="Gallery" description="The full gallery of design and design-engineering skills.">
+  <h1 class="mb-10 font-serif text-4xl font-semibold">All skills</h1>
+  <FilterBar skills={sorted} />
+</BaseLayout>
