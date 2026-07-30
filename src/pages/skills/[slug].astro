@@ -1,0 +1,56 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ToolBadge from '../../components/ToolBadge.astro';
+
+export async function getStaticPaths() {
+  const skills = await getCollection('skills');
+  return skills.map((entry) => ({
+    params: { slug: entry.data.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { name, tagline, tools, rating, sourceUrl, sourceAuthor, lastVerified, previewAssets, status } =
+  entry.data;
+---
+
+<BaseLayout title={name} description={tagline}>
+  <div class="grid grid-cols-1 gap-12 lg:grid-cols-[2fr_1fr]">
+    <div>
+      <img src={previewAssets[0]} alt={`Preview of ${name}`} class="mb-8 w-full rounded-md" />
+      <h1 class="mb-2 font-serif text-4xl font-semibold">{name}</h1>
+      <p class="mb-8 text-lg text-stone-600">{tagline}</p>
+      <article class="prose prose-stone max-w-none">
+        <Content />
+      </article>
+    </div>
+    <aside class="flex flex-col gap-6 text-sm">
+      {status === 'superseded' && (
+        <p class="rounded-md bg-amber-100 px-3 py-2 text-amber-900">
+          This skill has been superseded by a newer entry.
+        </p>
+      )}
+      <div>
+        <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Works with</h2>
+        <div class="flex flex-wrap gap-2">
+          {tools.map((tool) => <ToolBadge tool={tool} />)}
+        </div>
+      </div>
+      <div>
+        <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Rating</h2>
+        <p aria-label={`Rated ${rating} out of 5`}>{'●'.repeat(rating)}{'○'.repeat(5 - rating)}</p>
+      </div>
+      <div>
+        <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Source</h2>
+        <p><a href={sourceUrl} class="underline">{sourceAuthor}</a></p>
+      </div>
+      <div>
+        <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Last verified</h2>
+        <p>{lastVerified.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      </div>
+    </aside>
+  </div>
+</BaseLayout>
