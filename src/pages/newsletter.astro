@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+interface ArchiveIssue {
+  title: string;
+  url: string;
+  publishedAt: string;
+}
+
+const archive: ArchiveIssue[] = [];
+---
+
+<BaseLayout
+  title="Newsletter"
+  description="Sign up for occasional emails about new skills added to the gallery."
+>
+  <h1 class="mb-4 font-serif text-4xl">Newsletter</h1>
+  <p class="mb-10 max-w-xl text-stone-600">
+    Occasional emails when a genuinely good skill gets added. No spam.
+  </p>
+
+  <!--
+    Placeholder Buttondown embed. Replace YOUR_USERNAME with your Buttondown
+    username before deploying: https://buttondown.com/emails
+  -->
+  <form
+    action="https://buttondown.com/api/emails/embed-subscribe/YOUR_USERNAME"
+    method="post"
+    target="popupwindow"
+    class="mb-16 flex max-w-md gap-3"
+  >
+    <input
+      type="email"
+      name="email"
+      required
+      placeholder="you@example.com"
+      class="flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm"
+    />
+    <button type="submit" class="rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper">
+      Subscribe
+    </button>
+  </form>
+
+  <h2 class="mb-6 font-serif text-2xl">Archive</h2>
+  {
+    archive.length === 0 ? (
+      <p class="text-sm text-stone-500">No issues yet — check back soon.</p>
+    ) : (
+      <ul class="flex flex-col gap-3">
+        {archive.map((issue) => (
+          <li>
+            <a href={issue.url} class="underline">{issue.title}</a>
+            <span class="ml-2 text-sm text-stone-500">{issue.publishedAt}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</BaseLayout>
