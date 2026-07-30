@@ -1,0 +1,98 @@
+---
+import { TOOL_META } from '../lib/toolMeta';
+import { CATEGORY_META } from '../lib/categoryMeta';
+import { TOOL_VALUES, CATEGORY_VALUES } from '../content/skillSchema';
+import SkillCard from './SkillCard.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  skills: CollectionEntry<'skills'>[];
+}
+
+const { skills } = Astro.props;
+---
+
+<div class="flex flex-col gap-8 lg:flex-row lg:gap-12">
+  <aside class="lg:w-56 shrink-0">
+    <fieldset class="mb-8">
+      <legend class="mb-3 text-sm font-medium uppercase tracking-wide text-stone-500">Tools</legend>
+      <div class="flex flex-col gap-2">
+        {TOOL_VALUES.map((tool) => (
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" value={tool} data-filter="tools" class="accent-ink" />
+            {TOOL_META[tool].label}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend class="mb-3 text-sm font-medium uppercase tracking-wide text-stone-500">Categories</legend>
+      <div class="flex flex-col gap-2">
+        {CATEGORY_VALUES.map((category) => (
+          <label class="flex items-center gap-2 text-sm">
+            <input type="checkbox" value={category} data-filter="categories" class="accent-ink" />
+            {CATEGORY_META[category].label}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  </aside>
+
+  <div class="flex-1">
+    <p id="filter-count" class="mb-4 text-sm text-stone-500"></p>
+    <p id="filter-empty" class="hidden text-sm text-stone-500">No skills match those filters.</p>
+    <div id="skill-grid" class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+      {skills.map((skill) => (
+        <div
+          data-skill-card
+          data-tools={skill.data.tools.join(',')}
+          data-categories={skill.data.categories.join(',')}
+        >
+          <SkillCard skill={skill} />
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<script>
+  import { filterSkills } from '../lib/filterSkills';
+
+  const grid = document.getElementById('skill-grid')!;
+  const countLabel = document.getElementById('filter-count')!;
+  const emptyLabel = document.getElementById('filter-empty')!;
+  const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-skill-card]'));
+  const checkboxes = Array.from(document.querySelectorAll<HTMLInputElement>('input[data-filter]'));
+
+  const entries = cards.map((card) => ({
+    el: card,
+    tools: (card.dataset.tools ?? '').split(',').filter(Boolean),
+    categories: (card.dataset.categories ?? '').split(',').filter(Boolean),
+  }));
+
+  function currentFilter() {
+    const tools = checkboxes
+      .filter((checkbox) => checkbox.dataset.filter === 'tools' && checkbox.checked)
+      .map((checkbox) => checkbox.value);
+    const categories = checkboxes
+      .filter((checkbox) => checkbox.dataset.filter === 'categories' && checkbox.checked)
+      .map((checkbox) => checkbox.value);
+    return { tools, categories };
+  }
+
+  function applyFilter() {
+    const filter = currentFilter();
+    const matched = filterSkills(entries, filter);
+    const matchedSet = new Set(matched.map((entry) => entry.el));
+
+    for (const entry of entries) {
+      entry.el.hidden = !matchedSet.has(entry.el);
+    }
+
+    countLabel.textContent = `Showing ${matched.length} of ${entries.length} skills`;
+    emptyLabel.classList.toggle('hidden', matched.length > 0);
+  }
+
+  checkboxes.forEach((checkbox) => checkbox.addEventListener('change', applyFilter));
+  applyFilter();
+</script>
