@@ -16,7 +16,7 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
 <div class="flex flex-col gap-8 lg:flex-row lg:gap-12">
   <aside class="lg:w-56 shrink-0">
     <fieldset class="mb-8">
-      <legend class="mb-3 text-sm font-medium uppercase tracking-wide text-stone-500">Tools</legend>
+      <legend class="mb-3 text-sm font-medium uppercase tracking-wide text-ink-soft">Tools</legend>
       <div class="flex flex-col gap-2">
         {availableTools.map((tool) => (
           <label class="flex items-center gap-2 text-sm">
@@ -27,7 +27,7 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
       </div>
     </fieldset>
     <fieldset>
-      <legend class="mb-3 text-sm font-medium uppercase tracking-wide text-stone-500">Categories</legend>
+      <legend class="mb-3 text-sm font-medium uppercase tracking-wide text-ink-soft">Categories</legend>
       <div class="flex flex-col gap-2">
         {availableCategories.map((category) => (
           <label class="flex items-center gap-2 text-sm">
@@ -40,16 +40,16 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
   </aside>
 
   <div class="flex-1">
-    <p id="filter-count" class="mb-4 text-sm text-stone-500"></p>
-    <p id="filter-empty" class="hidden text-sm text-stone-500">No skills match those filters.</p>
+    <p id="filter-count" class="mb-4 text-sm text-ink-soft"></p>
+    <p id="filter-empty" class="hidden text-sm text-ink-soft">No skills match those filters.</p>
     <div id="skill-grid" class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
-      {skills.map((skill) => (
+      {skills.map((skill, i) => (
         <div
           data-skill-card
           data-tools={skill.data.tools.join(',')}
           data-categories={skill.data.categories.join(',')}
         >
-          <SkillCard skill={skill} />
+          <SkillCard skill={skill} index={i + 1} />
         </div>
       ))}
     </div>

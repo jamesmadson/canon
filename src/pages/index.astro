@@ -10,26 +10,26 @@ const featured = sorted.filter((s) => s.data.featured).slice(0, 5);
 
 <BaseLayout title="Home">
   <section class="py-16 sm:py-24">
-    <h1 class="max-w-2xl font-serif text-5xl font-semibold leading-tight sm:text-6xl">
+    <h1 class="max-w-2xl text-5xl font-black leading-tight sm:text-6xl">
       A curated gallery of design skills for AI agents.
     </h1>
-    <p class="mt-6 max-w-xl text-lg text-stone-600">
+    <p class="mt-6 max-w-xl text-lg font-medium text-ink-soft">
       Hand-picked SKILL.md files and design-tool instructions — Sidebar.io meets an
       awesome-list, not a scraped registry.
     </p>
   </section>
 
   <section class="mb-20">
-    <h2 class="mb-6 font-serif text-2xl font-semibold">This month's picks</h2>
+    <h2 class="mb-6 text-2xl font-bold">This month's picks</h2>
     <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
-      {featured.map((skill) => <SkillCard skill={skill} />)}
+      {featured.map((skill, i) => <SkillCard skill={skill} index={i + 1} />)}
     </div>
   </section>
 
   <section>
-    <h2 class="mb-6 font-serif text-2xl font-semibold">All skills</h2>
+    <h2 class="mb-6 text-2xl font-bold">All skills</h2>
     <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
-      {sorted.map((skill) => <SkillCard skill={skill} />)}
+      {sorted.map((skill, i) => <SkillCard skill={skill} index={i + 1} />)}
     </div>
   </section>
 </BaseLayout>
