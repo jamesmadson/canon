@@ -175,3 +175,33 @@ filled via a future submission.
 - No live Formspree form ID (placeholder only, user swaps in their own)
 - No deploy-platform-specific config beyond what Astro's static output needs
   by default for Vercel
+
+## Addendum: Visual Direction B (adopted 2026-07-31)
+
+The theme described in "Visual design" above (Fraunces/Inter, warm paper `#FAF9F5`,
+terracotta accent) has been superseded by a Swiss-modernist direction validated
+through a mood-board exploration, referencing Otl Aicher's Munich 1972 identity
+and Josef Müller-Brockmann's *Grid Systems in Graphic Design*.
+
+**Palette:** `--color-paper: #cac8c0` (warm grey ground, off Aicher's pictogram
+sheets), `--color-tile: #ffffff`, `--color-ink: #161616`, `--color-ink-soft:
+#55554f`, `--color-rule` / `--color-rule-strong` (hairline rules),
+`--color-accent-blue: #2c7fb8`, `--color-accent-orange: #d8501f`,
+`--color-accent-yellow: #e0a83a`. All three accent hex values are eyeballed
+from reference images, not a verified swatch book.
+
+**Type:** one family (Geist, self-hosted from the `geist` npm package's static
+files under `public/fonts/geist/`) at medium-to-bold weight throughout, no
+display/body pairing. Geist Mono is installed but not used anywhere yet —
+reserved for a future literal code/install-snippet context.
+
+**Distinguishing features:** a toggleable hairline column grid over `<main>`
+(off by default), outlined (not filled) tool badges, typography-only skill
+cards (no preview image, a zero-padded index number instead), and a solid
+color hero on each skill detail page with an 8-cell tool-coverage matrix
+inspired by the Munich '72 Games schedule pictogram grid.
+
+**Old theme:** kept installed, not deleted. `@fontsource/fraunces` and
+`@fontsource/inter` remain in `package.json` but are no longer imported;
+`src/content/skills/*.mdx`'s `previewAssets` field and the generated SVG
+files under `public/previews/` are unused by any page but still exist.
