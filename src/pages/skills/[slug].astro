@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ToolBadge from '../../components/ToolBadge.astro';
+import { CATEGORY_META } from '../../lib/categoryMeta';
 
 export async function getStaticPaths() {
   const skills = await getCollection('skills');
@@ -13,8 +14,18 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await render(entry);
-const { name, tagline, tools, rating, sourceUrl, sourceAuthor, lastVerified, previewAssets, status } =
-  entry.data;
+const {
+  name,
+  tagline,
+  tools,
+  categories,
+  rating,
+  sourceUrl,
+  sourceAuthor,
+  lastVerified,
+  previewAssets,
+  status,
+} = entry.data;
 ---
 
 <BaseLayout title={name} description={tagline}>
@@ -40,6 +51,19 @@ const { name, tagline, tools, rating, sourceUrl, sourceAuthor, lastVerified, pre
         </div>
       </div>
       <div>
+        <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Categories</h2>
+        <div class="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <span
+              class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-ink"
+              style={`background-color: ${CATEGORY_META[category].color}26`}
+            >
+              {CATEGORY_META[category].label}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div>
         <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Rating</h2>
         <p aria-label={`Rated ${rating} out of 5`}>{'●'.repeat(rating)}{'○'.repeat(5 - rating)}</p>
       </div>
@@ -49,7 +73,7 @@ const { name, tagline, tools, rating, sourceUrl, sourceAuthor, lastVerified, pre
       </div>
       <div>
         <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Last verified</h2>
-        <p>{lastVerified.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <p>{lastVerified.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</p>
       </div>
     </aside>
   </div>

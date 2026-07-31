@@ -1,7 +1,6 @@
 ---
 import { TOOL_META } from '../lib/toolMeta';
 import { CATEGORY_META } from '../lib/categoryMeta';
-import { TOOL_VALUES, CATEGORY_VALUES } from '../content/skillSchema';
 import SkillCard from './SkillCard.astro';
 import type { CollectionEntry } from 'astro:content';
 
@@ -10,6 +9,8 @@ interface Props {
 }
 
 const { skills } = Astro.props;
+const availableTools = [...new Set(skills.flatMap((skill) => skill.data.tools))].sort();
+const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.categories))].sort();
 ---
 
 <div class="flex flex-col gap-8 lg:flex-row lg:gap-12">
@@ -17,7 +18,7 @@ const { skills } = Astro.props;
     <fieldset class="mb-8">
       <legend class="mb-3 text-sm font-medium uppercase tracking-wide text-stone-500">Tools</legend>
       <div class="flex flex-col gap-2">
-        {TOOL_VALUES.map((tool) => (
+        {availableTools.map((tool) => (
           <label class="flex items-center gap-2 text-sm">
             <input type="checkbox" value={tool} data-filter="tools" class="accent-ink" />
             {TOOL_META[tool].label}
@@ -28,7 +29,7 @@ const { skills } = Astro.props;
     <fieldset>
       <legend class="mb-3 text-sm font-medium uppercase tracking-wide text-stone-500">Categories</legend>
       <div class="flex flex-col gap-2">
-        {CATEGORY_VALUES.map((category) => (
+        {availableCategories.map((category) => (
           <label class="flex items-center gap-2 text-sm">
             <input type="checkbox" value={category} data-filter="categories" class="accent-ink" />
             {CATEGORY_META[category].label}

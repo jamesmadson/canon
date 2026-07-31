@@ -28,7 +28,7 @@ export const skillSchema = z.object({
   sourceAuthor: z.string(),
   tools: z.array(z.enum(TOOL_VALUES)).min(1),
   categories: z.array(z.enum(CATEGORY_VALUES)).min(1),
-  previewType: z.enum(['image', 'video', 'before-after']),
+  previewType: z.enum(['image']),
   previewAssets: z.array(z.string()).min(1),
   rating: z.number().min(1).max(5),
   addedDate: z.coerce.date(),

@@ -1,4 +1,5 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "../**/*.{astro,ts,mdx}";
 @plugin "@tailwindcss/typography";
 
 @theme {
