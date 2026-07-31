@@ -3,8 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Submit a skill" description="Suggest a skill for the gallery.">
-  <h1 class="mb-4 font-serif text-4xl">Submit a skill</h1>
-  <p class="mb-10 max-w-xl text-stone-600">
+  <h1 class="mb-4 text-4xl font-black">Submit a skill</h1>
+  <p class="mb-10 max-w-xl font-medium text-ink-soft">
     Suggest a skill for the gallery. This does not publish automatically — every
     submission is reviewed by hand before it's added.
   </p>
@@ -14,47 +14,47 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     (https://formspree.io/forms) before deploying.
   -->
   <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="flex max-w-xl flex-col gap-6">
-    <label class="flex flex-col gap-2 text-sm">
+    <label class="flex flex-col gap-2 text-sm font-semibold">
       Skill name
-      <input type="text" name="skillName" required class="rounded-md border border-stone-300 px-3 py-2" />
+      <input type="text" name="skillName" required class="border border-rule-strong px-3 py-2 font-medium" />
     </label>
-    <label class="flex flex-col gap-2 text-sm">
+    <label class="flex flex-col gap-2 text-sm font-semibold">
       Source URL
-      <input type="url" name="sourceUrl" required class="rounded-md border border-stone-300 px-3 py-2" />
+      <input type="url" name="sourceUrl" required class="border border-rule-strong px-3 py-2 font-medium" />
     </label>
-    <label class="flex flex-col gap-2 text-sm">
+    <label class="flex flex-col gap-2 text-sm font-semibold">
       Tool(s)
       <input
         type="text"
         name="tools"
         placeholder="e.g. Claude, Cursor"
         required
-        class="rounded-md border border-stone-300 px-3 py-2"
+        class="border border-rule-strong px-3 py-2 font-medium"
       />
     </label>
-    <label class="flex flex-col gap-2 text-sm">
+    <label class="flex flex-col gap-2 text-sm font-semibold">
       Category
       <input
         type="text"
         name="category"
         placeholder="e.g. motion, accessibility"
         required
-        class="rounded-md border border-stone-300 px-3 py-2"
+        class="border border-rule-strong px-3 py-2 font-medium"
       />
     </label>
-    <label class="flex flex-col gap-2 text-sm">
+    <label class="flex flex-col gap-2 text-sm font-semibold">
       Your name
-      <input type="text" name="submitterName" required class="rounded-md border border-stone-300 px-3 py-2" />
+      <input type="text" name="submitterName" required class="border border-rule-strong px-3 py-2 font-medium" />
     </label>
-    <label class="flex flex-col gap-2 text-sm">
+    <label class="flex flex-col gap-2 text-sm font-semibold">
       Your email
-      <input type="email" name="submitterEmail" required class="rounded-md border border-stone-300 px-3 py-2" />
+      <input type="email" name="submitterEmail" required class="border border-rule-strong px-3 py-2 font-medium" />
     </label>
-    <label class="flex flex-col gap-2 text-sm">
+    <label class="flex flex-col gap-2 text-sm font-semibold">
       One-line pitch
-      <textarea name="pitch" required rows="3" class="rounded-md border border-stone-300 px-3 py-2"></textarea>
+      <textarea name="pitch" required rows="3" class="border border-rule-strong px-3 py-2 font-medium"></textarea>
     </label>
-    <button type="submit" class="rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper">
+    <button type="submit" class="bg-ink px-4 py-2 text-sm font-semibold text-white">
       Submit for review
     </button>
   </form>

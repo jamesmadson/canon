@@ -14,8 +14,8 @@ const archive: ArchiveIssue[] = [];
   title="Newsletter"
   description="Sign up for occasional emails about new skills added to the gallery."
 >
-  <h1 class="mb-4 font-serif text-4xl">Newsletter</h1>
-  <p class="mb-10 max-w-xl text-stone-600">
+  <h1 class="mb-4 text-4xl font-black">Newsletter</h1>
+  <p class="mb-10 max-w-xl font-medium text-ink-soft">
     Occasional emails when a genuinely good skill gets added. No spam.
   </p>
 
@@ -34,23 +34,23 @@ const archive: ArchiveIssue[] = [];
       name="email"
       required
       placeholder="you@example.com"
-      class="flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm"
+      class="flex-1 border border-rule-strong px-3 py-2 text-sm font-medium"
     />
-    <button type="submit" class="rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper">
+    <button type="submit" class="bg-ink px-4 py-2 text-sm font-semibold text-white">
       Subscribe
     </button>
   </form>
 
-  <h2 class="mb-6 font-serif text-2xl">Archive</h2>
+  <h2 class="mb-6 text-2xl font-bold">Archive</h2>
   {
     archive.length === 0 ? (
-      <p class="text-sm text-stone-500">No issues yet — check back soon.</p>
+      <p class="text-sm font-medium text-ink-soft">No issues yet — check back soon.</p>
     ) : (
       <ul class="flex flex-col gap-3">
         {archive.map((issue) => (
           <li>
             <a href={issue.url} class="underline">{issue.title}</a>
-            <span class="ml-2 text-sm text-stone-500">{issue.publishedAt}</span>
+            <span class="ml-2 text-sm font-medium text-ink-soft">{issue.publishedAt}</span>
           </li>
         ))}
       </ul>
