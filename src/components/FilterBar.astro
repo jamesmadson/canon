@@ -19,7 +19,7 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
       <legend class="mb-3 text-sm font-medium uppercase tracking-wide text-ink-soft">Tools</legend>
       <div class="flex flex-col gap-2">
         {availableTools.map((tool) => (
-          <label class="flex items-center gap-2 text-sm">
+          <label class="flex items-center gap-2 text-sm font-medium">
             <input type="checkbox" value={tool} data-filter="tools" class="accent-ink" />
             {TOOL_META[tool].label}
           </label>
@@ -30,7 +30,7 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
       <legend class="mb-3 text-sm font-medium uppercase tracking-wide text-ink-soft">Categories</legend>
       <div class="flex flex-col gap-2">
         {availableCategories.map((category) => (
-          <label class="flex items-center gap-2 text-sm">
+          <label class="flex items-center gap-2 text-sm font-medium">
             <input type="checkbox" value={category} data-filter="categories" class="accent-ink" />
             {CATEGORY_META[category].label}
           </label>
@@ -40,8 +40,8 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
   </aside>
 
   <div class="flex-1">
-    <p id="filter-count" class="mb-4 text-sm text-ink-soft"></p>
-    <p id="filter-empty" class="hidden text-sm text-ink-soft">No skills match those filters.</p>
+    <p id="filter-count" class="mb-4 text-sm font-medium text-ink-soft"></p>
+    <p id="filter-empty" class="hidden text-sm font-medium text-ink-soft">No skills match those filters.</p>
     <div id="skill-grid" class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
       {skills.map((skill, i) => (
         <div
