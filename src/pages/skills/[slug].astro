@@ -3,6 +3,8 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ToolBadge from '../../components/ToolBadge.astro';
 import { CATEGORY_META } from '../../lib/categoryMeta';
+import { TOOL_META } from '../../lib/toolMeta';
+import { TOOL_VALUES } from '../../content/skillSchema';
 
 export async function getStaticPaths() {
   const skills = await getCollection('skills');
@@ -23,57 +25,76 @@ const {
   sourceUrl,
   sourceAuthor,
   lastVerified,
-  previewAssets,
   status,
 } = entry.data;
 ---
 
 <BaseLayout title={name} description={tagline}>
+  <div class="-mx-6 mb-10 bg-accent-blue px-6 py-12 text-white sm:px-10 sm:py-16">
+    <span class="inline-block bg-white px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-ink">
+      {CATEGORY_META[categories[0]].label}
+    </span>
+    <h1 class="mt-6 max-w-2xl text-4xl font-black leading-tight sm:text-5xl">{name}</h1>
+    <div class="mt-10 grid max-w-md grid-cols-8 gap-1">
+      {TOOL_VALUES.map((toolValue) => {
+        const active = tools.includes(toolValue);
+        return (
+          <div
+            class={
+              active
+                ? 'flex aspect-square items-center justify-center border border-white bg-white'
+                : 'flex aspect-square items-center justify-center border border-white/40'
+            }
+          >
+            <span class={active ? 'text-[8px] font-semibold uppercase text-accent-blue' : 'text-[8px] font-semibold uppercase text-white/70'}>
+              {TOOL_META[toolValue].abbr}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+
   <div class="grid grid-cols-1 gap-12 lg:grid-cols-[2fr_1fr]">
     <div>
-      <img src={previewAssets[0]} alt={`Preview of ${name}`} class="mb-8 w-full rounded-md" />
-      <h1 class="mb-2 font-serif text-4xl font-semibold">{name}</h1>
-      <p class="mb-8 text-lg text-stone-600">{tagline}</p>
-      <article class="prose prose-stone max-w-none">
+      <p class="mb-8 text-lg font-medium text-ink-soft">{tagline}</p>
+      <article class="prose prose-stone max-w-none prose-headings:text-ink prose-p:text-ink-soft prose-a:text-accent-blue prose-strong:text-ink">
         <Content />
       </article>
     </div>
     <aside class="flex flex-col gap-6 text-sm">
       {status === 'superseded' && (
-        <p class="rounded-md bg-amber-100 px-3 py-2 text-amber-900">
+        <p class="bg-accent-yellow/20 px-3 py-2 font-medium text-ink">
           This skill has been superseded by a newer entry.
         </p>
       )}
       <div>
-        <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Works with</h2>
+        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Works with</h2>
         <div class="flex flex-wrap gap-2">
           {tools.map((tool) => <ToolBadge tool={tool} />)}
         </div>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Categories</h2>
+        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Categories</h2>
         <div class="flex flex-wrap gap-2">
           {categories.map((category) => (
-            <span
-              class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium text-ink"
-              style={`background-color: ${CATEGORY_META[category].color}26`}
-            >
+            <span class="inline-flex items-center border border-rule-strong px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-ink">
               {CATEGORY_META[category].label}
             </span>
           ))}
         </div>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Rating</h2>
+        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Rating</h2>
         <p aria-label={`Rated ${rating} out of 5`}>{'●'.repeat(rating)}{'○'.repeat(5 - rating)}</p>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Source</h2>
+        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Source</h2>
         <p><a href={sourceUrl} class="underline">{sourceAuthor}</a></p>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">Last verified</h2>
-        <p>{lastVerified.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</p>
+        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Last verified</h2>
+        <p class="font-medium">{lastVerified.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</p>
       </div>
     </aside>
   </div>
