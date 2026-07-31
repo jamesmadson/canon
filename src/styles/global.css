@@ -10,8 +10,20 @@
 }
 @font-face {
   font-family: "Geist";
+  font-weight: 500;
+  src: url("/fonts/geist/Geist-Medium.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist";
   font-weight: 600;
   src: url("/fonts/geist/Geist-SemiBold.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist";
+  font-weight: 700;
+  src: url("/fonts/geist/Geist-Bold.woff2") format("woff2");
   font-display: swap;
 }
 @font-face {
@@ -33,10 +45,10 @@
   --color-paper: #cac8c0;
   --color-tile: #ffffff;
   --color-ink: #161616;
-  --color-ink-soft: #55554f;
+  --color-ink-soft: #4d4d47;
   --color-rule: #b3b1a7;
-  --color-rule-strong: #8c8a80;
-  --color-accent-blue: #2c7fb8;
+  --color-rule-strong: #706e65;
+  --color-accent-blue: #1d5c88;
   --color-accent-orange: #d8501f;
   --color-accent-yellow: #e0a83a;
 }
@@ -48,13 +60,13 @@
 .grid-overlay::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 0 1.5rem;
   background-image: repeating-linear-gradient(
     to right,
     var(--color-rule) 0,
     var(--color-rule) 1px,
     transparent 1px,
-    transparent calc((100% - 100px) / 6 + 20px)
+    transparent calc((100% - 64px) / 3 + 32px)
   );
   opacity: 0;
   transition: opacity 0.12s ease;
