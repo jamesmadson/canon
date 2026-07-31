@@ -4,28 +4,22 @@ import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   skill: CollectionEntry<'skills'>;
+  index: number;
 }
 
-const { skill } = Astro.props;
-const { name, tagline, tools, rating, previewAssets, slug } = skill.data;
+const { skill, index } = Astro.props;
+const { name, tagline, tools, rating, slug } = skill.data;
 ---
 
 <a href={`/skills/${slug}/`} class="group flex flex-col gap-3">
-  <div class="aspect-[4/3] w-full overflow-hidden rounded-md bg-stone-100">
-    <img
-      src={previewAssets[0]}
-      alt={`Preview of ${name}`}
-      class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-      loading="lazy"
-    />
-  </div>
+  <span class="text-xs font-semibold text-ink-soft">{String(index).padStart(2, '0')}</span>
   <div class="flex flex-col gap-1">
-    <h3 class="font-serif text-lg text-ink">{name}</h3>
-    <p class="text-sm text-stone-600">{tagline}</p>
+    <h3 class="text-lg font-semibold text-ink">{name}</h3>
+    <p class="text-sm font-medium text-ink-soft">{tagline}</p>
   </div>
   <div class="flex flex-wrap items-center gap-2">
     {tools.map((tool) => <ToolBadge tool={tool} />)}
-    <span class="ml-auto text-xs text-stone-400" aria-label={`Rated ${rating} out of 5`}>
+    <span class="ml-auto text-xs font-medium text-ink-soft" aria-label={`Rated ${rating} out of 5`}>
       {'●'.repeat(rating)}{'○'.repeat(5 - rating)}
     </span>
   </div>
