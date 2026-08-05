@@ -1,0 +1,6 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#ffffff"/>
+  <rect x="0" y="0" width="800" height="10" fill="#d8501f"/>
+  <text x="60" y="300" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="44" fill="#161616">Huashu Design</text>
+  <text x="60" y="345" font-family="Arial, Helvetica, sans-serif" font-size="16" letter-spacing="2" fill="#4d4d47">UI AESTHETICS · MOTION</text>
+</svg>
