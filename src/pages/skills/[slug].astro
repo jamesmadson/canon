@@ -31,7 +31,7 @@ const {
 
 <BaseLayout title={name} description={tagline}>
   <div class="-mx-6 mb-10 bg-accent-blue px-6 py-12 text-white sm:px-10 sm:py-16">
-    <span class="inline-block bg-white px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-ink">
+    <span class="inline-block bg-white px-2.5 py-1 text-xs font-semibold text-ink">
       {CATEGORY_META[categories[0]].label}
     </span>
     <h1 class="mt-6 max-w-2xl text-4xl font-black leading-tight sm:text-5xl">{name}</h1>
@@ -69,31 +69,31 @@ const {
         </p>
       )}
       <div>
-        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Works with</h2>
+        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Works with</h2>
         <div class="flex flex-wrap gap-2">
           {tools.map((tool) => <ToolBadge tool={tool} />)}
         </div>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Categories</h2>
+        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Categories</h2>
         <div class="flex flex-wrap gap-2">
           {categories.map((category) => (
-            <span class="inline-flex items-center border border-rule-strong px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-ink">
+            <span class="inline-flex items-center border border-rule-strong px-2.5 py-1 text-xs font-semibold text-ink">
               {CATEGORY_META[category].label}
             </span>
           ))}
         </div>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Rating</h2>
+        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Rating</h2>
         <p aria-label={`Rated ${rating} out of 5`}>{'●'.repeat(rating)}{'○'.repeat(5 - rating)}</p>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Source</h2>
+        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Source</h2>
         <p><a href={sourceUrl} class="underline">{sourceAuthor}</a></p>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft">Last verified</h2>
+        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Last verified</h2>
         <p class="font-medium">{lastVerified.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</p>
       </div>
     </aside>

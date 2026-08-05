@@ -20,25 +20,27 @@ const {
     <title>{title} · Design Skills</title>
     <meta name="description" content={description} />
   </head>
-  <body class="bg-paper font-sans font-medium text-ink antialiased">
-    <header class="mx-auto flex max-w-6xl items-center justify-between px-6 py-8">
-      <a href="/" class="text-xl font-semibold">Design Skills</a>
-      <nav class="flex gap-6 text-sm font-semibold">
-        <a href="/skills">Gallery</a>
-        <a href="/submit">Submit</a>
-        <a href="/newsletter">Newsletter</a>
-      </nav>
+  <body class="bg-tile font-sans font-medium text-ink antialiased">
+    <header class="border-b border-rule-strong bg-paper">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-8">
+        <a href="/" class="text-xl font-semibold">Design Skills</a>
+        <nav class="flex gap-6 text-sm font-semibold">
+          <a href="/skills">Gallery</a>
+          <a href="/submit">Submit</a>
+          <a href="/newsletter">Newsletter</a>
+        </nav>
+      </div>
     </header>
     <main class="grid-overlay mx-auto max-w-6xl px-6 pb-24">
       <slot />
     </main>
-    <footer class="mx-auto max-w-6xl px-6 py-12 text-sm font-medium text-ink-soft">
+    <footer class="border-t border-rule mx-auto max-w-6xl px-6 py-12 text-sm font-medium text-ink-soft">
       <p>A hand-picked gallery of design and design-engineering skills.</p>
     </footer>
     <button
       type="button"
       id="grid-toggle"
-      class="fixed bottom-5 right-5 z-10 border border-rule-strong bg-tile px-3.5 py-2 text-xs font-semibold uppercase tracking-wider text-ink-soft hover:text-ink"
+      class="fixed bottom-5 right-5 z-10 border border-rule-strong bg-tile px-3.5 py-2 text-xs font-semibold tracking-wide text-ink-soft hover:text-ink"
       aria-pressed="false"
     >
       Grid — Off
