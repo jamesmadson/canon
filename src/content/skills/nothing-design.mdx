@@ -1,0 +1,24 @@
+---
+slug: nothing-design
+name: Nothing Design
+tagline: "A named, numbered visual system — Swiss typography plus Nothing's dot-matrix industrial cool, budgeted down to exactly three type layers."
+sourceUrl: https://github.com/dominikmartn/nothing-design-skill
+sourceAuthor: dominikmartn
+tools: [claude, claude-code, generic]
+categories: [ui-aesthetics, design-systems]
+previewType: image
+previewAssets: ["/previews/nothing-design.svg"]
+rating: 4
+addedDate: 2026-08-05
+lastVerified: 2026-08-05
+status: active
+featured: false
+---
+
+A named, numbered design system rather than a loose set of preferences: exactly three visual layers per screen (primary/secondary/tertiary, each locked to a specific type role), a font budget (two families max, three sizes max, two weights max, treated as a spending limit, not a suggestion), and Nothing's actual visual signature — OLED-black dark mode, warm off-white light mode, dot-matrix Doto for hero moments, monochrome as the default canvas with color reserved for status.
+
+The "three-layer rule" squint test is the sharpest single idea in it: if two elements still compete for attention after squinting at the screen, one has to shrink, fade, or move. That's a genuinely testable design principle, not just taste dressed up as one.
+
+**Install**: `git clone` the repo, then copy the `nothing-design/` folder into `~/.claude/skills/` — no plugin manifest, manual copy only.
+
+**Gotcha**: it's explicitly narrow by design — the frontmatter tells the model to "NEVER trigger automatically for generic UI or design tasks," only when someone explicitly asks for "Nothing style." Don't expect it to volunteer opinions on a brief that isn't asking for this specific aesthetic.
