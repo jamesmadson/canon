@@ -1,7 +1,9 @@
-# Design Skills Gallery
+# Canon
 
 A curated, editorial gallery of design and design-engineering "skill" files for
 AI coding agents (Claude, Cursor, Codex, Copilot) and design tools (Figma, Miro).
+Formerly "Design Skills Gallery" — renamed Canon, as in an accepted body of
+principles/work, echoing the Vignelli Canon that helped shape its visual system.
 
 ## Development
 
