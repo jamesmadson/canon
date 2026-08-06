@@ -42,7 +42,7 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
   <div class="flex-1">
     <p id="filter-count" class="mb-4 text-sm font-medium text-ink-soft"></p>
     <p id="filter-empty" class="hidden text-sm font-medium text-ink-soft">No skills match those filters.</p>
-    <div id="skill-grid" class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+    <div id="skill-grid" class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {skills.map((skill, i) => (
         <div
           data-skill-card

@@ -9,26 +9,26 @@ const featured = sorted.filter((s) => s.data.featured).slice(0, 5);
 ---
 
 <BaseLayout title="Home">
-  <section class="-mx-6 mb-4 bg-paper px-6 py-16 sm:py-24">
-    <h1 class="max-w-2xl text-5xl font-black leading-tight sm:text-6xl">
+  <section class="-mx-6 mb-8 bg-paper px-6 py-10 sm:py-12">
+    <h1 class="max-w-xl text-3xl font-bold leading-snug sm:text-4xl">
       A curated gallery of design skills for AI agents.
     </h1>
-    <p class="mt-6 max-w-xl text-lg font-medium text-ink-soft">
+    <p class="mt-4 max-w-xl text-sm font-medium text-ink-soft">
       Hand-picked SKILL.md files and design-tool instructions — Sidebar.io meets an
       awesome-list, not a scraped registry.
     </p>
   </section>
 
-  <section class="mb-20">
-    <h2 class="mb-6 text-2xl font-bold">This month's picks</h2>
-    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+  <section class="mb-12">
+    <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">This month's picks</h2>
+    <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {featured.map((skill, i) => <SkillCard skill={skill} index={i + 1} />)}
     </div>
   </section>
 
   <section>
-    <h2 class="mb-6 text-2xl font-bold">All skills</h2>
-    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+    <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">All skills</h2>
+    <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {sorted.map((skill, i) => <SkillCard skill={skill} index={i + 1} />)}
     </div>
   </section>
