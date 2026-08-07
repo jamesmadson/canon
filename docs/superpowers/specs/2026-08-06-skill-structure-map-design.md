@@ -140,21 +140,32 @@ fields are reused for the hub card — no new data needed for them).
   pre-expanded demo state) reveals up to 4 subsections, then `+N more` as
   plain text beyond that. **Omitted entirely if `contentOutline` is
   empty.**
-- **Package branch** (bottom): `fileTree` filtered to exclude the entry
-  whose `path`'s final segment is `SKILL.md` (already shown as the hub) —
-  matched by basename, not exact path, because root-form `sourceUrl`s (see
-  Generation script) scope `fileTree` to the whole repo, and `SKILL.md`'s
-  nesting depth within that scope varies per repo: `huashu-design` has it
-  at the true root (`SKILL.md`), `nothing-design` one level down
-  (`nothing-design/SKILL.md`), `make-interfaces-feel-better` two levels
-  down (`skills/make-interfaces-feel-better/SKILL.md`). Then partitioned
-  into root-level files and subdirectories exactly as in the original
-  file-tree-only design — folders show a count + up to 3 example filenames
-  + `+N more`, revealed the same hover-to-expand way as content
-  subsections. **Omitted entirely if empty after filtering** — this is a
-  real case today, not hypothetical: `emil-design-eng`'s only file is its
-  own `SKILL.md`, so it renders with a Contents branch and no Package
-  branch at all.
+- **Package branch** (bottom): built from `fileTree` with `SKILL.md`'s own
+  containing folder treated as **hoisted** — its contents become the
+  effective top level for grouping, not the folder itself. This matters
+  because `SKILL.md`'s nesting depth varies per repo (checked against all
+  11 real skills): `huashu-design` has it at the true scope root
+  (`SKILL.md`), `nothing-design` one level down (`nothing-design/SKILL.md`),
+  `make-interfaces-feel-better` two levels down
+  (`skills/make-interfaces-feel-better/SKILL.md`). Concretely: find the
+  `fileTree` entry whose path's final segment is `SKILL.md`; call the
+  directory containing it `hubDir` (`''` if `SKILL.md` is already at the
+  scope root). Every other entry whose path starts with `hubDir/` has that
+  prefix stripped before grouping; entries outside `hubDir` (true siblings
+  at the scope root — e.g. `make-interfaces-feel-better`'s `AGENTS.md`,
+  `CLAUDE.md`, `LICENSE`, `README.md`, which sit outside the
+  `skills/make-interfaces-feel-better/` folder that holds `SKILL.md`) keep
+  their original path. Without this hoist, `nothing-design`'s `references/`
+  folder — genuinely two levels below the repo root
+  (`nothing-design/references/`) — would never surface as a folder row at
+  all, since naive "top-level path segment" grouping only looks one level
+  deep. After hoisting, grouping proceeds exactly as in the original
+  file-tree-only design: root-level files render first, each subdirectory
+  shows a count + up to 3 example filenames + `+N more`, revealed the same
+  hover-to-expand way as content subsections. **Omitted entirely if empty
+  after hoisting/filtering** — real today, not hypothetical:
+  `emil-design-eng`'s only file is its own `SKILL.md`, so it renders with a
+  Contents branch and no Package branch at all.
 - If both branches are empty (no headings, no other files), the hub renders
   alone — not observed in any of the 11 current skills, but the layout
   degrades to just the hub card with no special-casing required.
@@ -214,10 +225,12 @@ headings.
   `SKILL.md` with no `##` headings; the branch is omitted, no fabricated
   structure is shown. Not hit by any of the 11 current skills, but the
   schema and component both support it.
-- **Deeply nested folders** (folder within a folder): out of scope for this
-  pass — none of the 11 current skills have this shape (deepest is one
-  level, `references/*.md`). If a future skill needs it, the grouping logic
-  would need to recurse; noted as a known limitation, not built speculatively.
+- **Deeply nested folders** (a folder within a folder, *after* the
+  `hubDir` hoist described in the Component section): out of scope for this
+  pass — none of the 11 current skills have this shape once hoisted (the
+  deepest is one level past `hubDir`, e.g. `references/*.md`). If a future
+  skill needs it, the grouping logic would need to recurse; noted as a
+  known limitation, not built speculatively.
 - **Script failures** (repo renamed/deleted, rate limit): the script is
   manual and run once per skill addition/refresh, so a failure just means
   re-running it — no build-time fallback needed since it never runs during
