@@ -84,8 +84,12 @@ A one-time script, `scripts/fetch-skill-trees.ts`, run manually via
 CI. For each skill `.mdx` file:
 
 1. Parse `sourceUrl` frontmatter into `{ owner, repo, path }`. `sourceUrl`
-   is either a repo root (`github.com/{owner}/{repo}`) or a subtree
-   (`github.com/{owner}/{repo}/tree/{branch}/{path}`).
+   is either a repo root (`github.com/{owner}/{repo}`, in which case
+   `path` is `''` and the skill's scope is the **entire repo** — real for
+   3 of the 11 current skills, e.g. `nothing-design`, whose Package branch
+   correctly includes root-level `README.md`/`LICENSE` alongside
+   `SKILL.md`) or a subtree (`github.com/{owner}/{repo}/tree/{branch}/{path}`,
+   scope is just that path).
 2. Resolve the repo's actual default branch via `gh api repos/{owner}/{repo}
    --jq .default_branch`. (Not assumed to be `main` — `huashu-design` 404'd
    on that assumption during brainstorming.)
@@ -137,7 +141,13 @@ fields are reused for the hub card — no new data needed for them).
   plain text beyond that. **Omitted entirely if `contentOutline` is
   empty.**
 - **Package branch** (bottom): `fileTree` filtered to exclude the entry
-  whose `path === 'SKILL.md'` (already shown as the hub), then partitioned
+  whose `path`'s final segment is `SKILL.md` (already shown as the hub) —
+  matched by basename, not exact path, because root-form `sourceUrl`s (see
+  Generation script) scope `fileTree` to the whole repo, and `SKILL.md`'s
+  nesting depth within that scope varies per repo: `huashu-design` has it
+  at the true root (`SKILL.md`), `nothing-design` one level down
+  (`nothing-design/SKILL.md`), `make-interfaces-feel-better` two levels
+  down (`skills/make-interfaces-feel-better/SKILL.md`). Then partitioned
   into root-level files and subdirectories exactly as in the original
   file-tree-only design — folders show a count + up to 3 example filenames
   + `+N more`, revealed the same hover-to-expand way as content
