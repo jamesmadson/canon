@@ -48,8 +48,7 @@
   --color-ink-soft: oklch(41.83% 0.0097 106.81);
   --color-rule: oklch(75.92% 0.0142 97.5);
   --color-rule-strong: oklch(53.72% 0.0139 96.58);
-  --color-accent-blue: oklch(43.42% 0.0923 245.01);
-  --color-accent-orange: oklch(60.85% 0.1806 38.29);
+  --color-accent-orange: oklch(56% 0.185 40);
   --color-accent-yellow: oklch(76.53% 0.138 80.38);
 }
 
