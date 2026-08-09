@@ -1,18 +1,89 @@
 ---
 slug: better-accessibility
 name: Better Accessibility
-tagline: "The a11y reference you actually want cited inline — focus rings to ARIA, with real before/afters."
-sourceUrl: https://github.com/jakubkrehel/skills/tree/main/skills/better-accessibility
+tagline: >-
+  The a11y reference you actually want cited inline — focus rings to ARIA, with
+  real before/afters.
+sourceUrl: 'https://github.com/jakubkrehel/skills/tree/main/skills/better-accessibility'
 sourceAuthor: Jakub Krehel
-tools: [claude, cursor, codex, generic]
-categories: [accessibility]
+tools:
+  - claude
+  - cursor
+  - codex
+  - generic
+categories:
+  - accessibility
 previewType: image
-previewAssets: ["/previews/better-accessibility.svg"]
+previewAssets:
+  - /previews/better-accessibility.svg
 rating: 5
-addedDate: 2026-07-10
-lastVerified: 2026-07-29
+addedDate: 2026-07-10T00:00:00.000Z
+lastVerified: 2026-07-29T00:00:00.000Z
 status: active
 featured: true
+fileTree:
+  - path: SKILL.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/skills/blob/main/skills/better-accessibility/SKILL.md
+  - path: agents
+    type: dir
+    url: >-
+      https://github.com/jakubkrehel/skills/tree/main/skills/better-accessibility/agents
+  - path: agents/openai.yaml
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/skills/blob/main/skills/better-accessibility/agents/openai.yaml
+  - path: focus-and-keyboard.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/skills/blob/main/skills/better-accessibility/focus-and-keyboard.md
+  - path: forms.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/skills/blob/main/skills/better-accessibility/forms.md
+  - path: hit-areas.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/skills/blob/main/skills/better-accessibility/hit-areas.md
+  - path: motion-and-zoom.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/skills/blob/main/skills/better-accessibility/motion-and-zoom.md
+  - path: screen-readers.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/skills/blob/main/skills/better-accessibility/screen-readers.md
+  - path: semantics-and-aria.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/skills/blob/main/skills/better-accessibility/semantics-and-aria.md
+contentOutline:
+  - title: Quick Reference
+    subsections: []
+  - title: Core Principles
+    subsections:
+      - 1. Native Elements First
+      - 2. Visible Focus Rings
+      - 3. Full Keyboard Support
+      - 4. Trap and Restore Focus
+      - 5. Minimum Hit Area
+      - 6. Label and Type Every Control
+      - 7. Errors That Announce
+      - 8. Accessible Names Everywhere
+      - 9. Don't Rely on Color Alone
+      - 10. Honor prefers-reduced-motion
+      - 11. Announce Dynamic Content
+      - 12. Alt Text by Purpose
+      - 13. Structure Is Navigation
+      - 14. Survive Zoom and Text Resize
+  - title: Common Mistakes
+    subsections: []
+  - title: Review Output Format
+    subsections:
+      - Findings
+      - Example
+      - Verification and Verdict
 ---
 
 The most citation-dense accessibility reference in this gallery: fourteen numbered principles (focus-visible over bare focus, roving tabindex on composite widgets, `aria-describedby` wiring for form errors, minimum 24×24px hit targets per WCAG 2.5.8) each paired with a "common mistakes" table of real before/after code, not just prose rules.

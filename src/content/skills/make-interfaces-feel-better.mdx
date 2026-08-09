@@ -1,18 +1,117 @@
 ---
 slug: make-interfaces-feel-better
 name: Make Interfaces Feel Better
-tagline: "Nineteen small physical details — concentric radii, tabular numbers, scale-on-press — that add up to \"feels expensive.\""
-sourceUrl: https://github.com/jakubkrehel/make-interfaces-feel-better
+tagline: >-
+  Nineteen small physical details — concentric radii, tabular numbers,
+  scale-on-press — that add up to "feels expensive."
+sourceUrl: 'https://github.com/jakubkrehel/make-interfaces-feel-better'
 sourceAuthor: Jakub Krehel
-tools: [claude, cursor, codex, generic]
-categories: [motion, ui-aesthetics]
+tools:
+  - claude
+  - cursor
+  - codex
+  - generic
+categories:
+  - motion
+  - ui-aesthetics
 previewType: image
-previewAssets: ["/previews/make-interfaces-feel-better.svg"]
+previewAssets:
+  - /previews/make-interfaces-feel-better.svg
 rating: 5
-addedDate: 2026-07-05
-lastVerified: 2026-07-29
+addedDate: 2026-07-05T00:00:00.000Z
+lastVerified: 2026-07-29T00:00:00.000Z
 status: active
 featured: true
+fileTree:
+  - path: AGENTS.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/AGENTS.md
+  - path: CLAUDE.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/CLAUDE.md
+  - path: LICENSE
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/LICENSE
+  - path: README.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/README.md
+  - path: skills
+    type: dir
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/tree/main/skills
+  - path: skills/make-interfaces-feel-better
+    type: dir
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/tree/main/skills/make-interfaces-feel-better
+  - path: skills/make-interfaces-feel-better/SKILL.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/skills/make-interfaces-feel-better/SKILL.md
+  - path: skills/make-interfaces-feel-better/agents
+    type: dir
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/tree/main/skills/make-interfaces-feel-better/agents
+  - path: skills/make-interfaces-feel-better/agents/openai.yaml
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/skills/make-interfaces-feel-better/agents/openai.yaml
+  - path: skills/make-interfaces-feel-better/animations.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/skills/make-interfaces-feel-better/animations.md
+  - path: skills/make-interfaces-feel-better/icons.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/skills/make-interfaces-feel-better/icons.md
+  - path: skills/make-interfaces-feel-better/performance.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/skills/make-interfaces-feel-better/performance.md
+  - path: skills/make-interfaces-feel-better/surfaces.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/skills/make-interfaces-feel-better/surfaces.md
+  - path: skills/make-interfaces-feel-better/typography.md
+    type: file
+    url: >-
+      https://github.com/jakubkrehel/make-interfaces-feel-better/blob/main/skills/make-interfaces-feel-better/typography.md
+contentOutline:
+  - title: Quick Reference
+    subsections: []
+  - title: Core Principles
+    subsections:
+      - 1. Concentric Border Radius
+      - 2. Optical Over Geometric Alignment
+      - '3. Shadows for Elevation, Borders for Structure'
+      - 4. Interruptible Animations
+      - 5. Split and Stagger Enter Animations
+      - 6. Subtle Exit Animations
+      - 7. Contextual Icon Animations
+      - 8. Font Smoothing
+      - 9. Tabular Numbers
+      - 10. Text Wrapping
+      - 11. Image Outlines
+      - 12. Scale on Press
+      - 13. Skip Animation on Page Load
+      - '14. Never Use `transition: all`'
+      - 15. Use `will-change` Sparingly
+      - 16. Minimum Hit Area
+      - 17. Match Icon Stroke to Text Weight
+      - '18. One SVG, Recolored per State'
+      - 19. Motion Restraint
+  - title: Common Mistakes
+    subsections: []
+  - title: Review Output Format
+    subsections:
+      - Scope and Coverage
+      - Findings
+      - Example
+      - Considered but Rejected
+      - Verification and Verdict
 ---
 
 Nineteen small, extremely specific physical-detail rules — the kind that don't show up in a style guide but that your eye clocks instantly when they're missing. Concentric border radius (outer = inner + padding). Scale-on-press pinned to exactly `0.96`, never below `0.95`. Icon stroke width matched to adjacent text weight. A pure-black-or-white 10% outline on images, explicitly *not* a tinted neutral, because a tinted outline "reads as dirt on the image edge."

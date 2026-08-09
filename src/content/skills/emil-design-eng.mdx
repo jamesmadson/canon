@@ -1,18 +1,110 @@
 ---
 slug: emil-design-eng
 name: Emil Design Eng
-tagline: "The taste-and-polish philosophy behind Improve Animations, generalized to every UI decision, not just motion."
-sourceUrl: https://github.com/emilkowalski/skills/tree/main/skills/emil-design-eng
+tagline: >-
+  The taste-and-polish philosophy behind Improve Animations, generalized to
+  every UI decision, not just motion.
+sourceUrl: 'https://github.com/emilkowalski/skills/tree/main/skills/emil-design-eng'
 sourceAuthor: Emil Kowalski
-tools: [claude, claude-code, cursor, generic]
-categories: [ui-aesthetics, motion]
+tools:
+  - claude
+  - claude-code
+  - cursor
+  - generic
+categories:
+  - ui-aesthetics
+  - motion
 previewType: image
-previewAssets: ["/previews/emil-design-eng.svg"]
+previewAssets:
+  - /previews/emil-design-eng.svg
 rating: 5
-addedDate: 2026-08-05
-lastVerified: 2026-08-05
+addedDate: 2026-08-05T00:00:00.000Z
+lastVerified: 2026-08-05T00:00:00.000Z
 status: active
 featured: false
+fileTree:
+  - path: SKILL.md
+    type: file
+    url: >-
+      https://github.com/emilkowalski/skills/blob/main/skills/emil-design-eng/SKILL.md
+contentOutline:
+  - title: Initial Response
+    subsections: []
+  - title: Core Philosophy
+    subsections:
+      - 'Taste is trained, not innate'
+      - Unseen details compound
+      - Beauty is leverage
+  - title: Review Format (Required)
+    subsections: []
+  - title: The Animation Decision Framework
+    subsections:
+      - 1. Should this animate at all?
+      - 2. What is the purpose?
+      - 3. What easing should it use?
+      - 4. How fast should it be?
+      - Perceived performance
+  - title: Spring Animations
+    subsections:
+      - When to use springs
+      - Spring-based mouse interactions
+      - Spring configuration
+      - Interruptibility advantage
+  - title: Component Building Principles
+    subsections:
+      - Buttons must feel responsive
+      - Never animate from scale(0)
+      - Make popovers origin-aware
+      - 'Tooltips: skip delay on subsequent hovers'
+      - Use CSS transitions over keyframes for interruptible UI
+      - Use blur to mask imperfect transitions
+      - Animate enter states with @starting-style
+  - title: CSS Transform Mastery
+    subsections:
+      - translateY with percentages
+      - scale() scales children too
+      - 3D transforms for depth
+      - transform-origin
+  - title: clip-path for Animation
+    subsections:
+      - The inset shape
+      - Tabs with perfect color transitions
+      - Hold-to-delete pattern
+      - Image reveals on scroll
+      - Comparison sliders
+  - title: Gesture and Drag Interactions
+    subsections:
+      - Momentum-based dismissal
+      - Damping at boundaries
+      - Pointer capture for drag
+      - Multi-touch protection
+      - Friction instead of hard stops
+  - title: Performance Rules
+    subsections:
+      - Only animate transform and opacity
+      - CSS variables are inheritable
+      - Framer Motion hardware acceleration caveat
+      - CSS animations beat JS under load
+      - Use WAAPI for programmatic CSS animations
+  - title: Accessibility
+    subsections:
+      - prefers-reduced-motion
+      - Touch device hover states
+  - title: The Sonner Principles (Building Loved Components)
+    subsections:
+      - Cohesion matters
+      - The opacity + height combination
+      - Review your work the next day
+      - Asymmetric enter/exit timing
+  - title: Stagger Animations
+    subsections: []
+  - title: Debugging Animations
+    subsections:
+      - Slow motion testing
+      - Frame-by-frame inspection
+      - Test on real devices
+  - title: Review Checklist
+    subsections: []
 ---
 
 The philosophy underneath Improve Animations, made general. Where the audit skill surveys a codebase's motion and turns findings into plans, this one is the live consult: taste-training principles ("good taste is trained, not innate"), a required Before/After review-table format, and drop-in, physics-accurate CSS for staggered lists and exit animations that are deliberately faster than their enters.

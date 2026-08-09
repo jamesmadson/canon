@@ -1,18 +1,110 @@
 ---
 slug: react-view-transitions
 name: React View Transitions
-tagline: "The missing manual for React's View Transition API — when to animate, when not to, copy-paste CSS included."
-sourceUrl: https://github.com/vercel-labs/agent-skills/tree/main/skills/react-view-transitions
+tagline: >-
+  The missing manual for React's View Transition API — when to animate, when not
+  to, copy-paste CSS included.
+sourceUrl: >-
+  https://github.com/vercel-labs/agent-skills/tree/main/skills/react-view-transitions
 sourceAuthor: Vercel
-tools: [claude, claude-code, cursor, codex, copilot, generic]
-categories: [motion]
+tools:
+  - claude
+  - claude-code
+  - cursor
+  - codex
+  - copilot
+  - generic
+categories:
+  - motion
 previewType: image
-previewAssets: ["/previews/react-view-transitions.svg"]
+previewAssets:
+  - /previews/react-view-transitions.svg
 rating: 4
-addedDate: 2026-06-01
-lastVerified: 2026-07-29
+addedDate: 2026-06-01T00:00:00.000Z
+lastVerified: 2026-07-29T00:00:00.000Z
 status: active
 featured: false
+fileTree:
+  - path: AGENTS.md
+    type: file
+    url: >-
+      https://github.com/vercel-labs/agent-skills/blob/main/skills/react-view-transitions/AGENTS.md
+  - path: README.md
+    type: file
+    url: >-
+      https://github.com/vercel-labs/agent-skills/blob/main/skills/react-view-transitions/README.md
+  - path: SKILL.md
+    type: file
+    url: >-
+      https://github.com/vercel-labs/agent-skills/blob/main/skills/react-view-transitions/SKILL.md
+  - path: metadata.json
+    type: file
+    url: >-
+      https://github.com/vercel-labs/agent-skills/blob/main/skills/react-view-transitions/metadata.json
+  - path: references
+    type: dir
+    url: >-
+      https://github.com/vercel-labs/agent-skills/tree/main/skills/react-view-transitions/references
+  - path: references/css-recipes.md
+    type: file
+    url: >-
+      https://github.com/vercel-labs/agent-skills/blob/main/skills/react-view-transitions/references/css-recipes.md
+  - path: references/implementation.md
+    type: file
+    url: >-
+      https://github.com/vercel-labs/agent-skills/blob/main/skills/react-view-transitions/references/implementation.md
+  - path: references/nextjs.md
+    type: file
+    url: >-
+      https://github.com/vercel-labs/agent-skills/blob/main/skills/react-view-transitions/references/nextjs.md
+  - path: references/patterns.md
+    type: file
+    url: >-
+      https://github.com/vercel-labs/agent-skills/blob/main/skills/react-view-transitions/references/patterns.md
+contentOutline:
+  - title: When to Animate
+    subsections:
+      - Choosing Animation Style
+  - title: Availability
+    subsections: []
+  - title: Implementation Workflow
+    subsections: []
+  - title: Core Concepts
+    subsections:
+      - The `<ViewTransition>` Component
+      - Animation Triggers
+      - Critical Placement Rule
+  - title: Styling with View Transition Classes
+    subsections:
+      - Props
+      - CSS Pseudo-Elements
+  - title: Transition Types
+    subsections:
+      - '`router.back()` and Browser Back Button'
+      - Types and Suspense
+  - title: Shared Element Transitions
+    subsections: []
+  - title: Common Patterns
+    subsections:
+      - Enter/Exit
+      - List Reorder
+      - Layout Displacement Morph
+      - Composing Shared Elements with List Identity
+      - Force Re-Enter with `key`
+      - Suspense Fallback to Content
+  - title: How Multiple VTs Interact
+    subsections:
+      - Use `default="none"` Deliberately
+      - Two Patterns Coexist
+      - Nested VT Limitation
+  - title: Next.js Integration
+    subsections: []
+  - title: Accessibility
+    subsections: []
+  - title: Reference Files
+    subsections: []
+  - title: Full Compiled Document
+    subsections: []
 ---
 
 The clearest explanation of React's `<ViewTransition>` API available anywhere right now: a priority-ordered list of five animation patterns (shared element, Suspense reveal, list identity, state change, route change), a rule for when *not* to use directional slides (lateral tab-to-tab navigation has no depth to communicate, so don't fake one), and copy-paste CSS recipes instead of hand-rolled keyframes.

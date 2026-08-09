@@ -1,18 +1,41 @@
 ---
 slug: web-design-guidelines
 name: Web Design Guidelines
-tagline: "A thin wrapper that always fetches Vercel's live interface guidelines before reviewing your UI."
-sourceUrl: https://github.com/vercel-labs/agent-skills/tree/main/skills/web-design-guidelines
+tagline: >-
+  A thin wrapper that always fetches Vercel's live interface guidelines before
+  reviewing your UI.
+sourceUrl: >-
+  https://github.com/vercel-labs/agent-skills/tree/main/skills/web-design-guidelines
 sourceAuthor: Vercel
-tools: [claude, cursor, codex, copilot, generic]
-categories: [accessibility, ui-aesthetics]
+tools:
+  - claude
+  - cursor
+  - codex
+  - copilot
+  - generic
+categories:
+  - accessibility
+  - ui-aesthetics
 previewType: image
-previewAssets: ["/previews/web-design-guidelines.svg"]
+previewAssets:
+  - /previews/web-design-guidelines.svg
 rating: 3
-addedDate: 2026-06-10
-lastVerified: 2026-07-29
+addedDate: 2026-06-10T00:00:00.000Z
+lastVerified: 2026-07-29T00:00:00.000Z
 status: active
 featured: false
+fileTree:
+  - path: SKILL.md
+    type: file
+    url: >-
+      https://github.com/vercel-labs/agent-skills/blob/main/skills/web-design-guidelines/SKILL.md
+contentOutline:
+  - title: How It Works
+    subsections: []
+  - title: Guidelines Source
+    subsections: []
+  - title: Usage
+    subsections: []
 ---
 
 The thinnest skill in this gallery, and deliberately so: it doesn't encode any rules of its own. It fetches Vercel's `web-interface-guidelines` document fresh from GitHub on every run, reads the files you point it at, and reports findings in a terse `file:line` format against whatever the guidelines say *today*.
