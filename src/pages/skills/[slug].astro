@@ -5,6 +5,7 @@ import ToolBadge from '../../components/ToolBadge.astro';
 import { CATEGORY_META } from '../../lib/categoryMeta';
 import { TOOL_META } from '../../lib/toolMeta';
 import { TOOL_VALUES } from '../../content/skillSchema';
+import StructureMap from '../../components/StructureMap.astro';
 
 export async function getStaticPaths() {
   const skills = await getCollection('skills');
@@ -26,6 +27,8 @@ const {
   sourceAuthor,
   lastVerified,
   status,
+  fileTree,
+  contentOutline,
 } = entry.data;
 ---
 
@@ -98,4 +101,6 @@ const {
       </div>
     </aside>
   </div>
+
+  <StructureMap name={name} tagline={tagline} fileTree={fileTree} contentOutline={contentOutline} />
 </BaseLayout>
