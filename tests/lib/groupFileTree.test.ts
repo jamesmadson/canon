@@ -87,4 +87,31 @@ describe('groupFileTree', () => {
     ];
     expect(groupFileTree(fileTree)).toEqual({ rootFiles: [], folders: [] });
   });
+
+  it('counts nested files recursively for the badge while only listing direct children as examples', () => {
+    // Models huashu-design's real shape: a folder (e.g. assets/) containing both
+    // direct files and nested subdirectories with their own files — the case that
+    // exposed the original bug (folder badge showed direct-child count only, 18
+    // instead of the real ~120, because nested files were silently dropped).
+    const base = 'https://github.com/alchaincyf/huashu-design';
+    const fileTree: FileTreeEntry[] = [
+      { path: 'SKILL.md', type: 'file', url: `${base}/blob/master/SKILL.md` },
+      { path: 'assets', type: 'dir', url: `${base}/tree/master/assets` },
+      { path: 'assets/logo.png', type: 'file', url: `${base}/blob/master/assets/logo.png` },
+      { path: 'assets/sfx', type: 'dir', url: `${base}/tree/master/assets/sfx` },
+      { path: 'assets/sfx/click.mp3', type: 'file', url: `${base}/blob/master/assets/sfx/click.mp3` },
+      { path: 'assets/sfx/hover.mp3', type: 'file', url: `${base}/blob/master/assets/sfx/hover.mp3` },
+      { path: 'assets/showcases', type: 'dir', url: `${base}/tree/master/assets/showcases` },
+      { path: 'assets/showcases/demo1.png', type: 'file', url: `${base}/blob/master/assets/showcases/demo1.png` },
+    ];
+
+    const result = groupFileTree(fileTree);
+
+    expect(result.folders).toHaveLength(1);
+    expect(result.folders[0].name).toBe('assets');
+    // display list stays direct-children-only
+    expect(result.folders[0].files.map((f) => f.path)).toEqual(['logo.png']);
+    // badge count is recursive — everything nested underneath, however deep
+    expect(result.folders[0].fileCount).toBe(4);
+  });
 });

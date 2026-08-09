@@ -226,11 +226,15 @@ headings.
   structure is shown. Not hit by any of the 11 current skills, but the
   schema and component both support it.
 - **Deeply nested folders** (a folder within a folder, *after* the
-  `hubDir` hoist described in the Component section): out of scope for this
-  pass — none of the 11 current skills have this shape once hoisted (the
-  deepest is one level past `hubDir`, e.g. `references/*.md`). If a future
-  skill needs it, the grouping logic would need to recurse; noted as a
-  known limitation, not built speculatively.
+  `hubDir` hoist described in the Component section): `huashu-design` was
+  found during final review to have exactly this shape — its `assets/`
+  folder contains both direct files and nested subdirectories (e.g.
+  `assets/sfx/*.mp3`, `assets/showcases/*.png`) two-plus levels deep,
+  ~120 files total. The displayed example list for a folder still shows
+  only direct children (one level) — that part is unchanged. But each
+  folder's file-count badge (and the "+N more" truncation text) now uses
+  a recursive count of every file nested underneath, however deep, so the
+  number stays honest instead of silently under-counting.
 - **Script failures** (repo renamed/deleted, rate limit): the script is
   manual and run once per skill addition/refresh, so a failure just means
   re-running it — no build-time fallback needed since it never runs during

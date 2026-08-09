@@ -8,6 +8,7 @@ export interface FileTreeFolder {
   name: string;
   url: string;
   files: FileTreeEntry[];
+  fileCount: number;
 }
 
 export interface GroupedFileTree {
@@ -56,7 +57,10 @@ export function groupFileTree(fileTree: FileTreeEntry[]): GroupedFileTree {
           !entry.relPath.slice(prefix.length).includes('/')
       )
       .map((entry) => ({ path: entry.relPath.slice(prefix.length), type: entry.type, url: entry.url }));
-    return { name: dir.relPath, url: dir.url, files };
+    const fileCount = normalized.filter(
+      (entry) => entry.type === 'file' && entry.relPath.startsWith(prefix)
+    ).length;
+    return { name: dir.relPath, url: dir.url, files, fileCount };
   });
 
   return { rootFiles, folders };

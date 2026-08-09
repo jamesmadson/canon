@@ -18,7 +18,7 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 {(hasContents || hasPackage) && (
   <section class="structure-map">
-    <p class="mb-4 text-xs font-semibold text-ink-soft">File &amp; content map</p>
+    <h2 class="mb-4 text-xs font-semibold text-ink-soft">File &amp; content map</h2>
 
     <div class="diagram">
       <div class="hub">
@@ -39,7 +39,7 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
                     <span class="node-label">{section.title}</span>
                     {section.subsections.length > 0 && (
                       <>
-                        <span class="node-meta font-mono">{plural(section.subsections.length, 'sub')}</span>
+                        <span class="node-meta font-mono">{section.subsections.length} sub</span>
                         <span class="hint-badge">hover</span>
                       </>
                     )}
@@ -66,8 +66,8 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
         {hasPackage && (
           <div class="branch">
             <p class="branch-label">
-              Package — {plural(rootFiles.length, 'file')}
-              {folders.length > 0 && `, ${plural(folders.length, 'folder')}`}
+              Package{rootFiles.length > 0 && ` — ${plural(rootFiles.length, 'file')}`}
+              {folders.length > 0 && `${rootFiles.length > 0 ? ', ' : ' — '}${plural(folders.length, 'folder')}`}
             </p>
             <div class="tree">
               {rootFiles.map((file) => (
@@ -83,14 +83,14 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
                   <div class="node-row">
                     <span class="glyph dir"></span>
                     <a class="node-label" href={folder.url} target="_blank" rel="noopener">{folder.name}/</a>
-                    {folder.files.length > 0 && (
+                    {folder.fileCount > 0 && (
                       <>
-                        <span class="node-meta font-mono">{plural(folder.files.length, 'file')}</span>
+                        <span class="node-meta font-mono">{plural(folder.fileCount, 'file')}</span>
                         <span class="hint-badge">hover</span>
                       </>
                     )}
                   </div>
-                  {folder.files.length > 0 && (
+                  {folder.fileCount > 0 && (
                     <div class="children">
                       {folder.files.slice(0, 3).map((f) => (
                         <div class="child-row">
@@ -98,8 +98,8 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
                           <a class="child-label" href={f.url} target="_blank" rel="noopener">{f.path}</a>
                         </div>
                       ))}
-                      {folder.files.length > 3 && (
-                        <div class="more">+ {folder.files.length - 3} more</div>
+                      {folder.fileCount > 3 && (
+                        <div class="more">+ {folder.fileCount - 3} more</div>
                       )}
                     </div>
                   )}
@@ -286,9 +286,20 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
     margin: 0.375rem 0 0 3px;
   }
 
-  .node:hover .children {
+  .node:hover .children,
+  .node:focus-within .children {
     max-height: 400px;
     opacity: 1;
+  }
+
+  @media (hover: none) {
+    .children {
+      max-height: none;
+      opacity: 1;
+    }
+    .hint-badge {
+      display: none;
+    }
   }
 
   .child-row {
