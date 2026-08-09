@@ -31,6 +31,14 @@ describe('seed content integrity', () => {
         expect(existsSync(assetPath), `${asset} referenced by ${file} does not exist`).toBe(true);
       }
     });
+
+    it(`${file}'s fileTree has exactly one SKILL.md entry`, () => {
+      const raw = readFileSync(path.join(skillsDir, file), 'utf-8');
+      const { data } = matter(raw);
+      const parsed = skillSchema.parse(data);
+      const skillMdEntries = parsed.fileTree.filter((entry) => entry.path.split('/').pop() === 'SKILL.md');
+      expect(skillMdEntries, `${file} should have exactly one SKILL.md entry in fileTree`).toHaveLength(1);
+    });
   }
 
   it('has unique slugs across all skill files', () => {

@@ -16,6 +16,8 @@ const validSkill = {
   lastVerified: '2026-07-29',
   status: 'active',
   featured: true,
+  fileTree: [{ path: 'SKILL.md', type: 'file', url: 'https://github.com/anthropics/skills/blob/main/SKILL.md' }],
+  contentOutline: [{ title: 'A section', subsections: [] }],
 };
 
 describe('skillSchema', () => {
@@ -46,5 +48,25 @@ describe('skillSchema', () => {
   it('rejects a missing required field', () => {
     const { tagline, ...rest } = validSkill;
     expect(() => skillSchema.parse(rest)).toThrow();
+  });
+
+  it('defaults contentOutline to an empty array when omitted', () => {
+    const { contentOutline, ...rest } = validSkill;
+    const result = skillSchema.parse(rest);
+    expect(result.contentOutline).toEqual([]);
+  });
+
+  it('rejects an empty fileTree', () => {
+    expect(() => skillSchema.parse({ ...validSkill, fileTree: [] })).toThrow();
+  });
+
+  it('rejects a fileTree entry with an invalid type', () => {
+    const badTree = [{ path: 'SKILL.md', type: 'symlink', url: 'https://github.com/x/y/blob/main/SKILL.md' }];
+    expect(() => skillSchema.parse({ ...validSkill, fileTree: badTree })).toThrow();
+  });
+
+  it('rejects a fileTree entry with a non-URL url field', () => {
+    const badTree = [{ path: 'SKILL.md', type: 'file', url: 'not-a-url' }];
+    expect(() => skillSchema.parse({ ...validSkill, fileTree: badTree })).toThrow();
   });
 });

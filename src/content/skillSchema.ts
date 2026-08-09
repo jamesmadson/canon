@@ -20,6 +20,17 @@ export const CATEGORY_VALUES = [
   'diagramming',
 ] as const;
 
+const fileTreeEntrySchema = z.object({
+  path: z.string(),
+  type: z.enum(['file', 'dir']),
+  url: z.string().url(),
+});
+
+const contentSectionSchema = z.object({
+  title: z.string(),
+  subsections: z.array(z.string()).default([]),
+});
+
 export const skillSchema = z.object({
   slug: z.string(),
   name: z.string(),
@@ -35,6 +46,8 @@ export const skillSchema = z.object({
   lastVerified: z.coerce.date(),
   status: z.enum(['active', 'archived', 'superseded']),
   featured: z.boolean().default(false),
+  fileTree: z.array(fileTreeEntrySchema).min(1),
+  contentOutline: z.array(contentSectionSchema).default([]),
 });
 
 export type Skill = z.infer<typeof skillSchema>;
