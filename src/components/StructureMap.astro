@@ -1,0 +1,376 @@
+---
+import { groupFileTree, type FileTreeEntry } from '../lib/groupFileTree';
+import type { ContentSection } from '../lib/parseSkillHeadings';
+
+interface Props {
+  name: string;
+  tagline: string;
+  fileTree: FileTreeEntry[];
+  contentOutline: ContentSection[];
+}
+
+const { name, tagline, fileTree, contentOutline } = Astro.props;
+const { rootFiles, folders } = groupFileTree(fileTree);
+const hasContents = contentOutline.length > 0;
+const hasPackage = rootFiles.length > 0 || folders.length > 0;
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+---
+
+{(hasContents || hasPackage) && (
+  <section class="structure-map">
+    <p class="mb-4 text-xs font-semibold text-ink-soft">File &amp; content map</p>
+
+    <div class="diagram">
+      <div class="hub">
+        <span class="hub-file font-mono">SKILL.md</span>
+        <p class="hub-name">{name}</p>
+        <p class="hub-tagline">{tagline}</p>
+      </div>
+
+      <div class="branches">
+        {hasContents && (
+          <div class="branch">
+            <p class="branch-label">Contents — {plural(contentOutline.length, 'section')}</p>
+            <div class="tree">
+              {contentOutline.map((section) => (
+                <div class="node">
+                  <div class="node-row">
+                    <span class="glyph section"></span>
+                    <span class="node-label">{section.title}</span>
+                    {section.subsections.length > 0 && (
+                      <>
+                        <span class="node-meta font-mono">{plural(section.subsections.length, 'sub')}</span>
+                        <span class="hint-badge">hover</span>
+                      </>
+                    )}
+                  </div>
+                  {section.subsections.length > 0 && (
+                    <div class="children">
+                      {section.subsections.slice(0, 4).map((sub) => (
+                        <div class="child-row">
+                          <span class="glyph section child-glyph"></span>
+                          <span class="child-label">{sub}</span>
+                        </div>
+                      ))}
+                      {section.subsections.length > 4 && (
+                        <div class="more">+ {section.subsections.length - 4} more</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {hasPackage && (
+          <div class="branch">
+            <p class="branch-label">
+              Package — {plural(rootFiles.length, 'file')}
+              {folders.length > 0 && `, ${plural(folders.length, 'folder')}`}
+            </p>
+            <div class="tree">
+              {rootFiles.map((file) => (
+                <div class="node">
+                  <div class="node-row">
+                    <span class="glyph file"></span>
+                    <a class="node-label" href={file.url} target="_blank" rel="noopener">{file.path}</a>
+                  </div>
+                </div>
+              ))}
+              {folders.map((folder) => (
+                <div class="node">
+                  <div class="node-row">
+                    <span class="glyph dir"></span>
+                    <a class="node-label" href={folder.url} target="_blank" rel="noopener">{folder.name}/</a>
+                    {folder.files.length > 0 && (
+                      <>
+                        <span class="node-meta font-mono">{plural(folder.files.length, 'file')}</span>
+                        <span class="hint-badge">hover</span>
+                      </>
+                    )}
+                  </div>
+                  {folder.files.length > 0 && (
+                    <div class="children">
+                      {folder.files.slice(0, 3).map((f) => (
+                        <div class="child-row">
+                          <span class="glyph file child-glyph"></span>
+                          <a class="child-label" href={f.url} target="_blank" rel="noopener">{f.path}</a>
+                        </div>
+                      ))}
+                      {folder.files.length > 3 && (
+                        <div class="more">+ {folder.files.length - 3} more</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="glyph section"></span> content section</span>
+      <span class="legend-item"><span class="glyph file"></span> file</span>
+      <span class="legend-item"><span class="glyph dir"></span> folder</span>
+    </div>
+  </section>
+)}
+
+<style>
+  .structure-map {
+    margin-top: 2.5rem;
+  }
+
+  .diagram {
+    display: grid;
+    grid-template-columns: minmax(180px, 220px) 1fr;
+    gap: 0 1.75rem;
+    align-items: start;
+  }
+
+  .hub {
+    background: var(--color-accent-orange);
+    color: white;
+    padding: 1.25rem 1.125rem;
+    border-radius: 3px;
+  }
+
+  .hub-file {
+    display: block;
+    font-size: 0.9375rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .hub-name {
+    font-size: 1.0625rem;
+    font-weight: 900;
+    line-height: 1.2;
+    margin: 0 0 0.375rem;
+  }
+
+  .hub-tagline {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.82);
+    margin: 0;
+  }
+
+  .branches {
+    display: flex;
+    flex-direction: column;
+    gap: 1.375rem;
+  }
+
+  .branch-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-ink-soft);
+    margin: 0 0 0.625rem;
+  }
+
+  .tree {
+    border-left: 1px solid var(--color-rule);
+    margin-left: 3px;
+  }
+
+  .node {
+    position: relative;
+    padding: 0.4375rem 0.25rem;
+    margin: 0 -0.25rem;
+    border-radius: 3px;
+    transition: background-color 0.18s ease;
+  }
+
+  .node:hover {
+    background-color: color-mix(in oklch, var(--color-accent-orange) 8%, transparent);
+  }
+
+  .node-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .node-row::before {
+    content: "";
+    flex: none;
+    width: 14px;
+    height: 1px;
+    background: var(--color-rule);
+    transition: background-color 0.18s ease;
+  }
+
+  .node:hover .node-row::before {
+    background: var(--color-rule-strong);
+  }
+
+  .glyph {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border: 1.3px solid var(--color-ink-soft);
+    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .node:hover .glyph {
+    transform: scale(1.25);
+  }
+
+  .glyph.section {
+    border-radius: 50%;
+    border-color: var(--color-accent-orange);
+    background: var(--color-accent-orange);
+  }
+
+  .glyph.file {
+    background: var(--color-ink-soft);
+  }
+
+  .glyph.dir {
+    background: transparent;
+  }
+
+  .child-glyph {
+    width: 6px;
+    height: 6px;
+  }
+
+  .node-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  a.node-label {
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-rule-strong);
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  a.node-label:hover {
+    color: var(--color-accent-orange);
+    border-color: var(--color-accent-orange);
+  }
+
+  .node-meta {
+    font-size: 0.65625rem;
+    color: var(--color-ink-soft);
+    background: color-mix(in oklch, var(--color-accent-orange) 8%, transparent);
+    padding: 1px 6px;
+    border-radius: 20px;
+  }
+
+  .hint-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.59375rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-accent-orange);
+    margin-left: auto;
+  }
+
+  .children {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+    border-left: 1px solid var(--color-rule);
+    margin: 0.375rem 0 0 3px;
+  }
+
+  .node:hover .children {
+    max-height: 400px;
+    opacity: 1;
+  }
+
+  .child-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4375rem;
+    padding: 0.25rem;
+    margin: 0 -0.25rem;
+    border-radius: 3px;
+    transition: background-color 0.15s ease;
+  }
+
+  .child-row:hover {
+    background-color: color-mix(in oklch, var(--color-accent-orange) 8%, transparent);
+  }
+
+  .child-row::before {
+    content: "";
+    flex: none;
+    width: 12px;
+    height: 1px;
+    background: var(--color-rule);
+  }
+
+  .child-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-ink-soft);
+  }
+
+  a.child-label {
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  a.child-label:hover {
+    color: var(--color-accent-orange);
+  }
+
+  .more {
+    font-size: 0.6875rem;
+    color: var(--color-ink-soft);
+    padding: 0.25rem 0 0.25rem 1.1875rem;
+  }
+
+  .legend {
+    margin-top: 1.75rem;
+    padding: 0.875rem 1.125rem;
+    border: 1px solid var(--color-rule);
+    display: inline-flex;
+    gap: 1.375rem;
+    flex-wrap: wrap;
+    background: var(--color-paper);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4375rem;
+    font-size: 0.6875rem;
+    color: var(--color-ink-soft);
+    font-weight: 500;
+  }
+
+  @media (max-width: 640px) {
+    .diagram {
+      grid-template-columns: 1fr;
+    }
+    .branches {
+      margin-top: 1.125rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .children,
+    .node,
+    .node-row::before,
+    .glyph,
+    .child-row,
+    a.node-label,
+    a.child-label {
+      transition: none;
+    }
+  }
+</style>
