@@ -42,14 +42,13 @@
 @theme {
   --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
-  --color-paper: oklch(83.21% 0.0112 95.19);
-  --color-tile: oklch(100% 0 0);
+  --color-bg: oklch(100% 0 0);
   --color-ink: oklch(20.02% 0 0);
-  --color-ink-soft: oklch(41.83% 0.0097 106.81);
-  --color-rule: oklch(75.92% 0.0142 97.5);
-  --color-rule-strong: oklch(53.72% 0.0139 96.58);
+  --color-ink-soft: oklch(42% 0 0);
+  --color-surface: oklch(92% 0.003 210);
+  --color-rule: oklch(85% 0.005 210);
+  --color-rule-strong: oklch(68% 0.005 210);
   --color-accent-orange: oklch(56% 0.185 40);
-  --color-accent-yellow: oklch(76.53% 0.138 80.38);
 }
 
 /* construction grid — hidden by default, faint when toggled on (see BaseLayout) */
