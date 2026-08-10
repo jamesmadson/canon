@@ -20,14 +20,14 @@ const {
     <title>{title} · Canon</title>
     <meta name="description" content={description} />
   </head>
-  <body class="bg-tile font-sans font-medium text-ink antialiased">
-    <header class="border-b border-rule-strong bg-paper">
+  <body class="bg-bg font-sans font-medium text-ink antialiased">
+    <header class="border-b border-rule">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-8">
         <a href="/" class="text-xl font-semibold">Canon</a>
         <nav class="flex gap-6 text-sm font-semibold">
-          <a href="/skills">Gallery</a>
-          <a href="/submit">Submit</a>
-          <a href="/newsletter">Newsletter</a>
+          <a href="/skills" class="text-ink-soft transition-colors hover:text-accent-orange focus-visible:text-accent-orange">Gallery</a>
+          <a href="/submit" class="text-ink-soft transition-colors hover:text-accent-orange focus-visible:text-accent-orange">Submit</a>
+          <a href="/newsletter" class="text-ink-soft transition-colors hover:text-accent-orange focus-visible:text-accent-orange">Newsletter</a>
         </nav>
       </div>
     </header>
@@ -40,7 +40,7 @@ const {
     <button
       type="button"
       id="grid-toggle"
-      class="fixed bottom-5 right-5 z-10 border border-rule-strong bg-tile px-3.5 py-2 text-xs font-semibold tracking-wide text-ink-soft hover:text-ink"
+      class="fixed bottom-5 right-5 z-10 border border-rule-strong bg-bg px-3.5 py-2 text-xs font-semibold tracking-wide text-ink-soft hover:text-ink"
       aria-pressed="false"
     >
       Grid — Off
