@@ -126,3 +126,38 @@ submit, newsletter. Confirm: no greige or orange visible anywhere at
 rest; hover a card, a nav link, and a StructureMap file link and confirm
 orange appears only then. `npx astro check` + `npm run build` green;
 migration grep returns nothing.
+
+## Addendum (2026-08-11, post-final-review)
+
+Three corrections came out of final review of the implementation.
+
+First, and largest: orange was removed from Canon entirely, at the
+user's direction. The "one rule for orange" above — that it survives as
+an interaction-only color — is superseded. The site is now fully
+monochrome, including interaction states. Hover and focus feedback on
+nav links, skill cards, prose links, and the StructureMap now come from
+value shifts (gray to black, or black to gray), the existing gray
+washes, and existing non-color cues (underlines, glyph scale) — not
+from hue. The `--color-accent-orange` token has been deleted from
+`src/styles/global.css`.
+
+Second, `--color-rule-strong` was corrected from `oklch(68% 0.005 210)`
+to `oklch(66% 0.005 210)`. The spec's contrast note above claimed "no
+contrast re-audit is needed" for the re-derived rule grays because they
+were treated as purely decorative (hairlines/borders, not text). That
+premise didn't hold for every use: `--color-rule-strong` also draws the
+border on bordered-only form inputs (submit and newsletter pages),
+which are non-text UI components subject to WCAG 1.4.11's 3:1 contrast
+floor against their background. At 68% lightness the border measured
+2.876:1 on white — under the floor. At 66% it measures 3.105:1, clearing
+it.
+
+Third, the prose-link hover utility was implemented as originally
+planned — `hover:prose-a:text-accent-orange` — and that plan was itself
+wrong. Tailwind's typography-plugin variant order matters: `hover:` as
+the outer variant compiles to an article-level `:hover` selector, so
+hovering anywhere in the prose body lit up every link at once, not just
+the one under the pointer. The corrected form flips the variant order —
+`prose-a:hover:text-ink-soft` — which compiles to a per-link `:hover`,
+so each link dims individually on hover, on top of its always-present
+underline.
