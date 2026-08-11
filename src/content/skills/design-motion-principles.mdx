@@ -1,0 +1,121 @@
+---
+slug: design-motion-principles
+name: Design Motion Principles
+tagline: >-
+  Three named motion philosophies — Kowalski, Krehel, Tompkins — weighted by
+  project context, with a frequency gate that decides whether it should animate
+  at all.
+sourceUrl: >-
+  https://github.com/kylezantos/design-motion-principles/tree/main/skills/design-motion-principles
+sourceAuthor: Kyle Zantos
+tools:
+  - claude-code
+  - cursor
+  - generic
+categories:
+  - motion
+previewType: image
+previewAssets:
+  - /previews/design-motion-principles.svg
+rating: 5
+addedDate: 2026-08-11T00:00:00.000Z
+lastVerified: 2026-08-11T00:00:00.000Z
+status: active
+featured: false
+fileTree:
+  - path: SKILL.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/SKILL.md
+  - path: references
+    type: dir
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/tree/main/skills/design-motion-principles/references
+  - path: references/accessibility.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/accessibility.md
+  - path: references/anti-checklist.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/anti-checklist.md
+  - path: references/audit-checklist.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/audit-checklist.md
+  - path: references/creation-gotchas.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/creation-gotchas.md
+  - path: references/demo-shell.html
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/demo-shell.html
+  - path: references/emil-kowalski.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/emil-kowalski.md
+  - path: references/jakub-krehel.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/jakub-krehel.md
+  - path: references/jhey-tompkins.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/jhey-tompkins.md
+  - path: references/motion-cookbook.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/motion-cookbook.md
+  - path: references/output-format.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/output-format.md
+  - path: references/performance.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/performance.md
+  - path: references/report-template.html
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/references/report-template.html
+  - path: workflows
+    type: dir
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/tree/main/skills/design-motion-principles/workflows
+  - path: workflows/audit.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/workflows/audit.md
+  - path: workflows/create.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/design-motion-principles/blob/main/skills/design-motion-principles/workflows/create.md
+contentOutline:
+  - title: 'STEP 0: Detect Mode (DO THIS FIRST)'
+    subsections: []
+  - title: The Three Designers
+    subsections: []
+  - title: Context-to-Perspective Mapping
+    subsections: []
+  - title: Core Principles (Both Modes)
+    subsections:
+      - The Frequency Gate
+      - Duration Guidelines (Context-Dependent)
+      - The Golden Rule
+      - Accessibility is NOT Optional
+  - title: Reference Index
+    subsections: []
+  - title: Workflow Index
+    subsections: []
+---
+
+Not another motion checklist — a panel. The skill distills the published work of three motion designers into three attributable lenses that each answer a different question: Emil Kowalski asks *"should this animate at all?"*, Jakub Krehel asks *"is this subtle and polished enough for production?"*, and Jhey Tompkins asks *"what could this become?"* The sharp idea is that the lenses are weighted by project context before anything else happens — a productivity tool leads with Emil, a kids' app leads with Jakub and Jhey — which turns "it depends" from a shrug into an actual lookup table.
+
+The frequency gate is the hardest-working rule in it: rare interactions earn expressive motion, daily ones get subtle-and-fast, hundred-times-a-day ones get nothing, and keyboard-initiated actions never animate. Two modes — Create builds components with purposeful motion, Audit reviews existing motion and emits a self-contained HTML report with looping demos of each finding.
+
+There's a meta angle for Canon readers: two of the three distilled designers are already in this gallery first-hand (Emil's Improve Animations and Design Eng skills, Jakub's Make Interfaces Feel Better). This is the synthesis view — useful precisely when you want the voices weighed against each other rather than one philosophy applied pure.
+
+**Install**: the repo bundles a `skills/` folder — copy `skills/design-motion-principles/` into your `.claude/skills/` directory (references and workflows come with it).
+
+**Gotcha**: the author is explicit that the lenses are his interpretation of each designer's *published* work, "named in tribute; not authored or endorsed by the designers themselves." Honest framing, worth knowing before you cite a finding as "what Emil would say."
