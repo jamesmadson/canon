@@ -1,0 +1,69 @@
+---
+slug: thumb-first
+name: Thumb-First
+tagline: >-
+  A three-skill mobile review team — design judgment and device reality run as
+  separate passes, then merge into one report that never lets an opinion read as
+  a defect.
+sourceUrl: 'https://github.com/kylezantos/thumb-first/tree/main/skills/thumb-first'
+sourceAuthor: Kyle Zantos
+tools:
+  - claude-code
+  - cursor
+  - generic
+categories:
+  - ui-aesthetics
+  - accessibility
+previewType: image
+previewAssets:
+  - /previews/thumb-first.svg
+rating: 4
+addedDate: 2026-08-11T00:00:00.000Z
+lastVerified: 2026-08-11T00:00:00.000Z
+status: active
+featured: false
+fileTree:
+  - path: SKILL.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/thumb-first/blob/main/skills/thumb-first/SKILL.md
+  - path: references
+    type: dir
+    url: >-
+      https://github.com/kylezantos/thumb-first/tree/main/skills/thumb-first/references
+  - path: references/unified-report.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/thumb-first/blob/main/skills/thumb-first/references/unified-report.md
+  - path: workflows
+    type: dir
+    url: >-
+      https://github.com/kylezantos/thumb-first/tree/main/skills/thumb-first/workflows
+  - path: workflows/full-review.md
+    type: file
+    url: >-
+      https://github.com/kylezantos/thumb-first/blob/main/skills/thumb-first/workflows/full-review.md
+contentOutline:
+  - title: Mode Selection
+    subsections: []
+  - title: Full Review — Orchestration
+    subsections:
+      - Step 0 · Detect the target once
+      - Step 1 · Design pass
+      - Step 2 · Platform pass
+      - Step 3 · Merge
+  - title: What this umbrella is NOT
+    subsections: []
+  - title: Suite Map
+    subsections: []
+  - title: Reference & Workflow Index
+    subsections: []
+---
+
+The architecture is the pitch: most mobile tooling collapses two different questions — *is this the right design?* and *is it built correctly for the device?* — until opinions read as defects and must-fixes read as preferences. Thumb-First keeps them as two independently versioned sibling skills (judgment is durable; platform specifics rot with every OS release) plus a thin umbrella that runs both and merges the output. It's the first multi-skill package in Canon — a working example of skills composed as a team rather than a monolith.
+
+The design layer reviews through eight named, attributable lenses — Hoober's ergonomics, Hurff's thumb zones, Wroblewski's focus, Josh Clark's direct manipulation, NN/g's empiricism, the platform canons — and when the lenses disagree, it surfaces the disagreement as one of nine recurring decision forks (sheet vs. modal, gesture vs. visible control, where destructive actions hide) instead of flattening everything into "best practices." The platform layer finds objective P0–P3 defects with file:line — safe areas, iOS Safari quirks, PWA manifests, touch targets — and hands off honestly on native targets rather than faking a web audit.
+
+**Install**: the umbrella references its siblings by relative path, so copy the repo's entire `skills/` directory (all three folders — `thumb-first`, `thumb-first-design`, `thumb-first-platform`) into `.claude/skills/`, not just one.
+
+**Gotcha**: Canon's entry points at the umbrella; it won't run a full review without both siblings installed beside it. The technical pass is web/PWA-deep — React Native and Swift targets get a stated limitation and a handoff, not a device audit.
