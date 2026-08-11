@@ -47,8 +47,7 @@
   --color-ink-soft: oklch(42% 0 0);
   --color-surface: oklch(92% 0.003 210);
   --color-rule: oklch(85% 0.005 210);
-  --color-rule-strong: oklch(68% 0.005 210);
-  --color-accent-orange: oklch(56% 0.185 40);
+  --color-rule-strong: oklch(66% 0.005 210);
 }
 
 /* construction grid — hidden by default, faint when toggled on (see BaseLayout) */
