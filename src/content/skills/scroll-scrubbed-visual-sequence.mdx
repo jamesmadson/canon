@@ -1,0 +1,84 @@
+---
+slug: scroll-scrubbed-visual-sequence
+name: Scroll-Scrubbed Visual Sequence
+tagline: >-
+  Turn one visual transformation into a scroll instrument — normalized progress
+  as the single source of truth, with the renderer (video, frames, canvas, SVG)
+  swappable underneath.
+sourceUrl: >-
+  https://github.com/MengTo/Skills/tree/main/agent-skills/web-design/scroll-scrubbed-visual-sequence
+sourceAuthor: Meng To
+tools:
+  - claude-code
+  - codex
+  - cursor
+  - generic
+categories:
+  - motion
+previewType: image
+previewAssets:
+  - /previews/scroll-scrubbed-visual-sequence.svg
+rating: 4
+addedDate: 2026-08-11T00:00:00.000Z
+lastVerified: 2026-08-11T00:00:00.000Z
+status: active
+featured: false
+fileTree:
+  - path: REFERENCES.md
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/scroll-scrubbed-visual-sequence/REFERENCES.md
+  - path: SKILL.md
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/scroll-scrubbed-visual-sequence/SKILL.md
+  - path: agents
+    type: dir
+    url: >-
+      https://github.com/MengTo/Skills/tree/main/agent-skills/web-design/scroll-scrubbed-visual-sequence/agents
+  - path: agents/openai.yaml
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/scroll-scrubbed-visual-sequence/agents/openai.yaml
+  - path: demo
+    type: dir
+    url: >-
+      https://github.com/MengTo/Skills/tree/main/agent-skills/web-design/scroll-scrubbed-visual-sequence/demo
+  - path: demo/PROMPT.md
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/scroll-scrubbed-visual-sequence/demo/PROMPT.md
+  - path: demo/index.html
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/scroll-scrubbed-visual-sequence/demo/index.html
+  - path: demo/preview.jpg
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/scroll-scrubbed-visual-sequence/demo/preview.jpg
+contentOutline:
+  - title: Define the sequence
+    subsections: []
+  - title: Choose the renderer
+    subsections: []
+  - title: Build the scroll stage
+    subsections: []
+  - title: Handle media safely
+    subsections: []
+  - title: Preserve access and control
+    subsections: []
+  - title: Tune deliberately
+    subsections: []
+  - title: Verify
+    subsections: []
+---
+
+The pattern behind every Apple-style product-story page, extracted as a discipline rather than a library: define the sequence as data first (scroll length, frame count, poster frame, reduced-motion frame, copy stops), derive one normalized progress value from native scroll position, and let that value drive whatever renderer fits. Wheel deltas, elapsed time, and autoplay are explicitly banned as sources of truth — native scroll must determine the exact visual state in both directions, which is what makes the sequence feel like an instrument instead of an animation you happen to scroll past.
+
+The renderer-selection table is the most reusable part: video for continuous photographic sequences (with keyframe-encoding and `currentTime`-coalescing guidance), image sequences when exact art-directed frames matter, canvas for procedural drawing, SVG/DOM for diagrams and accessible interface walkthroughs, and WebGL only when depth or a real camera materially strengthens the idea — each with its own performance rules.
+
+Accessibility is built into the data model, not bolted on: a `reducedMotionFrame` and poster mean the page stays fully usable with motion off.
+
+**Install**: copy `agent-skills/web-design/scroll-scrubbed-visual-sequence/` from the repo into your `.claude/skills/` directory.
+
+**Gotcha**: its native-scroll-only rule means it will actively fight scroll-hijacking setups (smooth-scroll libraries, wheel-delta drivers). That's a feature, but if your site already uses Lenis-style smoothing, reconcile the two before pointing an agent at this.
