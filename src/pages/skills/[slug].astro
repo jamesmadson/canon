@@ -43,19 +43,24 @@ const {
         const active = tools.includes(toolValue);
         return (
           <div
+            title={`${TOOL_META[toolValue].label}${active ? '' : ' — not supported'}`}
+            aria-label={`${TOOL_META[toolValue].label}: ${active ? 'supported' : 'not supported'}`}
             class={
               active
                 ? 'flex aspect-square items-center justify-center bg-ink'
                 : 'flex aspect-square items-center justify-center border border-rule-strong'
             }
           >
-            <span class={active ? 'text-[10px] font-semibold uppercase text-white' : 'text-[10px] font-semibold uppercase text-ink-soft'}>
+            <span aria-hidden="true" class={active ? 'text-[10px] font-semibold uppercase text-white' : 'text-[10px] font-semibold uppercase text-ink-soft'}>
               {TOOL_META[toolValue].abbr}
             </span>
           </div>
         );
       })}
     </div>
+    <p class="mt-3 max-w-md text-xs font-medium text-ink-soft">
+      Tool coverage — filled cells are supported. Full names under “Works with” below.
+    </p>
   </div>
 
   <div class="grid grid-cols-1 gap-12 lg:grid-cols-[2fr_1fr]">
