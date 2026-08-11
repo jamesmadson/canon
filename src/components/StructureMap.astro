@@ -38,10 +38,16 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
                     <span class="glyph section"></span>
                     <span class="node-label">{section.title}</span>
                     {section.subsections.length > 0 && (
-                      <>
+                      <button
+                        type="button"
+                        class="node-toggle"
+                        aria-expanded="false"
+                        aria-label={`${section.subsections.length} subsections, tap to expand`}
+                      >
                         <span class="node-meta font-mono">{section.subsections.length} sub</span>
-                        <span class="hint-badge">hover</span>
-                      </>
+                        <span class="hint-badge hint-hover">hover</span>
+                        <span class="hint-badge hint-tap">tap</span>
+                      </button>
                     )}
                   </div>
                   {section.subsections.length > 0 && (
@@ -84,10 +90,16 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
                     <span class="glyph dir"></span>
                     <a class="node-label" href={folder.url} target="_blank" rel="noopener">{folder.name}/</a>
                     {folder.fileCount > 0 && (
-                      <>
+                      <button
+                        type="button"
+                        class="node-toggle"
+                        aria-expanded="false"
+                        aria-label={`${plural(folder.fileCount, 'file')} in ${folder.name}, tap to expand`}
+                      >
                         <span class="node-meta font-mono">{plural(folder.fileCount, 'file')}</span>
-                        <span class="hint-badge">hover</span>
-                      </>
+                        <span class="hint-badge hint-hover">hover</span>
+                        <span class="hint-badge hint-tap">tap</span>
+                      </button>
                     )}
                   </div>
                   {folder.fileCount > 0 && (
@@ -118,6 +130,24 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
     </div>
   </section>
 )}
+
+<script>
+  // Tap-to-expand for touch devices. Desktop keeps hover/focus-within
+  // (pure CSS, untouched). This only wires up the .node-toggle buttons;
+  // the `data-bound` guard keeps a second run from double-binding if this
+  // script is ever re-executed on the same page.
+  const toggles = document.querySelectorAll<HTMLButtonElement>('.node-toggle:not([data-bound])');
+
+  toggles.forEach((button) => {
+    button.dataset.bound = 'true';
+    button.addEventListener('click', () => {
+      const children = button.closest('.node')?.querySelector<HTMLElement>(':scope > .children');
+      if (!children) return;
+      const isOpen = children.classList.toggle('is-open');
+      button.setAttribute('aria-expanded', String(isOpen));
+    });
+  });
+</script>
 
 <style>
   .structure-map {
@@ -294,7 +324,41 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
     background: var(--color-surface);
     padding: 1px 6px;
     border-radius: 20px;
+  }
+
+  .hint-tap {
+    display: none;
+  }
+
+  /* The toggle wraps the count badge + hint badge so the whole cluster is
+     one real <button>, positioned exactly where the hint-badge used to sit
+     (margin-left: auto pushes it to the row's trailing edge). A pseudo-
+     element pads the hit area out to the ~44px touch-target floor without
+     changing the visible badge size. */
+  .node-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
     margin-left: auto;
+    border: none;
+    background: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .node-toggle::after {
+    content: "";
+    position: absolute;
+    top: -13px;
+    bottom: -13px;
+    /* Left inset is smaller than the right/top/bottom so this never
+       overlaps the folder <a>'s own expanded hit area (a.node-label::before
+       extends +4px to its right) — the two stay independently tappable. */
+    left: -4px;
+    right: -10px;
   }
 
   .children {
@@ -313,12 +377,20 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
   }
 
   @media (hover: none) {
-    .children {
-      max-height: none;
+    /* Touch devices have no hover, so .children stay collapsed (the count
+       badge above still signposts what's hidden) until the .node-toggle
+       button is tapped, which adds .is-open. Desktop's hover/focus-within
+       rule above is untouched and keeps working exactly as before — this
+       block only adds behavior, it doesn't take any away. */
+    .children.is-open {
+      max-height: 400px;
       opacity: 1;
     }
-    .hint-badge {
+    .hint-hover {
       display: none;
+    }
+    .hint-tap {
+      display: inline-flex;
     }
   }
 

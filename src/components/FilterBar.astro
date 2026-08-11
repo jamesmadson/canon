@@ -14,7 +14,17 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
 ---
 
 <div class="flex flex-col gap-8 lg:flex-row lg:gap-12">
-  <aside class="lg:w-56 shrink-0">
+  <button
+    type="button"
+    id="filter-toggle"
+    aria-expanded="false"
+    aria-controls="filter-panel"
+    class="min-h-11 border border-rule-strong px-4 text-sm font-semibold lg:hidden"
+  >
+    Filters
+  </button>
+
+  <aside id="filter-panel" class="hidden lg:order-1 lg:block lg:w-56 shrink-0">
     <fieldset class="mb-8">
       <legend class="mb-3 text-sm font-semibold text-ink-soft">Tools</legend>
       <div class="flex flex-col gap-2">
@@ -39,7 +49,7 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
     </fieldset>
   </aside>
 
-  <div class="flex-1">
+  <div class="flex-1 lg:order-2">
     <div aria-live="polite">
       <p id="filter-count" class="mb-4 text-sm font-medium text-ink-soft"></p>
       <p id="filter-empty" class="hidden text-sm font-medium text-ink-soft">No skills match those filters.</p>
@@ -66,6 +76,17 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
   const emptyLabel = document.getElementById('filter-empty')!;
   const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-skill-card]'));
   const checkboxes = Array.from(document.querySelectorAll<HTMLInputElement>('input[data-filter]'));
+
+  const toggle = document.getElementById('filter-toggle') as HTMLButtonElement | null;
+  const panel = document.getElementById('filter-panel');
+
+  if (toggle && panel) {
+    toggle.addEventListener('click', () => {
+      const isOpen = panel.classList.contains('hidden') === false;
+      panel.classList.toggle('hidden', isOpen);
+      toggle.setAttribute('aria-expanded', String(!isOpen));
+    });
+  }
 
   const entries = cards.map((card) => ({
     el: card,
@@ -94,6 +115,11 @@ const availableCategories = [...new Set(skills.flatMap((skill) => skill.data.cat
 
     countLabel.textContent = `Showing ${matched.length} of ${entries.length} skills`;
     emptyLabel.classList.toggle('hidden', matched.length > 0);
+
+    if (toggle) {
+      const activeCount = filter.tools.length + filter.categories.length;
+      toggle.textContent = activeCount > 0 ? `Filters · ${activeCount}` : 'Filters';
+    }
   }
 
   checkboxes.forEach((checkbox) => checkbox.addEventListener('change', applyFilter));
