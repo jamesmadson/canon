@@ -193,6 +193,7 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
   }
 
   .node-row {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -255,6 +256,20 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
     transition: color 0.15s ease, border-color 0.15s ease;
   }
 
+  /* Stretch the link's hit area to fill the whole row, including the
+     row's own padding (which lives on the parent .node, shared with any
+     expanded .children below) — without changing any visible spacing.
+     Insets match .node's padding exactly so the hit area covers the full
+     visual row height/width but stops short of the expanded children list. */
+  a.node-label::before {
+    content: "";
+    position: absolute;
+    top: -0.4375rem;
+    bottom: -0.4375rem;
+    left: -0.25rem;
+    right: -0.25rem;
+  }
+
   a.node-label:hover,
   a.node-label:focus-visible {
     border-color: var(--color-ink);
@@ -308,6 +323,7 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
   }
 
   .child-row {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0.4375rem;
@@ -338,6 +354,15 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
   a.child-label {
     text-decoration: none;
     transition: color 0.15s ease;
+  }
+
+  /* .child-row owns its padding directly (unlike .node), so inset:0 against
+     it already fills the row's full padding box — same stretched-hit-area
+     goal as a.node-label, simpler because there's no nested content to avoid. */
+  a.child-label::before {
+    content: "";
+    position: absolute;
+    inset: 0;
   }
 
   a.child-label:hover,
