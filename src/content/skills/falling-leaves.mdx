@@ -1,0 +1,89 @@
+---
+slug: falling-leaves
+name: Falling Leaves
+tagline: >-
+  Why generic particles read as confetti and a tumble that crosses zero reads as
+  a leaf — drifting foliage built from the physics the eye actually checks.
+sourceUrl: >-
+  https://github.com/MengTo/Skills/tree/main/agent-skills/web-design/falling-leaves
+sourceAuthor: Meng To
+tools:
+  - claude-code
+  - codex
+  - cursor
+  - generic
+categories:
+  - motion
+previewType: image
+previewAssets:
+  - /previews/falling-leaves.svg
+rating: 4
+addedDate: 2026-08-11T00:00:00.000Z
+lastVerified: 2026-08-11T00:00:00.000Z
+status: active
+featured: false
+fileTree:
+  - path: SKILL.md
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/falling-leaves/SKILL.md
+  - path: agents
+    type: dir
+    url: >-
+      https://github.com/MengTo/Skills/tree/main/agent-skills/web-design/falling-leaves/agents
+  - path: agents/openai.yaml
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/falling-leaves/agents/openai.yaml
+  - path: demo
+    type: dir
+    url: >-
+      https://github.com/MengTo/Skills/tree/main/agent-skills/web-design/falling-leaves/demo
+  - path: demo/PROMPT.md
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/falling-leaves/demo/PROMPT.md
+  - path: demo/index.html
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/falling-leaves/demo/index.html
+  - path: demo/preview.jpg
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/falling-leaves/demo/preview.jpg
+contentOutline:
+  - title: Build the tumble first
+    subsections: []
+  - title: Couple the slip to the tumble
+    subsections: []
+  - title: Bake both faces
+    subsections: []
+  - title: Vary every parameter per leaf
+    subsections: []
+  - title: Choose where leaves come back from
+    subsections: []
+  - title: 'Set density by band area, not by count'
+    subsections: []
+  - title: Layer for depth
+    subsections: []
+  - title: Handle colour and light
+    subsections: []
+  - title: Budget the cost
+    subsections: []
+  - title: Stop invisible work
+    subsections: []
+  - title: Respect the reader
+    subsections: []
+  - title: Verify
+    subsections: []
+---
+
+The sharpest single insight in Canon's motion shelf: a sprite that only spins in the picture plane reads as confetti no matter how good the artwork is. What the eye checks for is the tumble — the leaf turning about its own long axis, showing its face, thinning to nothing edge-on, opening out again. On 2D canvas that's one line (`ctx.scale(Math.cos(spin), 1)` crossing zero); in 3D it's the reason you instance quads and never point sprites, which always face the camera and can never go edge-on.
+
+The second insight compounds the first: lateral drift is driven by the *same* angle as the tumble, ninety degrees out of phase — a leaf slips sideways when it knifes through the air edge-on and stalls when it presents its face flat. One coupled term instead of an independent sine, and the path suddenly looks aerodynamic instead of like a wind easing bug. The rest covers both-face sprite baking, density-versus-count math, depth layering, color under tone mapping, `prefers-reduced-motion`, and visibility pausing.
+
+Works for maple, sakura, blossom, ash, and snowfall shapes — anywhere drifting foliage has to read as the real thing.
+
+**Install**: copy `agent-skills/web-design/falling-leaves/` from the repo into your `.claude/skills/` directory.
+
+**Gotcha**: it opens by telling you when *not* to use it — for a bounded atmosphere of generic motes it points you at the author's sibling `ambient-section-particles` skill instead, which isn't bundled in this folder. The self-aware scoping is part of why it made the cut.

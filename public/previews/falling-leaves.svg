@@ -1,0 +1,6 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#ffffff"/>
+  <rect x="0" y="0" width="800" height="10" fill="#141413"/>
+  <text x="60" y="300" font-family="Helvetica, Arial, sans-serif" font-size="44" fill="#141413">Falling Leaves</text>
+  <text x="60" y="345" font-family="Helvetica, Arial, sans-serif" font-size="18" letter-spacing="2" fill="#6b6b6b">MOTION</text>
+</svg>
