@@ -1,0 +1,93 @@
+---
+slug: threejs-landscape
+name: Three.js Landscape
+tagline: >-
+  A live landscape that stays quiet behind the subject — polar-grid terrain,
+  slope-and-moisture coloring, GPU grass, and a time-of-day system that
+  cross-fades instead of cutting.
+sourceUrl: >-
+  https://github.com/MengTo/Skills/tree/main/agent-skills/web-design/threejs-landscape
+sourceAuthor: Meng To
+tools:
+  - claude-code
+  - codex
+  - cursor
+  - generic
+categories:
+  - ui-aesthetics
+  - motion
+previewType: image
+previewAssets:
+  - /previews/threejs-landscape.svg
+rating: 4
+addedDate: 2026-08-11T00:00:00.000Z
+lastVerified: 2026-08-11T00:00:00.000Z
+status: active
+featured: false
+fileTree:
+  - path: SKILL.md
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/threejs-landscape/SKILL.md
+  - path: agents
+    type: dir
+    url: >-
+      https://github.com/MengTo/Skills/tree/main/agent-skills/web-design/threejs-landscape/agents
+  - path: agents/openai.yaml
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/threejs-landscape/agents/openai.yaml
+  - path: demo
+    type: dir
+    url: >-
+      https://github.com/MengTo/Skills/tree/main/agent-skills/web-design/threejs-landscape/demo
+  - path: demo/PROMPT.md
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/threejs-landscape/demo/PROMPT.md
+  - path: demo/assets
+    type: dir
+    url: >-
+      https://github.com/MengTo/Skills/tree/main/agent-skills/web-design/threejs-landscape/demo/assets
+  - path: demo/assets/three.min.js
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/threejs-landscape/demo/assets/three.min.js
+  - path: demo/index.html
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/threejs-landscape/demo/index.html
+  - path: demo/preview.jpg
+    type: file
+    url: >-
+      https://github.com/MengTo/Skills/blob/main/agent-skills/web-design/threejs-landscape/demo/preview.jpg
+contentOutline:
+  - title: Ring the camera with a polar grid
+    subsections: []
+  - title: Warp the domain before you layer octaves
+    subsections: []
+  - title: 'Colour by what the ground is doing, not by a texture'
+    subsections: []
+  - title: 'Grass: one ribbon, shaped entirely in the vertex shader'
+    subsections: []
+  - title: Stones from the same height function
+    subsections: []
+  - title: 'Sky: six stops on an 8×512 canvas'
+    subsections: []
+  - title: 'Stars: confine them to the band the camera can reach'
+    subsections: []
+  - title: 'Time of day is interpolation, not a switch'
+    subsections: []
+  - title: What to check before you call it done
+    subsections: []
+---
+
+The thesis is stated in the first line: a backdrop has one job — make the subject look like it is *somewhere*. Everything after is chosen so the landscape reads at a glance and then gets out of the way, which is exactly the discipline most Three.js hero scenes lack.
+
+The craft is real and specific. Terrain samples on a polar grid centred under the camera instead of a square heightfield, with ring spacing following `pow(t, 2.4)` so every ring covers roughly the same number of screen pixels — two thousand triangles near the subject beating two hundred thousand spread evenly. Plain fBm "reads as crumpled paper," so the sample position is domain-warped with a second noise field before the octaves are layered, which is the single biggest step toward terrain that looks eroded rather than crumpled. Ground color comes from slope and moisture, not textures; grass is instanced with wind computed on the GPU; the sky is a gradient dome with a star field you can actually see.
+
+It even warns you about the classic polar-grid failure — winding every quad backwards and looking at the sky through the ground — and tells you to orbit under the horizon once, deliberately, before building anything on top.
+
+**Install**: copy `agent-skills/web-design/threejs-landscape/` from the repo into your `.claude/skills/` directory. Requires Three.js in the target project.
+
+**Gotcha**: it's one of a trio — the author's `threejs-weather` (rain/storm/snow on top) and `threejs-towers` (architectural subjects) extend it, and the skill references both. It stands alone fine; just know the pointers lead outside this folder.
