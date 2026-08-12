@@ -48,6 +48,7 @@ export const skillSchema = z.object({
   featured: z.boolean().default(false),
   fileTree: z.array(fileTreeEntrySchema).min(1),
   contentOutline: z.array(contentSectionSchema).default([]),
+  companionPaths: z.array(z.string()).default([]),
 });
 
 export type Skill = z.infer<typeof skillSchema>;

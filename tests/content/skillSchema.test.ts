@@ -69,4 +69,9 @@ describe('skillSchema', () => {
     const badTree = [{ path: 'SKILL.md', type: 'file', url: 'not-a-url' }];
     expect(() => skillSchema.parse({ ...validSkill, fileTree: badTree })).toThrow();
   });
+
+  it('defaults companionPaths to an empty array when omitted', () => {
+    const result = skillSchema.parse(validSkill);
+    expect(result.companionPaths).toEqual([]);
+  });
 });
