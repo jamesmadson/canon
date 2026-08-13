@@ -1,0 +1,39 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # withastro/action does not create .nojekyll, and GitHub Pages ignores
+      # underscore-prefixed directories (Astro emits dist/_astro/) without one.
+      # Appending `touch dist/.nojekyll` to the build command runs it right
+      # after the build, before the action's internal upload-pages-artifact
+      # step, so the file is present in the uploaded artifact.
+      - name: Build
+        uses: withastro/action@v3
+        with:
+          build-cmd: npm run build && touch dist/.nojekyll
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

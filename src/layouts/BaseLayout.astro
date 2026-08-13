@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { withBase } from '../lib/withBase';
 
 interface Props {
   title: string;
@@ -20,7 +21,7 @@ const {
     <title>{title} · Canon</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#ffffff" />
-    <link rel="preload" href="/fonts/archivo/Archivo-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={withBase('/fonts/archivo/Archivo-400.woff2')} as="font" type="font/woff2" crossorigin />
   </head>
   <body class="bg-bg font-sans font-medium text-ink antialiased">
     <a
@@ -31,12 +32,12 @@ const {
     </a>
     <header class="border-b border-rule">
       <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-8">
-        <a href="/" class="text-xl font-semibold">Canon</a>
+        <a href={withBase('/')} class="text-xl font-semibold">Canon</a>
         <nav class="flex gap-6 text-sm font-semibold">
-          <a href="/kits" class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Kits</a>
-          <a href="/skills" class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Gallery</a>
-          <a href="/submit" class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Submit</a>
-          <a href="/newsletter" class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Newsletter</a>
+          <a href={withBase('/kits')} class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Kits</a>
+          <a href={withBase('/skills')} class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Gallery</a>
+          <a href={withBase('/submit')} class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Submit</a>
+          <a href={withBase('/newsletter')} class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Newsletter</a>
         </nav>
       </div>
     </header>

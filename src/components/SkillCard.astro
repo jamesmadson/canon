@@ -1,6 +1,7 @@
 ---
 import ToolBadge from './ToolBadge.astro';
 import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../lib/withBase';
 
 interface Props {
   skill: CollectionEntry<'skills'>;
@@ -11,7 +12,7 @@ const { skill, index } = Astro.props;
 const { name, tagline, tools, rating, slug } = skill.data;
 ---
 
-<a href={`/skills/${slug}/`} class="group flex flex-col gap-2 bg-bg p-4 hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2">
+<a href={withBase(`/skills/${slug}/`)} class="group flex flex-col gap-2 bg-bg p-4 hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2">
   <span class="text-[11px] font-semibold text-ink-soft">{String(index).padStart(2, '0')}</span>
   <div class="flex flex-col gap-1">
     <h3 class="text-base font-semibold text-ink">{name}</h3>

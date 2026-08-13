@@ -2,40 +2,43 @@
 @source "../**/*.{astro,ts,mdx}";
 @plugin "@tailwindcss/typography";
 
+/* Font URLs below are base-coupled: plain CSS can't read import.meta.env.BASE_URL,
+   so the "/canon" deploy base is hardcoded here. If the deploy path ever changes,
+   update these alongside astro.config.mjs (site/base) and buildInstallScript.ts. */
 @font-face {
   font-family: "Archivo";
   font-weight: 400;
-  src: url("/fonts/archivo/Archivo-400.woff2") format("woff2");
+  src: url("/canon/fonts/archivo/Archivo-400.woff2") format("woff2");
   font-display: swap;
 }
 @font-face {
   font-family: "Archivo";
   font-weight: 500;
-  src: url("/fonts/archivo/Archivo-500.woff2") format("woff2");
+  src: url("/canon/fonts/archivo/Archivo-500.woff2") format("woff2");
   font-display: swap;
 }
 @font-face {
   font-family: "Archivo";
   font-weight: 600;
-  src: url("/fonts/archivo/Archivo-600.woff2") format("woff2");
+  src: url("/canon/fonts/archivo/Archivo-600.woff2") format("woff2");
   font-display: swap;
 }
 @font-face {
   font-family: "Archivo";
   font-weight: 700;
-  src: url("/fonts/archivo/Archivo-700.woff2") format("woff2");
+  src: url("/canon/fonts/archivo/Archivo-700.woff2") format("woff2");
   font-display: swap;
 }
 @font-face {
   font-family: "Archivo";
   font-weight: 900;
-  src: url("/fonts/archivo/Archivo-900.woff2") format("woff2");
+  src: url("/canon/fonts/archivo/Archivo-900.woff2") format("woff2");
   font-display: swap;
 }
 @font-face {
   font-family: "Geist Mono";
   font-weight: 400;
-  src: url("/fonts/geist/GeistMono-Regular.woff2") format("woff2");
+  src: url("/canon/fonts/geist/GeistMono-Regular.woff2") format("woff2");
   font-display: swap;
 }
 

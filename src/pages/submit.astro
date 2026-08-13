@@ -9,85 +9,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     submission is reviewed by hand before it's added.
   </p>
 
-  <!--
-    Replace YOUR_FORM_ID with the ID from your Formspree form
-    (https://formspree.io/forms) before deploying.
-  -->
-  <form action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="flex max-w-xl flex-col gap-6">
-    <label class="flex flex-col gap-2 text-sm font-semibold">
-      Skill name
-      <input
-        type="text"
-        name="skillName"
-        required
-        autocomplete="off"
-        class="border border-rule-strong px-3 py-2 text-base font-medium"
-      />
-    </label>
-    <label class="flex flex-col gap-2 text-sm font-semibold">
-      Source URL
-      <input
-        type="url"
-        name="sourceUrl"
-        required
-        autocomplete="url"
-        class="border border-rule-strong px-3 py-2 text-base font-medium"
-      />
-    </label>
-    <label class="flex flex-col gap-2 text-sm font-semibold">
-      Tool(s)
-      <input
-        type="text"
-        name="tools"
-        placeholder="e.g. Claude, Cursor"
-        required
-        autocomplete="off"
-        class="border border-rule-strong px-3 py-2 text-base font-medium"
-      />
-    </label>
-    <label class="flex flex-col gap-2 text-sm font-semibold">
-      Category
-      <input
-        type="text"
-        name="category"
-        placeholder="e.g. motion, accessibility"
-        required
-        autocomplete="off"
-        class="border border-rule-strong px-3 py-2 text-base font-medium"
-      />
-    </label>
-    <label class="flex flex-col gap-2 text-sm font-semibold">
-      Your name
-      <input
-        type="text"
-        name="submitterName"
-        required
-        autocomplete="name"
-        class="border border-rule-strong px-3 py-2 text-base font-medium"
-      />
-    </label>
-    <label class="flex flex-col gap-2 text-sm font-semibold">
-      Your email
-      <input
-        type="email"
-        name="submitterEmail"
-        required
-        autocomplete="email"
-        class="border border-rule-strong px-3 py-2 text-base font-medium"
-      />
-    </label>
-    <label class="flex flex-col gap-2 text-sm font-semibold">
-      One-line pitch
-      <textarea
-        name="pitch"
-        required
-        rows="3"
-        autocomplete="off"
-        class="border border-rule-strong px-3 py-2 text-base font-medium"
-      ></textarea>
-    </label>
-    <button type="submit" class="bg-ink px-4 py-3 text-sm font-semibold text-white">
-      Submit for review
-    </button>
-  </form>
+  <div class="max-w-xl border border-rule-strong px-4 py-3 text-sm font-medium text-ink-soft">
+    Submissions aren't open yet — check back soon, or reach out via the source
+    links on any skill page.
+  </div>
 </BaseLayout>

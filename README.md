@@ -21,10 +21,26 @@ The dev server runs at `http://localhost:4321`.
 - `npm run test` — run the Vitest suite (schema, taxonomy, filter engine)
 - `npm run check` — Astro type-check
 
-## Before deploying
+## Deploying
 
-- Replace `YOUR_FORM_ID` in `src/pages/submit.astro` with your real Formspree form ID.
-- Replace `YOUR_USERNAME` in `src/pages/newsletter.astro` with your real Buttondown username.
+Canon deploys to GitHub Pages at **https://jamesmadson.github.io/canon**, via
+`.github/workflows/deploy.yml` on every push to `main` (or manually with
+`workflow_dispatch`).
+
+One-time manual step: in the repo's Settings → Pages, set **Source** to
+"GitHub Actions". Nothing deploys until that's set.
+
+The `/canon` base path is coupled in three places — if the deploy domain or
+path ever changes, update all three together:
+
+- `astro.config.mjs` (`site` and `base`)
+- `src/styles/global.css` (`@font-face` `url("/canon/fonts/...")` — plain CSS
+  can't read Astro's `BASE_URL`, so it's hardcoded)
+- `src/lib/buildInstallScript.ts` (the generated install script's header comment)
+
+The submit and newsletter forms are intentionally disabled for launch (see
+`src/pages/submit.astro` and `src/pages/newsletter.astro`) — both pages are
+live with a "not open yet" notice in place of the form.
 
 ## Content
 
