@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import KitCard from '../../components/KitCard.astro';
+
+const kits = (await getCollection('kits', ({ data }) => data.status === 'active')).sort(
+  (a, b) => a.data.name.localeCompare(b.data.name)
+);
+---
+
+<BaseLayout title="Kits" description="Curated, phased bundles of design skills for a concrete job — with a one-command install.">
+  <h1 class="mb-2 text-2xl font-bold">Kits</h1>
+  <p class="mb-6 max-w-xl text-sm font-medium text-ink-soft">
+    Skills composed for a job, in working order — each with a one-command install
+    script and an attachable digest for tools that can't run skills.
+  </p>
+  <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2">
+    {kits.map((kit) => <KitCard kit={kit} />)}
+  </div>
+</BaseLayout>

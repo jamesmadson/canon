@@ -2,10 +2,14 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SkillCard from '../components/SkillCard.astro';
+import KitCard from '../components/KitCard.astro';
 
 const allSkills = await getCollection('skills', ({ data }) => data.status !== 'archived');
 const sorted = [...allSkills].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
 const featured = sorted.filter((s) => s.data.featured).slice(0, 5);
+const kits = (await getCollection('kits', ({ data }) => data.status === 'active')).sort(
+  (a, b) => a.data.name.localeCompare(b.data.name)
+);
 ---
 
 <BaseLayout title="Home">
@@ -17,6 +21,13 @@ const featured = sorted.filter((s) => s.data.featured).slice(0, 5);
       Hand-picked SKILL.md files and design-tool instructions — Sidebar.io meets an
       awesome-list, not a scraped registry.
     </p>
+  </section>
+
+  <section class="mb-12">
+    <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">Kits</h2>
+    <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2 xl:grid-cols-4">
+      {kits.map((kit) => <KitCard kit={kit} />)}
+    </div>
   </section>
 
   <section class="mb-12">

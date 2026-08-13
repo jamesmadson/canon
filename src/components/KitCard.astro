@@ -1,0 +1,19 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  kit: CollectionEntry<'kits'>;
+}
+
+const { kit } = Astro.props;
+const { name, tagline, slug, phases } = kit.data;
+const skillCount = phases.reduce((n, phase) => n + phase.entries.length, 0);
+---
+
+<a href={`/kits/${slug}/`} class="group flex flex-col gap-2 bg-bg p-4 hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2">
+  <h3 class="text-base font-semibold text-ink">{name}</h3>
+  <p class="text-[13px] font-medium leading-snug text-ink-soft">{tagline}</p>
+  <p class="mt-1 text-[11px] font-medium text-ink-soft">
+    {phases.length} {phases.length === 1 ? 'phase' : 'phases'} · {skillCount} skills
+  </p>
+</a>
