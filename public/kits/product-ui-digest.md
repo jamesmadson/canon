@@ -6,12 +6,14 @@ upload. It's the distilled, portable form of a ten-skill kit. The complete
 skills install into `.claude/skills/` via the kit's install script and
 should do the heavy work wherever they can run.
 
-Provenance: distilled from MIT-licensed skills by Anthropic
-(frontend-design), Vercel Labs (web-design-guidelines, react-view-transitions),
-Jakub Krehel (make-interfaces-feel-better, better-accessibility,
-better-writing), Emil Kowalski (emil-design-eng, improve-animations), and
-Kyle Zantos (design-motion-principles, thumb-first suite) — curated by
-Canon.
+Provenance: distilled from skills by Jakub Krehel
+(make-interfaces-feel-better, better-accessibility, better-writing), Emil
+Kowalski (emil-design-eng, improve-animations), and Kyle Zantos
+(design-motion-principles, thumb-first suite) — MIT; Anthropic
+(frontend-design) — Apache-2.0; and Vercel Labs (web-design-guidelines,
+react-view-transitions) — no license stated. This digest itself is
+Canon's own writing, distilled from those skills rather than copied from
+them — curated by Canon.
 
 ---
 

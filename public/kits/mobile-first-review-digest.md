@@ -9,10 +9,11 @@ and should do the heavy work wherever they can run.
 Unlike the build kits, this one is a **method**: it tells you how to run a
 review and what to look for, not how to design something new.
 
-Provenance: distilled from MIT-licensed skills by Kyle Zantos (thumb-first
-suite), Vercel Labs (web-design-guidelines), Jakub Krehel
-(better-accessibility, better-writing), and Emil Kowalski
-(improve-animations) — curated by Canon.
+Provenance: distilled from skills by Kyle Zantos (thumb-first suite),
+Jakub Krehel (better-accessibility, better-writing), and Emil Kowalski
+(improve-animations) — MIT; and Vercel Labs (web-design-guidelines) — no
+license stated. This digest itself is Canon's own writing, distilled from
+those skills rather than copied from them — curated by Canon.
 
 ---
 

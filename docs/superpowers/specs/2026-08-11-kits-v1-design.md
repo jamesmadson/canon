@@ -178,10 +178,9 @@ skill lineup per kit is fixed here:
   better-accessibility, better-writing · Motion pass:
   improve-animations.
 
-(11 of Canon's 16 skills appear in kits; huashu-design,
-nothing-design, brand-guidelines-absent-from-none — the aesthetic-
-recipe and prototype-generator entries stay gallery-only, which is
-correct: kits are jobs, not inventories.)
+(14 of Canon's 16 skills appear in kits; only huashu-design and
+nothing-design stay gallery-only, which is correct: kits are jobs,
+not inventories.)
 
 ## Testing
 

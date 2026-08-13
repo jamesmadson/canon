@@ -7,12 +7,14 @@ complete skills (with their reference files, workflows, and checklists)
 install into `.claude/skills/` via the kit's install script and should do
 the heavy work wherever they can run.
 
-Provenance: distilled from MIT-licensed skills by Anthropic
-(frontend-design, brand-guidelines), Vercel Labs (web-design-guidelines),
-Emil Kowalski (emil-design-eng, improve-animations), Jakub Krehel
-(better-writing, better-accessibility, make-interfaces-feel-better),
-Kyle Zantos (design-motion-principles, thumb-first suite), and Meng To
-(scroll-scrubbed-visual-sequence) — curated by Canon.
+Provenance: distilled from skills by Jakub Krehel (better-writing,
+better-accessibility, make-interfaces-feel-better), Emil Kowalski
+(emil-design-eng, improve-animations), Kyle Zantos
+(design-motion-principles, thumb-first suite), and Meng To
+(scroll-scrubbed-visual-sequence) — MIT; Anthropic (frontend-design,
+brand-guidelines) — Apache-2.0; and Vercel Labs (web-design-guidelines) —
+no license stated. This digest itself is Canon's own writing, distilled
+from those skills rather than copied from them — curated by Canon.
 
 ---
 
