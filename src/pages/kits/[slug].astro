@@ -42,7 +42,7 @@ const skillsBySlug = new Map(allSkills.map((s) => [s.data.slug, s.data]));
               <div class="flex flex-col gap-1 bg-bg py-3 sm:flex-row sm:items-baseline sm:gap-6">
                 <a
                   href={`/skills/${item.skill}/`}
-                  class="-my-3 shrink-0 py-3 text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:decoration-ink sm:w-64"
+                  class="relative -my-3 shrink-0 py-3 text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:decoration-ink sm:w-64"
                 >
                   {skill ? skill.name : item.skill}
                 </a>
@@ -58,7 +58,7 @@ const skillsBySlug = new Map(allSkills.map((s) => [s.data.slug, s.data]));
   <section class="mt-14">
     <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">Artifacts</h2>
     <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2">
-      <a href={`/kits/${slug}/install.sh`} download class="group flex flex-col gap-2 bg-bg p-4 hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2">
+      <a href={`/kits/${slug}/install.sh`} download={`${slug}-install.sh`} class="group flex flex-col gap-2 bg-bg p-4 hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2">
         <span class="text-base font-semibold text-ink">Install script</span>
         <span class="text-[13px] font-medium text-ink-soft">Installs every skill in this kit into your project.</span>
         <code class="mt-1 font-mono text-[11px] text-ink-soft">bash install.sh — run from your project root</code>

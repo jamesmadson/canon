@@ -49,6 +49,11 @@ describe('kits corpus integrity', () => {
       const kit = kitSchema.parse(data);
       expect(existsSync(path.join(publicDir, kit.digestPath)), `${kit.digestPath} missing`).toBe(true);
     });
+
+    it(`${file}'s digestPath follows the /kits/<slug>-digest.md convention`, () => {
+      const kit = kitSchema.parse(data);
+      expect(kit.digestPath).toBe('/kits/' + kit.slug + '-digest.md');
+    });
   }
 
   it('has unique kit slugs', () => {

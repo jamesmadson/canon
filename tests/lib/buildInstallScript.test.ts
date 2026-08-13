@@ -29,6 +29,13 @@ const suiteSkill: KitSkillInput = {
   companionPaths: ['skills/thumb-first-design', 'skills/thumb-first-platform'],
 };
 
+const nestedSubtreeSkill: KitSkillInput = {
+  slug: 'nested-subtree',
+  sourceUrl: 'https://github.com/example/kit/tree/main/foo/bar',
+  hubPath: 'baz/SKILL.md',
+  companionPaths: [],
+};
+
 function script(skills: KitSkillInput[]): string {
   return buildInstallScript({ slug: 'test-kit', name: 'Test Kit', skills });
 }
@@ -36,6 +43,10 @@ function script(skills: KitSkillInput[]): string {
 describe('buildInstallScript', () => {
   it('installs a subtree skill from its sourceUrl path', () => {
     expect(script([subtreeSkill])).toContain('install_skill anthropics/skills skills/frontend-design\n');
+  });
+
+  it('joins a non-empty sourceUrl path with a nested hubPath directory', () => {
+    expect(script([nestedSubtreeSkill])).toContain('install_skill example/kit foo/bar/baz\n');
   });
 
   it('installs a root-form skill whose SKILL.md sits in a nested folder', () => {
@@ -69,7 +80,7 @@ describe('buildInstallScript', () => {
     expect(script([subtreeSkill, suiteSkill])).toEqual(script([subtreeSkill, suiteSkill]));
   });
 
-  it('handles a repo-root skill copy by stripping .git in the template', () => {
+  it('template strips .git after copying (static template regression check)', () => {
     expect(script([rootHubSkill])).toContain('rm -rf "$DEST/$name/.git"');
   });
 });
