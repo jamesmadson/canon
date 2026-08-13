@@ -1,0 +1,31 @@
+---
+slug: mobile-first-review
+name: Mobile-First Review
+tagline: Audit what you already shipped — judgment and device reality, kept apart on purpose.
+phases:
+  - title: The audit team
+    entries:
+      - skill: thumb-first
+        why: Runs a design-judgment pass and a platform-technical pass as separate agents, then merges them into one report that never lets an opinion read as a defect.
+  - title: What it audits against
+    entries:
+      - skill: web-design-guidelines
+        why: The interface-correctness checklist the platform pass folds into its findings.
+      - skill: better-accessibility
+        why: Hit areas, focus, and keyboard paths — the findings most likely to be real defects rather than preferences.
+      - skill: better-writing
+        why: Mobile's brutal space constraints punish vague labels and long errors first.
+  - title: Motion pass
+    entries:
+      - skill: improve-animations
+        why: Motion that reads as polish on a desktop demo often reads as lag on a mid-range phone.
+digestPath: /kits/mobile-first-review-digest.md
+addedDate: 2026-08-12
+status: active
+---
+
+The lightest kit here, and the only one pointed at something that already exists. Five skills, led by a three-part audit team that produces one prioritized report.
+
+Its organizing idea is worth stealing even if you never install it: mobile review collapses two different questions — *is this the right design?* and *is it built correctly for the device?* — and mixing them is how opinions start reading as defects and must-fixes get filed as preferences. Keeping them as separate passes with separate output classes, merged only at the end into one fix-order, is what makes the report actionable instead of a list.
+
+The supporting skills aren't there to run separately so much as to give the audit something specific to measure against — a review that says "improve the tap targets" is worth less than one that says 44px and names the file and line. We ran exactly this kit against Canon itself: it found twelve platform defects and five design forks, and the site you're reading it on is what came out the other side.
