@@ -6,6 +6,7 @@ import { CATEGORY_META } from '../../lib/categoryMeta';
 import { TOOL_META } from '../../lib/toolMeta';
 import { TOOL_VALUES } from '../../content/skillSchema';
 import StructureMap from '../../components/StructureMap.astro';
+import DepthDots from '../../components/DepthDots.astro';
 
 export async function getStaticPaths() {
   const skills = await getCollection('skills');
@@ -93,8 +94,12 @@ const {
         </div>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Rating</h2>
-        <p aria-label={`Rated ${rating} out of 5`}>{'●'.repeat(rating)}{'○'.repeat(5 - rating)}</p>
+        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Depth</h2>
+        <p><DepthDots rating={rating} /></p>
+        <p class="mt-1 text-[11px] font-medium text-ink-soft">
+          How much judgment this skill carries, from a single technique (1) to a
+          full method (5).
+        </p>
       </div>
       <div>
         <h2 class="mb-2 text-xs font-semibold text-ink-soft">Source</h2>

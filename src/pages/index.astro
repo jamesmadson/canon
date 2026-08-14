@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SkillCard from '../components/SkillCard.astro';
 import KitCard from '../components/KitCard.astro';
+import DepthLegend from '../components/DepthLegend.astro';
 
 const allSkills = await getCollection('skills', ({ data }) => data.status !== 'archived');
 const sorted = [...allSkills].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
@@ -31,16 +32,17 @@ const kits = (await getCollection('kits', ({ data }) => data.status === 'active'
   </section>
 
   <section class="mb-12">
-    <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">This month's picks</h2>
+    <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-ink-soft">This month's picks</h2>
+    <DepthLegend />
     <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {featured.map((skill, i) => <SkillCard skill={skill} index={i + 1} />)}
+      {featured.map((skill) => <SkillCard skill={skill} />)}
     </div>
   </section>
 
   <section>
     <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">All skills</h2>
     <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {sorted.map((skill, i) => <SkillCard skill={skill} index={i + 1} />)}
+      {sorted.map((skill) => <SkillCard skill={skill} />)}
     </div>
   </section>
 </BaseLayout>

@@ -47,4 +47,10 @@ describe('buildCanonAll', () => {
   it('is deterministic for identical input', () => {
     expect(buildCanonAll(input)).toEqual(buildCanonAll(input));
   });
+
+  it('uses H2 for kit section headings, not H1', () => {
+    const out = buildCanonAll(input);
+    expect(out).toContain('## Marketing / Landing Site');
+    expect(out.split('\n')).not.toContain('# Marketing / Landing Site');
+  });
 });

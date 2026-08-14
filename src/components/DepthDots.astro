@@ -1,0 +1,14 @@
+---
+export const DEPTH_LABEL = 'Depth — how much judgment the skill carries';
+
+interface Props {
+  rating: number;
+}
+
+const { rating } = Astro.props;
+const label = `${DEPTH_LABEL}: ${rating} of 5`;
+---
+
+<span class="text-[11px] leading-none font-medium tracking-[0.15em] text-ink-soft" title={label} aria-label={label}>
+  {'●'.repeat(rating)}{'○'.repeat(5 - rating)}
+</span>

@@ -38,14 +38,11 @@ describe('generated canon artifacts stay in sync with their sources', () => {
     expect(data.description.toLowerCase()).toContain('use when');
   });
 
-  it('canon-all inlines every routed kit body', () => {
+  it("canon-all's inlined sections byte-match their source digest bodies", () => {
     const all = readFileSync(path.join(root, 'public/kits/canon-all.md'), 'utf-8');
     for (const slug of ROUTED) {
       const body = matter(digest(slug)).content.trim();
-      // Compare a distinctive slice rather than the whole body so the test
-      // reports a readable diff when it fails.
-      const probe = body.split('\n').filter((l) => l.trim().length > 40)[0];
-      expect(all, `canon-all missing content from ${slug}`).toContain(probe);
+      expect(all, `canon-all section for ${slug} does not byte-match its digest body`).toContain(body);
     }
   });
 

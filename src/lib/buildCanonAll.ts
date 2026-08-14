@@ -30,7 +30,7 @@ metadata:
 
 export function buildCanonAll(input: CanonAllInput): string {
   const sections = input.kits
-    .map((kit) => `---\n\n# ${kit.title}\n\n${kit.body.trim()}\n`)
+    .map((kit) => `---\n\n## ${kit.title}\n\n${kit.body.trim()}\n`)
     .join('\n');
 
   return `${FRONTMATTER}\n${input.routerBody.trim()}\n\n${sections}`;

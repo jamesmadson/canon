@@ -95,7 +95,7 @@ Composes: `thumb-first`, `web-design-guidelines`, `better-accessibility`,
 
 ---
 
-# Marketing / Landing Site
+## Marketing / Landing Site
 
 # Marketing / Landing Site — Kit Digest
 
@@ -222,7 +222,7 @@ mid-range phone, not just an emulator.
 
 ---
 
-# Product UI / Dashboard
+## Product UI / Dashboard
 
 # Product UI / Dashboard — Kit Digest
 
@@ -348,7 +348,7 @@ opened at 375px.
 
 ---
 
-# Mobile-First Review
+## Mobile-First Review
 
 # Mobile-First Review — Kit Digest
 
