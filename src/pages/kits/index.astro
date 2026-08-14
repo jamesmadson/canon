@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import KitCard from '../../components/KitCard.astro';
+import { withBase } from '../../lib/withBase';
 
 const kits = (await getCollection('kits', ({ data }) => data.status === 'active')).sort(
   (a, b) => a.data.name.localeCompare(b.data.name)
@@ -14,7 +15,36 @@ const kits = (await getCollection('kits', ({ data }) => data.status === 'active'
     Skills composed for a job, in working order — each with a one-command install
     script and an attachable digest for tools that can't run skills.
   </p>
+  <section class="mb-10 border border-rule-strong p-5">
+    <h2 class="text-lg font-semibold text-ink">Start here: the Canon router</h2>
+    <p class="mt-2 max-w-2xl text-sm font-medium text-ink-soft">
+      One skill that routes to the right kit. Install it once, then name the kind
+      of work — a landing page, a dashboard, a mobile review — and it pulls in
+      that kit's guidance. It stays dormant until you call it.
+    </p>
+    <div class="mt-4 flex flex-wrap gap-px bg-rule">
+      <a
+        href={withBase('/kits/canon-all.md')}
+        download
+        class="min-h-11 flex-1 bg-bg px-4 py-3 text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2"
+      >
+        canon-all.md — one file for Figma
+      </a>
+      <a
+        href="https://github.com/jamesmadson/canon/tree/main/plugin/canon"
+        class="min-h-11 flex-1 bg-bg px-4 py-3 text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2"
+      >
+        Claude Code plugin — install from GitHub
+      </a>
+    </div>
+  </section>
+  <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">The four kits</h2>
   <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2">
     {kits.map((kit) => <KitCard kit={kit} />)}
   </div>
+  <p class="mt-4 max-w-2xl text-sm font-medium text-ink-soft">
+    The router covers Marketing / Landing Site, Product UI / Dashboard, and
+    Mobile-First Review. Full Redesign is the everything bundle — install it
+    directly rather than routing to it.
+  </p>
 </BaseLayout>
