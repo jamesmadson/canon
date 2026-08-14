@@ -1,3 +1,20 @@
+---
+name: canon-full-redesign
+description: >-
+  Canon's Full Redesign kit, distilled into one file: brand foundation, UI
+  craft floor, a motion frequency gate, copy rules, an accessibility floor,
+  mobile discipline, and pre-ship gates. Use when planning or executing a
+  full product redesign, establishing brand rules before building, or
+  reviewing design work against a complete standard.
+compatibility: >-
+  A portable reference distilled from a Canon kit. Works in any agent or
+  design tool that accepts a single Markdown skill file; the kit's full
+  multi-file skills install separately.
+metadata:
+  source: https://jamesmadson.github.io/canon/kits/full-redesign/
+  kit: full-redesign
+---
+
 # Full Redesign — Kit Digest
 
 Attach this file where design work happens but skills can't run — Claude

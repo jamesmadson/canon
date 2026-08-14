@@ -1,3 +1,20 @@
+---
+name: canon-product-ui
+description: >-
+  Canon's Product UI / Dashboard kit, distilled into one file: restraint as a
+  functional requirement — systems before screens, density and data craft, a
+  motion frequency gate, copy for dense interfaces, an accessibility floor for
+  custom widgets, and mobile reality. Use when designing, building, or
+  reviewing a dashboard, data-heavy product interface, or admin tool.
+compatibility: >-
+  A portable reference distilled from a Canon kit. Works in any agent or
+  design tool that accepts a single Markdown skill file; the kit's full
+  multi-file skills install separately.
+metadata:
+  source: https://jamesmadson.github.io/canon/kits/product-ui/
+  kit: product-ui
+---
+
 # Product UI / Dashboard — Kit Digest
 
 Attach this file where design work happens but skills can't run — Claude

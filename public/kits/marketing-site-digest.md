@@ -1,3 +1,20 @@
+---
+name: canon-marketing-site
+description: >-
+  Canon's Marketing / Landing Site kit, distilled into one file: how to make
+  a page argue in one scroll — the page's job, craft floor, motion and
+  signature moments, persuasion copy, accessibility under heavy motion, and
+  mobile discipline. Use when designing, building, or reviewing a landing
+  page, marketing site, or any page that has to persuade.
+compatibility: >-
+  A portable reference distilled from a Canon kit. Works in any agent or
+  design tool that accepts a single Markdown skill file; the kit's full
+  multi-file skills install separately.
+metadata:
+  source: https://jamesmadson.github.io/canon/kits/marketing-site/
+  kit: marketing-site
+---
+
 # Marketing / Landing Site — Kit Digest
 
 Attach this file where design work happens but skills can't run — Claude

@@ -1,3 +1,21 @@
+---
+name: canon-mobile-first-review
+description: >-
+  Canon's Mobile-First Review kit, distilled into one file: a method for
+  auditing an existing mobile experience in two separate passes — design
+  judgment (decision forks, thumb zones, what earns the first screen) and
+  platform verification (tap targets, iOS input zoom, safe areas,
+  hover-dependent UI) — merged into one prioritized report. Use when
+  reviewing, auditing, or critiquing a mobile app, screen, or PWA.
+compatibility: >-
+  A portable reference distilled from a Canon kit. Works in any agent or
+  design tool that accepts a single Markdown skill file; the kit's full
+  multi-file skills install separately.
+metadata:
+  source: https://jamesmadson.github.io/canon/kits/mobile-first-review/
+  kit: mobile-first-review
+---
+
 # Mobile-First Review — Kit Digest
 
 Attach this file where review work happens but skills can't run — Claude
