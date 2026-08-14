@@ -4,9 +4,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import KitCard from '../../components/KitCard.astro';
 import { withBase } from '../../lib/withBase';
 
+const ROUTED_SLUGS = ['marketing-site', 'product-ui', 'mobile-first-review'];
+
 const kits = (await getCollection('kits', ({ data }) => data.status === 'active')).sort(
   (a, b) => a.data.name.localeCompare(b.data.name)
 );
+const routedKits = kits.filter((kit) => ROUTED_SLUGS.includes(kit.data.slug));
+const bundleKits = kits.filter((kit) => !ROUTED_SLUGS.includes(kit.data.slug));
 ---
 
 <BaseLayout title="Kits" description="Curated, phased bundles of design skills for a concrete job — with a one-command install.">
@@ -38,13 +42,16 @@ const kits = (await getCollection('kits', ({ data }) => data.status === 'active'
       </a>
     </div>
   </section>
-  <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">The four kits</h2>
-  <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2">
-    {kits.map((kit) => <KitCard kit={kit} />)}
+  <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">The router's three routes</h2>
+  <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-3">
+    {routedKits.map((kit) => <KitCard kit={kit} />)}
+  </div>
+
+  <h2 class="mb-4 mt-10 text-sm font-semibold uppercase tracking-wide text-ink-soft">The everything bundle</h2>
+  <div class="grid grid-cols-1 gap-px bg-rule">
+    {bundleKits.map((kit) => <KitCard kit={kit} />)}
   </div>
   <p class="mt-4 max-w-2xl text-sm font-medium text-ink-soft">
-    The router covers Marketing / Landing Site, Product UI / Dashboard, and
-    Mobile-First Review. Full Redesign is the everything bundle — install it
-    directly rather than routing to it.
+    Full Redesign is installed directly rather than routed to.
   </p>
 </BaseLayout>
