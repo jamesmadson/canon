@@ -1,0 +1,78 @@
+import { describe, it, expect } from 'vitest';
+import { readFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import matter from 'gray-matter';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const root = path.join(__dirname, '../..');
+
+const ROUTED = ['marketing-site', 'product-ui', 'mobile-first-review'];
+
+const digest = (slug: string) =>
+  readFileSync(path.join(root, 'public/kits', `${slug}-digest.md`), 'utf-8');
+
+describe('generated canon artifacts stay in sync with their sources', () => {
+  for (const slug of ROUTED) {
+    it(`plugin skill canon-${slug} byte-matches its digest`, () => {
+      const generated = readFileSync(
+        path.join(root, 'plugin/canon/skills', `canon-${slug}`, 'SKILL.md'),
+        'utf-8'
+      );
+      expect(generated).toBe(digest(slug));
+    });
+  }
+
+  it('canon-all exists and is under the 500-line spec recommendation', () => {
+    const file = path.join(root, 'public/kits/canon-all.md');
+    expect(existsSync(file)).toBe(true);
+    const lines = readFileSync(file, 'utf-8').split('\n').length;
+    expect(lines).toBeLessThan(500);
+  });
+
+  it('canon-all has spec-valid frontmatter', () => {
+    const { data } = matter(readFileSync(path.join(root, 'public/kits/canon-all.md'), 'utf-8'));
+    expect(data.name).toBe('canon-all');
+    expect(typeof data.description).toBe('string');
+    expect(data.description.length).toBeLessThanOrEqual(1024);
+    expect(data.description.toLowerCase()).toContain('use when');
+  });
+
+  it('canon-all inlines every routed kit body', () => {
+    const all = readFileSync(path.join(root, 'public/kits/canon-all.md'), 'utf-8');
+    for (const slug of ROUTED) {
+      const body = matter(digest(slug)).content.trim();
+      // Compare a distinctive slice rather than the whole body so the test
+      // reports a readable diff when it fails.
+      const probe = body.split('\n').filter((l) => l.trim().length > 40)[0];
+      expect(all, `canon-all missing content from ${slug}`).toContain(probe);
+    }
+  });
+
+  it('the router names exactly the three routed kits', () => {
+    const router = readFileSync(
+      path.join(root, 'plugin/canon/skills/canon/SKILL.md'),
+      'utf-8'
+    );
+    for (const slug of ROUTED) {
+      expect(router).toContain(`canon-${slug}`);
+    }
+    expect(router).not.toContain('canon-full-redesign');
+  });
+
+  it('the plugin and marketplace manifests parse and carry required fields', () => {
+    const plugin = JSON.parse(
+      readFileSync(path.join(root, 'plugin/canon/.claude-plugin/plugin.json'), 'utf-8')
+    );
+    expect(plugin.name).toBe('canon');
+    expect(typeof plugin.description).toBe('string');
+
+    const marketplace = JSON.parse(
+      readFileSync(path.join(root, '.claude-plugin/marketplace.json'), 'utf-8')
+    );
+    expect(Array.isArray(marketplace.plugins)).toBe(true);
+    expect(marketplace.plugins.length).toBeGreaterThan(0);
+    expect(marketplace.plugins[0].name).toBe('canon');
+    expect(marketplace.plugins[0].category).toBe('design');
+  });
+});
