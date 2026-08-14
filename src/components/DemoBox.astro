@@ -1,0 +1,113 @@
+---
+import { DEMO_CASES } from '../data/demoCases';
+import { withBase } from '../lib/withBase';
+import { renderInlineMarkdown } from '../lib/inlineMarkdown';
+---
+
+<section class="mb-12" aria-labelledby="demo-heading">
+  <h2 id="demo-heading" class="mb-2 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+    Canon in use
+  </h2>
+  <p class="mb-4 max-w-2xl text-sm font-medium text-ink-soft">
+    Install one skill. Name the kind of work, and it pulls in the judgment that
+    applies — not a list of files to read.
+  </p>
+
+  <div class="border border-rule-strong">
+    <div role="tablist" aria-label="Example use cases" class="flex flex-wrap gap-px bg-rule">
+      {DEMO_CASES.map((demoCase, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`demo-tab-${demoCase.id}`}
+          aria-controls={`demo-panel-${demoCase.id}`}
+          aria-selected={i === 0 ? 'true' : 'false'}
+          tabindex={i === 0 ? 0 : -1}
+          data-demo-tab={demoCase.id}
+          class="min-h-11 flex-1 bg-bg px-4 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink aria-selected:bg-surface aria-selected:text-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2"
+        >
+          {demoCase.label}
+        </button>
+      ))}
+    </div>
+
+    {DEMO_CASES.map((demoCase, i) => (
+      <div
+        role="tabpanel"
+        id={`demo-panel-${demoCase.id}`}
+        aria-labelledby={`demo-tab-${demoCase.id}`}
+        data-demo-panel={demoCase.id}
+        hidden={i !== 0}
+        class="border-t border-rule p-4 sm:p-6"
+      >
+        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">You type</p>
+        <p class="mb-5 font-mono text-sm text-ink">{demoCase.prompt}</p>
+
+        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Canon pulls in</p>
+        <div class="mb-5 flex flex-col gap-px bg-rule">
+          <div class="bg-bg py-2">
+            <a
+              href={withBase(`/kits/${demoCase.route}/`)}
+              class="text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink"
+            >
+              {demoCase.route}
+            </a>
+          </div>
+          {demoCase.skills.map((slug) => (
+            <div class="bg-bg py-2">
+              <a
+                href={withBase(`/skills/${slug}/`)}
+                class="text-sm font-medium text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong"
+              >
+                {slug}
+              </a>
+            </div>
+          ))}
+        </div>
+
+        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">What comes back</p>
+        <ul class="flex flex-col gap-2">
+          {demoCase.excerpt.map((line) => (
+            <li
+              class="border-l border-rule-strong pl-3 text-sm font-medium leading-relaxed text-ink-soft"
+              set:html={renderInlineMarkdown(line)}
+            />
+          ))}
+        </ul>
+      </div>
+    ))}
+
+    <p class="border-t border-rule bg-surface px-4 py-2 text-[11px] font-medium text-ink-soft sm:px-6">
+      A scripted example, not a live session. Every line above is quoted from the
+      kit it names.
+    </p>
+  </div>
+</section>
+
+<script>
+  const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-demo-tab]'));
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-demo-panel]'));
+
+  function select(id: string, focus = false) {
+    for (const tab of tabs) {
+      const active = tab.dataset.demoTab === id;
+      tab.setAttribute('aria-selected', String(active));
+      tab.tabIndex = active ? 0 : -1;
+      if (active && focus) tab.focus();
+    }
+    for (const panel of panels) {
+      panel.hidden = panel.dataset.demoPanel !== id;
+    }
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => select(tab.dataset.demoTab!));
+    tab.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+      event.preventDefault();
+      const step = event.key === 'ArrowRight' ? 1 : -1;
+      const next = tabs[(i + step + tabs.length) % tabs.length];
+      select(next.dataset.demoTab!, true);
+    });
+  });
+</script>
