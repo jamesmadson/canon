@@ -1,0 +1,20 @@
+{
+  "name": "canon",
+  "description": "Canon — a curated catalog of design skills for AI agents, packaged as installable kits.",
+  "owner": {
+    "name": "James Madson",
+    "url": "https://jamesmadson.github.io/canon/"
+  },
+  "plugins": [
+    {
+      "name": "canon",
+      "description": "A router skill plus three design kits: marketing and landing sites, product UI and dashboards, and mobile-first review. Install once, invoke deliberately.",
+      "author": {
+        "name": "James Madson",
+        "url": "https://jamesmadson.github.io/canon/"
+      },
+      "category": "design",
+      "source": "./plugin/canon"
+    }
+  ]
+}
