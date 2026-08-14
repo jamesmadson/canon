@@ -20,6 +20,14 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} · Canon</title>
     <meta name="description" content={description} />
+    <meta property="og:title" content={`${title} · Canon`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Canon" />
+    {Astro.site && <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site).href} />}
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={`${title} · Canon`} />
+    <meta name="twitter:description" content={description} />
     <meta name="theme-color" content="#ffffff" />
     <link rel="preload" href={withBase('/fonts/archivo/Archivo-400.woff2')} as="font" type="font/woff2" crossorigin />
   </head>
