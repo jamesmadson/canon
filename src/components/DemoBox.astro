@@ -45,19 +45,19 @@ import { renderInlineMarkdown } from '../lib/inlineMarkdown';
 
         <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Canon pulls in</p>
         <div class="mb-5 flex flex-col gap-px bg-rule">
-          <div class="bg-bg py-2">
+          <div class="bg-bg">
             <a
               href={withBase(`/kits/${demoCase.route}/`)}
-              class="text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink"
+              class="flex min-h-11 items-center px-1 py-2 text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink"
             >
               {demoCase.route}
             </a>
           </div>
           {demoCase.skills.map((slug) => (
-            <div class="bg-bg py-2">
+            <div class="bg-bg">
               <a
                 href={withBase(`/skills/${slug}/`)}
-                class="text-sm font-medium text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong"
+                class="flex min-h-11 items-center px-1 py-2 text-sm font-medium text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong"
               >
                 {slug}
               </a>
