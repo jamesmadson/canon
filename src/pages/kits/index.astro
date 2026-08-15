@@ -26,6 +26,10 @@ const bundleKits = kits.filter((kit) => !ROUTED_SLUGS.includes(kit.data.slug));
       of work — a landing page, a dashboard, a mobile review — and it pulls in
       that kit's guidance. It stays dormant until you call it.
     </p>
+    <p class="mt-4 text-sm font-medium text-ink-soft">
+      Claude Code plugin —
+      <code class="rounded-none bg-surface px-1.5 py-0.5 font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>
+    </p>
     <div class="mt-4 flex flex-wrap gap-px bg-rule">
       <a
         href={withBase('/kits/canon-all.md')}
@@ -36,9 +40,11 @@ const bundleKits = kits.filter((kit) => !ROUTED_SLUGS.includes(kit.data.slug));
       </a>
       <a
         href="https://github.com/jamesmadson/canon/tree/main/plugin/canon"
+        target="_blank"
+        rel="noopener"
         class="min-h-11 flex-1 bg-bg px-4 py-3 text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2"
       >
-        Claude Code plugin — install from GitHub
+        Plugin source on GitHub
       </a>
     </div>
   </section>
