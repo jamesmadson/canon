@@ -1,0 +1,107 @@
+---
+slug: improve-ui
+name: Improve UI
+tagline: >-
+  A read-only audit that refuses to guess — a connection counts only when it is
+  proven through rendering, and the output is a plan for another agent, not an
+  edit.
+sourceUrl: 'https://github.com/ibelick/ui-skills/tree/main/skills/improve-ui'
+sourceAuthor: Julien Thibeaut
+tools:
+  - claude-code
+  - cursor
+  - codex
+  - generic
+categories:
+  - ui-aesthetics
+  - design-systems
+previewType: image
+previewAssets:
+  - /previews/improve-ui.svg
+rating: 4
+addedDate: 2026-08-15T00:00:00.000Z
+lastVerified: 2026-08-15T00:00:00.000Z
+status: active
+featured: true
+companionPaths:
+  - skills/baseline-ui
+  - skills/fixing-accessibility
+  - skills/fixing-motion-performance
+  - skills/fixing-metadata
+  - skills/create-design-md
+fileTree:
+  - path: SKILL.md
+    type: file
+    url: 'https://github.com/ibelick/ui-skills/blob/main/skills/improve-ui/SKILL.md'
+  - path: agents
+    type: dir
+    url: 'https://github.com/ibelick/ui-skills/tree/main/skills/improve-ui/agents'
+  - path: agents/openai.yaml
+    type: file
+    url: >-
+      https://github.com/ibelick/ui-skills/blob/main/skills/improve-ui/agents/openai.yaml
+  - path: references
+    type: dir
+    url: >-
+      https://github.com/ibelick/ui-skills/tree/main/skills/improve-ui/references
+  - path: references/plan-template.md
+    type: file
+    url: >-
+      https://github.com/ibelick/ui-skills/blob/main/skills/improve-ui/references/plan-template.md
+contentOutline:
+  - title: Boundaries
+    subsections: []
+  - title: 1. Select the surface
+    subsections: []
+  - title: 2. Reconstruct the local system
+    subsections: []
+  - title: Design language
+    subsections: []
+  - title: 3. Prove findings
+    subsections: []
+  - title: 4. Vet findings
+    subsections: []
+  - title: 5. Report
+    subsections: []
+  - title: Design language
+    subsections: []
+  - title: Findings
+    subsections: []
+  - title: Improve first
+    subsections: []
+  - title: 6. Specify selected changes
+    subsections: []
+---
+
+Most "review my UI" skills fail the same way: they grep the repository for
+inconsistencies, find forty things that look related, and report all of them
+with equal confidence. This one is built almost entirely to prevent that.
+
+The rule doing the work: *a connection exists only when it is proven through
+rendering, imports, props, resolved configuration, CSS inheritance, or a
+generated artifact loaded by the surface.* Shared names don't count. Similar
+tokens don't count. Repository proximity doesn't count. Conceptual relationship
+definitely doesn't count. It traces the actual rendered path from routes and
+layouts outward, and anything it can't reach that way is out of scope.
+
+Paired with that is a stated preference for silence: **prefer no finding to an
+unsupported one**. Audit tools are graded by users on whether the findings are
+real, not on how many there are, and almost none of them are written that way.
+
+It is also strictly read-only on product source — it may only write under
+`design-plans/`, may not install dependencies, run formatters, commit, or touch
+the working tree. The deliverable is a set of self-contained implementation
+plans written for an executor with no memory of the audit or the conversation.
+That separation is the same two-agent split Canon's review kits use, arrived at
+independently.
+
+Small detail with real teeth: *absence of design documentation is not a
+finding.* And drafts, proposals, and migration plans describe future intent —
+they don't govern the current surface unless the repo says they've been
+accepted. Both rules stop the classic audit failure of scoring a codebase
+against a design system that was never actually adopted.
+
+Part of a six-skill set — `baseline-ui`, `fixing-accessibility`,
+`fixing-motion-performance`, `fixing-metadata`, and `create-design-md` ship
+alongside it. `improve-ui` is the one to reach for first; the others are
+narrower and mostly corrective.

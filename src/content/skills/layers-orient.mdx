@@ -1,0 +1,83 @@
+---
+slug: layers-orient
+name: Layers — Orient
+tagline: >-
+  Seven layers of product design, and a diagnostic that names the lowest one
+  with unresolved decisions — because polishing the surface above a broken
+  conceptual model is wasted work.
+sourceUrl: 'https://github.com/jamiemill/layers-skills/tree/main/skills/layers-orient'
+sourceAuthor: Jamie Mill
+tools:
+  - claude-code
+  - claude
+  - cursor
+  - generic
+categories:
+  - design-systems
+  - ui-aesthetics
+previewType: image
+previewAssets:
+  - /previews/layers-orient.svg
+rating: 4
+addedDate: 2026-08-15T00:00:00.000Z
+lastVerified: 2026-08-15T00:00:00.000Z
+status: active
+featured: true
+companionPaths:
+  - skills/layers-intro
+  - skills/layers-observed-behaviour
+  - skills/layers-domain
+  - skills/layers-user-needs
+  - skills/layers-product-strategy
+  - skills/layers-conceptual-model
+  - skills/layers-interaction-flow
+  - skills/layers-surface
+fileTree:
+  - path: SKILL.md
+    type: file
+    url: >-
+      https://github.com/jamiemill/layers-skills/blob/main/skills/layers-orient/SKILL.md
+contentOutline:
+  - title: Guided session
+    subsections:
+      - Layer audit
+      - Decision landscape
+      - Bottleneck analysis
+      - Recommendation
+---
+
+Everything else in this gallery operates at the surface — how the thing looks,
+how it moves, whether the tap target is big enough. This one sits underneath
+all of it, and it is the only entry here that will tell you the design problem
+you brought it isn't the design problem you have.
+
+The framework stacks seven layers: observed behaviour, the domain, user needs,
+product and service strategy, the conceptual model, interaction structure and
+flow, and finally surface. Each has its own skill. Orient is the front door —
+a rapid audit across all seven that names **the bottleneck: the lowest layer
+with unresolved or risky decisions**, because unresolved work low in the stack
+puts everything above it at risk.
+
+The sharpest move is a distinction most audits skip entirely: separating
+decisions that are genuinely **solid** from decisions that are merely
+**assumed**. A team that believes its conceptual model is settled, when it was
+actually inherited unexamined from a competitor, will keep producing surface
+work that doesn't land and won't know why. Assumed and Strong look identical
+from the outside and require completely different responses.
+
+Its quality signals are stated as tests it can fail: the bottleneck layer is
+named specifically rather than gestured at, assumed layers are distinguished
+from strong ones, and the recommendation points at one particular skill with a
+reason. A diagnostic that can only ever say "seems fine, keep going" isn't a
+diagnostic.
+
+It's deliberately shallow by design — a short audit and one recommendation, not
+a report. The depth lives in the eight sibling skills it routes to. Run
+`/layers-intro` first for framework context; Orient assumes it.
+
+**Where it fits with the rest of Canon**: use this before the craft skills, not
+alongside them. If Orient says your bottleneck is user needs, no amount of
+motion polish or accessibility remediation will help — and the honest thing a
+design tool can do is say so.
+
+MIT. Installs with `npx skills add jamiemill/layers-skills`.
