@@ -103,11 +103,18 @@ import { renderInlineMarkdown } from '../lib/inlineMarkdown';
   tabs.forEach((tab, i) => {
     tab.addEventListener('click', () => select(tab.dataset.demoTab!));
     tab.addEventListener('keydown', (event) => {
-      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
-      event.preventDefault();
-      const step = event.key === 'ArrowRight' ? 1 : -1;
-      const next = tabs[(i + step + tabs.length) % tabs.length];
-      select(next.dataset.demoTab!, true);
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        const step = event.key === 'ArrowRight' ? 1 : -1;
+        const next = tabs[(i + step + tabs.length) % tabs.length];
+        select(next.dataset.demoTab!, true);
+        return;
+      }
+      if (event.key === 'Home' || event.key === 'End') {
+        event.preventDefault();
+        const next = tabs[event.key === 'Home' ? 0 : tabs.length - 1];
+        select(next.dataset.demoTab!, true);
+      }
     });
   });
 </script>
