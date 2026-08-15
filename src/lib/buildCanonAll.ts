@@ -28,9 +28,50 @@ metadata:
 ---
 `;
 
+/**
+ * Demotes every ATX heading (`#` … `######`) by one level, so a body that
+ * assumed it owned the top of the document nests correctly under a wrapper
+ * heading instead. Only touches heading lines outside fenced code blocks —
+ * lines inside ``` or ~~~ fences are passed through untouched, so a fenced
+ * shell comment like `# build it` never gets rewritten. Inline code spans
+ * (`` `# not a heading` ``) are unaffected by construction: ATX headings are
+ * only recognized at the start of a line, and a code span's backtick can't
+ * open a line-anchored match unless the whole line degenerately is one.
+ */
+export function demoteHeadings(markdown: string): string {
+  let inFence = false;
+  let fenceChar = '';
+
+  return markdown
+    .split('\n')
+    .map((line) => {
+      const fenceMatch = line.match(/^ {0,3}(`{3,}|~{3,})/);
+      if (fenceMatch) {
+        const marker = fenceMatch[1];
+        if (!inFence) {
+          inFence = true;
+          fenceChar = marker[0];
+        } else if (marker[0] === fenceChar) {
+          inFence = false;
+        }
+        return line;
+      }
+
+      if (inFence) return line;
+
+      const headingMatch = line.match(/^(#{1,6})(\s.*)?$/);
+      if (headingMatch) {
+        return `#${line}`;
+      }
+
+      return line;
+    })
+    .join('\n');
+}
+
 export function buildCanonAll(input: CanonAllInput): string {
   const sections = input.kits
-    .map((kit) => `---\n\n## ${kit.title}\n\n${kit.body.trim()}\n`)
+    .map((kit) => `---\n\n## ${kit.title}\n\n${demoteHeadings(kit.body.trim())}\n`)
     .join('\n');
 
   return `${FRONTMATTER}\n${input.routerBody.trim()}\n\n${sections}`;

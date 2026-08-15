@@ -97,13 +97,13 @@ Composes: `thumb-first`, `web-design-guidelines`, `better-accessibility`,
 
 ## Marketing / Landing Site
 
-# Marketing / Landing Site — Kit Digest
+## Marketing / Landing Site — Kit Digest
 
-Attach this file where design work happens but skills can't run — Claude
-Design, a claude.ai Project's knowledge base, or any tool that takes an
-upload. It's the distilled, portable form of a ten-skill kit. The complete
-skills install into `.claude/skills/` via the kit's install script and
-should do the heavy work wherever they can run.
+Canon's ten-skill Marketing / Landing Site kit, distilled into one
+self-contained file. It carries the kit's judgment — what to decide, and
+what the trade-off is — and needs nothing else installed to be useful.
+Where the individual skills it draws on are present, they hold more detail
+on their own subjects and are worth deferring to.
 
 Provenance: distilled from skills by Jakub Krehel
 (make-interfaces-feel-better, better-writing, better-accessibility), Kyle
@@ -116,7 +116,7 @@ copied from them — curated by Canon.
 
 ---
 
-## 1 · Brand foundation
+### 1 · Brand foundation
 
 > FILL IN before first use: the real palette, type families and scale, logo
 > rules, and three adjectives for the voice.
@@ -129,7 +129,7 @@ hero on white, the cream-and-terracotta wellness look, near-black with one
 acid accent, Inter-as-safe-choice. Pick one deliberately or avoid them
 deliberately — but decide.
 
-## 2 · The page's job
+### 2 · The page's job
 
 One page, one argument. Before any layout: what should a visitor
 understand, believe, and do? Every section either advances that or gets
@@ -137,7 +137,7 @@ cut. The hero states the thesis rather than decorating it. Social proof
 sits where doubt appears, not in a band at the bottom because that's where
 logos go.
 
-## 3 · UI craft floor
+### 3 · UI craft floor
 
 - Depth, radius, and spacing from a scale. Concentric radii: inner = outer
   − padding.
@@ -148,7 +148,7 @@ logos go.
 - Set the type scale for the widest hero and the narrowest phone in the
   same pass, not in sequence.
 
-## 4 · Motion & signature moments
+### 4 · Motion & signature moments
 
 The frequency gate still applies — but a marketing page is one of the few
 contexts where the top row is the right answer:
@@ -175,7 +175,7 @@ it — a backdrop's job is to make the subject look like it's *somewhere*,
 then get out of the way. If a flourish would survive being described in a
 sentence to a stakeholder, it's probably earning its place.
 
-## 5 · Copy rules
+### 5 · Copy rules
 
 Marketing copy is the product on this surface.
 
@@ -188,7 +188,7 @@ Marketing copy is the product on this surface.
 - Address the reader as "you". Delete every word not doing work.
 - Links describe their destination. One capitalization policy throughout.
 
-## 6 · Accessibility floor
+### 6 · Accessibility floor
 
 Heavy motion and full-bleed art are exactly where these get dropped:
 
@@ -203,7 +203,7 @@ Heavy motion and full-bleed art are exactly where these get dropped:
 - Autoplaying video: muted, with a pause control, and disabled under
   `prefers-reduced-motion`.
 
-## 7 · Mobile discipline
+### 7 · Mobile discipline
 
 The first screen on a phone shows the argument, not the navigation. Decide
 deliberately: how the hero reflows, whether the signature moment runs at
@@ -211,7 +211,7 @@ all on mobile (often it shouldn't — battery and mid-range GPUs are real),
 where the primary CTA sits in the thumb zone, and whether long scroll
 sequences degrade to static art below a breakpoint.
 
-## 8 · Pre-ship gates
+### 8 · Pre-ship gates
 
 Nothing ships until: a keyboard-only pass reaches every CTA; a 375px pass
 shows the argument on the first screen with no horizontal scroll; motion
@@ -224,13 +224,13 @@ mid-range phone, not just an emulator.
 
 ## Product UI / Dashboard
 
-# Product UI / Dashboard — Kit Digest
+## Product UI / Dashboard — Kit Digest
 
-Attach this file where design work happens but skills can't run — Claude
-Design, a claude.ai Project's knowledge base, or any tool that takes an
-upload. It's the distilled, portable form of a ten-skill kit. The complete
-skills install into `.claude/skills/` via the kit's install script and
-should do the heavy work wherever they can run.
+Canon's ten-skill Product UI / Dashboard kit, distilled into one
+self-contained file. It carries the kit's judgment — what to decide, and
+what the trade-off is — and needs nothing else installed to be useful.
+Where the individual skills it draws on are present, they hold more detail
+on their own subjects and are worth deferring to.
 
 Provenance: distilled from skills by Jakub Krehel
 (make-interfaces-feel-better, better-accessibility, better-writing), Emil
@@ -243,14 +243,14 @@ them — curated by Canon.
 
 ---
 
-## 0 · The governing constraint
+### 0 · The governing constraint
 
 This is a surface people use every day, not one they visit once. Restraint
 isn't a style preference here — it's the functional requirement. A flourish
 that delights on first encounter becomes a tax on the four-hundredth. When
 a decision is genuinely close, pick the quieter option.
 
-## 1 · Systems before screens
+### 1 · Systems before screens
 
 Define tokens and primitives before composing views: spacing scale, radius
 scale, type scale, elevation levels, and the semantic state colors
@@ -258,7 +258,7 @@ scale, type scale, elevation levels, and the semantic state colors
 A dashboard designed screen-by-screen produces twelve near-identical card
 components; a dashboard designed system-first produces one.
 
-## 2 · Density and data craft
+### 2 · Density and data craft
 
 - Tabular numbers everywhere digits align — tables, stat tiles, timestamps,
   anything comparable down a column.
@@ -276,7 +276,7 @@ components; a dashboard designed system-first produces one.
 - Sparklines and charts get the same care as type: an emphasized endpoint,
   a faint grid, a legible axis.
 
-## 3 · Motion, restrained
+### 3 · Motion, restrained
 
 The frequency gate does the most work in this kit:
 
@@ -293,7 +293,7 @@ animate a keyboard-initiated action; `prefers-reduced-motion` fully
 supported. If you're on React and the shell is navigation-heavy, view
 transitions are the one place a little motion reliably helps orientation.
 
-## 4 · Copy rules
+### 4 · Copy rules
 
 Labels and errors carry more weight per word here than anywhere else.
 
@@ -309,7 +309,7 @@ Labels and errors carry more weight per word here than anywhere else.
 - Never concatenate fragments around variables — full templated strings
   with real pluralization.
 
-## 5 · Accessibility floor
+### 5 · Accessibility floor
 
 Custom widgets are where dense product UI actually fails:
 
@@ -328,7 +328,7 @@ Custom widgets are where dense product UI actually fails:
   extended areas never overlap in a dense grid.
 - Inputs: correct `type`, `inputmode`, `autocomplete`; never block paste.
 
-## 6 · Mobile reality
+### 6 · Mobile reality
 
 Dashboards get opened on phones whether or not they were designed for it.
 Decide deliberately rather than letting it happen: which views have a
@@ -337,7 +337,7 @@ with a frozen first column? a deliberate "open on desktop" message?),
 where the primary action sits in the thumb zone, and what gets dropped
 rather than shrunk.
 
-## 7 · Pre-ship gates
+### 7 · Pre-ship gates
 
 Nothing ships until: a keyboard-only walkthrough completes every flow
 including custom widgets; every state (loading, empty, error, overflow) has
@@ -350,13 +350,13 @@ opened at 375px.
 
 ## Mobile-First Review
 
-# Mobile-First Review — Kit Digest
+## Mobile-First Review — Kit Digest
 
-Attach this file where review work happens but skills can't run — Claude
-Design, a claude.ai Project's knowledge base, or any tool that takes an
-upload. It's the distilled, portable form of a five-skill audit kit. The
-complete skills install into `.claude/skills/` via the kit's install script
-and should do the heavy work wherever they can run.
+Canon's five-skill Mobile-First Review kit, distilled into one
+self-contained file. It carries the kit's judgment — what to decide, and
+what the trade-off is — and needs nothing else installed to be useful.
+Where the individual skills it draws on are present, they hold more detail
+on their own subjects and are worth deferring to.
 
 Unlike the build kits, this one is a **method**: it tells you how to run a
 review and what to look for, not how to design something new.
@@ -369,7 +369,7 @@ those skills rather than copied from them — curated by Canon.
 
 ---
 
-## 1 · The method: two passes, one report
+### 1 · The method: two passes, one report
 
 Mobile review collapses two different questions, and mixing them is how
 reviews become unusable. Run them as separate passes:
@@ -386,7 +386,7 @@ ends with a single combined fix-order. The discipline that makes it work:
 an opinion must never read as a defect, and a must-fix must never read as
 a preference.
 
-## 2 · Pass A — design judgment
+### 2 · Pass A — design judgment
 
 Review through named lenses rather than a flattened "best practices" list,
 and surface disagreements as decisions rather than papering over them:
@@ -412,7 +412,7 @@ visitor's first screen shows the thing, not the filters for the thing; and
 **one primary action per screen**, placed in the natural thumb zone,
 with that zone not squandered on secondary or developer affordances.
 
-## 3 · Pass B — platform verification
+### 3 · Pass B — platform verification
 
 Objective, checkable, and severity-ranked:
 
@@ -436,14 +436,14 @@ Objective, checkable, and severity-ranked:
 - **Performance**: measure on a production build, not a dev server —
   dev-toolbar and unbundled assets make dev-server numbers meaningless.
 
-## 4 · Copy under mobile constraints
+### 4 · Copy under mobile constraints
 
 Mobile's space punishes vague labels first. Verb-first buttons naming the
 action; errors calm, plain, and actionable; one term per concept; links
 that describe their destination. Truncation is a design decision, not an
 accident — decide what wraps, what truncates, and what shrinks.
 
-## 5 · Motion under mobile constraints
+### 5 · Motion under mobile constraints
 
 Motion that reads as polish on a desktop demo often reads as lag on a
 mid-range phone. Apply the frequency gate (frequent interactions get no
@@ -451,7 +451,7 @@ motion), animate `transform` and `opacity` only, support
 `prefers-reduced-motion`, and pause offscreen work. Anything continuously
 animating is a battery decision as much as a design one.
 
-## 6 · Reporting
+### 6 · Reporting
 
 Findings are only as good as their specificity. "Improve the tap targets"
 is worth less than "nav links measure 46×20px, under the 44px floor —

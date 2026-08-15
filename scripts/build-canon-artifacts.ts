@@ -41,7 +41,7 @@ writeFileSync(path.join(root, 'public/kits/canon-all.md'), canonAll);
 
 const lines = canonAll.split('\n').length;
 console.log(`✓ canon-all.md (${lines} lines)`);
-if (lines > 500) {
+if (lines >= 500) {
   console.error(`!! canon-all is ${lines} lines — over the Agent Skills 500-line recommendation`);
   process.exit(1);
 }

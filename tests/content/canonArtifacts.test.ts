@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
+import { demoteHeadings } from '../../src/lib/buildCanonAll';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '../..');
@@ -38,12 +39,18 @@ describe('generated canon artifacts stay in sync with their sources', () => {
     expect(data.description.toLowerCase()).toContain('use when');
   });
 
-  it("canon-all's inlined sections byte-match their source digest bodies", () => {
+  it("canon-all's inlined sections byte-match their source digest bodies, demoted one heading level", () => {
     const all = readFileSync(path.join(root, 'public/kits/canon-all.md'), 'utf-8');
     for (const slug of ROUTED) {
-      const body = matter(digest(slug)).content.trim();
-      expect(all, `canon-all section for ${slug} does not byte-match its digest body`).toContain(body);
+      const body = demoteHeadings(matter(digest(slug)).content.trim());
+      expect(all, `canon-all section for ${slug} does not byte-match its (demoted) digest body`).toContain(body);
     }
+  });
+
+  it('canon-all contains exactly one H1', () => {
+    const all = readFileSync(path.join(root, 'public/kits/canon-all.md'), 'utf-8');
+    const h1Lines = all.split('\n').filter((line) => /^# (?!#)/.test(line));
+    expect(h1Lines).toHaveLength(1);
   });
 
   it('the router names exactly the three routed kits', () => {
@@ -55,6 +62,15 @@ describe('generated canon artifacts stay in sync with their sources', () => {
       expect(router).toContain(`canon-${slug}`);
     }
     expect(router).not.toContain('canon-full-redesign');
+  });
+
+  it("the router's frontmatter description keeps its explicit non-auto-trigger clause", () => {
+    const router = readFileSync(
+      path.join(root, 'plugin/canon/skills/canon/SKILL.md'),
+      'utf-8'
+    );
+    const { data } = matter(router);
+    expect(data.description).toContain('NEVER trigger automatically');
   });
 
   it('the plugin and marketplace manifests parse and carry required fields', () => {
