@@ -17,12 +17,12 @@ metadata:
 
 # Full Redesign — Kit Digest
 
-Attach this file where design work happens but skills can't run — Claude
-Design, a claude.ai Project's knowledge base, or any tool that takes an
-upload. It's the distilled, portable form of an eleven-skill kit. The
-complete skills (with their reference files, workflows, and checklists)
-install into `.claude/skills/` via the kit's install script and should do
-the heavy work wherever they can run.
+Canon's eleven-skill Full Redesign kit, distilled into one self-contained
+file. It carries the kit's judgment — what to decide, and what the
+trade-off is — and needs nothing else installed to be useful. Where the
+individual skills it draws on are present, they hold more detail on their
+own subjects (reference files, workflows, checklists) and are worth
+deferring to.
 
 Provenance: distilled from skills by Jakub Krehel (better-writing,
 better-accessibility, make-interfaces-feel-better), Emil Kowalski

@@ -18,11 +18,11 @@ metadata:
 
 # Mobile-First Review — Kit Digest
 
-Attach this file where review work happens but skills can't run — Claude
-Design, a claude.ai Project's knowledge base, or any tool that takes an
-upload. It's the distilled, portable form of a five-skill audit kit. The
-complete skills install into `.claude/skills/` via the kit's install script
-and should do the heavy work wherever they can run.
+Canon's five-skill Mobile-First Review kit, distilled into one
+self-contained file. It carries the kit's judgment — what to decide, and
+what the trade-off is — and needs nothing else installed to be useful.
+Where the individual skills it draws on are present, they hold more detail
+on their own subjects and are worth deferring to.
 
 Unlike the build kits, this one is a **method**: it tells you how to run a
 review and what to look for, not how to design something new.
