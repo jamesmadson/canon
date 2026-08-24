@@ -20,6 +20,18 @@ export const CATEGORY_VALUES = [
   'diagramming',
 ] as const;
 
+// Derived from the source repo by scripts/fetch-skill-trees.ts — never hand-typed.
+// 'none' means the repo states no license, which makes the work legally
+// unusable regardless of how good it is. Say so plainly rather than omitting it.
+export const LICENSE_VALUES = [
+  'MIT',
+  'Apache-2.0',
+  'BSD-3-Clause',
+  'ISC',
+  'CC-BY-4.0',
+  'none',
+] as const;
+
 const fileTreeEntrySchema = z.object({
   path: z.string(),
   type: z.enum(['file', 'dir']),
@@ -37,6 +49,7 @@ export const skillSchema = z.object({
   tagline: z.string(),
   sourceUrl: z.string().url(),
   sourceAuthor: z.string(),
+  license: z.enum(LICENSE_VALUES),
   tools: z.array(z.enum(TOOL_VALUES)).min(1),
   categories: z.array(z.enum(CATEGORY_VALUES)).min(1),
   previewType: z.enum(['image']),

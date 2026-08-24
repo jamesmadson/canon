@@ -49,6 +49,37 @@ function fetchFileContent(owner: string, repo: string, repoPath: string): string
   return Buffer.from(base64, 'base64').toString('utf-8');
 }
 
+// Some monorepos (anthropics/skills) carry no repo-level license but ship a
+// LICENSE.txt inside each skill folder. Prefer the skill's own license over
+// the repo's, and report 'none' rather than guessing when neither exists.
+function detectLicense(
+  owner: string,
+  repo: string,
+  scopePath: string,
+  fileTree: FileTreeEntry[]
+): string {
+  const scoped = fileTree.find((entry) =>
+    /^licen[cs]e(\.[a-z]+)?$/i.test(entry.path.split('/').pop() ?? '')
+  );
+  if (scoped) {
+    const repoPath = scopePath ? `${scopePath}/${scoped.path}` : scoped.path;
+    const spdx = spdxFromText(fetchFileContent(owner, repo, repoPath));
+    if (spdx) return spdx;
+  }
+
+  const repoLicense = ghApi(`repos/${owner}/${repo}`, '.license.spdx_id // "none"');
+  return repoLicense === 'NOASSERTION' || repoLicense === 'null' ? 'none' : repoLicense;
+}
+
+function spdxFromText(text: string): string | null {
+  const head = text.slice(0, 400);
+  if (/Apache License/i.test(head)) return 'Apache-2.0';
+  if (/MIT License/i.test(head)) return 'MIT';
+  if (/BSD 3-Clause/i.test(head)) return 'BSD-3-Clause';
+  if (/ISC License/i.test(head)) return 'ISC';
+  return null;
+}
+
 const skillsDir = path.join(__dirname, '../src/content/skills');
 const files = readdirSync(skillsDir).filter((f) => f.endsWith('.mdx'));
 
@@ -73,8 +104,11 @@ for (const file of files) {
 
   parsed.data.fileTree = fileTree;
   parsed.data.contentOutline = contentOutline;
+  parsed.data.license = detectLicense(owner, repo, scopePath, fileTree);
 
   const output = matter.stringify(parsed.content, parsed.data);
   writeFileSync(filePath, output);
-  console.log(`✓ ${file}: ${fileTree.length} fileTree entries, ${contentOutline.length} content sections`);
+  console.log(
+    `✓ ${file}: ${fileTree.length} fileTree entries, ${contentOutline.length} content sections, license ${parsed.data.license}`
+  );
 }

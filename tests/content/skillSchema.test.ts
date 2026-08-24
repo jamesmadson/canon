@@ -7,6 +7,7 @@ const validSkill = {
   tagline: 'A tagline.',
   sourceUrl: 'https://github.com/anthropics/skills',
   sourceAuthor: 'Anthropic',
+  license: 'Apache-2.0',
   tools: ['claude'],
   categories: ['ui-aesthetics'],
   previewType: 'image',
@@ -73,5 +74,19 @@ describe('skillSchema', () => {
   it('defaults companionPaths to an empty array when omitted', () => {
     const result = skillSchema.parse(validSkill);
     expect(result.companionPaths).toEqual([]);
+  });
+
+  it('requires a license', () => {
+    const { license, ...withoutLicense } = validSkill;
+    expect(() => skillSchema.parse(withoutLicense)).toThrow();
+  });
+
+  it('rejects a license outside the known set', () => {
+    expect(() => skillSchema.parse({ ...validSkill, license: 'WTFPL' })).toThrow();
+  });
+
+  it("accepts 'none' so an unlicensed source can be stated rather than omitted", () => {
+    const result = skillSchema.parse({ ...validSkill, license: 'none' });
+    expect(result.license).toBe('none');
   });
 });

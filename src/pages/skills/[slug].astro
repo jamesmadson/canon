@@ -26,6 +26,7 @@ const {
   rating,
   sourceUrl,
   sourceAuthor,
+  license,
   lastVerified,
   status,
   fileTree,
@@ -104,6 +105,16 @@ const {
       <div>
         <h2 class="mb-2 text-xs font-semibold text-ink-soft">Source</h2>
         <p><a href={sourceUrl} class="underline">{sourceAuthor}</a></p>
+      </div>
+      <div>
+        <h2 class="mb-2 text-xs font-semibold text-ink-soft">License</h2>
+        <p class="text-sm font-medium text-ink">{license === 'none' ? 'None stated' : license}</p>
+        {license === 'none' && (
+          <p class="mt-1 text-[11px] font-medium text-ink-soft">
+            The source states no license, so there is no permission to use, copy, or
+            modify it. Worth asking the author to add one.
+          </p>
+        )}
       </div>
       <div>
         <h2 class="mb-2 text-xs font-semibold text-ink-soft">Last verified</h2>

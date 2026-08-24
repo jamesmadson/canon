@@ -71,6 +71,7 @@ contentOutline:
     subsections: []
   - title: Verify
     subsections: []
+license: MIT
 ---
 
 The pattern behind every Apple-style product-story page, extracted as a discipline rather than a library: define the sequence as data first (scroll length, frame count, poster frame, reduced-motion frame, copy stops), derive one normalized progress value from native scroll position, and let that value drive whatever renderer fits. Wheel deltas, elapsed time, and autoplay are explicitly banned as sources of truth — native scroll must determine the exact visual state in both directions, which is what makes the sequence feel like an instrument instead of an animation you happen to scroll past.
