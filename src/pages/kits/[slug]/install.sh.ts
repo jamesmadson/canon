@@ -17,6 +17,10 @@ export const GET: APIRoute = async ({ props }) => {
     for (const entry of phase.entries) {
       const skill = bySlug.get(entry.skill);
       if (!skill) throw new Error(`Kit ${kit.data.slug} references unknown skill "${entry.skill}"`);
+      // Never generate a command that copies a source we have no permission to
+      // copy. Hiding the page but still shipping the clone would be worse than
+      // doing neither.
+      if (skill.data.status !== 'active') continue;
       const hub = skill.data.fileTree.find((f) => f.path.split('/').pop() === 'SKILL.md');
       if (!hub) throw new Error(`Skill ${entry.skill} has no SKILL.md in its fileTree`);
       skills.push({

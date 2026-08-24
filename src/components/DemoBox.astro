@@ -1,7 +1,14 @@
 ---
+import { getCollection } from 'astro:content';
 import { DEMO_CASES } from '../data/demoCases';
 import { withBase } from '../lib/withBase';
 import { renderInlineMarkdown } from '../lib/inlineMarkdown';
+
+// Only name skills that have a public page — a demo that links to a 404 is
+// worse than a demo that lists one fewer skill.
+const activeSlugs = new Set(
+  (await getCollection('skills', ({ data }) => data.status === 'active')).map((s) => s.data.slug)
+);
 ---
 
 <section class="mb-12" aria-labelledby="demo-heading">
@@ -53,7 +60,7 @@ import { renderInlineMarkdown } from '../lib/inlineMarkdown';
               {demoCase.route}
             </a>
           </div>
-          {demoCase.skills.map((slug) => (
+          {demoCase.skills.filter((slug) => activeSlugs.has(slug)).map((slug) => (
             <div class="bg-bg">
               <a
                 href={withBase(`/skills/${slug}/`)}

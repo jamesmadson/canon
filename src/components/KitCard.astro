@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import { withBase } from '../lib/withBase';
 
 interface Props {
@@ -8,7 +8,15 @@ interface Props {
 
 const { kit } = Astro.props;
 const { name, tagline, slug, phases } = kit.data;
-const skillCount = phases.reduce((n, phase) => n + phase.entries.length, 0);
+// Count only what the kit page will actually list, so the card can't promise
+// ten skills and show nine.
+const activeSlugs = new Set(
+  (await getCollection('skills', ({ data }) => data.status === 'active')).map((s) => s.data.slug)
+);
+const skillCount = phases.reduce(
+  (n, phase) => n + phase.entries.filter((e) => activeSlugs.has(e.skill)).length,
+  0
+);
 ---
 
 <a href={withBase(`/kits/${slug}/`)} class="group flex flex-col gap-2 border-r border-b border-rule bg-bg p-4 transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2">

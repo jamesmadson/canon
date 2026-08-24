@@ -57,7 +57,10 @@ export const skillSchema = z.object({
   rating: z.number().min(1).max(5),
   addedDate: z.coerce.date(),
   lastVerified: z.coerce.date(),
-  status: z.enum(['active', 'archived', 'superseded']),
+  // 'pending-license' hides an entry everywhere it would be published or
+  // installed, without deleting the work. For sources that state no license
+  // at all, while we ask the author to add one.
+  status: z.enum(['active', 'archived', 'superseded', 'pending-license']),
   featured: z.boolean().default(false),
   fileTree: z.array(fileTreeEntrySchema).min(1),
   contentOutline: z.array(contentSectionSchema).default([]),

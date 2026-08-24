@@ -4,7 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import FilterBar from '../../components/FilterBar.astro';
 import DepthLegend from '../../components/DepthLegend.astro';
 
-const allSkills = await getCollection('skills', ({ data }) => data.status !== 'archived');
+const allSkills = await getCollection('skills', ({ data }) => data.status === 'active');
 const sorted = [...allSkills].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
 ---
 

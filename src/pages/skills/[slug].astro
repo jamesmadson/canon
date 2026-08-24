@@ -9,7 +9,9 @@ import StructureMap from '../../components/StructureMap.astro';
 import DepthDots from '../../components/DepthDots.astro';
 
 export async function getStaticPaths() {
-  const skills = await getCollection('skills');
+  // Hidden entries get no page at all — otherwise "hidden" only means
+  // "unlinked", and the URL is still public.
+  const skills = await getCollection('skills', ({ data }) => data.status === 'active');
   return skills.map((entry) => ({
     params: { slug: entry.data.slug },
     props: { entry },

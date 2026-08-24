@@ -6,7 +6,7 @@ import KitCard from '../components/KitCard.astro';
 import DepthLegend from '../components/DepthLegend.astro';
 import DemoBox from '../components/DemoBox.astro';
 
-const allSkills = await getCollection('skills', ({ data }) => data.status !== 'archived');
+const allSkills = await getCollection('skills', ({ data }) => data.status === 'active');
 const sorted = [...allSkills].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
 const featured = sorted.filter((s) => s.data.featured).slice(0, 5);
 const kits = (await getCollection('kits', ({ data }) => data.status === 'active')).sort(

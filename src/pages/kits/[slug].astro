@@ -37,7 +37,7 @@ const skillsBySlug = new Map(allSkills.map((s) => [s.data.slug, s.data]));
           {String(i + 1).padStart(2, '0')} · {phase.title}
         </h2>
         <div class="flex flex-col gap-px bg-rule">
-          {phase.entries.map((item) => {
+          {phase.entries.filter((item) => skillsBySlug.get(item.skill)?.status === 'active').map((item) => {
             const skill = skillsBySlug.get(item.skill);
             return (
               <div class="flex flex-col gap-1 bg-bg py-3 sm:flex-row sm:items-baseline sm:gap-6">
