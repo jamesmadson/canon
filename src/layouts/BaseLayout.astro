@@ -38,27 +38,39 @@ const {
     >
       Skip to content
     </a>
-    <header class="border-b border-rule">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-8">
-        <a href={withBase('/')} class="text-xl font-semibold">Canon</a>
-        <nav class="flex gap-6 text-sm font-semibold">
-          <a href={withBase('/kits')} class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Kits</a>
-          <a href={withBase('/skills')} class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Gallery</a>
-          <a href={withBase('/submit')} class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Submit</a>
-          <a href={withBase('/newsletter')} class="py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink">Newsletter</a>
-        </nav>
+    <header class="rise">
+      <div class="mx-auto max-w-6xl px-6">
+        <div class="flex items-center justify-between border-b border-rule py-7">
+          <a
+            href={withBase('/')}
+            class="rounded-sm text-xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+          >
+            Canon
+          </a>
+          <nav class="-mr-2 flex items-center gap-1 text-sm font-semibold">
+            <a href={withBase('/kits')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Kits</a>
+            <a href={withBase('/skills')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Gallery</a>
+            <a href={withBase('/submit')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Submit</a>
+            <a href={withBase('/newsletter')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Newsletter</a>
+          </nav>
+        </div>
       </div>
     </header>
-    <main id="main" class="grid-overlay mx-auto max-w-6xl px-6 pb-24">
+    <main id="main" class="grid-overlay rise rise-2 mx-auto max-w-6xl px-6 pb-24">
       <slot />
     </main>
-    <footer class="border-t border-rule mx-auto max-w-6xl px-6 py-12 text-sm font-medium text-ink-soft">
-      <p>A hand-picked gallery of design and design-engineering skills.</p>
+    <footer class="mx-auto max-w-6xl px-6">
+      <div class="border-t border-rule py-12 text-sm font-medium text-ink-soft">
+        <p>
+          Every skill here was read in full, license-checked, and written up by hand.
+          Twenty of them, chosen from many more.
+        </p>
+      </div>
     </footer>
     <button
       type="button"
       id="grid-toggle"
-      class="fixed bottom-5 right-5 z-10 hidden min-h-11 items-center border border-rule-strong bg-bg px-3.5 py-2 text-xs font-semibold tracking-wide text-ink-soft hover:text-ink sm:flex"
+      class="fixed bottom-5 right-5 z-10 hidden min-h-11 items-center rounded-md border border-rule-strong bg-bg px-3.5 py-2 text-xs font-semibold tracking-wide text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:flex"
       aria-pressed="false"
     >
       Grid — Off

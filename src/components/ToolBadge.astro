@@ -9,6 +9,6 @@ const { tool } = Astro.props;
 const meta = TOOL_META[tool] ?? TOOL_META.generic;
 ---
 
-<span class="inline-flex items-center border border-rule-strong px-2.5 py-1 text-xs font-semibold text-ink">
+<span class="inline-flex items-center rounded-sm border border-rule-strong px-2.5 py-1 text-xs font-semibold text-ink">
   {meta.label}
 </span>

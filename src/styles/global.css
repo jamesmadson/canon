@@ -51,6 +51,42 @@
   --color-surface: oklch(92% 0.003 210);
   --color-rule: oklch(85% 0.005 210);
   --color-rule-strong: oklch(66% 0.005 210);
+
+  /* Deliberately small. Enough to take the wireframe edge off a 1px border,
+     not enough to read as a "card UI". Concentric rule: inner = outer − padding. */
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+}
+
+/* Entrance motion. A visitor sees the first paint once, so the frequency gate
+   allows it — but only transform and opacity, and only when motion is welcome.
+   The whole block lives inside the media query so reduced-motion users never
+   get an opacity:0 starting state to be stranded in. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .rise {
+    animation: rise 0.45s cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  .rise-2 {
+    animation-delay: 60ms;
+  }
+  .rise-3 {
+    animation-delay: 120ms;
+  }
+  .rise-4 {
+    animation-delay: 180ms;
+  }
 }
 
 /* construction grid — hidden by default, faint when toggled on (see BaseLayout) */

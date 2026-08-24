@@ -15,13 +15,17 @@ const kits = (await getCollection('kits', ({ data }) => data.status === 'active'
 ---
 
 <BaseLayout title="Home">
-  <section class="mb-8 py-10 sm:py-12">
-    <h1 class="max-w-xl text-3xl font-bold leading-snug sm:text-4xl">
-      A curated gallery of design skills for AI agents.
+  <section class="mb-10 py-10 sm:py-14">
+    <h1 class="max-w-2xl text-3xl font-bold leading-snug sm:text-4xl">
+      Teach your AI what good design actually looks like.
     </h1>
-    <p class="mt-4 max-w-xl text-sm font-medium text-ink-soft">
-      Hand-picked SKILL.md files and design-tool instructions — Sidebar.io meets an
-      awesome-list, not a scraped registry.
+    <p class="mt-5 max-w-xl text-[15px] leading-relaxed font-medium text-ink-soft">
+      A <strong class="font-semibold text-ink">skill</strong> is a plain text file
+      that tells an AI tool how to think about a piece of work — the same way a
+      good brief does. Drop one in, and Claude, Cursor, or Figma stops guessing.
+    </p>
+    <p class="mt-3 max-w-xl text-[15px] leading-relaxed font-medium text-ink-soft">
+      Canon collects the twenty worth having. Every one read in full, not scraped.
     </p>
   </section>
 
@@ -30,25 +34,33 @@ const kits = (await getCollection('kits', ({ data }) => data.status === 'active'
   <section class="mb-12">
     <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-ink-soft">Kits</h2>
     <p class="mb-4 max-w-2xl text-sm font-medium text-ink-soft">
-      The router above routes to three of these; Full Redesign installs directly.
+      Several skills bundled for one job, in the order you'd actually use them.
+      Canon picks the right bundle for the first three; Full Redesign you install
+      on its own.
     </p>
-    <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2 xl:grid-cols-4">
-      {kits.map((kit) => <KitCard kit={kit} />)}
+    <div class="overflow-hidden rounded-lg border border-rule">
+      <div class="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+        {kits.map((kit) => <KitCard kit={kit} />)}
+      </div>
     </div>
   </section>
 
   <section class="mb-12">
     <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-ink-soft">This month's picks</h2>
     <DepthLegend />
-    <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {featured.map((skill) => <SkillCard skill={skill} />)}
+    <div class="overflow-hidden rounded-lg border border-rule">
+      <div class="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {featured.map((skill) => <SkillCard skill={skill} />)}
+      </div>
     </div>
   </section>
 
   <section>
     <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">All skills</h2>
-    <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {sorted.map((skill) => <SkillCard skill={skill} />)}
+    <div class="overflow-hidden rounded-lg border border-rule">
+      <div class="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {sorted.map((skill) => <SkillCard skill={skill} />)}
+      </div>
     </div>
   </section>
 </BaseLayout>

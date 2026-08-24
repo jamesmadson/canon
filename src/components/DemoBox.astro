@@ -9,11 +9,11 @@ import { renderInlineMarkdown } from '../lib/inlineMarkdown';
     Canon in use
   </h2>
   <p class="mb-4 max-w-2xl text-sm font-medium text-ink-soft">
-    Install one skill. Name the kind of work, and it pulls in the judgment that
-    applies — not a list of files to read.
+    You install one file. Then you just describe the work — and Canon brings in
+    the right guidance for it. Here's what that looks like.
   </p>
 
-  <div class="border border-rule-strong">
+  <div class="overflow-hidden rounded-lg border border-rule-strong">
     <div role="tablist" aria-label="Example use cases" class="flex flex-wrap gap-px bg-rule">
       {DEMO_CASES.map((demoCase, i) => (
         <button
@@ -43,7 +43,7 @@ import { renderInlineMarkdown } from '../lib/inlineMarkdown';
         <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">You type</p>
         <p class="mb-5 font-mono text-sm text-ink">{demoCase.prompt}</p>
 
-        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Canon pulls in</p>
+        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Canon brings in</p>
         <div class="mb-5 flex flex-col gap-px bg-rule">
           <div class="bg-bg">
             <a
@@ -65,7 +65,7 @@ import { renderInlineMarkdown } from '../lib/inlineMarkdown';
           ))}
         </div>
 
-        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">What comes back</p>
+        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">What it tells the AI</p>
         <ul class="flex flex-col gap-2">
           {demoCase.excerpt.map((line) => (
             <li

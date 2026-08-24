@@ -15,22 +15,23 @@ const bundleKits = kits.filter((kit) => !ROUTED_SLUGS.includes(kit.data.slug));
 
 <BaseLayout title="Kits" description="Curated, phased bundles of design skills for a concrete job — with a one-command install.">
   <h1 class="mb-2 text-2xl font-bold">Kits</h1>
-  <p class="mb-6 max-w-xl text-sm font-medium text-ink-soft">
-    Skills composed for a job, in working order — each with a one-command install
-    script and an attachable digest for tools that can't run skills.
+  <p class="mb-6 max-w-xl text-[15px] leading-relaxed font-medium text-ink-soft">
+    A kit is several skills grouped around one job, in the order you'd actually
+    use them. Each installs with a single command — or downloads as one file you
+    can upload to design tools like Figma.
   </p>
-  <section class="mb-10 border border-rule-strong p-5">
-    <h2 class="text-lg font-semibold text-ink">Start here: the Canon router</h2>
-    <p class="mt-2 max-w-2xl text-sm font-medium text-ink-soft">
-      One skill that routes to the right kit. Install it once, then name the kind
-      of work — a landing page, a dashboard, a mobile review — and it pulls in
-      that kit's guidance. It stays dormant until you call it.
+  <section class="mb-10 rounded-lg border border-rule-strong p-5 sm:p-6">
+    <h2 class="text-lg font-semibold text-ink">Start here</h2>
+    <p class="mt-2 max-w-2xl text-sm leading-relaxed font-medium text-ink-soft">
+      Rather than choosing a kit yourself, install <strong class="font-semibold text-ink">Canon</strong>
+      once and describe the work — a landing page, a dashboard, a mobile review.
+      It picks the right kit for you. It stays out of the way until you ask.
     </p>
     <p class="mt-4 text-sm font-medium text-ink-soft">
       Claude Code plugin —
-      <code class="rounded-none bg-surface px-1.5 py-0.5 font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>
+      <code class="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>
     </p>
-    <div class="mt-4 flex flex-wrap gap-px bg-rule">
+    <div class="mt-4 flex flex-wrap gap-px overflow-hidden rounded-md bg-rule">
       <a
         href={withBase('/kits/canon-all.md')}
         download
@@ -49,12 +50,12 @@ const bundleKits = kits.filter((kit) => !ROUTED_SLUGS.includes(kit.data.slug));
     </div>
   </section>
   <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">The router's three routes</h2>
-  <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-3">
+  <div class="-mr-px -mb-px grid grid-cols-1 overflow-hidden rounded-lg border border-rule sm:grid-cols-3">
     {routedKits.map((kit) => <KitCard kit={kit} />)}
   </div>
 
   <h2 class="mb-4 mt-10 text-sm font-semibold uppercase tracking-wide text-ink-soft">The everything bundle</h2>
-  <div class="grid grid-cols-1 gap-px bg-rule">
+  <div class="-mr-px -mb-px grid grid-cols-1 overflow-hidden rounded-lg border border-rule">
     {bundleKits.map((kit) => <KitCard kit={kit} />)}
   </div>
   <p class="mt-4 max-w-2xl text-sm font-medium text-ink-soft">
