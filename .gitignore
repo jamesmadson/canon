@@ -2,3 +2,7 @@ node_modules/
 dist/
 .astro/
 .vercel/
+
+# Local dev-server config — ports differ per machine and per worktree,
+# so this stays out of the repo (see 0aff23c).
+.claude/launch.json
