@@ -1,0 +1,20 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#faf9f5"/>
+  <rect x="0" y="0" width="800" height="10" fill="#141413"/>
+  <g stroke="#141413" stroke-width="3" fill="none">
+    <path d="M 100 180 H 560"/>
+    <path d="M 240 180 C 240 224, 280 260, 320 260 H 420" opacity="0.55"/>
+    <path d="M 450 180 C 450 224, 490 260, 530 260 H 560" stroke-dasharray="4 8" opacity="0.4"/>
+  </g>
+  <g fill="#faf9f5" stroke="#141413" stroke-width="3">
+    <circle cx="100" cy="180" r="9"/>
+    <circle cx="240" cy="180" r="9"/>
+    <circle cx="380" cy="180" r="9"/>
+    <circle cx="560" cy="180" r="9" fill="#141413"/>
+    <circle cx="420" cy="260" r="9"/>
+  </g>
+  <path d="M 310 171 L 319 180 L 310 189 L 301 180 Z" fill="#141413"/>
+  <circle cx="574" cy="260" r="6" fill="none" stroke="#141413" stroke-width="2.5" opacity="0.4"/>
+  <text x="60" y="390" font-family="Georgia, 'Times New Roman', serif" font-size="48" fill="#141413">Graft</text>
+  <text x="60" y="435" font-family="Helvetica, Arial, sans-serif" font-size="18" letter-spacing="2" fill="#141413" opacity="0.6">MAP A SESSION AS BRANCHES, FORKS, AND COMPACTIONS</text>
+</svg>

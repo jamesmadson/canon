@@ -1,0 +1,45 @@
+---
+slug: graft
+name: Graft
+tagline: >-
+  Maps a Claude Code session as a branch diagram: your turns as the trunk,
+  subagents as forks, compactions as diamonds.
+sourceUrl: https://jamesmadson.me/graft/
+sourceAuthor: James Madson
+license: MIT
+tools:
+  - claude-code
+categories:
+  - diagramming
+previewType: image
+previewAssets:
+  - /previews/graft.svg
+rating: 4
+addedDate: 2026-08-27T00:00:00.000Z
+lastVerified: 2026-08-27T00:00:00.000Z
+status: active
+featured: false
+fileTree:
+  - path: SKILL.md
+    type: file
+    url: https://jamesmadson.me/assets/graft/SKILL.md
+contentOutline:
+  - title: Hard rules
+    subsections: []
+  - title: Procedure
+    subsections: []
+  - title: Visual language
+    subsections: []
+  - title: Scope
+    subsections: []
+---
+
+The first skill published under Canon's own roof rather than curated in from elsewhere. Run `/graft` in any project and it renders that project's session history as a branch map: every turn you took as a node on the trunk, every subagent you launched as a fork sweeping off it, every compaction as a diamond. One self-contained HTML file, hand-rolled SVG, no d3, nothing leaves your machine.
+
+It exists because long-running sessions become unreadable as scrollback. A month of work in one session is a real thing now, and the shape of that work, where you forked, where the context compacted, where the effort clustered, is invisible in a transcript. The map makes the shape legible in one glance.
+
+The skill's hard rules are the interesting part: it refuses to read a transcript into context (they can exceed 100MB; parsing happens in a subprocess that emits a small summary), and it constrains itself to a three-word visual vocabulary. Trunk, fork, diamond. Nothing else.
+
+**Install**: `mkdir -p ~/.claude/skills/graft && curl -fsSL https://jamesmadson.me/assets/graft/SKILL.md -o ~/.claude/skills/graft/SKILL.md`, then `/graft` in any project. New skills register as typed commands on your next session start.
+
+**Gotcha**: Claude Code only, and it reads the local transcript format, which is undocumented and can drift between versions. The skill tells the agent to inspect a line and adapt before parsing, which has held so far, but a hard format change would need a skill update. The interactive editor it matches lives at jamesmadson.me/graft.
