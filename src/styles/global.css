@@ -89,6 +89,16 @@
   }
 }
 
+/* Tailwind v4's preflight follows the browser default of cursor:default on
+   buttons. Anything that acts like a control should say so on hover. */
+a[href],
+button:not(:disabled),
+label:has(input:not(:disabled)),
+summary,
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
 /* construction grid — hidden by default, faint when toggled on (see BaseLayout) */
 .grid-overlay {
   position: relative;

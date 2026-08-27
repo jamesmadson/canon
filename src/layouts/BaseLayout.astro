@@ -1,6 +1,8 @@
 ---
 import '../styles/global.css';
+import { getCollection } from 'astro:content';
 import { withBase } from '../lib/withBase';
+import { spellNumber } from '../lib/spellNumber';
 
 interface Props {
   title: string;
@@ -11,6 +13,11 @@ const {
   title,
   description = 'A curated gallery of design and design-engineering skills for AI agents.',
 } = Astro.props;
+
+// Derived, not written down: hiding a skill must not leave the footer
+// claiming a count the gallery no longer shows.
+const publishedSkills = await getCollection('skills', ({ data }) => data.status === 'active');
+const skillCount = spellNumber(publishedSkills.length);
 ---
 
 <!doctype html>
@@ -63,7 +70,7 @@ const {
       <div class="border-t border-rule py-12 text-sm font-medium text-ink-soft">
         <p>
           Every skill here was read in full, license-checked, and written up by hand.
-          Twenty of them, chosen from many more.
+          {` ${skillCount.charAt(0).toUpperCase()}${skillCount.slice(1)} of them, chosen from many more.`}
         </p>
       </div>
     </footer>

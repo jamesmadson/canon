@@ -9,7 +9,7 @@ const sorted = [...allSkills].sort((a, b) => b.data.addedDate.valueOf() - a.data
 ---
 
 <BaseLayout title="Gallery" description="The full gallery of design and design-engineering skills.">
-  <h1 class="mb-2 text-2xl font-bold">All skills</h1>
+  <h1 class="mb-3 text-3xl font-bold tracking-tight">All skills</h1>
   <DepthLegend />
   <FilterBar skills={sorted} />
 </BaseLayout>
