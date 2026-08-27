@@ -1,6 +1,6 @@
 {
   "name": "canon",
-  "description": "Canon — a curated catalog of design skills for AI agents, packaged as installable kits.",
+  "description": "Canon \u2014 a curated catalog of design skills for AI agents, packaged as installable kits.",
   "owner": {
     "name": "James Madson",
     "url": "https://jamesmadson.github.io/canon/"
@@ -15,6 +15,16 @@
       },
       "category": "design",
       "source": "./plugin/canon"
+    },
+    {
+      "name": "graft",
+      "description": "Session cartography: render any Claude Code session as a branch map. Trunk, forks, compactions, one HTML file out.",
+      "author": {
+        "name": "James Madson",
+        "url": "https://jamesmadson.me/graft/"
+      },
+      "category": "design",
+      "source": "./plugin/graft"
     }
   ]
 }

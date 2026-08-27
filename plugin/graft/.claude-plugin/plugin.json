@@ -1,0 +1,9 @@
+{
+  "name": "graft",
+  "description": "Map a Claude Code session as a branch diagram: your turns as the trunk, subagents as forks, compactions as diamonds. One self-contained HTML file, nothing leaves your machine. The interactive editor lives at jamesmadson.me/graft.",
+  "version": "0.1.0",
+  "author": {
+    "name": "James Madson",
+    "url": "https://jamesmadson.me/graft/"
+  }
+}

@@ -22,7 +22,7 @@ featured: false
 fileTree:
   - path: SKILL.md
     type: file
-    url: https://jamesmadson.me/assets/graft/SKILL.md
+    url: https://github.com/jamesmadson/canon/blob/main/plugin/graft/skills/graft/SKILL.md
 contentOutline:
   - title: Hard rules
     subsections: []
@@ -40,6 +40,6 @@ It exists because long-running sessions become unreadable as scrollback. A month
 
 The skill's hard rules are the interesting part: it refuses to read a transcript into context (they can exceed 100MB; parsing happens in a subprocess that emits a small summary), and it constrains itself to a three-word visual vocabulary. Trunk, fork, diamond. Nothing else.
 
-**Install**: `mkdir -p ~/.claude/skills/graft && curl -fsSL https://jamesmadson.me/assets/graft/SKILL.md -o ~/.claude/skills/graft/SKILL.md`, then `/graft` in any project. New skills register as typed commands on your next session start.
+**Install**: `claude plugin marketplace add jamesmadson/canon`, then install the `graft` plugin. Or copy `plugin/graft/skills/graft/SKILL.md` from the repo into `~/.claude/skills/graft/`. New skills register as typed commands on your next session start.
 
 **Gotcha**: Claude Code only, and it reads the local transcript format, which is undocumented and can drift between versions. The skill tells the agent to inspect a line and adapt before parsing, which has held so far, but a hard format change would need a skill update. The interactive editor it matches lives at jamesmadson.me/graft.
