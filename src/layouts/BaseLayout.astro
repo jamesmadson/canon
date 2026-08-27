@@ -47,14 +47,15 @@ const skillCount = spellNumber(publishedSkills.length);
     </a>
     <header class="rise">
       <div class="mx-auto max-w-6xl px-6">
-        <div class="flex items-center justify-between border-b border-rule py-7">
+        <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-rule py-7">
           <a
             href={withBase('/')}
             class="rounded-sm text-xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
           >
             Canon
           </a>
-          <nav class="-mr-2 flex items-center gap-1 text-sm font-semibold">
+          <nav class="-mr-2 -ml-2 flex flex-wrap items-center gap-x-1 text-sm font-semibold">
+            <a href={withBase('/use')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Use</a>
             <a href={withBase('/kits')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Kits</a>
             <a href={withBase('/skills')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Gallery</a>
             <a href={withBase('/submit')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Submit</a>

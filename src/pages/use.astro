@@ -1,0 +1,161 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/withBase';
+
+interface Prompt {
+  say: string;
+  gets: string;
+}
+
+interface Group {
+  title: string;
+  intro: string;
+  prompts: Prompt[];
+}
+
+const groups: Group[] = [
+  {
+    title: 'Starting something new',
+    intro:
+      'Say what you are making before you make it. Canon picks the kit and applies its judgment while the work is being shaped, rather than reviewing it afterwards.',
+    prompts: [
+      {
+        say: 'Use canon. I need to design the hero for our launch page.',
+        gets: 'Marketing / Landing Site — brand foundation, the page’s job, motion that earns its weight.',
+      },
+      {
+        say: 'Use canon to help me design the settings screen for our admin tool.',
+        gets: 'Product UI / Dashboard — restraint as a functional requirement, density and data craft.',
+      },
+      {
+        say: 'Canon: I’m building a pricing page. What should I get right first?',
+        gets: 'The order to decide things in, not a list of components to place.',
+      },
+    ],
+  },
+  {
+    title: 'Reviewing what already exists',
+    intro:
+      'Point it at something built. Canon separates judgment from verification, so an opinion never arrives disguised as a defect.',
+    prompts: [
+      {
+        say: 'Use canon to review this dashboard table before I ship it.',
+        gets: 'Tabular numbers, stable column alignment, state encoded in form as well as colour.',
+      },
+      {
+        say: 'Canon — audit this screen on mobile.',
+        gets: 'Mobile-First Review — two passes, then one prioritised report. Tap targets, safe areas, iOS input zoom.',
+      },
+      {
+        say: 'Run canon over this page and tell me what I got wrong.',
+        gets: 'Findings against the kit that fits, with the reasoning attached to each.',
+      },
+    ],
+  },
+  {
+    title: 'When you are not sure which applies',
+    intro:
+      'Ambiguity is a supported answer. Canon asks rather than guessing when two kits fit equally well.',
+    prompts: [
+      {
+        say: 'Which canon kit applies to redesigning our onboarding flow?',
+        gets: 'The three routes in one line each, and a question back if it is genuinely a toss-up.',
+      },
+      {
+        say: 'What design skills do I have available for this?',
+        gets: 'What is installed, what each covers, and which one this task needs.',
+      },
+    ],
+  },
+  {
+    title: 'Mid-work checks',
+    intro:
+      'Smaller questions, asked while you work. These reach a kit’s specific guidance rather than a full pass.',
+    prompts: [
+      {
+        say: 'Canon: is this animation earning its place?',
+        gets: 'The frequency gate — how often a user sees this, and what that permits.',
+      },
+      {
+        say: 'Use canon to check the copy on this empty state.',
+        gets: 'Plain, actionable, no apology; what happened and what to do next.',
+      },
+      {
+        say: 'Canon, is this ready to ship?',
+        gets: 'The kit’s pre-ship gates — keyboard pass, 375px pass, contrast measured over real backgrounds.',
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="How to use it"
+  description="What to type once Canon is installed — prompts for starting work, reviewing it, and checking it before you ship."
+>
+  <h1 class="mb-3 text-3xl font-bold tracking-tight">How to use it</h1>
+  <p class="mb-8 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+    Canon stays dormant until you call it — it will not interrupt you with design
+    opinions you did not ask for. That means you name it. Say
+    <strong class="font-semibold text-ink">canon</strong>, or name a kit, and
+    describe the work in your own words. It picks the rest.
+  </p>
+
+  <div class="mb-10 rounded-lg border border-rule-strong p-5 sm:p-6">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-ink-soft">Before any of this</h2>
+    <p class="mt-2 max-w-2xl text-sm leading-relaxed font-medium text-ink-soft">
+      Install it once —
+      <code class="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>
+      in Claude Code, or
+      <a href={withBase('/kits/')} class="underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink">download one file for Figma</a>.
+    </p>
+  </div>
+
+  <div class="flex flex-col gap-12">
+    {groups.map((group) => (
+      <section>
+        <h2 class="text-xl font-bold tracking-tight text-ink">{group.title}</h2>
+        <p class="mt-2 mb-5 max-w-2xl text-sm leading-relaxed font-medium text-ink-soft">
+          {group.intro}
+        </p>
+        <div class="overflow-hidden rounded-lg border border-rule">
+          <div class="-mb-px grid grid-cols-1">
+            {group.prompts.map((prompt) => (
+              <div class="border-b border-rule bg-bg p-4 sm:p-5">
+                <p class="font-mono text-sm leading-relaxed text-ink">{prompt.say}</p>
+                <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+                  <span class="font-semibold text-ink">What comes back — </span>
+                  {prompt.gets}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    ))}
+  </div>
+
+  <section class="mt-12 border-t border-rule pt-8">
+    <h2 class="text-xl font-bold tracking-tight text-ink">In Figma, or any single-file tool</h2>
+    <p class="mt-2 max-w-2xl text-sm leading-relaxed font-medium text-ink-soft">
+      <code class="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[13px] text-ink">canon-all.md</code>
+      carries all three kits in one file, so there is no separate router to invoke —
+      the guidance is already loaded. Describe the work and it applies the section
+      that fits. The prompts above still read correctly; you can drop the word
+      "canon" if you prefer.
+    </p>
+  </section>
+
+  <section class="mt-12 border-t border-rule pt-8">
+    <h2 class="text-xl font-bold tracking-tight text-ink">What it will not do</h2>
+    <ul class="mt-3 flex max-w-2xl flex-col gap-2 text-sm leading-relaxed font-medium text-ink-soft">
+      <li>Trigger on its own. General design chatter is not an invocation.</li>
+      <li>Guess when two kits fit equally. It asks which you meant.</li>
+      <li>
+        Mix two kits' guidance silently. If the work shifts from a dashboard to a
+        landing page, it re-routes and says so.
+      </li>
+      <li>Hand you a component library. Canon carries judgment, not house style.</li>
+    </ul>
+  </section>
+</BaseLayout>
