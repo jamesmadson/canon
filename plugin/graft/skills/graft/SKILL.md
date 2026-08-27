@@ -82,11 +82,11 @@ Tokens:
 - Font: system stack for body; `"IBM Plex Mono", monospace` for labels,
   uppercase, letter-spaced, ~11px, `font-variant-numeric: tabular-nums`.
 - Trunk: horizontal 2px line, a 6px-radius circle node per user turn
-  (assistant turns don't get nodes — they're the line between).
+  (assistant turns don't get nodes; they're the line between).
 - Forks (subagents): depart with a single shallow cubic sweep,
   `C fx,(y0+(y1-y0)*.55) (fx+33),y1 (fx+60),y1`, one open-circle node,
   label after in mono. **Labels must never overlap**: truncate to ~26
-  chars with an ellipsis, then lane-pack per row — greedy interval
+  chars with an ellipsis, then lane-pack per row: greedy interval
   packing where each fork occupies `[fx, fx + 60 + labelWidth]` and takes
   the first lane whose previous occupant ends before it. Row pitch grows
   to fit that row's lane count; rows without forks stay tight. Compute
