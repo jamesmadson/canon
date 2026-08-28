@@ -163,6 +163,15 @@ re-capturable on demand.
 - **Alive, not decorative:** annotation-layer comments pin to the canvas
   where they were made; Strata entries about a screen surface on it;
   a branch's map can sit beside main's to show what changed, spatially.
+- **Arrangement (D-32):** keep Figma's spatial freedom — pan, zoom, drag
+  screens by hand — and add what a free canvas can never have: computed
+  arrangements that cost nothing, because capture already knows the
+  structure. Three modes: **by IA** (route hierarchy), **by journey**
+  (flow order), **freeform** (hand placement, persisted). Switching to a
+  computed mode never destroys a freeform layout — it is a view, not an
+  edit. And no screen is ever "Frame 604252871": names come from routes
+  at capture, which is the whole difference between a canvas and a junk
+  drawer.
 - **Rings:** (1) agent-assisted capture via the CLI/skill and a manual
   arrange; (2) capture on demand from the app with route detection;
   (3) flow-graph edges and state variants. Ring 1 is post-alpha unless

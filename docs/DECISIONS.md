@@ -217,3 +217,12 @@ graduate into the system. Sequenced behind the system skill, which sits
 behind assumption 3. Note: Storybook's commercial arm is Chromatic —
 already mapped as a near-competitor — so this is both a bridge and a
 border.
+
+### D-32 · Survey keeps the canvas, kills the entropy — 2026-08-28
+The Figma-artboard screenshot is the reference for both halves: spatial
+pan/zoom/drag is the beloved interaction and stays; hundreds of unnamed
+"Frame 4…" rectangles are the disease and cannot occur. Arrangement has
+three modes — by IA (route hierarchy), by journey (flow order), freeform
+(hand placement, persisted) — and computed modes are views, never edits:
+switching arrangements never destroys a hand layout. Names come from
+routes at capture, so auto-layout is free where Figma's is manual labor.
