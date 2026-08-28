@@ -27,6 +27,15 @@ that practice.
 Prototype hosting is a table-stakes shell; the skills that run against the
 prototypes are the reason to pick Canon.
 
+**The SDLC frame (D-34):** Canon is the design lane of the AI-native
+SDLC (Anthropic's playbook, filed `2026-08-28-ai-native-sdlc-playbook`).
+Its operating principle, adopted explicitly: *every stage commits an
+artifact the next stage can read.* Stage by stage — Strata evidence and
+the decision log feed **Plan**; prototypes are **Build** artifacts;
+review runs are **Test**; PR graduation is **Deploy**; staleness flags
+are **Maintain**, feeding back to Plan. Canon's own development already
+runs this cycle, so the claim is demonstrable, not aspirational.
+
 ## Who it is for
 
 Design-led product teams of 2–15 who prototype in code and Figma

@@ -237,3 +237,12 @@ Canon on an issue linked to a prototype and a review runs, filing back
 as a comment plus a record entry. A mention is a person triggering, so
 D-20 holds naturally. Sequencing unchanged: this enriches what the
 integration is, not when it comes.
+
+### D-34 · Every stage commits an artifact the next stage can read — 2026-08-28
+Adopted from Anthropic's AI-native SDLC playbook (entry
+2026-08-28-ai-native-sdlc-playbook) as an articulated principle — it was
+already true implicitly. Canon is the design lane of that cycle: Strata
+and this log feed Plan; prototypes are Build artifacts; review runs are
+Test; PR graduation is Deploy; staleness is Maintain feeding back to
+Plan. Doubles as the alpha-conversation frame, citable to Anthropic's
+own literature, and as a description of how Canon itself is built.
