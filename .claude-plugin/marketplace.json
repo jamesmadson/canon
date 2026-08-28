@@ -37,14 +37,14 @@
       "source": "./plugin/strata"
     },
     {
-      "name": "dieter",
+      "name": "deter",
       "description": "Less, but better. A review that removes — every finding priced against the surface's job, one thing kept, at most one thing missing, and never an unrequested rewrite.",
       "author": {
         "name": "James Madson",
         "url": "https://jamesmadson.github.io/canon/"
       },
       "category": "design",
-      "source": "./plugin/dieter"
+      "source": "./plugin/deter"
     }
   ]
 }
