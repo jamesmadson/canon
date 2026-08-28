@@ -339,6 +339,15 @@ the reviews. Read the neighbors accordingly:
 - **Figma** — fighting for design-in-code centripetally (Make, Dev Mode);
   will build its version *inside* the canvas, which is the version the
   field entries show people leaving. Coexist via embed; never depend.
+- **Frame.io** — the best *analogy*, offered unprompted by the field
+  (entry `2026-08-28-frameio-comparison`): comments anchored to the
+  artifact, share links for people without the authoring tool. Use it as
+  the door-opener — "Frame.io for coded prototypes" — then correct on the
+  second sentence: Canon references live branches instead of hosting
+  uploaded versions, and feedback becomes an evidence record with
+  decided-states instead of an approve/reject queue. Also the
+  willingness-to-pay reference: review tooling in this shape sold to
+  Adobe for $1.275B.
 - **Chromatic / Pastel / Markup.io / BugHerd / Vercel previews** — the
   honest near-competitors. Annotation-on-a-URL is a commodity; the moat
   is annotations landing in an evidence record with a decided-state, and
