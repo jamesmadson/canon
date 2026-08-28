@@ -35,9 +35,12 @@ currently answers "where's the latest version?" from memory.
 
 ## The riskiest assumptions (test these, in order)
 
-1. **Teams will name branches `prototype-*`** (or map an existing
-   convention) to get their work indexed. If they won't adopt the
-   convention, nothing downstream matters.
+1. **Teams will select which branches are prototypes.** Connecting a
+   repo lists its branches; the person picks what's visible — no rename
+   required to be indexed (D-22, superseding the `prototype-*`
+   requirement). Prototypes *created in Canon* get the prefix, where it
+   costs nothing. The assumption is now curation-on-connect, not
+   convention adoption.
 2. **Feedback filed at the prototype beats feedback in Slack** — people
    will actually comment where the work lives.
 3. **Skill runs on real prototypes produce findings a lead acts on** —
@@ -71,8 +74,9 @@ security story honest.
 
 | In (alpha) | Out (explicitly) |
 | --- | --- |
-| GitHub App, read-only: list branches matching `prototype-*`, last commit, author, staleness | Hosting/deploying prototypes (link to the team's existing preview URLs) |
+| GitHub App, read-only: list all branches; the person selects which appear as prototypes; last commit, author, staleness. Canon-created prototypes get the `prototype-` prefix | Hosting/deploying prototypes (link to the team's existing preview URLs) |
 | Figma attach-by-URL with live embed | Figma API import, component sync |
+| Prototype cards carry screen thumbnails; the detail page previews the live URL at user-selected device sizes and orientations (phone, phone landscape, tablet, desktop) | Real-device farms, pixel-diffing |
 | Prototype page: description, links, activity, feedback thread | Realtime multiplayer anything |
 | Feedback: the annotation layer (below) plus a plain comment box, both filing Strata entries; reports (themes/open) per project | Public commenting, reactions, notifications beyond email |
 | Access: GitHub org membership = project access; share links for viewers | Roles/permissions matrix, SSO — alpha rides on GitHub auth |
@@ -151,6 +155,7 @@ Generalized:
 | `interface` | the project's own interaction conventions, learned from its prototypes |
 | `ux` | flows, decision forks taken, patterns rejected and why |
 | `copy` | voice rules, banned words, approved strings with their contexts |
+| `cairn` (candidate) | product decisions with their reasoning — the trail markers; sourced from `docs/DECISIONS.md`'s meta-pattern |
 
 Each follows the Strata disciplines: append-only layers, verbatim kept
 apart from interpretation, an evidence bar before anything is called a
