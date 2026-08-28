@@ -38,7 +38,7 @@ const SOURCES = [
     ← All prototypes
   </a>
 
-  <h1 class="mt-2 text-3xl font-bold tracking-tight">New prototype</h1>
+  <h1 class="mt-2 text-xl font-bold tracking-tight">New prototype</h1>
   <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
     A prototype is a version of a screen, kept where it already lives. Name it,
     then say where it comes from — Canon opens a branch for it, or points at a
@@ -92,7 +92,7 @@ const SOURCES = [
         type="text"
         value={NEW_PROTOTYPE.baseBranch}
         readonly
-        class="mt-1.5 w-full rounded-md border border-rule bg-bg px-3 py-2.5 font-mono text-sm text-ink focus-visible:outline-2 focus-visible:outline-ink"
+        class="mt-1.5 w-full rounded-md border border-rule bg-bg px-3 py-2.5 font-mono text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-ink"
       />
       <span class="mt-1.5 block text-[11px] leading-relaxed font-medium text-ink-soft">
         The branch the new one starts from. Whatever is on{' '}
@@ -119,13 +119,13 @@ const SOURCES = [
   <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
     <a
       href={withBase('/v2-preview/')}
-      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      class="btn btn-quiet"
     >
       Cancel
     </a>
     <a
       href={withBase('/v2-preview/new/created/')}
-      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      class="btn btn-primary"
     >
       Create prototype
     </a>

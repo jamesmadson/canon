@@ -45,7 +45,7 @@ const SKILLS = [
       {SKILLS.map((skill) => (
         <div class="flex items-baseline justify-between gap-4 border-b border-rule bg-bg px-4 py-3.5">
           <div class="min-w-0">
-            <p class="font-mono text-sm font-semibold text-ink">{skill.name}</p>
+            <p class="font-mono text-[13px] font-semibold text-ink">{skill.name}</p>
             <p class="mt-0.5 text-[13px] leading-snug font-medium text-ink-soft">{skill.line}</p>
           </div>
           {skill.state === 'on' ? (
@@ -67,13 +67,13 @@ const SKILLS = [
   <div class="mt-8 flex items-center justify-between gap-4">
     <a
       href={withBase('/v2-preview/onboarding/figma/')}
-      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      class="btn btn-quiet"
     >
       Back
     </a>
     <a
       href={withBase('/v2-preview/')}
-      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      class="btn btn-primary"
     >
       Open {PROJECT.name}
     </a>

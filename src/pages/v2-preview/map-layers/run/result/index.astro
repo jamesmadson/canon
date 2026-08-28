@@ -33,13 +33,13 @@ const LIFECYCLE = [
     ← Run a review
   </a>
 
-  <h1 class="mt-2 text-3xl font-bold tracking-tight">Review run</h1>
+  <h1 class="mt-2 text-xl font-bold tracking-tight">Review run</h1>
   <p class="mt-1 font-mono text-[13px] break-all text-ink-soft">{SCRIPTED_RUN.target}</p>
 
   <section class="mt-6" aria-labelledby="lifecycle-heading">
     <h2
       id="lifecycle-heading"
-      class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft"
+      class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft"
     >
       What happened
     </h2>
@@ -66,10 +66,10 @@ const LIFECYCLE = [
 
   <section class="mt-8" aria-labelledby="findings-heading">
     <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <h2 id="findings-heading" class="text-sm font-semibold uppercase tracking-wide text-ink-soft">
+      <h2 id="findings-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
         Findings
       </h2>
-      <p class="text-[11px] font-medium text-ink-soft">
+      <p class="text-[11px] font-medium text-ink-soft tabular-nums">
         {SCRIPTED_RUN.findings.length} removals · 1 kept
       </p>
     </div>
@@ -95,13 +95,13 @@ const LIFECYCLE = [
   <div class="mt-8 flex max-w-2xl items-center justify-between gap-4">
     <a
       href={withBase('/v2-preview/')}
-      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      class="btn btn-quiet"
     >
       Dashboard
     </a>
     <a
       href={withBase('/v2-preview/map-layers/')}
-      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      class="btn btn-primary"
     >
       Back to {prototype.name}
     </a>

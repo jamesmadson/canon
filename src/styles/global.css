@@ -98,3 +98,61 @@ summary,
 [role="button"]:not([aria-disabled="true"]) {
   cursor: pointer;
 }
+
+/* Two button shapes, and only two. Primary is an ink fill; quiet is a border.
+   One height, one radius, one horizontal padding — written here rather than
+   spelled out per screen so a third variant cannot quietly appear. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding-inline: 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+.btn:active {
+  transform: scale(0.99);
+}
+
+.btn-primary {
+  background-color: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-bg);
+}
+.btn-primary:hover {
+  background-color: color-mix(in oklab, var(--color-ink) 88%, var(--color-bg));
+  border-color: color-mix(in oklab, var(--color-ink) 88%, var(--color-bg));
+}
+
+.btn-quiet {
+  background-color: var(--color-bg);
+  border-color: var(--color-rule-strong);
+  color: var(--color-ink);
+}
+.btn-quiet:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition-duration: 0s;
+  }
+  .btn:active {
+    transform: none;
+  }
+}

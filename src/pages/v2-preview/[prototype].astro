@@ -35,9 +35,9 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
   </a>
 
   <div class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-    <h1 class="text-3xl font-bold tracking-tight">{prototype.name}</h1>
+    <h1 class="text-2xl font-bold tracking-tight">{prototype.name}</h1>
     {stale && (
-      <span class="rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold tracking-wide text-ink">
+      <span class="rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold tracking-wide text-ink tabular-nums">
         Idle {idle} days
       </span>
     )}
@@ -53,7 +53,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
   </p>
 
   <section class="mt-5" aria-labelledby="screen-heading">
-    <h2 id="screen-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+    <h2 id="screen-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
       The screen
     </h2>
     {prototype.screen ? (
@@ -94,14 +94,14 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
     </div>
     <div>
       <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Last activity</dt>
-      <dd class="mt-0.5 text-ink">
+      <dd class="mt-0.5 text-ink tabular-nums">
         {idleLabel(prototype.lastActivity, PREVIEW_AS_OF)} — {prototype.lastActivityNote}
       </dd>
     </div>
   </dl>
 
   <section class="mt-8" aria-labelledby="sources-heading">
-    <h2 id="sources-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+    <h2 id="sources-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
       Sources
     </h2>
     <div class="overflow-hidden rounded-md border border-rule">
@@ -124,10 +124,10 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
 
   <section class="mt-8" aria-labelledby="feedback-heading">
     <div class="mb-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <h2 id="feedback-heading" class="text-sm font-semibold uppercase tracking-wide text-ink-soft">
+      <h2 id="feedback-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
         Feedback
       </h2>
-      <p class="text-[11px] font-medium text-ink-soft">
+      <p class="text-[11px] font-medium text-ink-soft tabular-nums">
         Filed with Strata · {record.feedback.length}{' '}
         {record.feedback.length === 1 ? 'entry' : 'entries'}
       </p>
@@ -156,7 +156,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
   </section>
 
   <section class="mt-8" aria-labelledby="review-heading">
-    <h2 id="review-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+    <h2 id="review-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
       Review runs
     </h2>
     {record.review ? (
@@ -171,7 +171,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
         {record.runPath && (
           <a
             href={withBase(record.runPath)}
-            class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            class="btn btn-primary"
           >
             Run a review
           </a>
@@ -185,7 +185,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
   </section>
 
   <section class="mt-8" aria-labelledby="others-heading">
-    <h2 id="others-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+    <h2 id="others-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
       Elsewhere in {PROJECT.name}
     </h2>
     <div class="overflow-hidden rounded-md border border-rule">
@@ -198,7 +198,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
             <span class="text-[15px] font-semibold text-ink underline decoration-rule-strong underline-offset-4">
               {other.name}
             </span>
-            <span class="text-[11px] font-medium text-ink-soft">
+            <span class="text-[11px] font-medium text-ink-soft tabular-nums">
               {other.author} · {idleLabel(other.lastActivity, PREVIEW_AS_OF)}
             </span>
           </a>

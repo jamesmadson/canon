@@ -17,7 +17,7 @@ import { IMPORT_BRANCHES, PROJECT } from '../../../../data/v2Preview';
     ← Connect a source
   </a>
 
-  <h1 class="mt-2 text-3xl font-bold tracking-tight">Choose what's visible</h1>
+  <h1 class="mt-2 text-xl font-bold tracking-tight">Choose what's visible</h1>
   <p class="mt-1 font-mono text-[13px] break-all text-ink-soft">{PROJECT.secondRepo}</p>
   <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
     Same question as the first repository, asked again: which of these branches are prototypes?
@@ -48,13 +48,13 @@ import { IMPORT_BRANCHES, PROJECT } from '../../../../data/v2Preview';
   <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
     <a
       href={withBase('/v2-preview/import/')}
-      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      class="btn btn-quiet"
     >
       Back
     </a>
     <a
       href={withBase('/v2-preview/import/done/')}
-      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      class="btn btn-primary"
     >
       Continue
     </a>

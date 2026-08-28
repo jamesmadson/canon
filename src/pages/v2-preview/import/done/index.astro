@@ -16,7 +16,7 @@ const heading = count.charAt(0).toUpperCase() + count.slice(1);
   active="overview"
 >
   <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Source connected</p>
-  <h1 class="mt-1 text-3xl font-bold tracking-tight">
+  <h1 class="mt-1 text-xl font-bold tracking-tight">
     {heading} prototypes added from {repoName}
   </h1>
   <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
@@ -52,13 +52,13 @@ const heading = count.charAt(0).toUpperCase() + count.slice(1);
   <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
     <a
       href={withBase('/v2-preview/import/branches/')}
-      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      class="btn btn-quiet"
     >
       Back
     </a>
     <a
       href={withBase('/v2-preview/')}
-      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      class="btn btn-primary"
     >
       Back to the dashboard
     </a>

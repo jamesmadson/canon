@@ -22,7 +22,7 @@ const { shape = 'square', on, label } = Astro.props;
 <span
   aria-hidden="true"
   class:list={[
-    'flex size-4 shrink-0 items-center justify-center border text-[10px] leading-none',
+    'flex size-4 shrink-0 items-center justify-center border text-[11px] leading-none',
     shape === 'round' ? 'rounded-full' : 'rounded-sm',
     on ? 'border-ink' : 'border-rule-strong bg-bg',
     on && shape === 'square' && 'bg-ink font-bold text-bg',

@@ -38,9 +38,6 @@ const STATS = [
   { label: 'Stale', value: String(staleCount), note: `Quiet ${STALE_AFTER_DAYS} days or more` },
   { label: 'Review runs', value: String(REVIEW_RUNS), note: 'Every one triggered by a person' },
 ];
-
-const primaryButton =
-  'flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
 ---
 
 <AppShell
@@ -50,10 +47,10 @@ const primaryButton =
 >
   <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
     <div class="min-w-0">
-      <h1 class="text-3xl font-bold tracking-tight">{PROJECT.name}</h1>
+      <h1 class="text-2xl font-bold tracking-tight">{PROJECT.name}</h1>
       <p class="mt-1 text-[15px] font-medium text-ink-soft">{PROJECT.tagline}</p>
     </div>
-    <a href={withBase('/v2-preview/new/')} class={primaryButton}>New prototype</a>
+    <a href={withBase('/v2-preview/new/')} class="btn btn-primary">New prototype</a>
   </div>
 
   <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
@@ -63,12 +60,14 @@ const primaryButton =
   <div class="mt-6 overflow-hidden rounded-md border border-rule">
     <dl class="-mr-px -mb-px grid grid-cols-2 lg:grid-cols-4">
       {STATS.map((stat) => (
-        <div class="border-r border-b border-rule bg-bg px-4 py-3">
+        <div class="flex flex-col gap-1 border-r border-b border-rule bg-bg px-4 py-3">
           <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
             {stat.label}
           </dt>
-          <dd class="mt-0.5 text-lg font-semibold text-ink">{stat.value}</dd>
-          <dd class="text-[11px] font-medium text-ink-soft">{stat.note}</dd>
+          <dd class="text-2xl leading-none font-semibold tracking-tight text-ink tabular-nums">
+            {stat.value}
+          </dd>
+          <dd class="text-[11px] font-medium text-ink-soft tabular-nums">{stat.note}</dd>
         </div>
       ))}
     </dl>
@@ -99,10 +98,10 @@ const primaryButton =
 
   <section class="mt-8 scroll-mt-6" id="prototypes" aria-labelledby="prototypes-heading">
     <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <h2 id="prototypes-heading" class="text-sm font-semibold uppercase tracking-wide text-ink-soft">
+      <h2 id="prototypes-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
         Prototypes
       </h2>
-      <p class="text-[11px] font-medium text-ink-soft">
+      <p class="text-[11px] font-medium text-ink-soft tabular-nums">
         {PROTOTYPES.length} indexed · {staleCount} idle
       </p>
     </div>

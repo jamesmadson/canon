@@ -40,7 +40,7 @@ const source = sourceLine(prototype);
         {prototype.name}
       </span>
       {stale && (
-        <span class="rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold tracking-wide text-ink">
+        <span class="rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold tracking-wide text-ink tabular-nums">
           Idle {idle} days
         </span>
       )}
@@ -55,7 +55,7 @@ const source = sourceLine(prototype);
       {source.text}
     </span>
 
-    <span class="block text-[11px] font-medium text-ink-soft">
+    <span class="block text-[11px] font-medium text-ink-soft tabular-nums">
       {prototype.author} · {idleLabel(prototype.lastActivity, PREVIEW_AS_OF)}
     </span>
   </span>

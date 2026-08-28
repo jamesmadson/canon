@@ -74,7 +74,7 @@ const FLOWS = [
   title="Canon v2 preview — flow map"
   description="Every flow in the scripted Canon v2 preview, as a numbered sequence of links: first run, create, import, review, feedback."
 >
-  <h1 class="text-3xl font-bold tracking-tight">Flow map</h1>
+  <h1 class="text-xl font-bold tracking-tight">Flow map</h1>
   <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
     Every screen in the {PROJECT.name} preview, grouped into the {spellNumber(FLOWS.length)} paths
     worth walking. Each step is a link to the screen it names, so this page doubles as the script
@@ -89,10 +89,10 @@ const FLOWS = [
     {FLOWS.map((flow, flowIndex) => (
       <section aria-labelledby={`${flow.id}-heading`}>
         <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h2 id={`${flow.id}-heading`} class="text-lg font-semibold tracking-tight text-ink">
-            <span class="text-ink-soft">{flowIndex + 1}.</span> {flow.name}
+          <h2 id={`${flow.id}-heading`} class="text-[15px] font-semibold tracking-tight text-ink">
+            <span class="text-ink-soft tabular-nums">{flowIndex + 1}.</span> {flow.name}
           </h2>
-          <p class="text-[11px] font-medium text-ink-soft">{flow.steps.length} screens</p>
+          <p class="text-[11px] font-medium text-ink-soft tabular-nums">{flow.steps.length} screens</p>
         </div>
         <p class="mt-1 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
           {flow.blurb}
@@ -107,7 +107,7 @@ const FLOWS = [
               >
                 <span
                   aria-hidden="true"
-                  class="flex size-6 shrink-0 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink-soft"
+                  class="flex size-6 shrink-0 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink-soft tabular-nums"
                 >
                   {i + 1}
                 </span>

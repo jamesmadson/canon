@@ -36,7 +36,7 @@ const SKILLS = [
     ← {prototype.name}
   </a>
 
-  <h1 class="mt-2 text-3xl font-bold tracking-tight">Run a review</h1>
+  <h1 class="mt-2 text-xl font-bold tracking-tight">Run a review</h1>
   <p class="mt-1 font-mono text-[13px] break-all text-ink-soft">{prototype.ref}</p>
 
   <div class="mt-6 max-w-xl">
@@ -62,7 +62,7 @@ const SKILLS = [
               <span class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                 <span
                   class:list={[
-                    'font-mono text-sm font-semibold',
+                    'font-mono text-[13px] font-semibold',
                     skill.state === 'on' ? 'text-ink' : 'text-ink-soft',
                   ]}
                 >
@@ -104,13 +104,13 @@ const SKILLS = [
   <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
     <a
       href={withBase('/v2-preview/map-layers/')}
-      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      class="btn btn-quiet"
     >
       Cancel
     </a>
     <a
       href={withBase('/v2-preview/map-layers/run/result/')}
-      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      class="btn btn-primary"
     >
       Queue run
     </a>

@@ -16,7 +16,7 @@ import { PROJECT } from '../../../data/v2Preview';
     ← Overview
   </a>
 
-  <h1 class="mt-2 text-3xl font-bold tracking-tight">Connect a source</h1>
+  <h1 class="mt-2 text-xl font-bold tracking-tight">Connect a source</h1>
   <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
     {PROJECT.name} already reads <span class="font-mono text-[13px]">{PROJECT.repo}</span> and one
     Figma file. A project can hold more than one of each — a second repository joins the same
@@ -26,7 +26,7 @@ import { PROJECT } from '../../../data/v2Preview';
   <div class="mt-6 max-w-xl">
     <div class="rounded-md border border-rule bg-surface/50 px-4 py-3">
       <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Connected as</p>
-      <p class="mt-0.5 font-mono text-sm text-ink">{PROJECT.handle} · via your sign-in</p>
+      <p class="mt-0.5 font-mono text-[13px] text-ink">{PROJECT.handle} · via your sign-in</p>
     </div>
 
     <label class="mt-4 block">
@@ -35,7 +35,7 @@ import { PROJECT } from '../../../data/v2Preview';
         type="text"
         value={PROJECT.secondRepo}
         readonly
-        class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-mono text-sm text-ink focus-visible:outline-2 focus-visible:outline-ink"
+        class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-mono text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-ink"
       />
     </label>
 
@@ -53,13 +53,13 @@ import { PROJECT } from '../../../data/v2Preview';
   <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
     <a
       href={withBase('/v2-preview/')}
-      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      class="btn btn-quiet"
     >
       Cancel
     </a>
     <a
       href={withBase('/v2-preview/import/branches/')}
-      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      class="btn btn-primary"
     >
       Continue
     </a>

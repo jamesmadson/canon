@@ -26,11 +26,11 @@ const NEXT = [
   active="prototypes"
 >
   <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">New prototype</p>
-  <h1 class="mt-1 text-3xl font-bold tracking-tight">{NEW_PROTOTYPE.name} is ready</h1>
+  <h1 class="mt-1 text-xl font-bold tracking-tight">{NEW_PROTOTYPE.name} is ready</h1>
 
   <div class="mt-5 max-w-xl rounded-md border border-rule bg-surface/40 px-4 py-3">
     <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Branch created</p>
-    <p class="mt-1 font-mono text-sm break-all text-ink">{NEW_PROTOTYPE.branch}</p>
+    <p class="mt-1 font-mono text-[13px] break-all text-ink">{NEW_PROTOTYPE.branch}</p>
     <p class="mt-1 text-[13px] leading-relaxed font-medium text-ink-soft">
       Opened from <span class="font-mono">{NEW_PROTOTYPE.baseBranch}</span> on{' '}
       <span class="font-mono">{PROJECT.repo}</span>. It is a branch like any other — clone it,
@@ -39,7 +39,7 @@ const NEXT = [
   </div>
 
   <section class="mt-8 max-w-xl" aria-labelledby="next-heading">
-    <h2 id="next-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+    <h2 id="next-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
       What happens next
     </h2>
     <div class="overflow-hidden rounded-md border border-rule">
@@ -61,13 +61,13 @@ const NEXT = [
   <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
     <a
       href={withBase('/v2-preview/')}
-      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      class="btn btn-quiet"
     >
       Back to the dashboard
     </a>
     <a
       href={withBase(`/v2-preview/${NEW_PROTOTYPE.slug}/`)}
-      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      class="btn btn-primary"
     >
       Open {NEW_PROTOTYPE.name}
     </a>
