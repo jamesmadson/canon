@@ -28,7 +28,7 @@ const STATS = [
   {
     label: 'Prototypes',
     value: String(PROTOTYPES.length),
-    note: `${sentenceCase(spellNumber(GIT_PROTOTYPES))} from Git, ${spellNumber(FIGMA_PROTOTYPES)} from Figma`,
+    note: `${sentenceCase(spellNumber(GIT_PROTOTYPES))} from Git, ${spellNumber(FIGMA_PROTOTYPES)} from\u00A0Figma`,
   },
   {
     label: 'From',
@@ -36,7 +36,7 @@ const STATS = [
     note: `${SELECTED_BRANCHES} picked at connect, ${OPENED_SINCE} opened since`,
   },
   { label: 'Stale', value: String(staleCount), note: `Quiet ${STALE_AFTER_DAYS} days or more` },
-  { label: 'Review runs', value: String(REVIEW_RUNS), note: 'Every one triggered by a person' },
+  { label: 'Review runs', value: String(REVIEW_RUNS), note: 'Every one triggered by a\u00A0person' },
 ];
 ---
 

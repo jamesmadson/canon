@@ -12,7 +12,7 @@
 
 export const PREVIEW_AS_OF = '2026-08-27';
 
-export const PREVIEW_NOTE = 'A scripted preview, not the product. All names and data invented.';
+export const PREVIEW_NOTE = 'A scripted preview, not the product. All names and data\u00A0invented.';
 
 /** Which wireframe ScreenArt draws for a prototype. */
 export type ScreenKey = 'today' | 'streaks' | 'map' | 'onboarding';
@@ -89,7 +89,7 @@ export const PROJECT = {
   team: 'Fern Labs',
   tagline: 'A daily dose of the outdoors, measured.',
   blurb:
-    'A phone app for logging time outside: a daily target ring, a streak, and a quiet map of the green space nearby. Every prototype here is indexed from one repository and one Figma file.',
+    'A phone app for logging time outside: a daily target ring, a streak, and a quiet map of the green space nearby. Every prototype here is indexed from one repository and one Figma\u00A0file.',
   repo: 'fern-labs/fernwell',
   /** The second repository, connected after onboarding. Also invented. */
   secondRepo: 'fern-labs/trailhead',
@@ -179,7 +179,7 @@ export const PROTOTYPES: Prototype[] = [
     createdInCanon: false,
     author: 'Ruth Vantine',
     lastActivity: '2026-08-22',
-    lastActivityNote: 'Commit — "drop the flame, keep the count"',
+    lastActivityNote: 'Commit — "drop the flame, keep the\u00A0count"',
     sources: [
       { label: 'Branch', detail: 'fern-labs/fernwell · exp/streak-cards' },
       { label: 'Preview', detail: 'streak-cards.preview.fernlabs.example' },
@@ -196,7 +196,7 @@ export const PROTOTYPES: Prototype[] = [
     createdInCanon: true,
     author: 'Piet Halvorsen',
     lastActivity: '2026-08-01',
-    lastActivityNote: 'Commit — "first pass at the parks layer"',
+    lastActivityNote: 'Commit — "first pass at the parks\u00A0layer"',
     sources: [
       { label: 'Branch', detail: 'fern-labs/fernwell · prototype-map-layers' },
       { label: 'Preview', detail: 'map-layers.preview.fernlabs.example' },
@@ -250,11 +250,11 @@ export const RECORDS: Record<string, PrototypeRecord> = {
         date: '2026-08-20',
         speaker: 'P-07',
         context: 'Moderated session, 30 minutes, own phone',
-        said: 'The gap is so small I just read it as a circle.',
+        said: 'The gap is so small I just read it as a\u00A0circle.',
         meant:
           'My reading: the same misread as P-02, arrived at from the shape rather than the number. Two participants, which is a possible pattern, not a pattern.',
         decided:
-          '2026-08-25 — The ring now holds a visible gap until the target is actually met, and the minutes remaining print inside it. Shipped on feat/today-ring-v2.',
+          '2026-08-25 — The ring now holds a visible gap until the target is actually met, and the minutes remaining print inside it. Shipped on\u00A0feat/today-ring-v2.',
       },
       {
         id: '2026-08-21-01',
@@ -284,14 +284,14 @@ export const RECORDS: Record<string, PrototypeRecord> = {
           because: 'The same figure is already printed inside the ring, a screen-height above it.',
         },
         {
-          remove: 'The count-up animation on the minutes figure',
+          remove: 'The count-up animation on the minutes\u00A0figure',
           because:
             'It withholds the one number the screen exists for by about a second, and the ring has already answered the question by the time it lands.',
         },
         {
           remove: 'The share button in the header',
           because:
-            'It is the only control in the top corner and the least-used action on the screen. Log time outside — the reason the screen opens — sits in thumb reach and should stay the only button.',
+            'It is the only control in the top corner and the least-used action on the screen. Log time outside — the reason the screen opens — sits in thumb reach and should stay the only\u00A0button.',
         },
       ],
       kept: 'The gap in the ring stays. It is the one mark on the screen that tells forty-eight minutes apart from sixty.',
@@ -306,7 +306,7 @@ export const RECORDS: Record<string, PrototypeRecord> = {
         date: '2026-08-16',
         speaker: 'P-05',
         context: 'Moderated session, 25 minutes, own phone',
-        said: 'I missed a Tuesday and then I stopped opening it. It felt like being told off.',
+        said: 'I missed a Tuesday and then I stopped opening it. It felt like being told\u00A0off.',
         meant:
           'My reading: the broken streak reads as a verdict on the person rather than a record of a week. One participant.',
         decided: null,
@@ -337,7 +337,7 @@ export const RECORDS: Record<string, PrototypeRecord> = {
         {
           remove: 'The "Don\'t lose your streak" subtitle',
           because:
-            'It restates the number above it, and two participants read it as pressure rather than as information.',
+            'It restates the number above it, and two participants read it as pressure rather than as\u00A0information.',
         },
       ],
       kept: 'The plain day count stays. It is the only thing on the card a person came to check.',
@@ -394,7 +394,7 @@ export const SCRIPTED_RUN: ReviewRun = {
   target: 'prototype-map-layers · map-layers.preview.fernlabs.example',
   findings: [
     {
-      remove: 'The compass rose above the layer chips',
+      remove: 'The compass rose above the layer\u00A0chips',
       because:
         'North is up in every state this screen has, so the rose is a fixed answer to a question nobody asked. Where am I is the question, and the location dot has already answered it a thumb-length lower down.',
     },
