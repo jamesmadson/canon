@@ -1,0 +1,42 @@
+---
+import type { FeedbackEntry } from '../data/v2Preview';
+
+interface Props {
+  entry: FeedbackEntry;
+  /** Compact drops the context line and the open-question footer. */
+  compact?: boolean;
+}
+
+const { entry, compact = false } = Astro.props;
+---
+
+<article class="border-b border-rule bg-bg px-4 py-4 last:border-b-0">
+  <header class="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[11px] font-medium text-ink-soft">
+    <span class="rounded-sm border border-rule-strong px-1.5 py-0.5 font-mono font-semibold text-ink">
+      {entry.speaker}
+    </span>
+    <time datetime={entry.date}>{entry.date}</time>
+    {!compact && <span>· {entry.context}</span>}
+  </header>
+
+  <dl class="flex flex-col gap-3">
+    <div>
+      <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Said</dt>
+      <dd class="mt-1 border-l border-rule-strong pl-3 text-[15px] leading-relaxed font-medium text-ink">
+        “{entry.said}”
+      </dd>
+    </div>
+    <div>
+      <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Meant</dt>
+      <dd class="mt-1 border-l border-rule pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+        {entry.meant}
+      </dd>
+    </div>
+    <div>
+      <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Decided</dt>
+      <dd class="mt-1 border-l border-rule pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+        {entry.decided ?? 'Nothing yet. This one is still open.'}
+      </dd>
+    </div>
+  </dl>
+</article>

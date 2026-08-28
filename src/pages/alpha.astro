@@ -1,0 +1,166 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PreviewLabel from '../components/PreviewLabel.astro';
+import PrototypeRow from '../components/PrototypeRow.astro';
+import FeedbackEntryCard from '../components/FeedbackEntryCard.astro';
+import ReviewRunCard from '../components/ReviewRunCard.astro';
+import { withBase } from '../lib/withBase';
+import { PROTOTYPES, RECORDS } from '../data/v2Preview';
+
+const record = RECORDS['trip-recap'];
+// The entry with a Decided line — the pane should show the shape end to end.
+const featuredEntry = record.feedback.find((entry) => entry.decided) ?? record.feedback[0];
+const paneHeading = 'text-[11px] font-semibold uppercase tracking-wide text-ink-soft';
+---
+
+<BaseLayout
+  title="Canon v2 alpha"
+  description="Canon v2 keeps your team's prototypes, their feedback, and their reviews in one place. Join the alpha."
+>
+  <section class="mb-12 max-w-2xl">
+    <p class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Canon v2 · alpha</p>
+    <h1 class="text-3xl font-bold leading-snug sm:text-4xl">
+      Your prototypes, in one place, with the feedback still attached.
+    </h1>
+    <p class="mt-5 text-[15px] leading-relaxed font-medium text-ink-soft">
+      AI made it easy to build five versions of a screen in an afternoon. It did nothing
+      about what comes next — branches nobody can find, Figma links buried in a chat
+      thread, and feedback scattered across three of them.
+    </p>
+    <p class="mt-3 text-[15px] leading-relaxed font-medium text-ink-soft">
+      Canon lists every prototype your team has made, from GitHub and Figma, keeps the
+      feedback filed at the work itself, and flags the ones nobody has touched in two
+      weeks. Your work stays where it is: Canon reads it, never copies it.
+    </p>
+  </section>
+
+  <section class="mb-14" aria-labelledby="preview-heading">
+    <h2 id="preview-heading" class="mb-2 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+      What it looks like
+    </h2>
+    <p class="mb-4 max-w-2xl text-sm font-medium text-ink-soft">
+      Three parts of one project: the prototypes it has, one piece of feedback filed
+      against one of them, and a review that only ever suggests taking things away.
+    </p>
+
+    <div class="overflow-hidden rounded-lg border border-rule-strong">
+      <div class="grid grid-cols-1 lg:grid-cols-3">
+        <section class="overflow-hidden border-b border-rule lg:border-r lg:border-b-0" aria-label="Prototypes pane">
+          <p class={`border-b border-rule px-4 py-2 ${paneHeading}`}>Prototypes</p>
+          <div class="-mb-px">
+            {PROTOTYPES.map((prototype) => <PrototypeRow prototype={prototype} compact />)}
+          </div>
+        </section>
+
+        <section class="border-b border-rule lg:border-r lg:border-b-0" aria-label="Feedback pane">
+          <p class={`border-b border-rule px-4 py-2 ${paneHeading}`}>Feedback — said, meant, decided</p>
+          <FeedbackEntryCard entry={featuredEntry} compact />
+        </section>
+
+        <section aria-label="Review pane">
+          <p class={`border-b border-rule px-4 py-2 ${paneHeading}`}>Review — what to remove</p>
+          {record.review && <ReviewRunCard run={record.review} compact />}
+        </section>
+      </div>
+
+      <PreviewLabel placement="bottom" />
+    </div>
+
+    <a
+      href={withBase('/v2-preview/')}
+      class="mt-3 flex min-h-11 items-center text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Walk through the full screens
+    </a>
+    <p class="max-w-2xl text-sm font-medium text-ink-soft">
+      A scripted click-through of the dashboard and one prototype.
+    </p>
+  </section>
+
+  <section class="mb-14" aria-labelledby="how-heading">
+    <h2 id="how-heading" class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+      What the alpha does
+    </h2>
+    <div class="overflow-hidden rounded-lg border border-rule">
+      <div class="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-3">
+        <div class="border-r border-b border-rule bg-bg p-4">
+          <h3 class="text-base font-semibold text-ink">Indexes what exists</h3>
+          <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+            Connect a repository read-only and attach a Figma file. Every branch named
+            <span class="font-mono"> prototype-*</span> shows up with its author, its last
+            commit, and how long it has been quiet.
+          </p>
+        </div>
+        <div class="border-r border-b border-rule bg-bg p-4">
+          <h3 class="text-base font-semibold text-ink">Keeps the feedback</h3>
+          <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+            Comments file as dated entries: what a person said, word for word; what you
+            think it meant, marked as your reading; and what was decided. Names never
+            enter the record.
+          </p>
+        </div>
+        <div class="border-r border-b border-rule bg-bg p-4">
+          <h3 class="text-base font-semibold text-ink">Reviews on request</h3>
+          <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+            Press a button and a review runs against a prototype. The first one only
+            proposes removals, each with a reason. Nothing runs on its own.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mb-12 max-w-xl" aria-labelledby="waitlist-heading">
+    <h2 id="waitlist-heading" class="text-2xl font-bold tracking-tight">Join the alpha</h2>
+    <p class="mt-3 text-[15px] leading-relaxed font-medium text-ink-soft">
+      Teams of two to fifteen who prototype in code and Figma at the same time. Onboarded
+      by hand, a few at a time.
+    </p>
+
+    <div class="mt-5 rounded-lg border border-rule-strong p-4 sm:p-5">
+      <label for="waitlist-email" class="block text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+        Work email
+      </label>
+      <div class="mt-2 flex flex-col gap-2 sm:flex-row">
+        <input
+          id="waitlist-email"
+          type="email"
+          name="email"
+          disabled
+          placeholder="you@studio.example"
+          aria-describedby="waitlist-note"
+          class="min-h-11 w-full rounded-md border border-rule bg-surface px-3 text-sm font-medium text-ink-soft placeholder:text-ink-soft sm:flex-1"
+        />
+        <button
+          type="button"
+          disabled
+          aria-describedby="waitlist-note"
+          class="min-h-11 rounded-md border border-rule bg-surface px-4 text-sm font-semibold text-ink-soft"
+        >
+          Request an invite
+        </button>
+      </div>
+      <p id="waitlist-note" class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+        The waitlist opens shortly — or email
+        <a
+          href="mailto:james@jamesmadson.me"
+          class="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+        >
+          james@jamesmadson.me
+        </a>
+        to be first.
+      </p>
+    </div>
+
+    <p class="mt-5 text-[13px] leading-relaxed font-medium text-ink-soft">
+      Built by the practice behind the Canon gallery — twenty design skills, each read in
+      full, license-checked, and written up by hand.
+    </p>
+    <a
+      href={withBase('/skills/')}
+      class="flex min-h-11 items-center text-[13px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      See the gallery
+    </a>
+  </section>
+</BaseLayout>

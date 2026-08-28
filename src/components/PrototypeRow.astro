@@ -1,0 +1,46 @@
+---
+import { withBase } from '../lib/withBase';
+import { daysIdle, idleLabel, isStale } from '../lib/staleness';
+import { PREVIEW_AS_OF, type Prototype } from '../data/v2Preview';
+
+interface Props {
+  prototype: Prototype;
+  /** The three-pane preview on /alpha shows the same rows with the prose trimmed. */
+  compact?: boolean;
+}
+
+const { prototype, compact = false } = Astro.props;
+const stale = isStale(prototype.lastActivity, PREVIEW_AS_OF);
+const idle = daysIdle(prototype.lastActivity, PREVIEW_AS_OF);
+---
+
+<a
+  href={withBase(`/v2-preview/${prototype.slug}/`)}
+  class="group flex min-h-11 flex-col gap-1.5 border-b border-rule bg-bg px-4 py-3 transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2"
+>
+  <span class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+    <span class="text-[15px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors group-hover:decoration-ink">
+      {prototype.name}
+    </span>
+    {stale && (
+      <span class="rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold tracking-wide text-ink">
+        Idle {idle} days
+      </span>
+    )}
+  </span>
+
+  {!compact && (
+    <span class="max-w-2xl text-[13px] leading-snug font-medium text-ink-soft">{prototype.summary}</span>
+  )}
+
+  <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-medium text-ink-soft">
+    <span class="rounded-sm border border-rule px-1.5 py-0.5">{prototype.origin}</span>
+    <span class="font-mono break-all">{prototype.ref}</span>
+    <span>· {prototype.author}</span>
+    <span>· {idleLabel(prototype.lastActivity, PREVIEW_AS_OF)}</span>
+  </span>
+
+  {!compact && (
+    <span class="text-[11px] font-medium text-ink-soft">{prototype.lastActivityNote}</span>
+  )}
+</a>

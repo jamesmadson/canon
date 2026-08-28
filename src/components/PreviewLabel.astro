@@ -1,0 +1,15 @@
+---
+import { PREVIEW_NOTE } from '../data/v2Preview';
+
+interface Props {
+  /** "top" reads as an environment banner; "bottom" follows the DemoBox footer precedent. */
+  placement?: 'top' | 'bottom';
+}
+
+const { placement = 'top' } = Astro.props;
+const edge = placement === 'top' ? 'border-b' : 'border-t';
+---
+
+<p class:list={[edge, 'border-rule bg-surface px-4 py-2 text-[11px] font-medium text-ink-soft sm:px-6']}>
+  {PREVIEW_NOTE}
+</p>
