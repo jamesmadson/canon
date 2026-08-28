@@ -25,6 +25,16 @@
       },
       "category": "design",
       "source": "./plugin/graft"
+    },
+    {
+      "name": "strata",
+      "description": "A record of what users actually said, in layers. Files feedback by date under pseudonyms, keeps verbatim apart from interpretation, and refuses to call two people a pattern.",
+      "author": {
+        "name": "James Madson",
+        "url": "https://jamesmadson.github.io/canon/"
+      },
+      "category": "design",
+      "source": "./plugin/strata"
     }
   ]
 }
