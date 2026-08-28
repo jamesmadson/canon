@@ -52,13 +52,13 @@ const SOURCES = [
         type="text"
         value={NEW_PROTOTYPE.name}
         readonly
-        class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-medium text-ink focus-visible:outline-2 focus-visible:outline-ink"
+        class="mt-2 w-full rounded-md border border-rule-strong bg-bg px-3 py-3 font-medium text-ink focus-visible:outline-2 focus-visible:outline-ink"
       />
     </label>
 
-    <fieldset class="mt-5">
+    <fieldset class="mt-6">
       <legend class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Source</legend>
-      <div class="mt-1.5 flex flex-col gap-2">
+      <div class="mt-2 flex flex-col gap-2">
         {SOURCES.map((source) => (
           <div
             class:list={[
@@ -66,7 +66,7 @@ const SOURCES = [
               source.selected ? 'border-ink bg-surface/40' : 'border-rule bg-bg',
             ]}
           >
-            <span class="mt-0.5">
+            <span class="mt-1">
               <DrawnMark
                 shape="round"
                 on={source.selected}
@@ -75,7 +75,7 @@ const SOURCES = [
             </span>
             <span class="min-w-0 flex-1">
               <span class="block text-sm font-semibold text-ink">{source.title}</span>
-              <span class="mt-0.5 block text-[13px] leading-relaxed font-medium text-ink-soft">
+              <span class="mt-1 block text-[13px] leading-relaxed font-medium text-ink-soft">
                 {source.detail}
               </span>
             </span>
@@ -84,7 +84,7 @@ const SOURCES = [
       </div>
     </fieldset>
 
-    <label class="mt-5 block">
+    <label class="mt-6 block">
       <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
         Base branch
       </span>
@@ -92,20 +92,20 @@ const SOURCES = [
         type="text"
         value={NEW_PROTOTYPE.baseBranch}
         readonly
-        class="mt-1.5 w-full rounded-md border border-rule bg-bg px-3 py-2.5 font-mono text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-ink"
+        class="mt-2 w-full rounded-md border border-rule bg-bg px-3 py-3 font-mono text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-ink"
       />
-      <span class="mt-1.5 block text-[11px] leading-relaxed font-medium text-ink-soft">
+      <span class="mt-2 block text-[11px] leading-relaxed font-medium text-ink-soft">
         The branch the new one starts from. Whatever is on{' '}
         <span class="font-mono">{NEW_PROTOTYPE.baseBranch}</span> right now is what you begin with.
       </span>
     </label>
 
-    <div class="mt-5 rounded-md border border-rule px-4 py-3">
+    <div class="mt-6 rounded-md border border-rule px-4 py-3">
       <p class="text-sm leading-relaxed font-medium text-ink">
         This is the one case where Canon names a branch. It will be called:
       </p>
-      <p class="mt-1.5 font-mono text-[13px] break-all text-ink">{NEW_PROTOTYPE.branch}</p>
-      <p class="mt-1.5 text-[13px] leading-relaxed font-medium text-ink-soft">
+      <p class="mt-2 font-mono text-[13px] break-all text-ink">{NEW_PROTOTYPE.branch}</p>
+      <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
         The <span class="font-mono">prototype-</span> prefix plus the name you typed, lowercased
         and hyphenated.
       </p>

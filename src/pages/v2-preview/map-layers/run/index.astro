@@ -42,7 +42,7 @@ const SKILLS = [
   <div class="mt-6 max-w-xl">
     <fieldset>
       <legend class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Skill</legend>
-      <div class="mt-1.5 flex flex-col gap-2">
+      <div class="mt-2 flex flex-col gap-2">
         {SKILLS.map((skill) => (
           <div
             class:list={[
@@ -51,7 +51,7 @@ const SKILLS = [
             ]}
             aria-disabled={skill.state === 'soon' ? 'true' : undefined}
           >
-            <span class="mt-0.5">
+            <span class="mt-1">
               <DrawnMark
                 shape="round"
                 on={skill.state === 'on'}
@@ -69,12 +69,12 @@ const SKILLS = [
                   {skill.name}
                 </span>
                 {skill.state === 'soon' && (
-                  <span class="rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                  <span class="rounded-sm border border-rule-strong px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
                     Soon
                   </span>
                 )}
               </span>
-              <span class="mt-0.5 block text-[13px] leading-relaxed font-medium text-ink-soft">
+              <span class="mt-1 block text-[13px] leading-relaxed font-medium text-ink-soft">
                 {skill.line}
               </span>
             </span>
@@ -83,14 +83,14 @@ const SKILLS = [
       </div>
     </fieldset>
 
-    <div class="mt-5 overflow-hidden rounded-md border border-rule">
+    <div class="mt-6 overflow-hidden rounded-md border border-rule">
       <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
         Runs against
       </p>
       <p class="bg-bg px-4 py-3 font-mono text-[13px] break-all text-ink">{SCRIPTED_RUN.target}</p>
     </div>
 
-    <div class="mt-5 rounded-md border border-rule px-4 py-3">
+    <div class="mt-6 rounded-md border border-rule px-4 py-3">
       <p class="text-sm leading-relaxed font-medium text-ink">
         A person triggers every run. Nothing executes on push.
       </p>

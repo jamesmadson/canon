@@ -73,24 +73,24 @@ const STATS = [
     </dl>
   </div>
 
-  <div class="mt-5 flex flex-col gap-2 border-t border-rule pt-4 sm:flex-row sm:items-start sm:gap-8">
+  <div class="mt-6 flex flex-col gap-2 border-t border-rule pt-4 sm:flex-row sm:items-start sm:gap-8">
     <dl class="flex flex-col gap-2 text-[13px] font-medium sm:flex-row sm:gap-8">
       <div>
         <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Repository</dt>
-        <dd class="mt-0.5 font-mono break-all text-ink">{PROJECT.repo}</dd>
+        <dd class="mt-1 font-mono break-all text-ink">{PROJECT.repo}</dd>
       </div>
       <div>
         <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Figma file</dt>
-        <dd class="mt-0.5 text-ink">{PROJECT.figmaFile}</dd>
+        <dd class="mt-1 text-ink">{PROJECT.figmaFile}</dd>
       </div>
       <div>
         <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Access</dt>
-        <dd class="mt-0.5 text-ink">Read-only</dd>
+        <dd class="mt-1 text-ink">Read-only</dd>
       </div>
     </dl>
     <a
       href={withBase('/v2-preview/import/')}
-      class="-mt-2 flex min-h-11 items-center text-[13px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:mt-0 sm:ml-auto"
+      class="flex min-h-11 items-center text-[13px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors duration-[120ms] hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:ml-auto"
     >
       Connect a source
     </a>

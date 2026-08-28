@@ -37,7 +37,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
   <div class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-2">
     <h1 class="text-2xl font-bold tracking-tight">{prototype.name}</h1>
     {stale && (
-      <span class="rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold tracking-wide text-ink tabular-nums">
+      <span class="rounded-sm border border-rule-strong px-2 py-1 text-[11px] font-semibold tracking-wide text-ink tabular-nums">
         Idle {idle} days
       </span>
     )}
@@ -52,7 +52,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
     {source.text}
   </p>
 
-  <section class="mt-5" aria-labelledby="screen-heading">
+  <section class="mt-6" aria-labelledby="screen-heading">
     <h2 id="screen-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
       The screen
     </h2>
@@ -62,7 +62,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
       <div class="overflow-hidden rounded-md border border-rule">
         <div class="flex min-h-[300px] items-center justify-center bg-surface/30 px-4 py-6 sm:min-h-[420px]">
           <div
-            class="flex w-full max-w-[240px] flex-col items-center justify-center gap-2 px-5 py-10 text-center"
+            class="flex w-full max-w-[240px] flex-col items-center justify-center gap-2 px-6 py-10 text-center"
             style="aspect-ratio:390/844;border:1px dashed var(--color-rule-strong);border-radius:22px"
           >
             <p class="text-[15px] leading-relaxed font-medium text-ink-soft">
@@ -83,18 +83,18 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
     {prototype.summary}
   </p>
 
-  <dl class="mt-5 flex flex-col gap-2 border-t border-rule pt-4 text-[13px] font-medium sm:flex-row sm:gap-8">
+  <dl class="mt-6 flex flex-col gap-2 border-t border-rule pt-4 text-[13px] font-medium sm:flex-row sm:gap-8">
     <div>
       <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Indexed from</dt>
-      <dd class="mt-0.5 text-ink">{prototype.origin}</dd>
+      <dd class="mt-1 text-ink">{prototype.origin}</dd>
     </div>
     <div>
       <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Author</dt>
-      <dd class="mt-0.5 text-ink">{prototype.author}</dd>
+      <dd class="mt-1 text-ink">{prototype.author}</dd>
     </div>
     <div>
       <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Last activity</dt>
-      <dd class="mt-0.5 text-ink tabular-nums">
+      <dd class="mt-1 text-ink tabular-nums">
         {idleLabel(prototype.lastActivity, PREVIEW_AS_OF)} — {prototype.lastActivityNote}
       </dd>
     </div>
@@ -107,7 +107,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
     <div class="overflow-hidden rounded-md border border-rule">
       <dl class="-mb-px">
         {prototype.sources.map((s) => (
-          <div class="flex flex-col gap-0.5 border-b border-rule px-4 py-3 sm:flex-row sm:gap-4">
+          <div class="flex flex-col gap-1 border-b border-rule px-4 py-3 sm:flex-row sm:gap-4">
             <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft sm:w-28 sm:shrink-0">
               {s.label}
             </dt>
@@ -193,7 +193,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
         {others.map((other) => (
           <a
             href={withBase(`/v2-preview/${other.slug}/`)}
-            class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule bg-bg px-4 py-3 transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+            class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule bg-bg px-4 py-3 transition-colors duration-[120ms] hover:border-rule-strong hover:bg-surface/60 active:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
           >
             <span class="text-[15px] font-semibold text-ink underline decoration-rule-strong underline-offset-4">
               {other.name}

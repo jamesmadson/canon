@@ -20,7 +20,7 @@ import { BRANCHES, PROJECT } from '../../../data/v2Preview';
 
   <div class="mt-6 rounded-md border border-rule bg-surface/50 px-4 py-3">
     <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Connected as</p>
-    <p class="mt-0.5 font-mono text-[13px] text-ink">{PROJECT.handle} · via your sign-in</p>
+    <p class="mt-1 font-mono text-[13px] text-ink">{PROJECT.handle} · via your sign-in</p>
   </div>
 
   <label class="mt-4 block">
@@ -29,11 +29,11 @@ import { BRANCHES, PROJECT } from '../../../data/v2Preview';
       type="text"
       value={PROJECT.repo}
       readonly
-      class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-mono text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      class="mt-2 w-full rounded-md border border-rule-strong bg-bg px-3 py-3 font-mono text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-ink"
     />
   </label>
 
-  <div class="mt-5">
+  <div class="mt-6">
     <BranchChecklist branches={BRANCHES} />
   </div>
   <p class="mt-2 text-[11px] leading-relaxed font-medium text-ink-soft">
@@ -41,7 +41,7 @@ import { BRANCHES, PROJECT } from '../../../data/v2Preview';
     and you can change your mind later.
   </p>
 
-  <div class="mt-5 rounded-md border border-rule px-4 py-3">
+  <div class="mt-6 rounded-md border border-rule px-4 py-3">
     <p class="text-sm leading-relaxed font-medium text-ink">
       Canon does not ask you to rename anything. Your branches keep whatever
       convention you already use —
@@ -52,7 +52,7 @@ import { BRANCHES, PROJECT } from '../../../data/v2Preview';
     <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
       The one exception is a prototype started
       <em class="font-semibold text-ink not-italic">from</em> Canon: those branches
-      get the <code class="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[13px]">prototype-</code>
+      get the <code class="rounded-sm bg-surface px-2 py-1 font-mono text-[13px]">prototype-</code>
       prefix automatically, because Canon is the thing naming them.
     </p>
   </div>

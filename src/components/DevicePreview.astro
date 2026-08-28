@@ -39,7 +39,7 @@ const DEVICES = [
         aria-selected={i === 0 ? 'true' : 'false'}
         tabindex={i === 0 ? 0 : -1}
         data-device-tab={device.id}
-        class="min-h-11 flex-1 border-r border-rule bg-bg px-3 py-3 text-[13px] font-semibold whitespace-nowrap text-ink-soft transition-colors last:border-r-0 hover:text-ink aria-selected:bg-surface aria-selected:text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+        class="min-h-11 flex-1 border-r border-rule bg-bg px-3 py-3 text-[13px] font-semibold whitespace-nowrap text-ink-soft transition-colors duration-[120ms] last:border-r-0 hover:bg-surface/50 hover:text-ink active:bg-surface aria-selected:bg-surface aria-selected:text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
       >
         {device.label}
       </button>

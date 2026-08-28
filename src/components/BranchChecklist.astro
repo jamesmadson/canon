@@ -21,7 +21,7 @@ const selected = branches.filter((b) => b.selected).length;
   </p>
   <ul class="-mb-px">
     {branches.map((branch) => (
-      <li class="flex min-h-11 items-center gap-3 border-b border-rule bg-bg px-4 py-2.5">
+      <li class="flex min-h-11 items-center gap-3 border-b border-rule bg-bg px-4 py-3">
         <DrawnMark on={branch.selected} label={branch.selected ? 'Selected' : 'Not selected'} />
         <span class="min-w-0 flex-1">
           <span class="block font-mono text-[13px] break-all text-ink">{branch.name}</span>

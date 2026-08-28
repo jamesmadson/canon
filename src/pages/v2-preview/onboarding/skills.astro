@@ -43,15 +43,15 @@ const SKILLS = [
   <div class="mt-6 overflow-hidden rounded-lg border border-rule">
     <div class="-mb-px grid grid-cols-1">
       {SKILLS.map((skill) => (
-        <div class="flex items-baseline justify-between gap-4 border-b border-rule bg-bg px-4 py-3.5">
+        <div class="flex items-baseline justify-between gap-4 border-b border-rule bg-bg px-4 py-4">
           <div class="min-w-0">
             <p class="font-mono text-[13px] font-semibold text-ink">{skill.name}</p>
-            <p class="mt-0.5 text-[13px] leading-snug font-medium text-ink-soft">{skill.line}</p>
+            <p class="mt-1 text-[13px] leading-snug font-medium text-ink-soft">{skill.line}</p>
           </div>
           {skill.state === 'on' ? (
-            <span class="shrink-0 rounded-sm bg-ink px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-bg">On</span>
+            <span class="shrink-0 rounded-sm bg-ink px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-bg">On</span>
           ) : (
-            <span class="shrink-0 rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Soon</span>
+            <span class="shrink-0 rounded-sm border border-rule-strong px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Soon</span>
           )}
         </div>
       ))}

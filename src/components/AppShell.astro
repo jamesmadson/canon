@@ -33,34 +33,36 @@ const NAV = [
 
 const SOON = ['Research', 'Members'];
 
+// One row height and one row shape for every sidebar entry, so the two live
+// sections and the two that only say what they would be sit on the same grid.
 const rowBase =
-  'flex min-h-11 items-center rounded-md px-3 text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink';
+  'flex min-h-11 items-center rounded-md px-3 text-[13px] font-semibold transition-[background-color,color,box-shadow] duration-[120ms] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink';
 ---
 
 <BaseLayout title={title} description={description}>
   <div class="overflow-hidden rounded-lg border border-rule-strong">
     <PreviewLabel placement="top" />
 
-    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule px-4 py-2.5">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule px-4 py-2">
       <a
         href={withBase('/v2-preview/')}
-        class="-mx-2 flex min-h-11 items-center px-2 text-[15px] font-semibold tracking-tight text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+        class="-mx-2 flex min-h-11 items-center px-2 text-[13px] font-semibold tracking-tight text-ink-soft transition-colors duration-[120ms] hover:text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
       >
         Canon
       </a>
       <span aria-hidden="true" class="text-rule-strong">|</span>
-      <p class="flex min-w-0 items-center gap-1.5 text-[13px] font-medium text-ink-soft">
+      <p class="flex min-w-0 items-center gap-2 text-[13px] font-medium text-ink-soft">
         <span class="truncate">{PROJECT.team}</span>
         <span aria-hidden="true" class="text-rule-strong">/</span>
-        <span class="truncate font-semibold text-ink">{PROJECT.name}</span>
+        <span class="truncate text-[15px] font-semibold text-ink">{PROJECT.name}</span>
       </p>
-      <p class="ml-auto flex items-center gap-2 text-[13px] font-medium text-ink-soft">
+      <p class="ml-auto flex min-h-11 items-center gap-2 text-[13px] font-medium text-ink-soft">
         <span class="sr-only">Signed in as</span>
         <span class="hidden sm:inline">{PROJECT.viewer.name}</span>
         <span class="sr-only sm:hidden">{PROJECT.viewer.name}</span>
         <span
           aria-hidden="true"
-          class="flex size-7 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink"
+          class="flex size-8 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink"
         >
           {PROJECT.viewer.initials}
         </span>
@@ -70,7 +72,7 @@ const rowBase =
     <div class="flex flex-col md:flex-row">
       <nav
         aria-label="Project sections"
-        class="shrink-0 border-b border-rule p-2 md:w-48 md:border-r md:border-b-0"
+        class="shrink-0 border-b border-rule bg-surface/25 p-2 md:w-48 md:border-r md:border-b-0"
       >
         <ul class="flex flex-wrap gap-1 md:flex-col md:flex-nowrap">
           {NAV.map((item) => (
@@ -81,8 +83,8 @@ const rowBase =
                 class:list={[
                   rowBase,
                   active === item.id
-                    ? 'bg-surface text-ink'
-                    : 'text-ink-soft hover:bg-surface/60 hover:text-ink',
+                    ? 'bg-bg text-ink shadow-[inset_2px_0_0_var(--color-ink)]'
+                    : 'text-ink-soft hover:bg-bg/70 hover:text-ink active:bg-bg',
                 ]}
               >
                 {item.label}

@@ -34,14 +34,14 @@ const { title, description, step } = Astro.props;
           {i + 1 < step ? (
             <a
               href={withBase(s.href)}
-              class="flex min-h-11 items-center justify-center gap-1.5 px-2 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+              class="flex min-h-11 items-center justify-center gap-2 px-2 py-3 text-[11px] font-semibold uppercase tracking-wide text-ink transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
             >
               <span aria-hidden="true">●</span> {s.label}
             </a>
           ) : (
             <span
               class:list={[
-                'flex min-h-11 items-center justify-center gap-1.5 px-2 py-3 text-[11px] font-semibold uppercase tracking-wide',
+                'flex min-h-11 items-center justify-center gap-2 px-2 py-3 text-[11px] font-semibold uppercase tracking-wide',
                 i + 1 === step ? 'border-b-2 border-ink text-ink' : 'text-ink-soft',
               ]}
               aria-current={i + 1 === step ? 'step' : undefined}
