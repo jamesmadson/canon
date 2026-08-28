@@ -194,3 +194,14 @@ does the styling.
 ### D-29 · Decisions live in a log; the log becomes a skill — 2026-08-28
 This file. Superseded decisions stay visible; the meta-pattern section up
 top is the future skill's source material. Candidate name: Cairn.
+
+### D-30 · Survey answers the zoomed-out gap; captured, never mirrored — 2026-08-28
+The field named the unsolved problem — "a canvas of your running app" —
+and James took it. Survey is the space map beside Graft's time maps:
+screens captured from the running prototype by an agent walk, arranged by
+route, zoomable to project level, with annotations and evidence pinned in
+place. Core property: generated from the running app so it cannot drift —
+the one thing every workaround (Figma mirrors, snapshot walls, storyboard
+canvases) lacks. Sequenced post-alpha behind the dashboard and annotation
+layer. Also upgrades critique-in-PRs to a confirmed pattern (third
+independent voice).

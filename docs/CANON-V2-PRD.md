@@ -138,6 +138,37 @@ instead of pretending to replace it:
   workflow engine; just making the relationship the field study says
   matters visible.
 
+## Survey — the zoomed-out view
+
+The field named the gap in one sentence: *"Nobody's built a good 'canvas
+of your running app' yet."* Preview links answer "try this flow" and
+nothing answers "step back and see everything" — which is exactly why the
+demoted Figma file survives, kept alive for flows and key states. Four
+voices now circle this (snapshot walls, a storyboard canvas, a deleted
+UI-map tool, and the entry above); James has taken it as a problem to
+solve. **Survey** is the answer: Graft draws the time maps, Survey draws
+the space maps.
+
+The one property every workaround lacks, and Survey's core commitment:
+**the canvas is captured from the running prototype, so it cannot
+drift.** A Figma mirror decays the day it's drawn; a generated map is
+re-capturable on demand.
+
+- **Capture:** an agent walks the prototype's routes and key states and
+  snapshots each screen — the field's own `/prototype-exploder` pattern,
+  productized. Human-triggered like every run; re-run replaces the layer.
+- **Layout:** screens arranged by route into a zoomable map — flows as
+  paths, key states stacked under their screen. Project level zooms out
+  to every prototype's map side by side.
+- **Alive, not decorative:** annotation-layer comments pin to the canvas
+  where they were made; Strata entries about a screen surface on it;
+  a branch's map can sit beside main's to show what changed, spatially.
+- **Rings:** (1) agent-assisted capture via the CLI/skill and a manual
+  arrange; (2) capture on demand from the app with route detection;
+  (3) flow-graph edges and state variants. Ring 1 is post-alpha unless
+  NatureQuant's week screams otherwise — the dashboard and annotation
+  layer stay first.
+
 ## Contextual skills — the v2 architecture
 
 Strata accidentally defined the pattern every v2 skill follows: **the skill
