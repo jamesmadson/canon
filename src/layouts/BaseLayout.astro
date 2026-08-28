@@ -64,7 +64,7 @@ const skillCount = spellNumber(publishedSkills.length);
         </div>
       </div>
     </header>
-    <main id="main" class="grid-overlay rise rise-2 mx-auto max-w-6xl px-6 pt-10 pb-24 sm:pt-14">
+    <main id="main" class="rise rise-2 mx-auto max-w-6xl px-6 pt-10 pb-24 sm:pt-14">
       <slot />
     </main>
     <footer class="mx-auto max-w-6xl px-6">
@@ -75,22 +75,5 @@ const skillCount = spellNumber(publishedSkills.length);
         </p>
       </div>
     </footer>
-    <button
-      type="button"
-      id="grid-toggle"
-      class="fixed bottom-5 right-5 z-10 hidden min-h-11 items-center rounded-md border border-rule-strong bg-bg px-3.5 py-2 text-xs font-semibold tracking-wide text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:flex"
-      aria-pressed="false"
-    >
-      Grid — Off
-    </button>
   </body>
 </html>
-
-<script>
-  const btn = document.getElementById('grid-toggle') as HTMLButtonElement;
-  btn.addEventListener('click', () => {
-    const on = document.documentElement.classList.toggle('grid-visible');
-    btn.textContent = `Grid — ${on ? 'On' : 'Off'}`;
-    btn.setAttribute('aria-pressed', String(on));
-  });
-</script>

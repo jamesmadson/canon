@@ -98,26 +98,3 @@ summary,
 [role="button"]:not([aria-disabled="true"]) {
   cursor: pointer;
 }
-
-/* construction grid — hidden by default, faint when toggled on (see BaseLayout) */
-.grid-overlay {
-  position: relative;
-}
-.grid-overlay::before {
-  content: "";
-  position: absolute;
-  inset: 0 1.5rem;
-  background-image: repeating-linear-gradient(
-    to right,
-    var(--color-rule) 0,
-    var(--color-rule) 1px,
-    transparent 1px,
-    transparent calc((100% - 64px) / 3 + 32px)
-  );
-  opacity: 0;
-  transition: opacity 0.12s ease;
-  pointer-events: none;
-}
-html.grid-visible .grid-overlay::before {
-  opacity: 0.28;
-}
