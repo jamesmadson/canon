@@ -10,7 +10,7 @@ export default defineConfig({
   server: process.env.PORT ? { port: Number(process.env.PORT) } : undefined,
   integrations: [mdx()],
   // The skill briefly shipped as "dieter"; keep the old URL landing somewhere.
-  redirects: { '/skills/dieter': '/skills/deter' },
+  redirects: { '/skills/dieter': '/canon/skills/deter/' },
   vite: {
     plugins: [tailwindcss()],
   },
