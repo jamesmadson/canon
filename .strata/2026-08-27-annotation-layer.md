@@ -23,4 +23,7 @@ rebuild is the pain, which a platform amortizes.
 
 ## Decided
 
-—
+2026-08-27 — adopted as committed v2 scope: the annotation layer becomes
+the primary feedback mechanism on web prototypes (PRD, "The annotation
+layer"). P-12's "partial solution" caveat is kept as the stated limit —
+web prototypes the team builds, not native or third-party surfaces.

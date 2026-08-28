@@ -74,7 +74,7 @@ security story honest.
 | GitHub App, read-only: list branches matching `prototype-*`, last commit, author, staleness | Hosting/deploying prototypes (link to the team's existing preview URLs) |
 | Figma attach-by-URL with live embed | Figma API import, component sync |
 | Prototype page: description, links, activity, feedback thread | Realtime multiplayer anything |
-| Feedback: comment box that files a Strata entry; reports (themes/open) per project | Public commenting, reactions, notifications beyond email |
+| Feedback: the annotation layer (below) plus a plain comment box, both filing Strata entries; reports (themes/open) per project | Public commenting, reactions, notifications beyond email |
 | Access: GitHub org membership = project access; share links for viewers | Roles/permissions matrix, SSO — alpha rides on GitHub auth |
 | Skill runs: `dieter` and `access` against a branch's preview URL or Figma frame, results filed to the prototype | Automatic runs on every push; code-review skill (James, later) |
 | Sign-up page with interface preview + waitlist | Billing, teams self-serve onboarding |
@@ -82,6 +82,33 @@ security story honest.
 **Staleness is a feature, not a metric aside:** the dashboard flags
 prototypes with no commits in 14 days. Curation includes retiring things —
 that is the Canon position expressed in the product.
+
+## The annotation layer
+
+The field signal that graduated to committed scope (entry
+`2026-08-27-annotation-layer`, decided same day): a **toggleable layer
+above the running prototype** where a comment points at an actual page
+element. Teams in the thread are already hand-rolling this per project;
+Canon amortizes it.
+
+- **Delivery:** one script tag the team drops into their prototype build —
+  analytics-snippet ergonomics. It renders the layer, off by default,
+  toggled by keyboard shortcut or the Canon share link's `?annotate=1`.
+- **Anchoring:** a comment stores element selector + offset + viewport
+  size, and a snapshot of the anchor's text, so it degrades to "near
+  here" instead of vanishing when the prototype changes underneath it.
+- **Where it lands:** every annotation files as a Strata draft on that
+  prototype — the pointer is the evidence's context. Said is the
+  comment verbatim; the commenter confirms or is P-numbered by the
+  project owner.
+- **Honest limits, kept from the source:** web prototypes whose build you
+  control. Not native apps, not third-party sites (a browser extension is
+  the later answer), and not Figma — Figma's own comments already do this
+  there, and rebuilding them would be decoration.
+
+This is the concrete answer to the thread's strongest pattern: the shared
+review surface, restored **on** the live work instead of on a screenshot
+of it.
 
 ## Contextual skills — the v2 architecture
 
