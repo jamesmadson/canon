@@ -1,0 +1,57 @@
+---
+import OnboardingShell from '../../../components/OnboardingShell.astro';
+import { withBase } from '../../../lib/withBase';
+---
+
+<OnboardingShell
+  title="Canon v2 preview — attach Figma"
+  description="Onboarding step 3 of the scripted Canon v2 preview: attaching a Figma file by link, optional."
+  step={3}
+>
+  <h1 class="text-xl font-bold tracking-tight">
+    Attach Figma
+    <span class="ml-1.5 align-middle text-[11px] font-semibold uppercase tracking-wide text-ink-soft">optional</span>
+  </h1>
+  <p class="mt-2 text-sm leading-relaxed font-medium text-ink-soft">
+    Paste a file link and its frames sit beside your coded prototypes —
+    embedded, not imported. No Figma account connection needed for files
+    anyone-with-link can view. Skip freely; attach any time.
+  </p>
+
+  <label class="mt-6 block">
+    <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Figma file link</span>
+    <input
+      type="text"
+      value="figma.com/file/HRBLP0000/harbor-loop-concepts"
+      readonly
+      class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-mono text-sm text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    />
+  </label>
+  <p class="mt-2 text-[11px] leading-relaxed font-medium text-ink-soft">
+    Becomes "Harbor Loop — concepts" on the dashboard, flagged as a Figma
+    source.
+  </p>
+
+  <div class="mt-8 flex items-center justify-between gap-4">
+    <a
+      href={withBase('/v2-preview/onboarding/github/')}
+      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    >
+      Back
+    </a>
+    <div class="flex items-center gap-2">
+      <a
+        href={withBase('/v2-preview/onboarding/skills/')}
+        class="flex min-h-11 items-center rounded-md px-3 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      >
+        Skip for now
+      </a>
+      <a
+        href={withBase('/v2-preview/onboarding/skills/')}
+        class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      >
+        Attach file
+      </a>
+    </div>
+  </div>
+</OnboardingShell>

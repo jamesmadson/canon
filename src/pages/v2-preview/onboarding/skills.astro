@@ -1,0 +1,80 @@
+---
+import OnboardingShell from '../../../components/OnboardingShell.astro';
+import { withBase } from '../../../lib/withBase';
+
+const SKILLS = [
+  {
+    name: 'strata',
+    state: 'on',
+    line: 'Files feedback as dated, pseudonymized evidence — Said, Meant, Decided.',
+  },
+  {
+    name: 'graft',
+    state: 'on',
+    line: 'Draws the maps: session history now, branch history next.',
+  },
+  {
+    name: 'dieter',
+    state: 'on',
+    line: 'Reviews by removing — every finding priced against the surface’s job.',
+  },
+  {
+    name: 'access',
+    state: 'soon',
+    line: 'Accessibility pass: contrast, targets, keyboard path.',
+  },
+];
+---
+
+<OnboardingShell
+  title="Canon v2 preview — your skills"
+  description="Onboarding step 4 of the scripted Canon v2 preview: the skills that run against the project."
+  step={4}
+>
+  <h1 class="text-xl font-bold tracking-tight">Your skills</h1>
+  <p class="mt-2 text-sm leading-relaxed font-medium text-ink-soft">
+    These run against Harbor Loop two ways: inside your own agent as you work
+    — Claude Code, Cursor — and here as review runs.
+    <strong class="font-semibold text-ink">A person triggers every run.</strong>
+    Nothing executes on push, and nothing bills you by surprise.
+  </p>
+
+  <div class="mt-6 overflow-hidden rounded-lg border border-rule">
+    <div class="-mb-px grid grid-cols-1">
+      {SKILLS.map((skill) => (
+        <div class="flex items-baseline justify-between gap-4 border-b border-rule bg-bg px-4 py-3.5">
+          <div class="min-w-0">
+            <p class="font-mono text-sm font-semibold text-ink">{skill.name}</p>
+            <p class="mt-0.5 text-[13px] leading-snug font-medium text-ink-soft">{skill.line}</p>
+          </div>
+          {skill.state === 'on' ? (
+            <span class="shrink-0 rounded-sm bg-ink px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-bg">On</span>
+          ) : (
+            <span class="shrink-0 rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Soon</span>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <p class="mt-3 text-[11px] leading-relaxed font-medium text-ink-soft">
+    As the project's record grows — feedback filed, decisions made — these
+    same skills read it, and their findings start citing your history instead
+    of generic defaults.
+  </p>
+
+  <div class="mt-8 flex items-center justify-between gap-4">
+    <a
+      href={withBase('/v2-preview/onboarding/figma/')}
+      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    >
+      Back
+    </a>
+    <a
+      href={withBase('/v2-preview/')}
+      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Open Harbor Loop
+    </a>
+  </div>
+</OnboardingShell>

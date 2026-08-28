@@ -1,0 +1,68 @@
+---
+import OnboardingShell from '../../../components/OnboardingShell.astro';
+import { withBase } from '../../../lib/withBase';
+
+const BRANCHES = [
+  'prototype-trip-recap',
+  'prototype-fare-sheet',
+  'prototype-stop-picker',
+  'prototype-night-map',
+];
+---
+
+<OnboardingShell
+  title="Canon v2 preview — connect GitHub"
+  description="Onboarding step 2 of the scripted Canon v2 preview: connecting a repository read-only."
+  step={2}
+>
+  <h1 class="text-xl font-bold tracking-tight">Connect a repository</h1>
+  <p class="mt-2 text-sm leading-relaxed font-medium text-ink-soft">
+    You signed in with GitHub, so Canon already knows who you are — this step
+    grants <strong class="font-semibold text-ink">read-only</strong> access to
+    one repository. Canon never stores your code.
+  </p>
+
+  <div class="mt-6 rounded-md border border-rule bg-surface/50 px-4 py-3">
+    <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Connected as</p>
+    <p class="mt-0.5 font-mono text-sm text-ink">@ade-ninemile · via your sign-in</p>
+  </div>
+
+  <label class="mt-4 block">
+    <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Repository</span>
+    <input
+      type="text"
+      value="nine-mile/harbor-loop"
+      readonly
+      class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-mono text-sm text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    />
+  </label>
+
+  <div class="mt-5 rounded-md border border-rule px-4 py-3">
+    <p class="text-sm font-medium text-ink">
+      Branches named <code class="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[13px]">prototype-*</code>
+      become prototypes. Four found:
+    </p>
+    <ul class="mt-2 flex flex-col gap-1 font-mono text-[13px] text-ink-soft">
+      {BRANCHES.map((b) => <li>{b}</li>)}
+    </ul>
+    <p class="mt-2 text-[11px] leading-relaxed font-medium text-ink-soft">
+      A different naming convention? Map it later in project settings — the
+      pattern is yours, the indexing is Canon's.
+    </p>
+  </div>
+
+  <div class="mt-8 flex items-center justify-between gap-4">
+    <a
+      href={withBase('/v2-preview/onboarding/project/')}
+      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    >
+      Back
+    </a>
+    <a
+      href={withBase('/v2-preview/onboarding/figma/')}
+      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Connect read-only
+    </a>
+  </div>
+</OnboardingShell>

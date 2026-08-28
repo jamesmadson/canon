@@ -1,0 +1,51 @@
+---
+import OnboardingShell from '../../../components/OnboardingShell.astro';
+import { withBase } from '../../../lib/withBase';
+---
+
+<OnboardingShell
+  title="Canon v2 preview — name the project"
+  description="Onboarding step 1 of the scripted Canon v2 preview: naming the first project."
+  step={1}
+>
+  <h1 class="text-xl font-bold tracking-tight">Name your first project</h1>
+  <p class="mt-2 text-sm leading-relaxed font-medium text-ink-soft">
+    Signed in as <span class="font-mono text-[13px]">ade@ninemile.co</span> — a
+    project is the home for one product's prototypes, feedback, and reviews.
+  </p>
+
+  <label class="mt-6 block">
+    <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Project name</span>
+    <input
+      type="text"
+      value="Harbor Loop"
+      readonly
+      class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-medium text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    />
+  </label>
+
+  <label class="mt-4 block">
+    <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">One line on what it is <span class="normal-case">(optional)</span></span>
+    <input
+      type="text"
+      value="Transit companion for the Nine Mile ferry network."
+      readonly
+      class="mt-1.5 w-full rounded-md border border-rule bg-bg px-3 py-2.5 text-sm font-medium text-ink-soft focus-visible:outline-2 focus-visible:outline-ink"
+    />
+  </label>
+
+  <div class="mt-8 flex items-center justify-between gap-4">
+    <a
+      href={withBase('/v2-preview/signin/')}
+      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    >
+      Back
+    </a>
+    <a
+      href={withBase('/v2-preview/onboarding/github/')}
+      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Continue
+    </a>
+  </div>
+</OnboardingShell>

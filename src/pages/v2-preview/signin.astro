@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PreviewLabel from '../../components/PreviewLabel.astro';
+import { withBase } from '../../lib/withBase';
+---
+
+<BaseLayout
+  title="Canon v2 preview — sign in"
+  description="A scripted preview of Canon v2's sign-in: OAuth only, first sign-in creates the account."
+>
+  <p class="mb-4 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+    Canon v2 preview · sign in
+  </p>
+
+  <div class="mx-auto max-w-md overflow-hidden rounded-lg border border-rule-strong">
+    <PreviewLabel placement="top" />
+
+    <div class="px-6 py-10 text-center">
+      <p class="text-2xl font-bold tracking-tight">Canon</p>
+      <p class="mt-2 text-sm leading-relaxed font-medium text-ink-soft">
+        Sign in or create an account — they're the same door. No passwords to
+        make, none for us to lose.
+      </p>
+
+      <div class="mt-8 flex flex-col gap-2">
+        <a
+          href={withBase('/v2-preview/onboarding/project/')}
+          class="flex min-h-11 items-center justify-center rounded-md bg-ink px-4 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+        >
+          Continue with GitHub
+        </a>
+        <a
+          href={withBase('/v2-preview/onboarding/project/')}
+          class="flex min-h-11 items-center justify-center rounded-md border border-rule-strong px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+        >
+          Continue with Google
+        </a>
+      </div>
+
+      <p class="mt-6 text-[11px] leading-relaxed font-medium text-ink-soft">
+        Personal account. Read-only access to anything you connect — Canon
+        indexes and annotates; your work stays where it lives.
+      </p>
+    </div>
+
+    <p class="border-t border-rule bg-surface px-6 py-2 text-[11px] font-medium text-ink-soft">
+      In this preview both buttons continue as
+      <span class="font-mono">ade@ninemile.co</span> — an invented person.
+    </p>
+  </div>
+</BaseLayout>
