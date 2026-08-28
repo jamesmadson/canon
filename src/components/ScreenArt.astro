@@ -25,8 +25,14 @@ const { screen, w, h, label, class: className = '' } = Astro.props;
 const wide = w > h * 1.2;
 const k = Math.min(w, h);
 const pad = k * 0.06;
-const hair = Math.max(1, k * 0.004);
-const line = Math.max(1.2, k * 0.0065);
+
+// Two stroke weights, in screen pixels rather than viewBox units. The same art
+// is drawn at 79px in a card thumbnail and at 640px in the desktop frame; sized
+// in user units a hairline came out at a third of a pixel in the thumbnail and
+// nearly two in the desktop frame. non-scaling-stroke (applied below) holds
+// both weights steady, so the four wireframes read the same at every size.
+const hair = 1;
+const line = 2;
 
 const INK = 'var(--color-ink)';
 const SOFT = 'var(--color-ink-soft)';
@@ -228,14 +234,14 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
     rx={k * 0.012}
     fill="none"
     stroke={STRONG}
-    stroke-width={hair}
+    stroke-width={hair} vector-effect="non-scaling-stroke"
   />
-  <line x1="0" y1={hdrH} x2={w} y2={hdrH} stroke={RULE} stroke-width={hair} />
+  <line x1="0" y1={hdrH} x2={w} y2={hdrH} stroke={RULE} stroke-width={hair} vector-effect="non-scaling-stroke" />
 
   {/* nav — a bottom bar down a phone, a left rail across a wide screen */}
   {wide ? (
     <>
-      <line x1={railW} y1="0" x2={railW} y2={h} stroke={RULE} stroke-width={hair} />
+      <line x1={railW} y1="0" x2={railW} y2={h} stroke={RULE} stroke-width={hair} vector-effect="non-scaling-stroke" />
       {[0, 1, 2].map((i) => (
         <rect
           x={railX}
@@ -245,13 +251,13 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
           rx={railPillH / 2}
           fill={i === 0 ? INK : 'none'}
           stroke={i === 0 ? 'none' : STRONG}
-          stroke-width={hair}
+          stroke-width={hair} vector-effect="non-scaling-stroke"
         />
       ))}
     </>
   ) : (
     <>
-      <line x1="0" y1={h - tabH} x2={w} y2={h - tabH} stroke={RULE} stroke-width={hair} />
+      <line x1="0" y1={h - tabH} x2={w} y2={h - tabH} stroke={RULE} stroke-width={hair} vector-effect="non-scaling-stroke" />
       {[0, 1, 2].map((i) => (
         <rect
           x={cx + i * (tabW + tabGap)}
@@ -261,7 +267,7 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
           rx={tabPillH / 2}
           fill={i === 0 ? INK : 'none'}
           stroke={i === 0 ? 'none' : STRONG}
-          stroke-width={hair}
+          stroke-width={hair} vector-effect="non-scaling-stroke"
         />
       ))}
     </>
@@ -296,15 +302,16 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
         font-family="var(--font-mono)"
         font-size={r * 0.34}
         fill={INK}
+        style="font-variant-numeric: tabular-nums"
       >
         48/60
       </text>
 
-      <text x={sideX} y={targetY - labelSize * 0.6} font-family="var(--font-mono)" font-size={labelSize} fill={SOFT}>
+      <text x={sideX} y={targetY - labelSize * 0.6} font-family="var(--font-mono)" font-size={labelSize} fill={SOFT} style="font-variant-numeric: tabular-nums">
         TARGET 60m
       </text>
-      <line x1={sideX} y1={targetY} x2={sideX + sideW} y2={targetY} stroke={STRONG} stroke-width={hair} />
-      <line x1={tickX} y1={targetY - tick} x2={tickX} y2={targetY + tick} stroke={INK} stroke-width={line} />
+      <line x1={sideX} y1={targetY} x2={sideX + sideW} y2={targetY} stroke={STRONG} stroke-width={hair} vector-effect="non-scaling-stroke" />
+      <line x1={tickX} y1={targetY - tick} x2={tickX} y2={targetY + tick} stroke={INK} stroke-width={line} vector-effect="non-scaling-stroke" />
 
       {STAT_BARS.map((v, i) => (
         <>
@@ -316,7 +323,7 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
             rx={k * 0.016}
             fill="none"
             stroke={RULE}
-            stroke-width={hair}
+            stroke-width={hair} vector-effect="non-scaling-stroke"
           />
           <rect
             x={sideX + i * (statW + statGap) + statW * 0.16}
@@ -347,7 +354,7 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
           r={dotR}
           fill={on ? INK : 'none'}
           stroke={on ? 'none' : STRONG}
-          stroke-width={hair}
+          stroke-width={hair} vector-effect="non-scaling-stroke"
         />
       ))}
       <line
@@ -356,7 +363,7 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
         x2={weekBox.x + weekBox.w}
         y2={dotY + dotR * 2.2}
         stroke={RULE}
-        stroke-width={hair}
+        stroke-width={hair} vector-effect="non-scaling-stroke"
       />
 
       {CAL.map((row, ri) =>
@@ -369,7 +376,7 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
             rx={cell * 0.22}
             fill={on ? SURFACE : 'none'}
             stroke={on ? 'none' : RULE}
-            stroke-width={hair}
+            stroke-width={hair} vector-effect="non-scaling-stroke"
           />
         ))
       )}
@@ -383,17 +390,17 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
           d={blob(b.pts, cx + b.box[0] * cw, cy + b.box[1] * mapH, b.box[2] * cw, b.box[3] * mapH)}
           fill="none"
           stroke={i === 1 ? STRONG : RULE}
-          stroke-width={i === 1 ? line : hair}
+          stroke-width={i === 1 ? line : hair} vector-effect="non-scaling-stroke"
         />
       ))}
       <path
         d={`M ${cx} ${cy + mapH * 0.72} Q ${cx + cw * 0.34} ${cy + mapH * 0.48} ${cx + cw * 0.6} ${cy + mapH * 0.66} T ${cx + cw} ${cy + mapH * 0.54}`}
         fill="none"
         stroke={RULE}
-        stroke-width={hair}
+        stroke-width={hair} vector-effect="non-scaling-stroke"
       />
 
-      <circle cx={dotCx} cy={dotCy} r={hereR} fill="none" stroke={STRONG} stroke-width={hair} />
+      <circle cx={dotCx} cy={dotCy} r={hereR} fill="none" stroke={STRONG} stroke-width={hair} vector-effect="non-scaling-stroke" />
       <circle cx={dotCx} cy={dotCy} r={hereR * 0.34} fill={INK} />
 
       {[0, 1, 2].map((i) => (
@@ -405,7 +412,7 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
           rx={chipH / 2}
           fill={i === 0 ? INK : 'var(--color-bg)'}
           stroke={i === 0 ? 'none' : STRONG}
-          stroke-width={hair}
+          stroke-width={hair} vector-effect="non-scaling-stroke"
         />
       ))}
     </>
@@ -421,7 +428,7 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
         rx={k * 0.03}
         fill="none"
         stroke={RULE}
-        stroke-width={hair}
+        stroke-width={hair} vector-effect="non-scaling-stroke"
       />
       <rect
         x={cardX + off}
@@ -431,7 +438,7 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
         rx={k * 0.03}
         fill="var(--color-bg)"
         stroke={RULE}
-        stroke-width={hair}
+        stroke-width={hair} vector-effect="non-scaling-stroke"
       />
       <rect
         x={cardX}
@@ -441,7 +448,7 @@ const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = la
         rx={k * 0.03}
         fill="var(--color-bg)"
         stroke={STRONG}
-        stroke-width={line}
+        stroke-width={line} vector-effect="non-scaling-stroke"
       />
       <circle cx={cardX + cardW / 2} cy={cardY + cardH * 0.3} r={cardH * 0.13} fill={SURFACE} />
       <rect
