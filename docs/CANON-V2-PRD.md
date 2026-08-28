@@ -321,6 +321,28 @@ users per team. Vanity counts (signups, stars) tracked but never steering.
 - **Figma expectations.** Embeds look like integration; users will ask
   for sync. The PRD's answer: not until assumption 2 is proven.
 
+## Where it sits — adjacencies
+
+Canon v2 lives in the seam between the issue tracker ("what should we
+build and why") and the repo ("the code"): the prototypes, the evidence,
+the reviews. Read the neighbors accordingly:
+
+- **Linear** — worldview-aligned, complementary; their Customer Requests
+  is Strata's cousin inside an issue tracker. A Linear integration
+  (prototype ↔ project, feedback ↔ Customer Request) is the first
+  post-alpha integration candidate.
+- **Figma** — fighting for design-in-code centripetally (Make, Dev Mode);
+  will build its version *inside* the canvas, which is the version the
+  field entries show people leaving. Coexist via embed; never depend.
+- **Chromatic / Pastel / Markup.io / BugHerd / Vercel previews** — the
+  honest near-competitors. Annotation-on-a-URL is a commodity; the moat
+  is annotations landing in an evidence record with a decided-state, and
+  reviews run against the team's own accumulated context.
+
+Assumption, stated as one: this reads adjacency from public surfaces;
+any of them may be building the seam quietly. The response is the same
+either way — ship the record, which is the part that compounds.
+
 ## Out of scope for v2 entirely
 
 Skill configurator, hosting arbitrary bundles, PWA packaging, benchmark
