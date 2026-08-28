@@ -27,6 +27,14 @@ that practice.
 Prototype hosting is a table-stakes shell; the skills that run against the
 prototypes are the reason to pick Canon.
 
+**The alpha aperture (D-35):** the horizon below is wide on purpose; the
+build is not. Alpha is two jobs — **a prototype manager** (index,
+select, staleness, device previews) and **a feedback facilitator** (the
+annotation layer, the Strata record, its reports) — plus the single
+`deter` run that tests assumption 3. In one sentence: *prototypes in one
+place, feedback that becomes evidence.* Everything else in this document
+is sequenced or held, and stays unbuilt until the ladder clears it.
+
 **The SDLC frame (D-34):** Canon is the design lane of the AI-native
 SDLC (Anthropic's playbook, filed `2026-08-28-ai-native-sdlc-playbook`).
 Its operating principle, adopted explicitly: *every stage commits an

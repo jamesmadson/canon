@@ -246,3 +246,14 @@ and this log feed Plan; prototypes are Build artifacts; review runs are
 Test; PR graduation is Deploy; staleness is Maintain feeding back to
 Plan. Doubles as the alpha-conversation frame, citable to Anthropic's
 own literature, and as a description of how Canon itself is built.
+
+### D-35 · The alpha aperture: manage prototypes, facilitate feedback — 2026-08-28
+James, asking the right question at the right moment: is the scope too
+wide? The answer: the horizon can be wide; the build aperture cannot.
+Alpha is two jobs — a prototype manager (index, select, staleness,
+device previews) and a feedback facilitator (annotation layer, Strata
+record, reports) — plus the single deter run that tests assumption 3.
+Survey, promotion, Linear, the contextual skills, and the CLI remain
+sequenced or held, unbuilt until the ladder clears them. The positioning
+sentence tightens to match: prototypes in one place, feedback that
+becomes evidence.
