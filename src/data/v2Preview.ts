@@ -167,7 +167,7 @@ export const RECORDS: Record<string, PrototypeRecord> = {
     evidenceNote:
       'Three entries, two participants and one stakeholder. Two participants is a possible pattern and the count is said out loud; the stakeholder request stays out of that count.',
     review: {
-      skill: 'dieter',
+      skill: 'deter',
       ranOn: '2026-08-26',
       target: 'prototype-trip-recap · trip-recap.preview.nine-mile.example',
       findings: [
