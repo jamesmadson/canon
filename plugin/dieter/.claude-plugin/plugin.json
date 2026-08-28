@@ -1,0 +1,9 @@
+{
+  "name": "dieter",
+  "description": "Less, but better. A design review that names what to remove and why — priced against the surface's job and how often people meet it. Keeps at least one thing, allows at most one missing function, and never ships a rewrite nobody asked for.",
+  "version": "0.1.0",
+  "author": {
+    "name": "James Madson",
+    "url": "https://jamesmadson.github.io/canon/"
+  }
+}
