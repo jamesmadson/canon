@@ -1,0 +1,74 @@
+---
+import AppShell from '../../../../components/AppShell.astro';
+import { withBase } from '../../../../lib/withBase';
+import { spellNumber } from '../../../../lib/spellNumber';
+import { IMPORT_BRANCHES, IMPORT_SELECTED, PROJECT, PROTOTYPES } from '../../../../data/v2Preview';
+
+const added = IMPORT_BRANCHES.filter((b) => b.selected);
+const repoName = PROJECT.secondRepo.split('/').pop();
+const count = spellNumber(IMPORT_SELECTED);
+const heading = count.charAt(0).toUpperCase() + count.slice(1);
+---
+
+<AppShell
+  title="Canon v2 preview — source connected"
+  description="A scripted preview of Canon v2 confirming an imported repository, and saying plainly what the preview cannot show."
+  active="overview"
+>
+  <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Source connected</p>
+  <h1 class="mt-1 text-3xl font-bold tracking-tight">
+    {heading} prototypes added from {repoName}
+  </h1>
+  <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+    <span class="font-mono text-[13px]">{PROJECT.secondRepo}</span> is connected read-only.{' '}
+    {spellNumber(IMPORT_BRANCHES.length)} branches were found and {spellNumber(IMPORT_SELECTED)}{' '}
+    were picked; the others stayed branches.
+  </p>
+
+  <div class="mt-6 max-w-xl overflow-hidden rounded-md border border-rule">
+    <div class="-mb-px">
+      {added.map((branch) => (
+        <div class="border-b border-rule bg-bg px-4 py-3">
+          <p class="font-mono text-[13px] break-all text-ink">{branch.name}</p>
+          <p class="mt-0.5 text-[13px] font-medium text-ink-soft">{branch.note}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="mt-6 max-w-xl border-l border-rule-strong pl-4">
+    <p class="text-[13px] leading-relaxed font-medium text-ink-soft">
+      <span class="font-semibold text-ink">A seam in this preview —</span> the dashboard keeps
+      showing the {spellNumber(PROTOTYPES.length)} {PROJECT.name} prototypes and nothing else.
+      These pages are scripted and hold no state, so the {repoName} branches cannot appear on a
+      screen that was written before you clicked.
+    </p>
+    <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+      In the product they would sit in the same grid, each card labelled with the repository it
+      came from. Faking that here would mean faking the one thing this walkthrough is for.
+    </p>
+  </div>
+
+  <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
+    <a
+      href={withBase('/v2-preview/import/branches/')}
+      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    >
+      Back
+    </a>
+    <a
+      href={withBase('/v2-preview/')}
+      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Back to the dashboard
+    </a>
+  </div>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/flows/')}
+    class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Flow map
+  </a>
+</AppShell>

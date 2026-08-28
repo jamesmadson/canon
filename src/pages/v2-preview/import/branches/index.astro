@@ -1,0 +1,70 @@
+---
+import AppShell from '../../../../components/AppShell.astro';
+import BranchChecklist from '../../../../components/BranchChecklist.astro';
+import { withBase } from '../../../../lib/withBase';
+import { IMPORT_BRANCHES, PROJECT } from '../../../../data/v2Preview';
+---
+
+<AppShell
+  title="Canon v2 preview — choose what's visible"
+  description="A scripted preview of picking which branches of an imported repository become Canon v2 prototypes."
+  active="overview"
+>
+  <a
+    href={withBase('/v2-preview/import/')}
+    class="-ml-1 inline-flex min-h-11 items-center px-1 text-[13px] font-medium text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    ← Connect a source
+  </a>
+
+  <h1 class="mt-2 text-3xl font-bold tracking-tight">Choose what's visible</h1>
+  <p class="mt-1 font-mono text-[13px] break-all text-ink-soft">{PROJECT.secondRepo}</p>
+  <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+    Same question as the first repository, asked again: which of these branches are prototypes?
+    The rest stay branches, and Canon leaves them alone.
+  </p>
+
+  <div class="mt-6 max-w-xl">
+    <BranchChecklist branches={IMPORT_BRANCHES} />
+    <p class="mt-2 text-[11px] leading-relaxed font-medium text-ink-soft">
+      Read-only in this preview — in the product these are yours to tick and untick, and you can
+      change your mind later.
+    </p>
+
+    <div class="mt-5 rounded-md border border-rule px-4 py-3">
+      <p class="text-sm leading-relaxed font-medium text-ink">
+        Nothing here gets renamed. Existing branches are picked as they are —{' '}
+        <span class="font-mono text-[13px]">feat/</span>,{' '}
+        <span class="font-mono text-[13px]">exp/</span>, or nothing at all.
+      </p>
+      <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+        The <code class="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[13px]">prototype-</code>{' '}
+        prefix only appears on branches Canon opens itself, from the New prototype screen. Import
+        never adds it.
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
+    <a
+      href={withBase('/v2-preview/import/')}
+      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    >
+      Back
+    </a>
+    <a
+      href={withBase('/v2-preview/import/done/')}
+      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Continue
+    </a>
+  </div>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/flows/')}
+    class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Flow map
+  </a>
+</AppShell>
