@@ -1,0 +1,33 @@
+---
+import DrawnMark from './DrawnMark.astro';
+import type { Branch } from '../data/v2Preview';
+
+/**
+ * The "choose what's visible" list, shared by the first repository in
+ * onboarding and by every repository imported afterwards. One component so the
+ * second repo cannot quietly grow a different rule than the first.
+ */
+interface Props {
+  branches: Branch[];
+}
+
+const { branches } = Astro.props;
+const selected = branches.filter((b) => b.selected).length;
+---
+
+<div class="overflow-hidden rounded-md border border-rule">
+  <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+    Branches · {branches.length} found, {selected} selected
+  </p>
+  <ul class="-mb-px">
+    {branches.map((branch) => (
+      <li class="flex min-h-11 items-center gap-3 border-b border-rule bg-bg px-4 py-2.5">
+        <DrawnMark on={branch.selected} label={branch.selected ? 'Selected' : 'Not selected'} />
+        <span class="min-w-0 flex-1">
+          <span class="block font-mono text-[13px] break-all text-ink">{branch.name}</span>
+          <span class="block text-[11px] font-medium text-ink-soft">{branch.note}</span>
+        </span>
+      </li>
+    ))}
+  </ul>
+</div>

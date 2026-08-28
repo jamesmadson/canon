@@ -1,7 +1,8 @@
 ---
 import OnboardingShell from '../../../components/OnboardingShell.astro';
+import BranchChecklist from '../../../components/BranchChecklist.astro';
 import { withBase } from '../../../lib/withBase';
-import { BRANCHES, PROJECT, SELECTED_BRANCHES } from '../../../data/v2Preview';
+import { BRANCHES, PROJECT } from '../../../data/v2Preview';
 ---
 
 <OnboardingShell
@@ -32,32 +33,8 @@ import { BRANCHES, PROJECT, SELECTED_BRANCHES } from '../../../data/v2Preview';
     />
   </label>
 
-  <div class="mt-5 overflow-hidden rounded-md border border-rule">
-    <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
-      Branches · {BRANCHES.length} found, {SELECTED_BRANCHES} selected
-    </p>
-    <ul class="-mb-px">
-      {BRANCHES.map((branch) => (
-        <li class="flex min-h-11 items-center gap-3 border-b border-rule bg-bg px-4 py-2.5">
-          <span
-            aria-hidden="true"
-            class:list={[
-              'flex size-4 shrink-0 items-center justify-center rounded-sm border text-[10px] leading-none',
-              branch.selected
-                ? 'border-ink bg-ink font-bold text-bg'
-                : 'border-rule-strong bg-bg',
-            ]}
-          >
-            {branch.selected ? '✓' : ''}
-          </span>
-          <span class="min-w-0 flex-1">
-            <span class="block font-mono text-[13px] break-all text-ink">{branch.name}</span>
-            <span class="block text-[11px] font-medium text-ink-soft">{branch.note}</span>
-          </span>
-          <span class="sr-only">{branch.selected ? 'Selected' : 'Not selected'}</span>
-        </li>
-      ))}
-    </ul>
+  <div class="mt-5">
+    <BranchChecklist branches={BRANCHES} />
   </div>
   <p class="mt-2 text-[11px] leading-relaxed font-medium text-ink-soft">
     Read-only in this preview — in the product these are yours to tick and untick,

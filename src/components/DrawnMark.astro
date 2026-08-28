@@ -1,0 +1,34 @@
+---
+/**
+ * The selection mark, drawn rather than delegated to a native control.
+ *
+ * Every choice in this preview is read-only: a real checkbox or radio would
+ * invite a click that does nothing, and it would drag the browser's own accent
+ * colour into a monochrome page. So the mark is two spans and a border.
+ *
+ * Square reads as many-of, round as one-of — the same grammar a real form
+ * would use, so the shape still tells you what kind of choice this is.
+ */
+interface Props {
+  shape?: 'square' | 'round';
+  on: boolean;
+  /** What a screen reader gets in place of the mark. */
+  label: string;
+}
+
+const { shape = 'square', on, label } = Astro.props;
+---
+
+<span
+  aria-hidden="true"
+  class:list={[
+    'flex size-4 shrink-0 items-center justify-center border text-[10px] leading-none',
+    shape === 'round' ? 'rounded-full' : 'rounded-sm',
+    on ? 'border-ink' : 'border-rule-strong bg-bg',
+    on && shape === 'square' && 'bg-ink font-bold text-bg',
+  ]}
+>
+  {on && shape === 'square' && '✓'}
+  {on && shape === 'round' && <span class="block size-2 rounded-full bg-ink"></span>}
+</span>
+<span class="sr-only">{label}</span>
