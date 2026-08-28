@@ -226,3 +226,14 @@ three modes — by IA (route hierarchy), by journey (flow order), freeform
 (hand placement, persisted) — and computed modes are views, never edits:
 switching arrangements never destroys a hand layout. Names come from
 routes at capture, so auto-layout is free where Figma's is manual labor.
+
+### D-33 · Held: the Linear integration runs both ways — 2026-08-28
+Refines the standing Linear adjacency, still post-alpha. Linear → Canon:
+issues, comments, and Customer Requests as a Strata intake source, under
+full ring discipline — pseudonymized (customers P-, teammates T-),
+drafts confirmed by a person, quarantine for anything uncleanable.
+Canon → Linear: commands run where the team works — mention or assign
+Canon on an issue linked to a prototype and a review runs, filing back
+as a comment plus a record entry. A mention is a person triggering, so
+D-20 holds naturally. Sequencing unchanged: this enriches what the
+integration is, not when it comes.

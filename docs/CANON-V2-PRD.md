@@ -391,9 +391,17 @@ build and why") and the repo ("the code"): the prototypes, the evidence,
 the reviews. Read the neighbors accordingly:
 
 - **Linear** — worldview-aligned, complementary; their Customer Requests
-  is Strata's cousin inside an issue tracker. A Linear integration
-  (prototype ↔ project, feedback ↔ Customer Request) is the first
-  post-alpha integration candidate.
+  is Strata's cousin inside an issue tracker. The first post-alpha
+  integration candidate, and per D-33 it runs both ways:
+  **Linear → Canon**: issues, comments, and Customer Requests become a
+  Strata intake source — synthesized into the record under the same
+  discipline as every ring (pseudonymized, drafts confirmed by a person,
+  quarantine for anything that can't be cleaned; teammates as T-,
+  customers as P-). **Canon → Linear**: Canon's commands run where the
+  team already works — mention or assign Canon on an issue linked to a
+  prototype, and a review runs, filing its result back as a comment and
+  a record entry. The mention *is* the person triggering, so the D-20
+  contract holds without ceremony.
 - **Figma** — fighting for design-in-code centripetally (Make, Dev Mode);
   will build its version *inside* the canvas, which is the version the
   field entries show people leaving. Coexist via embed; never depend.
