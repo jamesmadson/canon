@@ -56,7 +56,27 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
     <h2 id="screen-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft">
       The screen
     </h2>
-    <DevicePreview screen={prototype.screen} screenName={prototype.name} idBase="device" />
+    {prototype.screen ? (
+      <DevicePreview screen={prototype.screen} screenName={prototype.name} idBase="device" />
+    ) : (
+      <div class="overflow-hidden rounded-md border border-rule">
+        <div class="flex min-h-[300px] items-center justify-center bg-surface/30 px-4 py-6 sm:min-h-[420px]">
+          <div
+            class="flex w-full max-w-[240px] flex-col items-center justify-center gap-2 px-5 py-10 text-center"
+            style="aspect-ratio:390/844;border:1px dashed var(--color-rule-strong);border-radius:22px"
+          >
+            <p class="text-[15px] leading-relaxed font-medium text-ink-soft">
+              <strong class="font-semibold text-ink">No capture yet</strong> — this prototype
+              hasn't run anywhere Canon can see.
+            </p>
+          </div>
+        </div>
+        <p class="border-t border-rule px-4 py-2 text-[11px] font-medium text-ink-soft">
+          The frame stays empty until there is something to frame. Canon will not draw a
+          placeholder screen and let it pass for the work.
+        </p>
+      </div>
+    )}
   </section>
 
   <p class="mt-6 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
@@ -126,7 +146,7 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
       </div>
     ) : (
       <div class="rounded-md border border-rule px-4 py-4 text-[13px] font-medium text-ink-soft">
-        Nothing filed against this prototype.
+        {record.emptyFeedbackNote}
       </div>
     )}
 
@@ -144,8 +164,18 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
         <ReviewRunCard run={record.review} />
       </div>
     ) : (
-      <div class="rounded-md border border-rule px-4 py-4 text-[13px] font-medium text-ink-soft">
-        No run yet. Reviews are triggered by a person, never on every push.
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-rule px-4 py-3">
+        <p class="text-[13px] font-medium text-ink-soft">
+          No run yet. Reviews are triggered by a person, never on every push.
+        </p>
+        {record.runPath && (
+          <a
+            href={withBase(record.runPath)}
+            class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            Run a review
+          </a>
+        )}
       </div>
     )}
     <p class="mt-2 max-w-2xl text-[11px] font-medium text-ink-soft">

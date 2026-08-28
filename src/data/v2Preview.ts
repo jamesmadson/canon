@@ -21,8 +21,15 @@ export interface Prototype {
   slug: string;
   name: string;
   summary: string;
-  /** The screen this prototype is a version of — drives ScreenArt. */
-  screen: ScreenKey;
+  /**
+   * The screen this prototype is a version of — drives ScreenArt.
+   *
+   * `null` means Canon has never seen this one run: no branch deploy, no
+   * attached preview URL, nothing to frame. An empty prototype borrowing
+   * another screen's wireframe would be the one picture in here that lies, so
+   * the empty case gets an empty frame that says what is missing.
+   */
+  screen: ScreenKey | null;
   /** Where Canon indexed it from. A prototype is a reference, never a copy. */
   origin: 'Git' | 'Figma';
   /** Branch name for Git prototypes, frame name for Figma ones. */
@@ -67,6 +74,14 @@ export interface PrototypeRecord {
   /** What the evidence adds up to, said out loud with its counts. */
   evidenceNote: string;
   review: ReviewRun | null;
+  /** Shown in place of the thread when nothing has been filed yet. */
+  emptyFeedbackNote: string;
+  /**
+   * Where "Run a review" goes from the empty run state, or null when this
+   * preview scripts no run for it. A link to a screen that does not exist
+   * would be the same lie as a disabled row pretending to be clickable.
+   */
+  runPath: string | null;
 }
 
 export const PROJECT = {
@@ -74,8 +89,10 @@ export const PROJECT = {
   team: 'Fern Labs',
   tagline: 'A daily dose of the outdoors, measured.',
   blurb:
-    'A phone app for logging time outside: a daily target ring, a streak, and a quiet map of the green space nearby. Four prototypes indexed from one repository and one Figma file.',
+    'A phone app for logging time outside: a daily target ring, a streak, and a quiet map of the green space nearby. Every prototype here is indexed from one repository and one Figma file.',
   repo: 'fern-labs/fernwell',
+  /** The second repository, connected after onboarding. Also invented. */
+  secondRepo: 'fern-labs/trailhead',
   figmaFile: 'Fernwell — concepts',
   account: 'ade@fernlabs.co',
   handle: '@ade-fernlabs',
@@ -103,6 +120,34 @@ export const BRANCHES: Branch[] = [
   { name: 'fix/copy-pass', selected: false, note: 'Copy corrections. Nothing to review.' },
   { name: 'prototype-map-layers', selected: true, note: 'Opened from Canon, so Canon named it.' },
 ];
+
+/**
+ * The second repository, as the import flow finds it. A different product by
+ * the same invented team — a route planner — so the branch names read as
+ * somebody else's work rather than more Fernwell.
+ *
+ * Kept separate from BRANCHES on purpose: BRANCHES is the repo Canon saw at
+ * onboarding, and folding a later import into it would quietly rewrite what
+ * that screen showed.
+ */
+export const IMPORT_BRANCHES: Branch[] = [
+  { name: 'main', selected: false, note: 'What ships. Not a prototype.' },
+  { name: 'develop', selected: false, note: 'Integration branch. Not a prototype.' },
+  { name: 'feat/route-editor', selected: true, note: 'Dragging a route by its points.' },
+  { name: 'exp/elevation-profile', selected: true, note: 'The climb, drawn under the map.' },
+  { name: 'fix/unit-labels', selected: false, note: 'Miles and kilometres. Nothing to review.' },
+];
+
+/**
+ * The branch Canon opens for you in the create flow, and the one place the
+ * `prototype-` prefix comes from: Canon is the thing doing the naming.
+ */
+export const NEW_PROTOTYPE = {
+  name: 'Dawn mode',
+  slug: 'dawn-mode',
+  branch: 'prototype-dawn-mode',
+  baseBranch: 'main',
+};
 
 export const PROTOTYPES: Prototype[] = [
   {
@@ -171,6 +216,20 @@ export const PROTOTYPES: Prototype[] = [
     lastActivityNote: 'Figma edit — third card rewritten',
     sources: [{ label: 'Figma frame', detail: 'Fernwell — concepts · Onboarding 1–3' }],
   },
+  {
+    slug: NEW_PROTOTYPE.slug,
+    name: NEW_PROTOTYPE.name,
+    summary:
+      'A low-light palette for the hour after sunrise, which is when most of the logging actually happens. Opened from Canon a moment ago — the branch exists and nothing has landed on it yet.',
+    screen: null,
+    origin: 'Git',
+    ref: NEW_PROTOTYPE.branch,
+    createdInCanon: true,
+    author: PROJECT.viewer.name,
+    lastActivity: PREVIEW_AS_OF,
+    lastActivityNote: `Branch opened from ${NEW_PROTOTYPE.baseBranch} — no commits yet`,
+    sources: [{ label: 'Branch', detail: `${PROJECT.repo} · ${NEW_PROTOTYPE.branch}` }],
+  },
 ];
 
 export const RECORDS: Record<string, PrototypeRecord> = {
@@ -237,6 +296,8 @@ export const RECORDS: Record<string, PrototypeRecord> = {
       ],
       kept: 'The gap in the ring stays. It is the one mark on the screen that tells forty-eight minutes apart from sixty.',
     },
+    emptyFeedbackNote: 'Nothing filed against this prototype.',
+    runPath: null,
   },
   'streak-cards': {
     feedback: [
@@ -281,6 +342,8 @@ export const RECORDS: Record<string, PrototypeRecord> = {
       ],
       kept: 'The plain day count stays. It is the only thing on the card a person came to check.',
     },
+    emptyFeedbackNote: 'Nothing filed against this prototype.',
+    runPath: null,
   },
   'map-layers': {
     feedback: [
@@ -298,12 +361,55 @@ export const RECORDS: Record<string, PrototypeRecord> = {
     evidenceNote:
       'One entry, one participant. One participant is a quote, not a pattern — and it is the reason this branch is parked rather than abandoned.',
     review: null,
+    emptyFeedbackNote: 'Nothing filed against this prototype.',
+    runPath: '/v2-preview/map-layers/run/',
   },
   'onboarding-concepts': {
     feedback: [],
     evidenceNote: 'No entries. Nothing has been filed against this prototype.',
     review: null,
+    emptyFeedbackNote: 'Nothing filed against this prototype.',
+    runPath: null,
   },
+  [NEW_PROTOTYPE.slug]: {
+    feedback: [],
+    evidenceNote:
+      'No entries, because nothing has been shown to anyone yet. An empty record is the honest state of a prototype that is one minute old.',
+    review: null,
+    emptyFeedbackNote: "No feedback yet. Share the link once there's something to react to.",
+    runPath: null,
+  },
+};
+
+/**
+ * The run the review flow produces, kept out of RECORDS on purpose.
+ *
+ * This preview has no state to keep, so a run "filed" on one screen cannot
+ * show up on another. Rather than pretend otherwise, the result page carries
+ * the run and says plainly that Map layers still reads as having none.
+ */
+export const SCRIPTED_RUN: ReviewRun = {
+  skill: 'deter',
+  ranOn: PREVIEW_AS_OF,
+  target: 'prototype-map-layers · map-layers.preview.fernlabs.example',
+  findings: [
+    {
+      remove: 'The compass rose above the layer chips',
+      because:
+        'North is up in every state this screen has, so the rose is a fixed answer to a question nobody asked. Where am I is the question, and the location dot has already answered it a thumb-length lower down.',
+    },
+    {
+      remove: 'The solid fill on the active layer chips',
+      because:
+        'The fill is the heaviest mark on the screen and it sits directly over the path, which is the one line the map is drawn to show. A field test already found the chip states unreadable outdoors, so the fill is not buying the state it costs.',
+    },
+    {
+      remove: 'The legend under the map',
+      because:
+        'It names the same three layers as the chips above it, in the same order, adding no word. On a 390pt screen that repetition costs the map a fifth of its height.',
+    },
+  ],
+  kept: 'The chips themselves stay. Turning a layer off is the only thing a person can do on this screen, and the row is where they do it.',
 };
 
 export function prototypeBySlug(slug: string): Prototype | undefined {
@@ -319,4 +425,21 @@ export function sourceLine(prototype: Prototype): { mono: boolean; text: string 
 
 /** Derived, never written down — the stat strip must not outlive the data. */
 export const SELECTED_BRANCHES = BRANCHES.filter((b) => b.selected).length;
+export const IMPORT_SELECTED = IMPORT_BRANCHES.filter((b) => b.selected).length;
 export const REVIEW_RUNS = Object.values(RECORDS).filter((r) => r.review).length;
+export const GIT_PROTOTYPES = PROTOTYPES.filter((p) => p.origin === 'Git').length;
+export const FIGMA_PROTOTYPES = PROTOTYPES.length - GIT_PROTOTYPES;
+
+/**
+ * Prototypes Canon opened after the repository was connected, so they were
+ * never in the branch list onboarding showed. Counting them separately is what
+ * keeps the stat strip's arithmetic closable: branches picked at connect, plus
+ * these, plus the Figma set, equals the number of prototypes.
+ */
+const CONNECTED_BRANCH_NAMES = new Set(BRANCHES.map((b) => b.name));
+export const OPENED_SINCE = PROTOTYPES.filter(
+  (p) => p.createdInCanon && !CONNECTED_BRANCH_NAMES.has(p.ref),
+).length;
+
+/** The prefixed branches, named in the dashboard's own sentence about them. */
+export const CANON_NAMED_REFS = PROTOTYPES.filter((p) => p.createdInCanon).map((p) => p.ref);

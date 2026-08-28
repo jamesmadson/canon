@@ -23,9 +23,14 @@ const source = sourceLine(prototype);
   href={withBase(`/v2-preview/${prototype.slug}/`)}
   class="group flex min-h-11 items-start gap-3 border-b border-rule bg-bg px-4 py-3 transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
 >
-  <span class="block w-9 shrink-0 overflow-hidden rounded-[3px] border border-rule-strong bg-bg">
+  <span
+    class:list={[
+      'block w-9 shrink-0 overflow-hidden rounded-[3px] border bg-bg',
+      prototype.screen ? 'border-rule-strong' : 'border-dashed border-rule-strong',
+    ]}
+  >
     <span class="block aspect-[390/844]">
-      <ScreenArt screen={prototype.screen} w={390} h={844} />
+      {prototype.screen && <ScreenArt screen={prototype.screen} w={390} h={844} />}
     </span>
   </span>
 
