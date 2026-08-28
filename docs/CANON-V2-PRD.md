@@ -50,7 +50,7 @@ Each alpha week answers one of these before we build the layer above it.
 ## Core model
 
 ```
-Team
+Account (personal at alpha; teams are a later layer, not a rename)
  └─ Project
      ├─ Sources        a Git repo (GitHub App, read-only at alpha)
      │                 a Figma file (embed by URL at alpha)
@@ -163,6 +163,82 @@ the Canon gallery" as the credential.
   cleared — nothing irreversible ships before that.)
 - Waitlist capture is still blocked on a Formspree/Buttondown account —
   the one Phase-0 blocker this PRD inherits from the GTM plan.
+
+## Accounts and surfaces
+
+- **Sign in:** OAuth only — GitHub and Google, no passwords to store.
+  Sign-up and sign-in are one screen; the first sign-in creates the
+  account. Personal accounts at alpha; a team is a later *addition*
+  (shared projects via invite link bridge the gap until then).
+- **Dark mode from day one in the app.** The OKLCH token set inverts
+  cleanly; ship system-preference default plus a toggle. The marketing
+  site stays light — one committed look — while the app, a daily surface,
+  gets both.
+- **PWA-first app shell.** Manifest + service worker from the start:
+  installable, offline read of last-viewed prototypes and feedback.
+  Justified now in a way it wasn't for the static site — the app has
+  state, sessions, and a return loop. Native apps stay out of scope.
+- **The CLI** — `npx canon` (or `npm i -g canon`): the same model,
+  text-only, for people who live where the prototypes live. `canon ls`
+  (prototypes + staleness), `canon feedback` (a Strata intake at the
+  terminal), `canon report themes|open`, `canon review dieter`. No
+  previews — the terminal gets tables and verbatims, not screenshots.
+  It greets with the wordmark and then stays quiet:
+
+```
+ ██████  █████  ███   ██  ██████  ███   ██
+██      ██   ██ ████  ██ ██    ██ ████  ██
+██      ███████ ██ ██ ██ ██    ██ ██ ██ ██
+██      ██   ██ ██  ████ ██    ██ ██  ████
+ ██████ ██   ██ ██   ███  ██████  ██   ███
+        the record of the work
+```
+
+## Research
+
+A project-level **Research page** cataloguing every finding — the Strata
+record with a face. Filterable by source type, participant, tag, and
+date; every card traceable to its entry; the themes/open reports rendered
+live at the top with their citations.
+
+Intake grows in rings:
+
+1. **Alpha:** paste text, upload `.md` and screenshots — Strata parses
+   into Said/Meant/Decided drafts the person confirms before filing.
+   Parsing proposes; a human files.
+2. **Next:** Figma and Miro **links** attach to entries as references
+   (embed where the platform allows).
+3. **Later:** true Miro/Figma import — pull sticky notes and frames via
+   their APIs and parse each into a draft entry. Gated on ring 1 proving
+   people actually confirm drafts rather than rubber-stamping them.
+
+The evidence bar and pseudonymization apply at every ring — imports get
+the same discipline as hand-filed entries, and an import that can't be
+pseudonymized cleanly lands in a quarantine list, not the record.
+
+## Field signals — 2026-08-27 thread (filed in `.strata/`)
+
+A 13-reply r/UXDesign thread on designing in code, filed as entries.
+Counts are stated per the evidence bar; all one thread, so independence
+is partial — replies could see each other:
+
+- **Coded prototypes lose the shared review surface** — 4 participants
+  (P-03, P-04, P-11, P-12): snapshot walls in Mural, discussion displaced
+  into PRs and Looms, a hand-rolled annotation layer, and an essay naming
+  the trade ("you gain fidelity and lose visibility, context, and
+  collaboration"). Directly validates assumption 2 and the prototype
+  page.
+- **Screens get piped back into boards as a workaround** — 4 participants
+  (P-03, P-05, P-09, P-10), including reviews run for legal and copy
+  teams. Review surfaces must serve people who never open the repo.
+- **Figma demoted to whiteboard, not deliverable** — 4 participants
+  (P-02, P-04, P-06, P-07), one team already running its own "mocks
+  site" — the dashboard, hand-built.
+- Single signals, not patterns: staging-and-overwrites chaos with no
+  branch discipline (P-01), "working in code means production code, not
+  a prototype tier" (P-08), and an open question on where content
+  designers fit (P-13) — the last one bears on the `copy` skill and is
+  worth a follow-up.
 
 ## Alpha plan
 
