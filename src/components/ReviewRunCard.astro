@@ -1,0 +1,48 @@
+---
+import type { ReviewRun } from '../data/v2Preview';
+
+interface Props {
+  run: ReviewRun;
+  /** Compact shows the first two findings and the count of the rest. */
+  compact?: boolean;
+}
+
+const { run, compact = false } = Astro.props;
+const findings = compact ? run.findings.slice(0, 2) : run.findings;
+const hidden = run.findings.length - findings.length;
+---
+
+<div class="bg-bg">
+  <div class="border-b border-rule px-4 py-3">
+    <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[11px] font-medium text-ink-soft">
+      <span class="rounded-sm border border-rule-strong px-1.5 py-0.5 font-mono font-semibold text-ink">
+        {run.skill}
+      </span>
+      <span>run {run.ranOn}</span>
+      <span aria-hidden="true">·</span>
+      <span>{run.findings.length} findings, all of them removals</span>
+    </p>
+    {!compact && <p class="mt-2 font-mono text-[11px] break-all text-ink-soft">{run.target}</p>}
+  </div>
+
+  <ul>
+    {findings.map((finding) => (
+      <li class="border-b border-rule px-4 py-3">
+        <p class="text-[15px] leading-snug font-semibold text-ink">{finding.remove}</p>
+        <p class="mt-1 text-[13px] leading-relaxed font-medium text-ink-soft">{finding.because}</p>
+      </li>
+    ))}
+  </ul>
+
+  {hidden > 0 && (
+    <p class="px-4 py-2 text-[11px] font-medium text-ink-soft">
+      {hidden} more removals in the full run.
+    </p>
+  )}
+
+  {!compact && (
+    <p class="px-4 py-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+      <span class="font-semibold text-ink">Kept —</span> {run.kept}
+    </p>
+  )}
+</div>

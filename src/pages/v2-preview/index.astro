@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PreviewLabel from '../../components/PreviewLabel.astro';
+import PrototypeRow from '../../components/PrototypeRow.astro';
+import { withBase } from '../../lib/withBase';
+import { isStale, STALE_AFTER_DAYS } from '../../lib/staleness';
+import { PREVIEW_AS_OF, PROJECT, PROTOTYPES } from '../../data/v2Preview';
+
+const staleCount = PROTOTYPES.filter((p) => isStale(p.lastActivity, PREVIEW_AS_OF)).length;
+---
+
+<BaseLayout
+  title="Canon v2 preview — dashboard"
+  description="A scripted preview of the Canon v2 project dashboard: prototypes indexed from Git and Figma, with staleness flags."
+>
+  <p class="mb-4 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+    Canon v2 · screen 1 of 2
+  </p>
+
+  <div class="overflow-hidden rounded-lg border border-rule-strong">
+    <PreviewLabel placement="top" />
+
+    <div class="px-4 py-6 sm:px-6">
+      <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Project</p>
+      <h1 class="mt-1 text-3xl font-bold tracking-tight">{PROJECT.name}</h1>
+      <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+        {PROJECT.blurb}
+      </p>
+
+      <dl class="mt-5 flex flex-col gap-2 border-t border-rule pt-4 text-[13px] font-medium sm:flex-row sm:gap-8">
+        <div>
+          <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Repository</dt>
+          <dd class="mt-0.5 font-mono break-all text-ink">{PROJECT.repo}</dd>
+        </div>
+        <div>
+          <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Figma file</dt>
+          <dd class="mt-0.5 text-ink">{PROJECT.figmaFile}</dd>
+        </div>
+        <div>
+          <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Access</dt>
+          <dd class="mt-0.5 text-ink">Read-only</dd>
+        </div>
+      </dl>
+
+      <section class="mt-8" aria-labelledby="prototypes-heading">
+        <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="prototypes-heading" class="text-sm font-semibold uppercase tracking-wide text-ink-soft">
+            Prototypes
+          </h2>
+          <p class="text-[11px] font-medium text-ink-soft">
+            {PROTOTYPES.length} indexed · {staleCount} idle
+          </p>
+        </div>
+
+        <div class="overflow-hidden rounded-md border border-rule">
+          <div class="-mb-px">
+            {PROTOTYPES.map((prototype) => <PrototypeRow prototype={prototype} />)}
+          </div>
+        </div>
+
+        <p class="mt-4 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
+          Anything with no activity for {STALE_AFTER_DAYS} days gets flagged. The flag is not a
+          scolding — retiring a prototype is a normal end state, and a project that never
+          retires anything is the one with a problem.
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <nav class="mt-8 flex flex-wrap gap-x-6 gap-y-1 text-sm font-medium" aria-label="Preview navigation">
+    <a
+      href={withBase('/v2-preview/trip-recap/')}
+      class="flex min-h-11 items-center font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Next screen — a prototype in detail
+    </a>
+    <a
+      href={withBase('/alpha/')}
+      class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Back to the alpha page
+    </a>
+  </nav>
+</BaseLayout>

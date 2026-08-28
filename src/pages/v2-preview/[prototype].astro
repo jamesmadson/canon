@@ -1,0 +1,186 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PreviewLabel from '../../components/PreviewLabel.astro';
+import FeedbackEntryCard from '../../components/FeedbackEntryCard.astro';
+import ReviewRunCard from '../../components/ReviewRunCard.astro';
+import { withBase } from '../../lib/withBase';
+import { daysIdle, idleLabel, isStale } from '../../lib/staleness';
+import { PREVIEW_AS_OF, PROJECT, PROTOTYPES, RECORDS } from '../../data/v2Preview';
+
+export function getStaticPaths() {
+  return PROTOTYPES.map((prototype) => ({
+    params: { prototype: prototype.slug },
+    props: { prototype },
+  }));
+}
+
+const { prototype } = Astro.props;
+const record = RECORDS[prototype.slug];
+const stale = isStale(prototype.lastActivity, PREVIEW_AS_OF);
+const idle = daysIdle(prototype.lastActivity, PREVIEW_AS_OF);
+const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
+---
+
+<BaseLayout
+  title={`Canon v2 preview — ${prototype.name}`}
+  description="A scripted preview of a Canon v2 prototype page: sources, a Strata feedback thread, and one review run."
+>
+  <p class="mb-4 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+    Canon v2 · screen 2 of 2
+  </p>
+
+  <div class="overflow-hidden rounded-lg border border-rule-strong">
+    <PreviewLabel placement="top" />
+
+    <div class="px-4 py-6 sm:px-6">
+      <a
+        href={withBase('/v2-preview/')}
+        class="-ml-1 inline-flex min-h-11 items-center px-1 text-[13px] font-medium text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      >
+        ← {PROJECT.name}
+      </a>
+
+      <div class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-2">
+        <h1 class="text-3xl font-bold tracking-tight">{prototype.name}</h1>
+        {stale && (
+          <span class="rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold tracking-wide text-ink">
+            Idle {idle} days
+          </span>
+        )}
+      </div>
+
+      <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+        {prototype.summary}
+      </p>
+
+      <dl class="mt-5 flex flex-col gap-2 border-t border-rule pt-4 text-[13px] font-medium sm:flex-row sm:gap-8">
+        <div>
+          <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Indexed from</dt>
+          <dd class="mt-0.5 text-ink">{prototype.origin}</dd>
+        </div>
+        <div>
+          <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Author</dt>
+          <dd class="mt-0.5 text-ink">{prototype.author}</dd>
+        </div>
+        <div>
+          <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Last activity</dt>
+          <dd class="mt-0.5 text-ink">
+            {idleLabel(prototype.lastActivity, PREVIEW_AS_OF)} — {prototype.lastActivityNote}
+          </dd>
+        </div>
+      </dl>
+
+      <section class="mt-8" aria-labelledby="sources-heading">
+        <h2 id="sources-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+          Sources
+        </h2>
+        <div class="overflow-hidden rounded-md border border-rule">
+          <dl class="-mb-px">
+            {prototype.sources.map((source) => (
+              <div class="flex flex-col gap-0.5 border-b border-rule px-4 py-3 sm:flex-row sm:gap-4">
+                <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft sm:w-28 sm:shrink-0">
+                  {source.label}
+                </dt>
+                <dd class="font-mono text-[13px] break-all text-ink">{source.detail}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <p class="mt-2 text-[11px] font-medium text-ink-soft">
+          The work stays in Git and Figma — Canon indexes and annotates, it never holds a copy.
+          These references point nowhere in the preview.
+        </p>
+      </section>
+
+      <section class="mt-8" aria-labelledby="feedback-heading">
+        <div class="mb-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id="feedback-heading" class="text-sm font-semibold uppercase tracking-wide text-ink-soft">
+            Feedback
+          </h2>
+          <p class="text-[11px] font-medium text-ink-soft">
+            Filed with Strata · {record.feedback.length}{' '}
+            {record.feedback.length === 1 ? 'entry' : 'entries'}
+          </p>
+        </div>
+        <p class="mb-3 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
+          Verbatim under <strong class="font-semibold text-ink">Said</strong>, your reading of it
+          under <strong class="font-semibold text-ink">Meant</strong> and marked as yours, and what
+          was actually done under <strong class="font-semibold text-ink">Decided</strong> — usually
+          nothing, which is the part worth seeing. People are pseudonyms; the mapping never enters
+          the record.
+        </p>
+
+        {record.feedback.length > 0 ? (
+          <div class="overflow-hidden rounded-md border border-rule">
+            {record.feedback.map((entry) => <FeedbackEntryCard entry={entry} />)}
+          </div>
+        ) : (
+          <div class="rounded-md border border-rule px-4 py-4 text-[13px] font-medium text-ink-soft">
+            Nothing filed against this prototype.
+          </div>
+        )}
+
+        <p class="mt-3 max-w-2xl border-l border-rule-strong pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+          <span class="font-semibold text-ink">Evidence —</span> {record.evidenceNote}
+        </p>
+      </section>
+
+      <section class="mt-8" aria-labelledby="review-heading">
+        <h2 id="review-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+          Review runs
+        </h2>
+        {record.review ? (
+          <div class="overflow-hidden rounded-md border border-rule">
+            <ReviewRunCard run={record.review} />
+          </div>
+        ) : (
+          <div class="rounded-md border border-rule px-4 py-4 text-[13px] font-medium text-ink-soft">
+            No run yet. Reviews are triggered by a person, never on every push.
+          </div>
+        )}
+        <p class="mt-2 max-w-2xl text-[11px] font-medium text-ink-soft">
+          <span class="font-mono">dieter</span> is a constraint review: less, but better. It only
+          proposes removals, and each one has to carry its reason.
+        </p>
+      </section>
+
+      <section class="mt-8" aria-labelledby="others-heading">
+        <h2 id="others-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+          Elsewhere in {PROJECT.name}
+        </h2>
+        <div class="overflow-hidden rounded-md border border-rule">
+          <div class="-mb-px">
+            {others.map((other) => (
+              <a
+                href={withBase(`/v2-preview/${other.slug}/`)}
+                class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule bg-bg px-4 py-3 transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2"
+              >
+                <span class="text-[15px] font-semibold text-ink underline decoration-rule-strong underline-offset-4">
+                  {other.name}
+                </span>
+                <span class="text-[11px] font-medium text-ink-soft">
+                  {other.author} · {idleLabel(other.lastActivity, PREVIEW_AS_OF)}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <nav class="mt-8 flex flex-wrap gap-x-6 gap-y-1 text-sm font-medium" aria-label="Preview navigation">
+    <a
+      href={withBase('/v2-preview/')}
+      class="flex min-h-11 items-center font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Back to the dashboard
+    </a>
+    <a
+      href={withBase('/alpha/')}
+      class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Back to the alpha page
+    </a>
+  </nav>
+</BaseLayout>
