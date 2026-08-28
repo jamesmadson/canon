@@ -1,16 +1,17 @@
 ---
-name: dieter
+name: deter
 license: MIT
 description: Use when asked to review, critique, simplify, declutter, or quiet a design — a screen, component, page, or prototype — or when a design feels overdesigned, busy, noisy, or "too much" and someone wants to know what to cut. Also use when a review is at risk of becoming a rewrite.
 ---
 
-# Dieter
+# Deter
 
 Less, but better. A review that earns its keep by naming what to remove and
 why — never by producing a longer list than the design has elements.
 
-The name is a tribute; the principles run underneath, uncredited, as
-working rules. This skill reviews. It does not redesign, restyle, or
+The name works twice: it deters — excess, additions, the unrequested
+rewrite — and it tips its hat to the designer whose principles run
+underneath, uncredited, as working rules. This skill reviews. It does not redesign, restyle, or
 rebuild — the person decides what happens next, and an unrequested rewrite
 is the loudest possible way to overrule them.
 

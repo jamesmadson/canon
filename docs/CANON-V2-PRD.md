@@ -41,7 +41,7 @@ currently answers "where's the latest version?" from memory.
 2. **Feedback filed at the prototype beats feedback in Slack** — people
    will actually comment where the work lives.
 3. **Skill runs on real prototypes produce findings a lead acts on** —
-   the Dieter/a11y reviews must change a decision, not decorate a page.
+   the Deter/a11y reviews must change a decision, not decorate a page.
 4. People will connect a private repo to a solo-maintained alpha (trust
    threshold — mitigated by read-only scopes and a clean security story).
 
@@ -59,7 +59,7 @@ Account (personal at alpha; teams are a later layer, not a rename)
      ├─ Feedback       Strata entries attached to a prototype or project
      │                 (pseudonymized, Said/Meant/Decided, evidence bar)
      ├─ Maps           Graft renders: branch history, session history
-     └─ Reviews        skill runs against a prototype: dieter, access,
+     └─ Reviews        skill runs against a prototype: deter, access,
                        (code review later)
 ```
 
@@ -76,7 +76,7 @@ security story honest.
 | Prototype page: description, links, activity, feedback thread | Realtime multiplayer anything |
 | Feedback: the annotation layer (below) plus a plain comment box, both filing Strata entries; reports (themes/open) per project | Public commenting, reactions, notifications beyond email |
 | Access: GitHub org membership = project access; share links for viewers | Roles/permissions matrix, SSO — alpha rides on GitHub auth |
-| Skill runs: `dieter` and `access` against a branch's preview URL or Figma frame, results filed to the prototype | Automatic runs on every push; code-review skill (James, later) |
+| Skill runs: `deter` and `access` against a branch's preview URL or Figma frame, results filed to the prototype | Automatic runs on every push; code-review skill (James, later) |
 | Sign-up page with interface preview + waitlist | Billing, teams self-serve onboarding |
 
 **Staleness is a feature, not a metric aside:** the dashboard flags
@@ -159,7 +159,7 @@ team's* accumulated record — "you used spacing-4 here but this system's
 cards use spacing-6, decided 2026-03-12" — which is the thing no generic
 skill can say.
 
-Alpha ships `strata` + `dieter` + `access`; `system` is next once
+Alpha ships `strata` + `deter` + `access`; `system` is next once
 assumption 3 proves review runs get acted on. `interface`, `ux`, and
 `copy` follow the same mold and are cheap once the mold is proven.
 
@@ -170,14 +170,14 @@ assumption 3 proves review runs get acted on. `interface`, `ux`, and
 | `canon` router + 3 kits | shipped | build-time judgment in the agent |
 | `graft` | shipped | maps: session history now, branch graph in v2 |
 | `strata` | shipped | the feedback system — the product's comment box *is* a Strata intake |
-| `dieter` | to build | constraint review: less, but better — flags what to remove, not add |
+| `deter` | to build | constraint review: less, but better — flags what to remove, not add |
 | `access` | to build | accessibility pass on a prototype: contrast, targets, keyboard path |
 | code review | later (James) | correctness/hygiene pass on prototype branches |
 
-Naming note for `dieter`: "Less is more" is Mies van der Rohe; Rams'
+Naming note for `deter`: "Less is more" is Mies van der Rohe; Rams'
 phrase is **"Less, but better"** (*Weniger, aber besser*). The skill uses
 the ethos as v1 decided — principles underneath, applied as concrete
-constraints — and avoids claiming the man's endorsement. `dieter` is a
+constraints — and avoids claiming the man's endorsement. `deter` is a
 tribute name; the description says so.
 
 ## Architecture (lean, scales)
@@ -232,7 +232,7 @@ the Canon gallery" as the credential.
 - **The CLI** — `npx canon` (or `npm i -g canon`): the same model,
   text-only, for people who live where the prototypes live. `canon ls`
   (prototypes + staleness), `canon feedback` (a Strata intake at the
-  terminal), `canon report themes|open`, `canon review dieter`. No
+  terminal), `canon report themes|open`, `canon review deter`. No
   previews — the terminal gets tables and verbatims, not screenshots.
   It greets with the wordmark and then stays quiet:
 
@@ -314,7 +314,7 @@ users per team. Vanity counts (signups, stars) tracked but never steering.
   week validated.
 - **Employer overlap.** Same product category as internal work. Mitigated
   by clean-room rule, public-repo provenance, and the pending
-  confirmation; if that answer is no, v2 pivots to skills-only (dieter +
+  confirmation; if that answer is no, v2 pivots to skills-only (deter +
   access still ship — they carry value without the platform).
 - **Repo trust.** Read-only scopes, no code storage, security page from
   day one.
@@ -353,6 +353,6 @@ publishing (stays on the GTM track), MCP server (revisit after alpha).
 1. `/alpha` page + waitlist (needs the form account) + preview mock
 2. App shell: auth, project, GitHub App branch index, staleness
 3. Prototype page + Figma embed + Strata-backed feedback
-4. `dieter` + `access` skills (TDD, baseline-first, like Strata)
+4. `deter` + `access` skills (TDD, baseline-first, like Strata)
 5. Review runs UI
 6. NatureQuant onboarding, then widen
