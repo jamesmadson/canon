@@ -205,3 +205,15 @@ the one thing every workaround (Figma mirrors, snapshot walls, storyboard
 canvases) lacks. Sequenced post-alpha behind the dashboard and annotation
 layer. Also upgrades critique-in-PRs to a confirmed pattern (third
 independent voice).
+
+### D-31 · Held: component promotion into the team's system — 2026-08-28
+Status: held, not committed — the log's first explicitly-held idea.
+Connect Storybook or the design-system repo; a component proven in a
+prototype promotes with a click. The click scaffolds a PR against the
+team's own repo (component + story + a system-record entry carrying the
+why) — never a copy into Canon, per D-15. Gives the contextual-skills
+architecture its write path: prototypes graduate as PRs, components
+graduate into the system. Sequenced behind the system skill, which sits
+behind assumption 3. Note: Storybook's commercial arm is Chromatic —
+already mapped as a near-competitor — so this is both a bridge and a
+border.

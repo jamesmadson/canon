@@ -199,6 +199,24 @@ Alpha ships `strata` + `deter` + `access`; `system` is next once
 assumption 3 proves review runs get acted on. `interface`, `ux`, and
 `copy` follow the same mold and are cheap once the mold is proven.
 
+### Promotion — prototypes feed the system (held, not committed)
+
+Held idea (D-31): connect a project's Storybook / design-system repo, and
+a component proven in a prototype can be **promoted into the system with
+a click**. The click's honest shape, consistent with D-15's no-storage
+rule: it scaffolds a **PR against the team's own system repo** — the
+extracted component, a story file, and a `system` record entry carrying
+the why (promoted from which prototype, on what evidence). Canon never
+hosts the component; the engineering buddy finishes the PR.
+
+This gives the contextual-skills architecture its missing write path:
+prototypes graduate as PRs, components graduate into the system — and
+the `system` record becomes the design system's changelog of reasons.
+Rings when taken up: (1) link Storybook, reference components; (2) the
+promote-scaffold; (3) drift flags — a prototype using a variant the
+system doesn't have. Held behind `system` itself, which is held behind
+assumption 3.
+
 ## The skills lineup at launch
 
 | Skill | State | Job in v2 |
