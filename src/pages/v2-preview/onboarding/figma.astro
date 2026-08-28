@@ -1,6 +1,7 @@
 ---
 import OnboardingShell from '../../../components/OnboardingShell.astro';
 import { withBase } from '../../../lib/withBase';
+import { PROJECT } from '../../../data/v2Preview';
 ---
 
 <OnboardingShell
@@ -22,14 +23,14 @@ import { withBase } from '../../../lib/withBase';
     <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Figma file link</span>
     <input
       type="text"
-      value="figma.com/file/HRBLP0000/harbor-loop-concepts"
+      value="figma.com/file/FRNWL0000/fernwell-concepts"
       readonly
       class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-mono text-sm text-ink focus-visible:outline-2 focus-visible:outline-ink"
     />
   </label>
   <p class="mt-2 text-[11px] leading-relaxed font-medium text-ink-soft">
-    Becomes "Harbor Loop — concepts" on the dashboard, flagged as a Figma
-    source.
+    Becomes "{PROJECT.figmaFile}" on the dashboard, flagged as a Figma source.
+    Its Onboarding frames come across as one prototype beside the coded ones.
   </p>
 
   <div class="mt-8 flex items-center justify-between gap-4">

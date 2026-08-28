@@ -1,6 +1,7 @@
 ---
 import OnboardingShell from '../../../components/OnboardingShell.astro';
 import { withBase } from '../../../lib/withBase';
+import { PROJECT } from '../../../data/v2Preview';
 ---
 
 <OnboardingShell
@@ -10,7 +11,7 @@ import { withBase } from '../../../lib/withBase';
 >
   <h1 class="text-xl font-bold tracking-tight">Name your first project</h1>
   <p class="mt-2 text-sm leading-relaxed font-medium text-ink-soft">
-    Signed in as <span class="font-mono text-[13px]">ade@ninemile.co</span> — a
+    Signed in as <span class="font-mono text-[13px]">{PROJECT.account}</span> — a
     project is the home for one product's prototypes, feedback, and reviews.
   </p>
 
@@ -18,7 +19,7 @@ import { withBase } from '../../../lib/withBase';
     <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Project name</span>
     <input
       type="text"
-      value="Harbor Loop"
+      value={PROJECT.name}
       readonly
       class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-medium text-ink focus-visible:outline-2 focus-visible:outline-ink"
     />
@@ -28,7 +29,7 @@ import { withBase } from '../../../lib/withBase';
     <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">One line on what it is <span class="normal-case">(optional)</span></span>
     <input
       type="text"
-      value="Transit companion for the Nine Mile ferry network."
+      value={PROJECT.tagline}
       readonly
       class="mt-1.5 w-full rounded-md border border-rule bg-bg px-3 py-2.5 text-sm font-medium text-ink-soft focus-visible:outline-2 focus-visible:outline-ink"
     />

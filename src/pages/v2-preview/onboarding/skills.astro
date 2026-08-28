@@ -1,6 +1,7 @@
 ---
 import OnboardingShell from '../../../components/OnboardingShell.astro';
 import { withBase } from '../../../lib/withBase';
+import { PROJECT } from '../../../data/v2Preview';
 
 const SKILLS = [
   {
@@ -33,7 +34,7 @@ const SKILLS = [
 >
   <h1 class="text-xl font-bold tracking-tight">Your skills</h1>
   <p class="mt-2 text-sm leading-relaxed font-medium text-ink-soft">
-    These run against Harbor Loop two ways: inside your own agent as you work
+    These run against {PROJECT.name} two ways: inside your own agent as you work
     — Claude Code, Cursor — and here as review runs.
     <strong class="font-semibold text-ink">A person triggers every run.</strong>
     Nothing executes on push, and nothing bills you by surprise.
@@ -74,7 +75,7 @@ const SKILLS = [
       href={withBase('/v2-preview/')}
       class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
     >
-      Open Harbor Loop
+      Open {PROJECT.name}
     </a>
   </div>
 </OnboardingShell>

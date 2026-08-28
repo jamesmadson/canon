@@ -7,7 +7,7 @@ import ReviewRunCard from '../components/ReviewRunCard.astro';
 import { withBase } from '../lib/withBase';
 import { PROTOTYPES, RECORDS } from '../data/v2Preview';
 
-const record = RECORDS['trip-recap'];
+const record = RECORDS['today-ring-v2'];
 // The entry with a Decided line — the pane should show the shape end to end.
 const featuredEntry = record.feedback.find((entry) => entry.decided) ?? record.feedback[0];
 const paneHeading = 'text-[11px] font-semibold uppercase tracking-wide text-ink-soft';
@@ -28,9 +28,10 @@ const paneHeading = 'text-[11px] font-semibold uppercase tracking-wide text-ink-
       thread, and feedback scattered across three of them.
     </p>
     <p class="mt-3 text-[15px] leading-relaxed font-medium text-ink-soft">
-      Canon lists every prototype your team has made, from GitHub and Figma, keeps the
-      feedback filed at the work itself, and flags the ones nobody has touched in two
-      weeks. Your work stays where it is: Canon reads it, never copies it.
+      Canon lists every prototype your team has made, from GitHub and Figma, shows each one
+      as the screen it actually is, keeps the feedback filed at the work itself, and flags
+      the ones nobody has touched in two weeks. Your work stays where it is: Canon reads it,
+      never copies it.
     </p>
   </section>
 
@@ -39,8 +40,9 @@ const paneHeading = 'text-[11px] font-semibold uppercase tracking-wide text-ink-
       What it looks like
     </h2>
     <p class="mb-4 max-w-2xl text-sm font-medium text-ink-soft">
-      Three parts of one project: the prototypes it has, one piece of feedback filed
-      against one of them, and a review that only ever suggests taking things away.
+      Three parts of one project — an invented app called Fernwell: the prototypes it has,
+      one piece of feedback filed against one of them, and a review that only ever suggests
+      taking things away.
     </p>
 
     <div class="overflow-hidden rounded-lg border border-rule-strong">
@@ -48,7 +50,7 @@ const paneHeading = 'text-[11px] font-semibold uppercase tracking-wide text-ink-
         <section class="overflow-hidden border-b border-rule lg:border-r lg:border-b-0" aria-label="Prototypes pane">
           <p class={`border-b border-rule px-4 py-2 ${paneHeading}`}>Prototypes</p>
           <div class="-mb-px">
-            {PROTOTYPES.map((prototype) => <PrototypeRow prototype={prototype} compact />)}
+            {PROTOTYPES.map((prototype) => <PrototypeRow prototype={prototype} />)}
           </div>
         </section>
 
@@ -73,7 +75,7 @@ const paneHeading = 'text-[11px] font-semibold uppercase tracking-wide text-ink-
       Walk through the full screens
     </a>
     <p class="max-w-2xl text-sm font-medium text-ink-soft">
-      A scripted click-through of the dashboard and one prototype.
+      A scripted click-through of the dashboard and one prototype, at four screen sizes.
     </p>
   </section>
 
@@ -86,9 +88,9 @@ const paneHeading = 'text-[11px] font-semibold uppercase tracking-wide text-ink-
         <div class="border-r border-b border-rule bg-bg p-4">
           <h3 class="text-base font-semibold text-ink">Indexes what exists</h3>
           <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
-            Connect a repository read-only and attach a Figma file. Every branch named
-            <span class="font-mono"> prototype-*</span> shows up with its author, its last
-            commit, and how long it has been quiet.
+            Connect a repository read-only and attach a Figma file, then tick the branches
+            that are prototypes. Keep the names you already use — each one shows up as a
+            screen, with its author, its last commit, and how long it has been quiet.
           </p>
         </div>
         <div class="border-r border-b border-rule bg-bg p-4">

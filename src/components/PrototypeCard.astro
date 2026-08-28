@@ -4,11 +4,6 @@ import { withBase } from '../lib/withBase';
 import { daysIdle, idleLabel, isStale } from '../lib/staleness';
 import { PREVIEW_AS_OF, sourceLine, type Prototype } from '../data/v2Preview';
 
-/**
- * The narrow form of a prototype: the screen, small, then its name and where
- * it came from. Used in the three-pane preview on /alpha, where a card grid
- * would not fit a third of the width.
- */
 interface Props {
   prototype: Prototype;
 }
@@ -21,15 +16,19 @@ const source = sourceLine(prototype);
 
 <a
   href={withBase(`/v2-preview/${prototype.slug}/`)}
-  class="group flex min-h-11 items-start gap-3 border-b border-rule bg-bg px-4 py-3 transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+  class="group flex flex-col border-r border-b border-rule bg-bg transition-colors hover:bg-surface/30 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
 >
-  <span class="block w-9 shrink-0 overflow-hidden rounded-[3px] border border-rule-strong bg-bg">
-    <span class="block aspect-[390/844]">
-      <ScreenArt screen={prototype.screen} w={390} h={844} />
+  <span class="relative block aspect-[3/2] overflow-hidden border-b border-rule bg-surface/40">
+    <span
+      class="absolute top-[2%] left-1/2 block w-[30%] min-w-[76px] -translate-x-1/2 overflow-hidden rounded-[5px] border border-rule-strong bg-bg"
+    >
+      <span class="block aspect-[390/844]">
+        <ScreenArt screen={prototype.screen} w={390} h={844} />
+      </span>
     </span>
   </span>
 
-  <span class="flex min-w-0 flex-1 flex-col gap-1">
+  <span class="flex min-h-11 flex-1 flex-col gap-1.5 px-4 py-3.5">
     <span class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
       <span class="text-[15px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors group-hover:decoration-ink">
         {prototype.name}
@@ -43,15 +42,16 @@ const source = sourceLine(prototype);
 
     <span
       class:list={[
-        'block break-all text-[11px] text-ink-soft',
+        'block break-all text-[13px] text-ink-soft',
         source.mono ? 'font-mono' : 'font-medium',
       ]}
     >
       {source.text}
     </span>
 
-    <span class="block text-[11px] font-medium text-ink-soft">
+    <span class="mt-auto block pt-1 text-[11px] font-medium text-ink-soft">
       {prototype.author} · {idleLabel(prototype.lastActivity, PREVIEW_AS_OF)}
+      <span class="block">{prototype.lastActivityNote}</span>
     </span>
   </span>
 </a>

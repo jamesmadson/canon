@@ -1,0 +1,116 @@
+---
+import ScreenArt from './ScreenArt.astro';
+import type { ScreenKey } from '../data/v2Preview';
+
+/**
+ * The prototype's screen in a frame, at four sizes.
+ *
+ * The frame is a thin bezel and nothing else — no notch, no status bar, no
+ * pretend OS chrome. Each tab changes the viewport the art is drawn for, so
+ * what moves between tabs is the layout, which is the only thing worth
+ * previewing. Tabs follow the same roving-tabindex pattern as the gallery's
+ * demo box.
+ */
+interface Props {
+  screen: ScreenKey;
+  screenName: string;
+  /** Unique per page — these ids end up in aria-controls. */
+  idBase: string;
+}
+
+const { screen, screenName, idBase } = Astro.props;
+
+const DEVICES = [
+  { id: 'phone', label: 'Phone', w: 390, h: 844, frame: 240, radius: 22 },
+  { id: 'landscape', label: 'Phone landscape', w: 844, h: 390, frame: 520, radius: 22 },
+  { id: 'tablet', label: 'Tablet', w: 834, h: 1112, frame: 380, radius: 16 },
+  { id: 'desktop', label: 'Desktop', w: 1440, h: 900, frame: 640, radius: 8 },
+];
+---
+
+<div class="overflow-hidden rounded-md border border-rule" data-device-preview={idBase}>
+  <div role="tablist" aria-label="Preview size" class="flex flex-wrap border-b border-rule">
+    {DEVICES.map((device, i) => (
+      <button
+        type="button"
+        role="tab"
+        id={`${idBase}-tab-${device.id}`}
+        aria-controls={`${idBase}-panel-${device.id}`}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        tabindex={i === 0 ? 0 : -1}
+        data-device-tab={device.id}
+        class="min-h-11 flex-1 border-r border-rule bg-bg px-3 py-3 text-[13px] font-semibold whitespace-nowrap text-ink-soft transition-colors last:border-r-0 hover:text-ink aria-selected:bg-surface aria-selected:text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+      >
+        {device.label}
+      </button>
+    ))}
+  </div>
+
+  {DEVICES.map((device, i) => (
+    <div
+      role="tabpanel"
+      id={`${idBase}-panel-${device.id}`}
+      aria-labelledby={`${idBase}-tab-${device.id}`}
+      data-device-panel={device.id}
+      hidden={i !== 0}
+      class="flex min-h-[300px] items-center justify-center bg-surface/30 px-4 py-6 sm:min-h-[560px]"
+    >
+      <div
+        class="w-full bg-bg"
+        style={`max-width:${device.frame}px;border:1px solid var(--color-rule-strong);border-radius:${device.radius}px;padding:6px`}
+      >
+        <div
+          class="overflow-hidden border border-rule"
+          style={`aspect-ratio:${device.w}/${device.h};border-radius:${Math.max(2, device.radius - 6)}px`}
+        >
+          <ScreenArt
+            screen={screen}
+            w={device.w}
+            h={device.h}
+            label={`${screenName} — ${device.label.toLowerCase()} wireframe, ${device.w} by ${device.h}`}
+          />
+        </div>
+      </div>
+    </div>
+  ))}
+
+  <p class="border-t border-rule px-4 py-2 text-[11px] font-medium text-ink-soft">
+    Wireframes, drawn for the preview — the real product frames the team's own
+    running prototype. Sizes are the device's points, scaled to fit.
+  </p>
+</div>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-device-preview]')) {
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-device-tab]'));
+    const panels = Array.from(root.querySelectorAll<HTMLElement>('[data-device-panel]'));
+
+    function select(id: string, focus = false) {
+      for (const tab of tabs) {
+        const active = tab.dataset.deviceTab === id;
+        tab.setAttribute('aria-selected', String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focus) tab.focus();
+      }
+      for (const panel of panels) {
+        panel.hidden = panel.dataset.devicePanel !== id;
+      }
+    }
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab.dataset.deviceTab!));
+      tab.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+          event.preventDefault();
+          const step = event.key === 'ArrowRight' ? 1 : -1;
+          select(tabs[(i + step + tabs.length) % tabs.length].dataset.deviceTab!, true);
+          return;
+        }
+        if (event.key === 'Home' || event.key === 'End') {
+          event.preventDefault();
+          select(tabs[event.key === 'Home' ? 0 : tabs.length - 1].dataset.deviceTab!, true);
+        }
+      });
+    });
+  }
+</script>

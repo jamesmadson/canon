@@ -1,0 +1,484 @@
+---
+import type { ScreenKey } from '../data/v2Preview';
+
+/**
+ * Monochrome wireframes of the four Fernwell screens, drawn inline so they
+ * scale to any frame without an asset request.
+ *
+ * The viewBox is the device's own point size, and the layout is computed from
+ * it — so the same screen lays itself out down a phone and across a desktop
+ * instead of being letterboxed. Ink, rule and surface tones only; the only
+ * text is a couple of short mono labels where a number is the point.
+ */
+interface Props {
+  screen: ScreenKey;
+  /** Viewport in device points. Sets both the viewBox and the layout. */
+  w: number;
+  h: number;
+  /** Provide to expose the art to assistive tech; omit where a caption names it. */
+  label?: string;
+  class?: string;
+}
+
+const { screen, w, h, label, class: className = '' } = Astro.props;
+
+const wide = w > h * 1.2;
+const k = Math.min(w, h);
+const pad = k * 0.06;
+const hair = Math.max(1, k * 0.004);
+const line = Math.max(1.2, k * 0.0065);
+
+const INK = 'var(--color-ink)';
+const SOFT = 'var(--color-ink-soft)';
+const RULE = 'var(--color-rule)';
+const STRONG = 'var(--color-rule-strong)';
+const SURFACE = 'var(--color-surface)';
+
+// Chrome. A header on every layout; a bottom tab bar down a phone, a left rail
+// across a wide one — the same three destinations either way.
+const railW = wide ? w * 0.13 : 0;
+const hdrH = wide ? h * 0.15 : h * 0.09;
+const tabH = wide ? 0 : h * 0.1;
+
+const cx = railW + pad;
+const cy = hdrH + pad * 0.6;
+const cw = w - railW - pad * 2;
+const ch = h - tabH - cy - pad;
+
+const titleW = Math.min(cw * 0.44, k * 0.46);
+const titleH = k * 0.042;
+const titleY = hdrH / 2 - titleH / 2;
+const avatar = k * 0.058;
+
+const tabW = k * 0.13;
+const tabPillH = k * 0.036;
+const tabY = h - tabH / 2 - tabPillH / 2;
+const tabGap = (cw - tabW * 3) / 2;
+
+const railPillW = railW * 0.6;
+const railPillH = k * 0.032;
+const railX = railW / 2 - railPillW / 2;
+const railY0 = hdrH + k * 0.05;
+const railStep = k * 0.09;
+
+// ── today ────────────────────────────────────────────────────────────────────
+const ringBox = wide
+  ? { x: cx, y: cy, w: cw * 0.4, h: ch }
+  : { x: cx, y: cy, w: cw, h: ch * 0.52 };
+const r = Math.min(ringBox.w, ringBox.h) * 0.36;
+const rcx = ringBox.x + ringBox.w / 2;
+const rcy = ringBox.y + ringBox.h / 2;
+const ringW = Math.max(2, r * 0.2);
+const circ = 2 * Math.PI * r;
+// Four-fifths of the way, and deliberately still open — the whole point of the
+// decision filed against this prototype.
+const done = 0.8;
+
+const sideX = wide ? cx + cw * 0.46 : cx;
+const sideW = wide ? cw * 0.54 : cw;
+const sideY = wide ? cy + ch * 0.2 : cy + ch * 0.58;
+const sideH = wide ? ch * 0.6 : ch * 0.42;
+
+const targetY = sideY + sideH * 0.14;
+const tickX = sideX + sideW * 0.8;
+const tick = k * 0.022;
+const labelSize = k * 0.03;
+
+const statGap = cw * 0.035;
+const statW = (sideW - statGap * 2) / 3;
+const statY = sideY + sideH * 0.36;
+const statH = sideH * 0.56;
+const STAT_BARS = [0.62, 0.38, 0.8];
+
+// ── streaks ──────────────────────────────────────────────────────────────────
+const weekBox = wide
+  ? { x: cx, y: cy + ch * 0.26, w: cw * 0.4, h: ch * 0.48 }
+  : { x: cx, y: cy, w: cw, h: ch * 0.26 };
+const calBox = wide
+  ? { x: cx + cw * 0.5, y: cy, w: cw * 0.5, h: ch }
+  : { x: cx, y: cy + ch * 0.34, w: cw, h: ch * 0.66 };
+
+const dotR = Math.min(weekBox.w / 18, k * 0.036);
+const dotStep = (weekBox.w - dotR * 2) / 6;
+const dotY = weekBox.y + weekBox.h * 0.62;
+const WEEK = [true, true, false, true, true, true, false];
+
+const cell = Math.min(calBox.w / 8.4, calBox.h / 6.4);
+const calGap = cell * 0.22;
+const calW = cell * 7 + calGap * 6;
+const calH = cell * 5 + calGap * 4;
+const calX = calBox.x + (calBox.w - calW) / 2;
+const calY = calBox.y + (calBox.h - calH) / 2;
+const CAL = [
+  [0, 1, 1, 0, 1, 1, 0],
+  [1, 1, 0, 1, 1, 0, 1],
+  [1, 0, 1, 1, 1, 1, 0],
+  [0, 1, 1, 0, 1, 1, 1],
+  [1, 1, 0, 1, 0, 0, 0],
+];
+
+// ── map ──────────────────────────────────────────────────────────────────────
+/** A closed blob through midpoints, so a handful of points reads as parkland. */
+function blob(pts: [number, number][], bx: number, by: number, bw: number, bh: number): string {
+  const p = pts.map(([px, py]) => [bx + px * bw, by + py * bh] as [number, number]);
+  const mid = (a: [number, number], b: [number, number]) =>
+    [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] as [number, number];
+  const start = mid(p[p.length - 1], p[0]);
+  let d = `M ${start[0].toFixed(2)} ${start[1].toFixed(2)}`;
+  for (let i = 0; i < p.length; i++) {
+    const next = mid(p[i], p[(i + 1) % p.length]);
+    d += ` Q ${p[i][0].toFixed(2)} ${p[i][1].toFixed(2)} ${next[0].toFixed(2)} ${next[1].toFixed(2)}`;
+  }
+  return `${d} Z`;
+}
+
+const mapH = ch - k * 0.13;
+const BLOBS: { box: [number, number, number, number]; pts: [number, number][] }[] = [
+  {
+    box: [0.02, 0.03, 0.47, 0.35],
+    pts: [
+      [0, 0.54],
+      [0.14, 0.12],
+      [0.47, 0.04],
+      [0.6, 0.3],
+      [0.94, 0.2],
+      [1, 0.62],
+      [0.64, 0.8],
+      [0.28, 1],
+    ],
+  },
+  {
+    box: [0.55, 0.14, 0.43, 0.41],
+    pts: [
+      [0.08, 0.28],
+      [0.42, 0],
+      [0.78, 0.18],
+      [1, 0.52],
+      [0.8, 0.7],
+      [0.9, 0.98],
+      [0.42, 0.86],
+      [0.14, 0.64],
+    ],
+  },
+  {
+    box: [0.12, 0.5, 0.44, 0.37],
+    pts: [
+      [0, 0.46],
+      [0.22, 0.08],
+      [0.62, 0],
+      [0.88, 0.26],
+      [1, 0.72],
+      [0.56, 1],
+      [0.2, 0.84],
+    ],
+  },
+  {
+    box: [0.63, 0.62, 0.34, 0.31],
+    pts: [
+      [0.06, 0.38],
+      [0.38, 0],
+      [0.74, 0.12],
+      [1, 0.46],
+      [0.76, 0.94],
+      [0.3, 1],
+      [0.08, 0.74],
+    ],
+  },
+];
+const dotCx = cx + cw * 0.46;
+const dotCy = cy + mapH * 0.5;
+const hereR = k * 0.055;
+
+const chipW = Math.min(cw * 0.27, k * 0.3);
+const chipH = k * 0.05;
+const chipGap = cw * 0.03;
+const chipY = cy + ch - chipH;
+
+// ── onboarding ───────────────────────────────────────────────────────────────
+const cardW = Math.min(cw * (wide ? 0.44 : 0.84), k * 0.72);
+const cardH = Math.min(ch * 0.66, cardW * 1.2);
+const cardX = cx + (cw - cardW) / 2;
+const cardY = cy + (ch - cardH) * 0.42;
+const off = k * 0.022;
+const pagerY = cardY + cardH + k * 0.07;
+const pagerR = k * 0.014;
+const pagerGap = k * 0.05;
+const pagerActiveW = k * 0.06;
+
+const a11y: { role?: 'img'; 'aria-label'?: string; 'aria-hidden'?: 'true' } = label
+  ? { role: 'img', 'aria-label': label }
+  : { 'aria-hidden': 'true' };
+---
+
+<svg
+  viewBox={`0 0 ${w} ${h}`}
+  class:list={['block h-full w-full', className]}
+  xmlns="http://www.w3.org/2000/svg"
+  {...a11y}
+>
+  <rect x="0" y="0" width={w} height={h} fill="var(--color-bg)" />
+
+  {/* header */}
+  <rect x={railW + pad} y={titleY} width={titleW} height={titleH} rx={titleH / 2} fill={SURFACE} />
+  <rect
+    x={w - pad - avatar}
+    y={hdrH / 2 - avatar / 2}
+    width={avatar}
+    height={avatar}
+    rx={k * 0.012}
+    fill="none"
+    stroke={STRONG}
+    stroke-width={hair}
+  />
+  <line x1="0" y1={hdrH} x2={w} y2={hdrH} stroke={RULE} stroke-width={hair} />
+
+  {/* nav — a bottom bar down a phone, a left rail across a wide screen */}
+  {wide ? (
+    <>
+      <line x1={railW} y1="0" x2={railW} y2={h} stroke={RULE} stroke-width={hair} />
+      {[0, 1, 2].map((i) => (
+        <rect
+          x={railX}
+          y={railY0 + i * railStep}
+          width={railPillW}
+          height={railPillH}
+          rx={railPillH / 2}
+          fill={i === 0 ? INK : 'none'}
+          stroke={i === 0 ? 'none' : STRONG}
+          stroke-width={hair}
+        />
+      ))}
+    </>
+  ) : (
+    <>
+      <line x1="0" y1={h - tabH} x2={w} y2={h - tabH} stroke={RULE} stroke-width={hair} />
+      {[0, 1, 2].map((i) => (
+        <rect
+          x={cx + i * (tabW + tabGap)}
+          y={tabY}
+          width={tabW}
+          height={tabPillH}
+          rx={tabPillH / 2}
+          fill={i === 0 ? INK : 'none'}
+          stroke={i === 0 ? 'none' : STRONG}
+          stroke-width={hair}
+        />
+      ))}
+    </>
+  )}
+
+  {screen === 'today' && (
+    <>
+      <circle
+        cx={rcx}
+        cy={rcy}
+        r={r}
+        fill="none"
+        stroke={RULE}
+        stroke-width={ringW}
+        stroke-linecap="round"
+      />
+      <circle
+        cx={rcx}
+        cy={rcy}
+        r={r}
+        fill="none"
+        stroke={INK}
+        stroke-width={ringW}
+        stroke-linecap="round"
+        stroke-dasharray={`${(circ * done).toFixed(2)} ${circ.toFixed(2)}`}
+        transform={`rotate(-90 ${rcx} ${rcy})`}
+      />
+      <text
+        x={rcx}
+        y={rcy + r * 0.12}
+        text-anchor="middle"
+        font-family="var(--font-mono)"
+        font-size={r * 0.34}
+        fill={INK}
+      >
+        48/60
+      </text>
+
+      <text x={sideX} y={targetY - labelSize * 0.6} font-family="var(--font-mono)" font-size={labelSize} fill={SOFT}>
+        TARGET 60m
+      </text>
+      <line x1={sideX} y1={targetY} x2={sideX + sideW} y2={targetY} stroke={STRONG} stroke-width={hair} />
+      <line x1={tickX} y1={targetY - tick} x2={tickX} y2={targetY + tick} stroke={INK} stroke-width={line} />
+
+      {STAT_BARS.map((v, i) => (
+        <>
+          <rect
+            x={sideX + i * (statW + statGap)}
+            y={statY}
+            width={statW}
+            height={statH}
+            rx={k * 0.016}
+            fill="none"
+            stroke={RULE}
+            stroke-width={hair}
+          />
+          <rect
+            x={sideX + i * (statW + statGap) + statW * 0.16}
+            y={statY + statH * 0.22}
+            width={statW * 0.46}
+            height={k * 0.018}
+            rx={k * 0.009}
+            fill={SURFACE}
+          />
+          <rect
+            x={sideX + i * (statW + statGap) + statW * 0.16}
+            y={statY + statH * 0.78 - statH * 0.34 * v}
+            width={statW * 0.2}
+            height={statH * 0.34 * v}
+            fill={INK}
+          />
+        </>
+      ))}
+    </>
+  )}
+
+  {screen === 'streaks' && (
+    <>
+      {WEEK.map((on, i) => (
+        <circle
+          cx={weekBox.x + dotR + i * dotStep}
+          cy={dotY}
+          r={dotR}
+          fill={on ? INK : 'none'}
+          stroke={on ? 'none' : STRONG}
+          stroke-width={hair}
+        />
+      ))}
+      <line
+        x1={weekBox.x}
+        y1={dotY + dotR * 2.2}
+        x2={weekBox.x + weekBox.w}
+        y2={dotY + dotR * 2.2}
+        stroke={RULE}
+        stroke-width={hair}
+      />
+
+      {CAL.map((row, ri) =>
+        row.map((on, ci) => (
+          <rect
+            x={calX + ci * (cell + calGap)}
+            y={calY + ri * (cell + calGap)}
+            width={cell}
+            height={cell}
+            rx={cell * 0.22}
+            fill={on ? SURFACE : 'none'}
+            stroke={on ? 'none' : RULE}
+            stroke-width={hair}
+          />
+        ))
+      )}
+    </>
+  )}
+
+  {screen === 'map' && (
+    <>
+      {BLOBS.map((b, i) => (
+        <path
+          d={blob(b.pts, cx + b.box[0] * cw, cy + b.box[1] * mapH, b.box[2] * cw, b.box[3] * mapH)}
+          fill="none"
+          stroke={i === 1 ? STRONG : RULE}
+          stroke-width={i === 1 ? line : hair}
+        />
+      ))}
+      <path
+        d={`M ${cx} ${cy + mapH * 0.72} Q ${cx + cw * 0.34} ${cy + mapH * 0.48} ${cx + cw * 0.6} ${cy + mapH * 0.66} T ${cx + cw} ${cy + mapH * 0.54}`}
+        fill="none"
+        stroke={RULE}
+        stroke-width={hair}
+      />
+
+      <circle cx={dotCx} cy={dotCy} r={hereR} fill="none" stroke={STRONG} stroke-width={hair} />
+      <circle cx={dotCx} cy={dotCy} r={hereR * 0.34} fill={INK} />
+
+      {[0, 1, 2].map((i) => (
+        <rect
+          x={cx + i * (chipW + chipGap)}
+          y={chipY}
+          width={chipW}
+          height={chipH}
+          rx={chipH / 2}
+          fill={i === 0 ? INK : 'var(--color-bg)'}
+          stroke={i === 0 ? 'none' : STRONG}
+          stroke-width={hair}
+        />
+      ))}
+    </>
+  )}
+
+  {screen === 'onboarding' && (
+    <>
+      <rect
+        x={cardX + off * 2}
+        y={cardY - off * 2}
+        width={cardW - off * 4}
+        height={cardH}
+        rx={k * 0.03}
+        fill="none"
+        stroke={RULE}
+        stroke-width={hair}
+      />
+      <rect
+        x={cardX + off}
+        y={cardY - off}
+        width={cardW - off * 2}
+        height={cardH}
+        rx={k * 0.03}
+        fill="var(--color-bg)"
+        stroke={RULE}
+        stroke-width={hair}
+      />
+      <rect
+        x={cardX}
+        y={cardY}
+        width={cardW}
+        height={cardH}
+        rx={k * 0.03}
+        fill="var(--color-bg)"
+        stroke={STRONG}
+        stroke-width={line}
+      />
+      <circle cx={cardX + cardW / 2} cy={cardY + cardH * 0.3} r={cardH * 0.13} fill={SURFACE} />
+      <rect
+        x={cardX + cardW * 0.16}
+        y={cardY + cardH * 0.56}
+        width={cardW * 0.68}
+        height={k * 0.028}
+        rx={k * 0.014}
+        fill={SURFACE}
+      />
+      <rect
+        x={cardX + cardW * 0.26}
+        y={cardY + cardH * 0.68}
+        width={cardW * 0.48}
+        height={k * 0.02}
+        rx={k * 0.01}
+        fill={RULE}
+      />
+      <rect
+        x={cardX + cardW * 0.2}
+        y={cardY + cardH * 0.8}
+        width={cardW * 0.6}
+        height={k * 0.05}
+        rx={k * 0.025}
+        fill={INK}
+      />
+
+      <rect
+        x={cardX + cardW / 2 - pagerGap - pagerActiveW / 2}
+        y={pagerY - pagerR}
+        width={pagerActiveW}
+        height={pagerR * 2}
+        rx={pagerR}
+        fill={INK}
+      />
+      <circle cx={cardX + cardW / 2} cy={pagerY} r={pagerR} fill={STRONG} />
+      <circle cx={cardX + cardW / 2 + pagerGap} cy={pagerY} r={pagerR} fill={STRONG} />
+    </>
+  )}
+</svg>

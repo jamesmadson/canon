@@ -1,53 +1,82 @@
 ---
 import OnboardingShell from '../../../components/OnboardingShell.astro';
 import { withBase } from '../../../lib/withBase';
-
-const BRANCHES = [
-  'prototype-trip-recap',
-  'prototype-fare-sheet',
-  'prototype-stop-picker',
-  'prototype-night-map',
-];
+import { BRANCHES, PROJECT, SELECTED_BRANCHES } from '../../../data/v2Preview';
 ---
 
 <OnboardingShell
-  title="Canon v2 preview — connect GitHub"
-  description="Onboarding step 2 of the scripted Canon v2 preview: connecting a repository read-only."
+  title="Canon v2 preview — choose what's visible"
+  description="Onboarding step 2 of the scripted Canon v2 preview: connecting a repository read-only and picking which branches are prototypes."
   step={2}
 >
-  <h1 class="text-xl font-bold tracking-tight">Connect a repository</h1>
+  <h1 class="text-xl font-bold tracking-tight">Choose what's visible</h1>
   <p class="mt-2 text-sm leading-relaxed font-medium text-ink-soft">
     You signed in with GitHub, so Canon already knows who you are — this step
     grants <strong class="font-semibold text-ink">read-only</strong> access to
-    one repository. Canon never stores your code.
+    one repository and asks which of its branches are prototypes. Canon never
+    stores your code.
   </p>
 
   <div class="mt-6 rounded-md border border-rule bg-surface/50 px-4 py-3">
     <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Connected as</p>
-    <p class="mt-0.5 font-mono text-sm text-ink">@ade-ninemile · via your sign-in</p>
+    <p class="mt-0.5 font-mono text-sm text-ink">{PROJECT.handle} · via your sign-in</p>
   </div>
 
   <label class="mt-4 block">
     <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Repository</span>
     <input
       type="text"
-      value="nine-mile/harbor-loop"
+      value={PROJECT.repo}
       readonly
       class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-mono text-sm text-ink focus-visible:outline-2 focus-visible:outline-ink"
     />
   </label>
 
-  <div class="mt-5 rounded-md border border-rule px-4 py-3">
-    <p class="text-sm font-medium text-ink">
-      Branches named <code class="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[13px]">prototype-*</code>
-      become prototypes. Four found:
+  <div class="mt-5 overflow-hidden rounded-md border border-rule">
+    <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+      Branches · {BRANCHES.length} found, {SELECTED_BRANCHES} selected
     </p>
-    <ul class="mt-2 flex flex-col gap-1 font-mono text-[13px] text-ink-soft">
-      {BRANCHES.map((b) => <li>{b}</li>)}
+    <ul class="-mb-px">
+      {BRANCHES.map((branch) => (
+        <li class="flex min-h-11 items-center gap-3 border-b border-rule bg-bg px-4 py-2.5">
+          <span
+            aria-hidden="true"
+            class:list={[
+              'flex size-4 shrink-0 items-center justify-center rounded-sm border text-[10px] leading-none',
+              branch.selected
+                ? 'border-ink bg-ink font-bold text-bg'
+                : 'border-rule-strong bg-bg',
+            ]}
+          >
+            {branch.selected ? '✓' : ''}
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block font-mono text-[13px] break-all text-ink">{branch.name}</span>
+            <span class="block text-[11px] font-medium text-ink-soft">{branch.note}</span>
+          </span>
+          <span class="sr-only">{branch.selected ? 'Selected' : 'Not selected'}</span>
+        </li>
+      ))}
     </ul>
-    <p class="mt-2 text-[11px] leading-relaxed font-medium text-ink-soft">
-      A different naming convention? Map it later in project settings — the
-      pattern is yours, the indexing is Canon's.
+  </div>
+  <p class="mt-2 text-[11px] leading-relaxed font-medium text-ink-soft">
+    Read-only in this preview — in the product these are yours to tick and untick,
+    and you can change your mind later.
+  </p>
+
+  <div class="mt-5 rounded-md border border-rule px-4 py-3">
+    <p class="text-sm leading-relaxed font-medium text-ink">
+      Canon does not ask you to rename anything. Your branches keep whatever
+      convention you already use —
+      <span class="font-mono text-[13px]">feat/</span>,
+      <span class="font-mono text-[13px]">exp/</span>, or nothing at all — and you
+      pick which ones are prototypes.
+    </p>
+    <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+      The one exception is a prototype started
+      <em class="font-semibold text-ink not-italic">from</em> Canon: those branches
+      get the <code class="rounded-sm bg-surface px-1.5 py-0.5 font-mono text-[13px]">prototype-</code>
+      prefix automatically, because Canon is the thing naming them.
     </p>
   </div>
 

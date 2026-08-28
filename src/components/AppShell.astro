@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PreviewLabel from './PreviewLabel.astro';
+import { withBase } from '../lib/withBase';
+import { PROJECT } from '../data/v2Preview';
+
+/**
+ * The platform chrome the v2 preview lives inside: a slim top bar, a left
+ * sidebar, and one content well.
+ *
+ * The two sections that exist in the preview are links; the two that don't are
+ * rows that say so. A disabled row that looks clickable would be the one lie
+ * this preview cannot afford — the whole page is an argument that the product
+ * shows you what is actually there.
+ */
+interface Props {
+  title: string;
+  description: string;
+  /** Which sidebar row is the current page. */
+  active: 'overview' | 'prototypes';
+}
+
+const { title, description, active } = Astro.props;
+
+const NAV = [
+  { id: 'overview', label: 'Overview', href: '/v2-preview/' },
+  { id: 'prototypes', label: 'Prototypes', href: '/v2-preview/#prototypes' },
+] as const;
+
+const SOON = ['Research', 'Members'];
+
+const rowBase =
+  'flex min-h-11 items-center rounded-md px-3 text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink';
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="overflow-hidden rounded-lg border border-rule-strong">
+    <PreviewLabel placement="top" />
+
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule px-4 py-2.5">
+      <a
+        href={withBase('/v2-preview/')}
+        class="-mx-2 flex min-h-11 items-center px-2 text-[15px] font-semibold tracking-tight text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+      >
+        Canon
+      </a>
+      <span aria-hidden="true" class="text-rule-strong">|</span>
+      <p class="flex min-w-0 items-center gap-1.5 text-[13px] font-medium text-ink-soft">
+        <span class="truncate">{PROJECT.team}</span>
+        <span aria-hidden="true" class="text-rule-strong">/</span>
+        <span class="truncate font-semibold text-ink">{PROJECT.name}</span>
+      </p>
+      <p class="ml-auto flex items-center gap-2 text-[13px] font-medium text-ink-soft">
+        <span class="sr-only">Signed in as</span>
+        <span class="hidden sm:inline">{PROJECT.viewer.name}</span>
+        <span class="sr-only sm:hidden">{PROJECT.viewer.name}</span>
+        <span
+          aria-hidden="true"
+          class="flex size-7 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink"
+        >
+          {PROJECT.viewer.initials}
+        </span>
+      </p>
+    </div>
+
+    <div class="flex flex-col md:flex-row">
+      <nav
+        aria-label="Project sections"
+        class="shrink-0 border-b border-rule p-2 md:w-48 md:border-r md:border-b-0"
+      >
+        <ul class="flex flex-wrap gap-1 md:flex-col md:flex-nowrap">
+          {NAV.map((item) => (
+            <li class="md:w-full">
+              <a
+                href={withBase(item.href)}
+                aria-current={active === item.id ? 'page' : undefined}
+                class:list={[
+                  rowBase,
+                  active === item.id
+                    ? 'bg-surface text-ink'
+                    : 'text-ink-soft hover:bg-surface/60 hover:text-ink',
+                ]}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+          {SOON.map((item) => (
+            <li class="md:w-full">
+              <span
+                aria-disabled="true"
+                class:list={[
+                  rowBase,
+                  'cursor-default flex-wrap gap-x-2 text-ink-soft/70 md:justify-between',
+                ]}
+              >
+                {item}
+                <span class="text-[11px] font-medium whitespace-nowrap">in the full product</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="min-w-0 flex-1 px-4 py-6 sm:px-6">
+        <slot />
+      </div>
+    </div>
+  </div>
+
+  <nav class="mt-8 flex flex-wrap gap-x-6 gap-y-1 text-sm font-medium" aria-label="Preview navigation">
+    <slot name="footer-nav" />
+    <a
+      href={withBase('/alpha/')}
+      class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Back to the alpha page
+    </a>
+  </nav>
+</BaseLayout>
