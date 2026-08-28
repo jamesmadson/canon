@@ -110,6 +110,30 @@ This is the concrete answer to the thread's strongest pattern: the shared
 review surface, restored **on** the live work instead of on a screenshot
 of it.
 
+## Developers, and what handoff becomes
+
+Two independent voices now say the same thing (entries
+`2026-08-27-discussion-moves-to-prs`, `2026-05-21-when-designers-start-
+building`): when designers build, handoff stops being a moment and
+becomes co-ownership of one artifact — and the enabling condition is
+social, a named engineering buddy, not a tool. v2 makes that legible
+instead of pretending to replace it:
+
+- **The prototype page is the handoff artifact.** Preview link, branch,
+  the feedback thread, and review runs in one place — the thing a
+  designer sends an engineer is a link, not a package.
+- **Copy the context.** One button on a prototype assembles a paste-ready
+  prompt: what this prototype is, the relevant record excerpts (decisions,
+  open feedback), and the branch — so an engineer's or designer's agent
+  starts warm instead of cold. Copying a prompt is the CLI-less handoff.
+- **Graduation is a PR.** "Open a PR from this prototype" is the exit
+  ramp (post-alpha; alpha links to the branch's compare view). The
+  dashboard's staleness flag is the other exit — retired is a valid end.
+- **A buddy field, not a role system.** A prototype can name its
+  engineering buddy — a person, displayed plainly. No approvals, no
+  workflow engine; just making the relationship the field study says
+  matters visible.
+
 ## Contextual skills — the v2 architecture
 
 Strata accidentally defined the pattern every v2 skill follows: **the skill
