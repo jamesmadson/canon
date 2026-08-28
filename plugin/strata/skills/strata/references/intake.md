@@ -20,10 +20,12 @@ deleting it later.
 ```markdown
 # Participants — local only, never committed
 
-P-01 · Holly Cooper · Global Process team · first seen 2026-07-30
-P-02 · Ishan Patel · first seen 2026-08-19
-S-01 · Priya · VP Design · stakeholder · first seen 2026-08-21
+P-01 · Maren Voss · operations team · first seen 2026-03-02
+P-02 · Theo Lindqvist · first seen 2026-03-11
+S-01 · R. Castellanos · design director · stakeholder · first seen 2026-03-14
 ```
+
+(Names above are invented for illustration.)
 
 Prefix by kind so reports can separate them: `P-` participant, `S-`
 stakeholder, `T-` internal teammate. A stakeholder's opinion and a user's
@@ -38,24 +40,23 @@ One file per feedback event: `.strata/YYYY-MM-DD-short-slug.md`
 
 ```markdown
 ---
-date: 2026-08-19
+date: 2026-03-11
 source: support
-participants: [P-01]
-about: [persistence, deployment]
+participants: [P-02]
+about: [export, reporting]
 assets: []
 ---
 
 ## Said
 
-> Built a working HTML dashboard for a Global process; every edit saves only
-> to the local browser. I need an approved enterprise source plus an
-> architecture/compliance review before broader deployment.
+> I ran the export three times and each time the page just went back to the
+> dashboard. I still don't know if a file was generated or where it went.
 
 ## Meant
 
-Reads as a graduation problem rather than a storage bug — the prototype works,
-it just cannot leave the personal tier. Unverified: I have not asked whether
-SharePoint specifically matters or whether any approved source would do.
+Reads as missing feedback after the action rather than a broken export —
+the file may well exist. Unverified: whether the export actually completed,
+and whether P-02 expected a download or an email.
 
 ## Decided
 

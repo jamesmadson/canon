@@ -4,8 +4,8 @@ Reports are read from `.strata/` at the moment they are asked for. Nothing is
 precomputed and no report is written back into the record — a report is a view,
 not a layer.
 
-Every claim carries its entries. Cite as `(2026-08-19-sharepoint-source,
-2026-07-30-prototype-lifecycle)`. A sentence with no citation does not ship.
+Every claim carries its entries. Cite as `(2026-03-11-silent-export,
+2026-03-20-save-uncertainty)`. A sentence with no citation does not ship.
 
 ## The evidence bar
 
@@ -29,15 +29,15 @@ sentence. Inflating it is the failure this skill exists to prevent.
 Group entries by what they are about, apply the bar, report strongest first.
 
 ```markdown
-## Pattern — prototypes cannot graduate past personal use
+## Pattern — no confirmation after a completed action
 Three participants (P-01, P-02, P-04) across five weeks.
-(2026-07-30-prototype-lifecycle, 2026-08-19-sharepoint-source,
-2026-08-19-database-connection, 2026-09-02-export-request)
+(2026-03-11-silent-export, 2026-03-20-save-uncertainty,
+2026-04-02-duplicate-submissions, 2026-04-14-usability-round-two)
 
-> "every edit saves only to the local browser" — P-01
-> "how do I connect BuildMe to a database" — P-02
+> "I still don't know if a file was generated or where it went" — P-02
+> "I clicked save twice more just in case" — P-01
 
-## Possible pattern — unclear whether a prototype is still live
+## Possible pattern — unclear who else can see a draft
 Two participants (P-01, P-05). Worth one question in the next session.
 ```
 
@@ -67,8 +67,8 @@ It surfaces what a team keeps hearing and keeps not answering. Order by how
 long the oldest entry has been sitting.
 
 ```markdown
-## Open — prototype lifecycle visibility
-First raised 2026-07-30, most recently 2026-09-02. Three entries, two
+## Open — no confirmation after a completed action
+First raised 2026-03-11, most recently 2026-04-14. Three entries, two
 participants, no decision recorded.
 ```
 

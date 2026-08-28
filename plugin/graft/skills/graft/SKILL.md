@@ -14,6 +14,10 @@ IBM Plex Mono labels, shallow sweep curves, open-circle terminators.
 
 - **Never read a transcript .jsonl into context.** They can exceed 100MB.
   All parsing happens in a python subprocess that emits a small JSON summary.
+- **The map contains conversation excerpts.** Turn summaries and fork labels
+  come from the transcript, so the generated HTML is as private as the
+  session it maps. Say so when delivering it, and never publish or share
+  one on the user's behalf.
 - Vanilla SVG + HTML/CSS only. No d3, no CDN, fully self-contained file.
 - Trunk = the main session. Forks = subagent/Task launches. Diamond
   markers = compaction boundaries. That is the whole vocabulary.
