@@ -412,6 +412,162 @@ export const SCRIPTED_RUN: ReviewRun = {
   kept: 'The chips themselves stay. Turning a layer off is the only thing a person can do on this screen, and the row is where they do it.',
 };
 
+/**
+ * The record: everything anyone has said about Fernwell, filed one entry at a
+ * time. Prototype threads are the same shape scoped to one screen; this is the
+ * project-wide list the report is built from.
+ */
+export type RecordSource = 'Interview' | 'Usability session' | 'Support thread' | 'Field note';
+
+export interface RecordEntry {
+  id: string;
+  date: string;
+  source: RecordSource;
+  /** P-nn for participants, S-nn for stakeholders. Never a name. */
+  speaker: string;
+  context: string;
+  /** Which prototype the entry was filed against, when it was filed at one. */
+  prototype: string | null;
+  /**
+   * The question the entry is evidence about. Entries sharing a theme are what
+   * the strength count counts — so "three voices" means three people, not three
+   * entries, and two entries from the same person stay one voice.
+   */
+  theme: string;
+  said: string;
+  meant: string;
+  decided: string | null;
+}
+
+/**
+ * Eight entries, five themes, two decisions. The shape of a real record: most
+ * of it open, one stakeholder request kept out of the participant count, and
+ * a couple of single quotes that are not pretending to be patterns.
+ */
+export const RECORD_ENTRIES: RecordEntry[] = [
+  {
+    id: '2026-08-05-01',
+    date: '2026-08-05',
+    source: 'Field note',
+    speaker: 'P-09',
+    context: 'Field test, 20 minutes, bright overcast, own phone',
+    prototype: 'map-layers',
+    theme: 'Layer state is unreadable outdoors',
+    said: 'Out here I cannot tell which layer is on. It is all grey on grey.',
+    meant:
+      'My reading: the chips carry their state in a fill that survives a desk and not a footpath. Legibility outdoors, not comprehension.',
+    decided: null,
+  },
+  {
+    id: '2026-08-11-01',
+    date: '2026-08-11',
+    source: 'Support thread',
+    speaker: 'P-06',
+    context: 'Email to support, replied to once, transcript filed whole',
+    prototype: null,
+    theme: "Yesterday's log is hard to find",
+    said: 'I walked at nine last night and I cannot work out where that went.',
+    meant:
+      'My reading: the home screen is today and only today, and there is no obvious door to any other day.',
+    decided: null,
+  },
+  {
+    id: '2026-08-16-01',
+    date: '2026-08-16',
+    source: 'Usability session',
+    speaker: 'P-05',
+    context: 'Moderated session, 25 minutes, own phone',
+    prototype: 'streak-cards',
+    theme: 'The streak card reads as pressure',
+    said: 'I missed a Tuesday and then I stopped opening it. It felt like being told off.',
+    meant:
+      'My reading: the broken streak reads as a verdict on the person rather than a record of a week.',
+    decided: null,
+  },
+  {
+    id: '2026-08-19-01',
+    date: '2026-08-19',
+    source: 'Usability session',
+    speaker: 'P-02',
+    context: 'Moderated session, 35 minutes, own phone',
+    prototype: 'today-ring-v2',
+    theme: 'The ring reads as done before it is',
+    said: 'It looked finished, so I went back inside. It was forty-eight minutes.',
+    meant:
+      'My reading: at four-fifths the ring closes far enough to read as done, and the number inside it loses the argument.',
+    decided: null,
+  },
+  {
+    id: '2026-08-20-01',
+    date: '2026-08-20',
+    source: 'Usability session',
+    speaker: 'P-07',
+    context: 'Moderated session, 30 minutes, own phone',
+    prototype: 'today-ring-v2',
+    theme: 'The ring reads as done before it is',
+    said: 'The gap is so small I just read it as a circle.',
+    meant:
+      'My reading: the same misread as P-02, arrived at from the shape rather than from the number.',
+    decided:
+      '2026-08-25 — The ring holds a visible gap until the target is met, and the minutes remaining print inside it. Shipped on feat/today-ring-v2.',
+  },
+  {
+    id: '2026-08-21-01',
+    date: '2026-08-21',
+    source: 'Interview',
+    speaker: 'S-01',
+    context: 'Written note after a review',
+    prototype: 'today-ring-v2',
+    theme: 'A weekly average on the home screen',
+    said: 'Could we put the weekly average on here too? This is the screen people actually open.',
+    meant:
+      'My reading: a stakeholder request. Kept apart from the participant evidence and not pooled with it — no participant has asked for a weekly average.',
+    decided: null,
+  },
+  {
+    id: '2026-08-21-02',
+    date: '2026-08-21',
+    source: 'Usability session',
+    speaker: 'P-08',
+    context: 'Moderated session, 30 minutes, own phone',
+    prototype: 'streak-cards',
+    theme: 'The streak card reads as pressure',
+    said: 'Nine days is nice, but the card mostly tells me what I am about to lose.',
+    meant: 'My reading: the same pressure P-05 described, named directly rather than acted on.',
+    decided:
+      '2026-08-22 — The flame glyph and the loss subtitle came off the card. The day count stays. Shipped on exp/streak-cards.',
+  },
+  {
+    id: '2026-08-24-01',
+    date: '2026-08-24',
+    source: 'Interview',
+    speaker: 'P-04',
+    context: 'Interview, 45 minutes, remote',
+    prototype: 'today-ring-v2',
+    theme: 'The ring reads as done before it is',
+    said: 'I stop when the circle joins up. That is the whole thing, really.',
+    meant:
+      'My reading: the third person to treat the closing of the ring as the end of the task, this time said as a habit rather than as a mistake.',
+    decided: null,
+  },
+];
+
+/**
+ * The entry the intake affordance drafts, filed nowhere until a person presses
+ * Confirm. Meant is a draft reading and says so — the record never fills that
+ * line in on its own and quietly leaves it.
+ */
+export const DRAFT_ENTRY = {
+  source: 'Usability session' as RecordSource,
+  speaker: 'P-03',
+  date: PREVIEW_AS_OF,
+  context: 'Pasted transcript, 18 minutes, own phone',
+  theme: 'The ring reads as done before it is',
+  said: 'I gave it a look, saw the circle, and put the phone away.',
+  meant:
+    'Draft reading — yours to keep, rewrite, or delete. Reads like the fourth account of the ring closing early, which would hold the pattern rather than change it.',
+};
+
 export function prototypeBySlug(slug: string): Prototype | undefined {
   return PROTOTYPES.find((p) => p.slug === slug);
 }

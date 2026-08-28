@@ -1,0 +1,243 @@
+---
+import AppShell from '../../../components/AppShell.astro';
+import RecordEntryCard from '../../../components/RecordEntryCard.astro';
+import { withBase } from '../../../lib/withBase';
+import { spellNumber } from '../../../lib/spellNumber';
+import { groupByTheme, STRENGTH_SCALE, strengthTag } from '../../../lib/evidence';
+import { DRAFT_ENTRY, PROJECT, RECORD_ENTRIES } from '../../../data/v2Preview';
+
+/**
+ * The record, project-wide.
+ *
+ * Strength is computed per theme and then hung on each entry, so a card can
+ * never claim a pattern the record does not contain. The scale is printed on
+ * the page next to the tags it produces — a legend that is also the rule.
+ */
+const themes = groupByTheme(RECORD_ENTRIES);
+const tagFor = new Map<string, string>();
+for (const theme of themes) {
+  for (const entry of theme.entries) tagFor.set(entry.id, strengthTag(theme));
+}
+
+// Newest first: a record is read from the top, and the top is what just landed.
+const entries = [...RECORD_ENTRIES].sort((a, b) => b.date.localeCompare(a.date));
+
+const voices = new Set(RECORD_ENTRIES.map((e) => e.speaker)).size;
+const decisions = RECORD_ENTRIES.filter((e) => e.decided).length;
+const patterns = themes.filter((t) => t.strength === 'pattern').length;
+---
+
+<AppShell
+  title="Canon v2 preview — the record"
+  description="A scripted preview of the Canon v2 record: dated entries with said, meant and decided, tagged by how many voices are behind them."
+  active="research"
+>
+  <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+    <div class="min-w-0">
+      <h1 class="text-2xl font-bold tracking-tight">The record</h1>
+      <p class="mt-1 text-[15px] font-medium text-ink-soft">
+        Everything anyone has said about {PROJECT.name}, one entry at a time.
+      </p>
+    </div>
+    <a href={withBase('/v2-preview/research/report/')} class="btn btn-quiet">Open the report</a>
+  </div>
+
+  <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+    An entry is three lines: the words a person used, your reading of them marked as yours, and
+    whatever was decided — which for most entries is nothing, and the record says so rather than
+    tidying it away. People are pseudonyms; the mapping never enters the&nbsp;record.
+  </p>
+
+  <div class="mt-6 overflow-hidden rounded-md border border-rule">
+    <dl class="-mr-px -mb-px grid grid-cols-2 lg:grid-cols-4">
+      {[
+        { label: 'Entries', value: String(RECORD_ENTRIES.length), note: `Across ${spellNumber(themes.length)} questions` },
+        { label: 'Voices', value: String(voices), note: 'People, not entries' },
+        { label: 'Patterns', value: String(patterns), note: 'Three voices or more' },
+        { label: 'Decisions', value: String(decisions), note: 'Everything else is open' },
+      ].map((stat) => (
+        <div class="flex flex-col gap-1 border-r border-b border-rule bg-bg px-4 py-3">
+          <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+            {stat.label}
+          </dt>
+          <dd class="text-2xl leading-none font-semibold tracking-tight text-ink tabular-nums">
+            {stat.value}
+          </dd>
+          <dd class="text-[11px] font-medium text-ink-soft tabular-nums">{stat.note}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+
+  <p class="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-rule pt-4 text-[13px] font-medium text-ink-soft">
+    <span class="text-[11px] font-semibold uppercase tracking-wide text-ink">Evidence strength</span>
+    <span class="tabular-nums">{STRENGTH_SCALE}</span>
+  </p>
+  <p class="mt-1 max-w-2xl text-[11px] leading-relaxed font-medium text-ink-soft">
+    A voice is a person. Two entries from the same participant stay one voice, and a stakeholder
+    request is filed the same way but never counted as one.
+  </p>
+
+  <section class="mt-8" aria-labelledby="intake-heading">
+    <h2 id="intake-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+      Add to the record
+    </h2>
+
+    <div class="overflow-hidden rounded-md border border-rule" data-intake>
+      <div data-intake-step="zone">
+        <button
+          type="button"
+          data-intake-paste
+          class="flex w-full min-h-11 flex-col items-center justify-center gap-2 border-b border-dashed border-rule-strong bg-surface/25 px-4 py-10 text-center transition-colors duration-[120ms] hover:bg-surface/50 active:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+        >
+          <span class="text-[15px] font-semibold text-ink">Paste a transcript, or drop a file</span>
+          <span class="max-w-md text-[13px] leading-relaxed font-medium text-ink-soft">
+            Canon splits it into entries and drafts the Meant line. Nothing is filed until you
+            confirm&nbsp;it.
+          </span>
+        </button>
+        <p class="px-4 py-2 text-[11px] font-medium text-ink-soft">
+          Scripted in this preview — the button below drafts one prepared entry.
+        </p>
+      </div>
+
+      <div data-intake-step="draft" hidden>
+        <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+          Drafted — not filed yet
+        </p>
+        <div class="bg-bg px-4 py-4">
+          <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[11px] font-medium text-ink-soft tabular-nums">
+            <span class="rounded-sm border border-rule-strong px-2 py-1 font-mono font-semibold text-ink">
+              {DRAFT_ENTRY.speaker}
+            </span>
+            <time datetime={DRAFT_ENTRY.date}>{DRAFT_ENTRY.date}</time>
+            <span>· {DRAFT_ENTRY.source} · {DRAFT_ENTRY.context}</span>
+          </p>
+          <p class="mt-2 text-[13px] font-semibold text-ink">{DRAFT_ENTRY.theme}</p>
+          <dl class="mt-3 flex flex-col gap-3">
+            <div>
+              <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Said</dt>
+              <dd class="mt-1 border-l border-rule-strong pl-3 text-[15px] leading-relaxed font-medium text-ink">
+                “{DRAFT_ENTRY.said}”
+              </dd>
+            </div>
+            <div>
+              <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                Meant <span class="font-medium normal-case">— unverified, drafted for you</span>
+              </dt>
+              <dd class="mt-1 border-l border-rule pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+                {DRAFT_ENTRY.meant}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Decided</dt>
+              <dd class="mt-1 border-l border-rule pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+                — Nothing yet, and drafting one would be putting words in your mouth.
+              </dd>
+            </div>
+          </dl>
+          <div class="mt-4 flex flex-wrap items-center gap-3">
+            <button type="button" data-intake-confirm class="btn btn-primary">Confirm entry</button>
+            <button type="button" data-intake-discard class="btn btn-quiet">Discard draft</button>
+          </div>
+        </div>
+      </div>
+
+      <div data-intake-step="filed" hidden>
+        <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+          Filed
+        </p>
+        <div class="bg-bg px-4 py-4">
+          <p class="text-[15px] leading-relaxed font-medium text-ink">
+            Filed as <span class="font-mono text-[13px]">{DRAFT_ENTRY.date}-02</span>, attributed to{' '}
+            <span class="font-mono text-[13px]">{DRAFT_ENTRY.speaker}</span>, with your name on the
+            Meant line.
+          </p>
+          <p class="mt-2 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
+            A fourth voice on the ring, so the report keeps it as a pattern. This preview holds no
+            state, so the list below is unchanged — in the product the entry would be at the top
+            of&nbsp;it.
+          </p>
+          <div class="mt-4">
+            <button type="button" data-intake-again class="btn btn-quiet">Add another</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-8" aria-labelledby="entries-heading">
+    <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      <h2 id="entries-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+        Entries
+      </h2>
+      <p class="text-[11px] font-medium text-ink-soft tabular-nums">
+        {RECORD_ENTRIES.length} filed · newest first
+      </p>
+    </div>
+
+    <div class="overflow-hidden rounded-md border border-rule">
+      {entries.map((entry) => (
+        <RecordEntryCard entry={entry} tag={tagFor.get(entry.id)!} />
+      ))}
+    </div>
+
+    <p class="mt-4 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
+      The report reads this list back as questions rather than dates —{' '}
+      <a
+        href={withBase('/v2-preview/research/report/')}
+        class="font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      >
+        the open report
+      </a>{' '}
+      groups the same entries by what they are evidence about, and lists what was said and never
+      decided.
+    </p>
+  </section>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/research/report/')}
+    class="flex min-h-11 items-center font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Next screen — the open report
+  </a>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/')}
+    class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Back to the dashboard
+  </a>
+</AppShell>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-intake]')) {
+    const steps = new Map<string, HTMLElement>();
+    for (const step of root.querySelectorAll<HTMLElement>('[data-intake-step]')) {
+      steps.set(step.dataset.intakeStep!, step);
+    }
+
+    function show(name: string, focusSelector?: string) {
+      for (const [id, el] of steps) el.hidden = id !== name;
+      const target = focusSelector
+        ? steps.get(name)?.querySelector<HTMLElement>(focusSelector)
+        : null;
+      target?.focus();
+    }
+
+    root
+      .querySelector<HTMLButtonElement>('[data-intake-paste]')
+      ?.addEventListener('click', () => show('draft', '[data-intake-confirm]'));
+    root
+      .querySelector<HTMLButtonElement>('[data-intake-confirm]')
+      ?.addEventListener('click', () => show('filed', '[data-intake-again]'));
+    root
+      .querySelector<HTMLButtonElement>('[data-intake-discard]')
+      ?.addEventListener('click', () => show('zone', '[data-intake-paste]'));
+    root
+      .querySelector<HTMLButtonElement>('[data-intake-again]')
+      ?.addEventListener('click', () => show('zone', '[data-intake-paste]'));
+  }
+</script>

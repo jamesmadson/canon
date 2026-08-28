@@ -21,7 +21,7 @@ interface Props {
    * the product rather than inside a section — the flow map, for one — where
    * marking a row current would point at a page you are not on.
    */
-  active?: 'overview' | 'prototypes';
+  active?: 'overview' | 'prototypes' | 'research';
 }
 
 const { title, description, active } = Astro.props;
@@ -29,9 +29,10 @@ const { title, description, active } = Astro.props;
 const NAV = [
   { id: 'overview', label: 'Overview', href: '/v2-preview/' },
   { id: 'prototypes', label: 'Prototypes', href: '/v2-preview/#prototypes' },
+  { id: 'research', label: 'Research', href: '/v2-preview/research/' },
 ] as const;
 
-const SOON = ['Research', 'Members'];
+const SOON = ['Members'];
 
 // One row height and one row shape for every sidebar entry, so the two live
 // sections and the two that only say what they would be sit on the same grid.

@@ -1,0 +1,75 @@
+---
+import { withBase } from '../lib/withBase';
+import { prototypeBySlug, type RecordEntry } from '../data/v2Preview';
+
+/**
+ * One entry in the record: what was said, what you read into it, and what was
+ * decided — which is usually nothing, and says so.
+ *
+ * The strength tag is passed in rather than worked out here, because strength
+ * is a property of the theme across the whole record and not of one entry.
+ */
+interface Props {
+  entry: RecordEntry;
+  /** "Pattern · 3 voices" and so on, from lib/evidence. */
+  tag: string;
+}
+
+const { entry, tag } = Astro.props;
+const prototype = entry.prototype ? prototypeBySlug(entry.prototype) : undefined;
+---
+
+<article
+  id={entry.id}
+  class="scroll-mt-6 border-b border-rule bg-bg px-4 py-4 last:border-b-0"
+>
+  <header class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[11px] font-medium text-ink-soft tabular-nums">
+    <span class="rounded-sm border border-rule-strong px-2 py-1 font-mono font-semibold text-ink">
+      {entry.speaker}
+    </span>
+    <time datetime={entry.date}>{entry.date}</time>
+    <span>· {entry.source}</span>
+    <span class="ml-auto rounded-sm border border-rule px-2 py-1 font-semibold whitespace-nowrap text-ink-soft">
+      {tag}
+    </span>
+  </header>
+
+  <p class="mt-2 text-[13px] font-medium text-ink-soft">{entry.context}</p>
+
+  <p class="mt-2 text-[13px] font-semibold text-ink">{entry.theme}</p>
+
+  <dl class="mt-3 flex flex-col gap-3">
+    <div>
+      <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Said</dt>
+      <dd class="mt-1 border-l border-rule-strong pl-3 text-[15px] leading-relaxed font-medium text-ink">
+        “{entry.said}”
+      </dd>
+    </div>
+    <div>
+      <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+        Meant <span class="font-medium normal-case">— unverified, my reading</span>
+      </dt>
+      <dd class="mt-1 border-l border-rule pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+        {entry.meant}
+      </dd>
+    </div>
+    <div>
+      <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Decided</dt>
+      <dd class="mt-1 border-l border-rule pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+        {entry.decided ?? '—'}
+      </dd>
+    </div>
+  </dl>
+
+  {prototype && (
+    <p class="mt-3 text-[11px] font-medium text-ink-soft">
+      Filed against{' '}
+      <a
+        href={withBase(`/v2-preview/${prototype.slug}/`)}
+        class="font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      >
+        {prototype.name}
+      </a>
+    </p>
+  )}
+</article>
