@@ -16,8 +16,12 @@ import { PROJECT } from '../data/v2Preview';
 interface Props {
   title: string;
   description: string;
-  /** Which sidebar row is the current page. */
-  active: 'overview' | 'prototypes';
+  /**
+   * Which sidebar row is the current page. Omitted on pages that sit beside
+   * the product rather than inside a section — the flow map, for one — where
+   * marking a row current would point at a page you are not on.
+   */
+  active?: 'overview' | 'prototypes';
 }
 
 const { title, description, active } = Astro.props;

@@ -1,0 +1,135 @@
+---
+import AppShell from '../../../components/AppShell.astro';
+import { withBase } from '../../../lib/withBase';
+import { spellNumber } from '../../../lib/spellNumber';
+import { NEW_PROTOTYPE, PROJECT } from '../../../data/v2Preview';
+
+/**
+ * The demo script, written down.
+ *
+ * Every step is a real link to the screen it names, so this page is both the
+ * index of the preview and the thing you read from while walking somebody
+ * through it. If a route ever disappears, this page breaks loudly rather than
+ * describing a flow that no longer exists.
+ */
+const FLOWS = [
+  {
+    id: 'first-run',
+    name: 'First run',
+    blurb: 'Sign in, name a project, connect a repository read-only, attach Figma, turn on skills.',
+    steps: [
+      { label: 'Sign in', href: '/v2-preview/signin/' },
+      { label: 'Name the project', href: '/v2-preview/onboarding/project/' },
+      { label: 'Connect GitHub', href: '/v2-preview/onboarding/github/' },
+      { label: 'Attach Figma', href: '/v2-preview/onboarding/figma/' },
+      { label: 'Choose skills', href: '/v2-preview/onboarding/skills/' },
+      { label: 'Dashboard', href: '/v2-preview/' },
+    ],
+  },
+  {
+    id: 'create',
+    name: 'Create a prototype',
+    blurb: `The one case where Canon names a branch, and the empty state you land in afterwards.`,
+    steps: [
+      { label: 'Dashboard', href: '/v2-preview/' },
+      { label: 'New prototype', href: '/v2-preview/new/' },
+      { label: 'Branch created', href: '/v2-preview/new/created/' },
+      { label: `${NEW_PROTOTYPE.name} — no capture yet`, href: `/v2-preview/${NEW_PROTOTYPE.slug}/` },
+    ],
+  },
+  {
+    id: 'import',
+    name: 'Import a repo',
+    blurb: 'A second source, picked branch by branch — and an honest note about what the preview cannot show.',
+    steps: [
+      { label: 'Dashboard', href: '/v2-preview/' },
+      { label: 'Connect a source', href: '/v2-preview/import/' },
+      { label: "Choose what's visible", href: '/v2-preview/import/branches/' },
+      { label: 'Source connected', href: '/v2-preview/import/done/' },
+    ],
+  },
+  {
+    id: 'review',
+    name: 'Run a review',
+    blurb: 'A person triggers it, deter proposes removals, each one priced.',
+    steps: [
+      { label: 'Map layers', href: '/v2-preview/map-layers/' },
+      { label: 'Run a review', href: '/v2-preview/map-layers/run/' },
+      { label: 'Review run', href: '/v2-preview/map-layers/run/result/' },
+    ],
+  },
+  {
+    id: 'feedback',
+    name: 'Read feedback',
+    blurb: 'Said, meant, decided — with the counts said out loud and the stakeholder kept apart.',
+    steps: [
+      { label: 'Dashboard', href: '/v2-preview/' },
+      { label: 'Today ring v2', href: '/v2-preview/today-ring-v2/' },
+    ],
+  },
+];
+---
+
+<AppShell
+  title="Canon v2 preview — flow map"
+  description="Every flow in the scripted Canon v2 preview, as a numbered sequence of links: first run, create, import, review, feedback."
+>
+  <h1 class="text-3xl font-bold tracking-tight">Flow map</h1>
+  <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+    Every screen in the {PROJECT.name} preview, grouped into the {spellNumber(FLOWS.length)} paths
+    worth walking. Each step is a link to the screen it names, so this page doubles as the script
+    for showing somebody around.
+  </p>
+  <p class="mt-2 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
+    Nothing here keeps state. A flow reads forward cleanly, and where a screen would have to
+    remember what you did on the last one, that screen says so instead of pretending.
+  </p>
+
+  <div class="mt-8 flex flex-col gap-8">
+    {FLOWS.map((flow, flowIndex) => (
+      <section aria-labelledby={`${flow.id}-heading`}>
+        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h2 id={`${flow.id}-heading`} class="text-lg font-semibold tracking-tight text-ink">
+            <span class="text-ink-soft">{flowIndex + 1}.</span> {flow.name}
+          </h2>
+          <p class="text-[11px] font-medium text-ink-soft">{flow.steps.length} screens</p>
+        </div>
+        <p class="mt-1 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
+          {flow.blurb}
+        </p>
+
+        <ol class="mt-3 overflow-hidden rounded-md border border-rule">
+          {flow.steps.map((step, i) => (
+            <li class="border-b border-rule last:border-b-0">
+              <a
+                href={withBase(step.href)}
+                class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 bg-bg px-4 py-3 transition-colors hover:bg-surface/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+              >
+                <span
+                  aria-hidden="true"
+                  class="flex size-6 shrink-0 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink-soft"
+                >
+                  {i + 1}
+                </span>
+                <span class="text-[15px] font-semibold text-ink underline decoration-rule-strong underline-offset-4">
+                  {step.label}
+                </span>
+                <span class="ml-auto font-mono text-[11px] break-all text-ink-soft">
+                  {step.href}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+  </div>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/')}
+    class="flex min-h-11 items-center font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Back to the dashboard
+  </a>
+</AppShell>

@@ -3,8 +3,13 @@ import AppShell from '../../components/AppShell.astro';
 import PrototypeCard from '../../components/PrototypeCard.astro';
 import { withBase } from '../../lib/withBase';
 import { isStale, STALE_AFTER_DAYS } from '../../lib/staleness';
+import { spellNumber } from '../../lib/spellNumber';
 import {
   BRANCHES,
+  CANON_NAMED_REFS,
+  FIGMA_PROTOTYPES,
+  GIT_PROTOTYPES,
+  OPENED_SINCE,
   PREVIEW_AS_OF,
   PROJECT,
   PROTOTYPES,
@@ -13,18 +18,29 @@ import {
 } from '../../data/v2Preview';
 
 const staleCount = PROTOTYPES.filter((p) => isStale(p.lastActivity, PREVIEW_AS_OF)).length;
+const sentenceCase = (word: string) => word.charAt(0).toUpperCase() + word.slice(1);
 
 // Every number here is counted off the data, so the strip cannot outlive it.
+// The "From" note has to close the arithmetic: branches picked when the repo
+// was connected, plus the ones Canon opened since, plus the Figma set, is the
+// prototype count above it.
 const STATS = [
-  { label: 'Prototypes', value: String(PROTOTYPES.length), note: 'Three from Git, one from Figma' },
+  {
+    label: 'Prototypes',
+    value: String(PROTOTYPES.length),
+    note: `${sentenceCase(spellNumber(GIT_PROTOTYPES))} from Git, ${spellNumber(FIGMA_PROTOTYPES)} from Figma`,
+  },
   {
     label: 'From',
     value: `${BRANCHES.length} branches`,
-    note: `${SELECTED_BRANCHES} selected`,
+    note: `${SELECTED_BRANCHES} picked at connect, ${OPENED_SINCE} opened since`,
   },
   { label: 'Stale', value: String(staleCount), note: `Quiet ${STALE_AFTER_DAYS} days or more` },
-  { label: 'Review runs', value: String(REVIEW_RUNS), note: 'Both triggered by a person' },
+  { label: 'Review runs', value: String(REVIEW_RUNS), note: 'Every one triggered by a person' },
 ];
+
+const primaryButton =
+  'flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink';
 ---
 
 <AppShell
@@ -32,8 +48,14 @@ const STATS = [
   description="A scripted preview of the Canon v2 project dashboard: prototype screens indexed from Git and Figma, with staleness flags."
   active="overview"
 >
-  <h1 class="text-3xl font-bold tracking-tight">{PROJECT.name}</h1>
-  <p class="mt-1 text-[15px] font-medium text-ink-soft">{PROJECT.tagline}</p>
+  <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+    <div class="min-w-0">
+      <h1 class="text-3xl font-bold tracking-tight">{PROJECT.name}</h1>
+      <p class="mt-1 text-[15px] font-medium text-ink-soft">{PROJECT.tagline}</p>
+    </div>
+    <a href={withBase('/v2-preview/new/')} class={primaryButton}>New prototype</a>
+  </div>
+
   <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
     {PROJECT.blurb}
   </p>
@@ -52,20 +74,28 @@ const STATS = [
     </dl>
   </div>
 
-  <dl class="mt-5 flex flex-col gap-2 border-t border-rule pt-4 text-[13px] font-medium sm:flex-row sm:gap-8">
-    <div>
-      <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Repository</dt>
-      <dd class="mt-0.5 font-mono break-all text-ink">{PROJECT.repo}</dd>
-    </div>
-    <div>
-      <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Figma file</dt>
-      <dd class="mt-0.5 text-ink">{PROJECT.figmaFile}</dd>
-    </div>
-    <div>
-      <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Access</dt>
-      <dd class="mt-0.5 text-ink">Read-only</dd>
-    </div>
-  </dl>
+  <div class="mt-5 flex flex-col gap-2 border-t border-rule pt-4 sm:flex-row sm:items-start sm:gap-8">
+    <dl class="flex flex-col gap-2 text-[13px] font-medium sm:flex-row sm:gap-8">
+      <div>
+        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Repository</dt>
+        <dd class="mt-0.5 font-mono break-all text-ink">{PROJECT.repo}</dd>
+      </div>
+      <div>
+        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Figma file</dt>
+        <dd class="mt-0.5 text-ink">{PROJECT.figmaFile}</dd>
+      </div>
+      <div>
+        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Access</dt>
+        <dd class="mt-0.5 text-ink">Read-only</dd>
+      </div>
+    </dl>
+    <a
+      href={withBase('/v2-preview/import/')}
+      class="-mt-2 flex min-h-11 items-center text-[13px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:mt-0 sm:ml-auto"
+    >
+      Connect a source
+    </a>
+  </div>
 
   <section class="mt-8 scroll-mt-6" id="prototypes" aria-labelledby="prototypes-heading">
     <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -84,10 +114,18 @@ const STATS = [
     </div>
 
     <p class="mt-4 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
-      Canon did not ask anyone to rename a branch. Three of the six branches on
-      <span class="font-mono">{PROJECT.repo}</span> were picked as prototypes and the rest stayed
-      branches — only <span class="font-mono">prototype-map-layers</span> carries the prefix,
-      because Canon opened that one itself.
+      Canon did not ask anyone to rename a branch. {sentenceCase(spellNumber(SELECTED_BRANCHES))} of
+      the {spellNumber(BRANCHES.length)} branches on <span class="font-mono">{PROJECT.repo}</span> were
+      picked as prototypes and the rest stayed branches. The{' '}
+      {spellNumber(CANON_NAMED_REFS.length)} that carry the{' '}
+      <span class="font-mono">prototype-</span> prefix —{' '}
+      {CANON_NAMED_REFS.map((ref, i) => (
+        <>
+          {i > 0 && ' and '}
+          <span class="font-mono">{ref}</span>
+        </>
+      ))}{' '}
+      — are the ones Canon opened itself, which is the only case where Canon does the naming.
     </p>
     <p class="mt-2 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
       Anything with no activity for {STALE_AFTER_DAYS} days gets flagged. The flag is not a
@@ -102,5 +140,13 @@ const STATS = [
     class="flex min-h-11 items-center font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
   >
     Next screen — a prototype in detail
+  </a>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/flows/')}
+    class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Flow map
   </a>
 </AppShell>
