@@ -16,12 +16,7 @@ const { entry, compact = false } = Astro.props;
       {entry.speaker}
     </span>
     <time datetime={entry.date}>{entry.date}</time>
-    {!compact && (
-      <>
-        <span aria-hidden="true">·</span>
-        <span>{entry.context}</span>
-      </>
-    )}
+    {!compact && <span>· {entry.context}</span>}
   </header>
 
   <dl class="flex flex-col gap-3">

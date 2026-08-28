@@ -18,9 +18,7 @@ const hidden = run.findings.length - findings.length;
       <span class="rounded-sm border border-rule-strong px-1.5 py-0.5 font-mono font-semibold text-ink">
         {run.skill}
       </span>
-      <span>run {run.ranOn}</span>
-      <span aria-hidden="true">·</span>
-      <span>{run.findings.length} findings, all of them removals</span>
+      <span>run {run.ranOn} · {run.findings.length} findings, all of them removals</span>
     </p>
     {!compact && <p class="mt-2 font-mono text-[11px] break-all text-ink-soft">{run.target}</p>}
   </div>

@@ -116,7 +116,7 @@ export const PROTOTYPES: Prototype[] = [
     slug: 'night-map',
     name: 'Night map',
     summary:
-      'A late-service map that dropped daytime routes entirely. Parked after the November timetable changed under it.',
+      'A late-service map that dropped daytime routes entirely. Parked after the summer timetable changed under it.',
     origin: 'Git',
     ref: 'prototype-night-map',
     author: 'Tomasz Ferrell',

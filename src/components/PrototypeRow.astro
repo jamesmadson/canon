@@ -36,10 +36,8 @@ const idle = daysIdle(prototype.lastActivity, PREVIEW_AS_OF);
   <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-medium text-ink-soft">
     <span class="rounded-sm border border-rule px-1.5 py-0.5">{prototype.origin}</span>
     <span class="font-mono break-all">{prototype.ref}</span>
-    <span aria-hidden="true">·</span>
-    <span>{prototype.author}</span>
-    <span aria-hidden="true">·</span>
-    <span>{idleLabel(prototype.lastActivity, PREVIEW_AS_OF)}</span>
+    <span>· {prototype.author}</span>
+    <span>· {idleLabel(prototype.lastActivity, PREVIEW_AS_OF)}</span>
   </span>
 
   {!compact && (

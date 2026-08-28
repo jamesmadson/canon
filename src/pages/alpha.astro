@@ -66,14 +66,14 @@ const paneHeading = 'text-[11px] font-semibold uppercase tracking-wide text-ink-
       <PreviewLabel placement="bottom" />
     </div>
 
-    <p class="mt-4 max-w-2xl text-sm font-medium text-ink-soft">
-      <a
-        href={withBase('/v2-preview/')}
-        class="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-      >
-        Walk through the full screens
-      </a>
-      — a scripted click-through of the dashboard and one prototype.
+    <a
+      href={withBase('/v2-preview/')}
+      class="mt-3 flex min-h-11 items-center text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Walk through the full screens
+    </a>
+    <p class="max-w-2xl text-sm font-medium text-ink-soft">
+      A scripted click-through of the dashboard and one prototype.
     </p>
   </section>
 
@@ -155,12 +155,12 @@ const paneHeading = 'text-[11px] font-semibold uppercase tracking-wide text-ink-
     <p class="mt-5 text-[13px] leading-relaxed font-medium text-ink-soft">
       Built by the practice behind the Canon gallery — twenty design skills, each read in
       full, license-checked, and written up by hand.
-      <a
-        href={withBase('/skills/')}
-        class="inline-flex min-h-11 items-center underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-      >
-        See the gallery
-      </a>
     </p>
+    <a
+      href={withBase('/skills/')}
+      class="flex min-h-11 items-center text-[13px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      See the gallery
+    </a>
   </section>
 </BaseLayout>
