@@ -1,0 +1,146 @@
+---
+import AppShell from '../../../components/AppShell.astro';
+import DrawnMark from '../../../components/DrawnMark.astro';
+import { withBase } from '../../../lib/withBase';
+import { NEW_PROTOTYPE, PROJECT } from '../../../data/v2Preview';
+
+/**
+ * Where the prefix rule becomes something you can see rather than read about.
+ *
+ * The source choice is the whole point of the screen: pick "new branch" and
+ * Canon opens `prototype-<name>` because Canon is the thing doing the naming;
+ * pick Figma and no branch exists at all. The line naming the branch is printed
+ * before the branch is created, not after.
+ */
+const SOURCES = [
+  {
+    selected: true,
+    title: `New branch on ${PROJECT.repo}`,
+    detail: `Canon will open ${NEW_PROTOTYPE.branch} from ${NEW_PROTOTYPE.baseBranch}.`,
+  },
+  {
+    selected: false,
+    title: 'Attach a Figma frame instead',
+    detail: `Point at a frame in ${PROJECT.figmaFile}. No branch is created, and nothing gets renamed.`,
+  },
+];
+---
+
+<AppShell
+  title="Canon v2 preview — new prototype"
+  description="A scripted preview of creating a prototype in Canon v2: naming it, choosing a source, and seeing the branch Canon will open."
+  active="prototypes"
+>
+  <a
+    href={withBase('/v2-preview/')}
+    class="-ml-1 inline-flex min-h-11 items-center px-1 text-[13px] font-medium text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    ← All prototypes
+  </a>
+
+  <h1 class="mt-2 text-3xl font-bold tracking-tight">New prototype</h1>
+  <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+    A prototype is a version of a screen, kept where it already lives. Name it,
+    then say where it comes from — Canon opens a branch for it, or points at a
+    frame you already have.
+  </p>
+
+  <div class="mt-6 max-w-xl">
+    <label class="block">
+      <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Name</span>
+      <input
+        type="text"
+        value={NEW_PROTOTYPE.name}
+        readonly
+        class="mt-1.5 w-full rounded-md border border-rule-strong bg-bg px-3 py-2.5 font-medium text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      />
+    </label>
+
+    <fieldset class="mt-5">
+      <legend class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Source</legend>
+      <div class="mt-1.5 flex flex-col gap-2">
+        {SOURCES.map((source) => (
+          <div
+            class:list={[
+              'flex items-start gap-3 rounded-md border px-4 py-3',
+              source.selected ? 'border-ink bg-surface/40' : 'border-rule bg-bg',
+            ]}
+          >
+            <span class="mt-0.5">
+              <DrawnMark
+                shape="round"
+                on={source.selected}
+                label={source.selected ? 'Selected' : 'Not selected'}
+              />
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-sm font-semibold text-ink">{source.title}</span>
+              <span class="mt-0.5 block text-[13px] leading-relaxed font-medium text-ink-soft">
+                {source.detail}
+              </span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </fieldset>
+
+    <label class="mt-5 block">
+      <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+        Base branch
+      </span>
+      <input
+        type="text"
+        value={NEW_PROTOTYPE.baseBranch}
+        readonly
+        class="mt-1.5 w-full rounded-md border border-rule bg-bg px-3 py-2.5 font-mono text-sm text-ink focus-visible:outline-2 focus-visible:outline-ink"
+      />
+      <span class="mt-1.5 block text-[11px] leading-relaxed font-medium text-ink-soft">
+        The branch the new one starts from. Whatever is on{' '}
+        <span class="font-mono">{NEW_PROTOTYPE.baseBranch}</span> right now is what you begin with.
+      </span>
+    </label>
+
+    <div class="mt-5 rounded-md border border-rule px-4 py-3">
+      <p class="text-sm leading-relaxed font-medium text-ink">
+        This is the one case where Canon names a branch. It will be called:
+      </p>
+      <p class="mt-1.5 font-mono text-[13px] break-all text-ink">{NEW_PROTOTYPE.branch}</p>
+      <p class="mt-1.5 text-[13px] leading-relaxed font-medium text-ink-soft">
+        The <span class="font-mono">prototype-</span> prefix plus the name you typed, lowercased
+        and hyphenated.
+      </p>
+      <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+        Branches you made yourself keep whatever convention you already use. Canon only prefixes
+        the ones it opens, so a glance at the branch list tells you which is which.
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
+    <a
+      href={withBase('/v2-preview/')}
+      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    >
+      Cancel
+    </a>
+    <a
+      href={withBase('/v2-preview/new/created/')}
+      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Create prototype
+    </a>
+  </div>
+
+  <p class="mt-4 max-w-xl text-[11px] leading-relaxed font-medium text-ink-soft">
+    Read-only in this preview — the name, the source and the base are fixed, so the walkthrough
+    lands on the same branch every time.
+  </p>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/flows/')}
+    class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Flow map
+  </a>
+</AppShell>

@@ -1,0 +1,83 @@
+---
+import AppShell from '../../../../components/AppShell.astro';
+import { withBase } from '../../../../lib/withBase';
+import { NEW_PROTOTYPE, PROJECT } from '../../../../data/v2Preview';
+
+/**
+ * The confirmation. It says what was made, then says plainly that the thing
+ * made is empty — a screen that congratulated you here and left you to
+ * discover the empty state on your own would be the wrong order.
+ */
+const NEXT = [
+  {
+    title: 'Push to the branch',
+    detail: `Anything that lands on ${NEW_PROTOTYPE.branch} shows up here. Canon reads the branch; it never holds a copy of it.`,
+  },
+  {
+    title: 'Or attach a preview URL',
+    detail: 'If the branch already deploys somewhere, paste that address and Canon frames the running screen instead of an empty one.',
+  },
+];
+---
+
+<AppShell
+  title="Canon v2 preview — prototype created"
+  description="A scripted preview of Canon v2 confirming a new prototype: the branch it opened, and the two ways to give it something to show."
+  active="prototypes"
+>
+  <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">New prototype</p>
+  <h1 class="mt-1 text-3xl font-bold tracking-tight">{NEW_PROTOTYPE.name} is ready</h1>
+
+  <div class="mt-5 max-w-xl rounded-md border border-rule bg-surface/40 px-4 py-3">
+    <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Branch created</p>
+    <p class="mt-1 font-mono text-sm break-all text-ink">{NEW_PROTOTYPE.branch}</p>
+    <p class="mt-1 text-[13px] leading-relaxed font-medium text-ink-soft">
+      Opened from <span class="font-mono">{NEW_PROTOTYPE.baseBranch}</span> on{' '}
+      <span class="font-mono">{PROJECT.repo}</span>. It is a branch like any other — clone it,
+      check it out, delete it if you change your mind.
+    </p>
+  </div>
+
+  <section class="mt-8 max-w-xl" aria-labelledby="next-heading">
+    <h2 id="next-heading" class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+      What happens next
+    </h2>
+    <div class="overflow-hidden rounded-md border border-rule">
+      <div class="-mb-px">
+        {NEXT.map((step) => (
+          <div class="border-b border-rule bg-bg px-4 py-3">
+            <p class="text-[15px] font-semibold text-ink">{step.title}</p>
+            <p class="mt-1 text-[13px] leading-relaxed font-medium text-ink-soft">{step.detail}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+    <p class="mt-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+      Until one of those happens there is nothing to look at, and {NEW_PROTOTYPE.name}'s page
+      says exactly that. An empty prototype is a normal thing to have for an afternoon.
+    </p>
+  </section>
+
+  <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
+    <a
+      href={withBase('/v2-preview/')}
+      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    >
+      Back to the dashboard
+    </a>
+    <a
+      href={withBase(`/v2-preview/${NEW_PROTOTYPE.slug}/`)}
+      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Open {NEW_PROTOTYPE.name}
+    </a>
+  </div>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/flows/')}
+    class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Flow map
+  </a>
+</AppShell>
