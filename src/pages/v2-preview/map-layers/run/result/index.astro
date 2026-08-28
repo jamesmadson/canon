@@ -1,0 +1,117 @@
+---
+import AppShell from '../../../../../components/AppShell.astro';
+import DrawnMark from '../../../../../components/DrawnMark.astro';
+import ReviewRunCard from '../../../../../components/ReviewRunCard.astro';
+import { withBase } from '../../../../../lib/withBase';
+import { prototypeBySlug, SCRIPTED_RUN } from '../../../../../data/v2Preview';
+
+const prototype = prototypeBySlug('map-layers')!;
+
+/**
+ * The lifecycle, drawn finished.
+ *
+ * A spinner here would be a picture of waiting, and nothing on this page is
+ * waiting — the run is scripted and already written. So the three states are a
+ * plain list, all ticked, with what each one actually meant beside it.
+ */
+const LIFECYCLE = [
+  { label: 'Queued', detail: 'You asked for it. The run went into the queue with your name on it.' },
+  { label: 'Running', detail: `deter read ${prototype.ref} and the preview it points at.` },
+  { label: 'Filed', detail: 'The findings landed on the prototype, dated, with their reasons attached.' },
+];
+---
+
+<AppShell
+  title="Canon v2 preview — review run"
+  description="A scripted preview of a finished Canon v2 review run: three removals with priced reasons, and one thing kept."
+  active="prototypes"
+>
+  <a
+    href={withBase('/v2-preview/map-layers/run/')}
+    class="-ml-1 inline-flex min-h-11 items-center px-1 text-[13px] font-medium text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    ← Run a review
+  </a>
+
+  <h1 class="mt-2 text-3xl font-bold tracking-tight">Review run</h1>
+  <p class="mt-1 font-mono text-[13px] break-all text-ink-soft">{SCRIPTED_RUN.target}</p>
+
+  <section class="mt-6" aria-labelledby="lifecycle-heading">
+    <h2
+      id="lifecycle-heading"
+      class="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-soft"
+    >
+      What happened
+    </h2>
+    <ol class="max-w-xl overflow-hidden rounded-md border border-rule">
+      {LIFECYCLE.map((stage) => (
+        <li class="flex items-start gap-3 border-b border-rule bg-bg px-4 py-3 last:border-b-0">
+          <span class="mt-0.5">
+            <DrawnMark on={true} label="Done" />
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-semibold text-ink">{stage.label}</span>
+            <span class="mt-0.5 block text-[13px] leading-relaxed font-medium text-ink-soft">
+              {stage.detail}
+            </span>
+          </span>
+        </li>
+      ))}
+    </ol>
+    <p class="mt-2 max-w-xl text-[11px] leading-relaxed font-medium text-ink-soft">
+      Drawn finished on purpose. A spinner here would be a picture of waiting, and this page has
+      never waited for anything.
+    </p>
+  </section>
+
+  <section class="mt-8" aria-labelledby="findings-heading">
+    <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      <h2 id="findings-heading" class="text-sm font-semibold uppercase tracking-wide text-ink-soft">
+        Findings
+      </h2>
+      <p class="text-[11px] font-medium text-ink-soft">
+        {SCRIPTED_RUN.findings.length} removals · 1 kept
+      </p>
+    </div>
+    <div class="overflow-hidden rounded-md border border-rule">
+      <ReviewRunCard run={SCRIPTED_RUN} />
+    </div>
+    <p class="mt-2 max-w-2xl text-[11px] leading-relaxed font-medium text-ink-soft">
+      <span class="font-mono">deter</span> only proposes. Nothing is removed from{' '}
+      <span class="font-mono">{prototype.ref}</span> until a person does it, and the run stays on
+      the record either way — including the findings you disagree with.
+    </p>
+  </section>
+
+  <div class="mt-6 max-w-2xl border-l border-rule-strong pl-4">
+    <p class="text-[13px] leading-relaxed font-medium text-ink-soft">
+      <span class="font-semibold text-ink">A seam in this preview —</span> these pages hold no
+      state, so this run lives on this page only. Go back to {prototype.name} and it still reads
+      as having no filed run, because the screen you are returning to was written before you
+      clicked Queue.
+    </p>
+  </div>
+
+  <div class="mt-8 flex max-w-2xl items-center justify-between gap-4">
+    <a
+      href={withBase('/v2-preview/')}
+      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    >
+      Dashboard
+    </a>
+    <a
+      href={withBase('/v2-preview/map-layers/')}
+      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Back to {prototype.name}
+    </a>
+  </div>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/flows/')}
+    class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Flow map
+  </a>
+</AppShell>

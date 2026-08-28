@@ -1,0 +1,126 @@
+---
+import AppShell from '../../../../components/AppShell.astro';
+import DrawnMark from '../../../../components/DrawnMark.astro';
+import { withBase } from '../../../../lib/withBase';
+import { prototypeBySlug, SCRIPTED_RUN } from '../../../../data/v2Preview';
+
+const prototype = prototypeBySlug('map-layers')!;
+
+/**
+ * Choosing the skill. `access` is a row that says Soon rather than a control
+ * that looks live and refuses — the same rule the sidebar follows.
+ */
+const SKILLS = [
+  {
+    name: 'deter',
+    state: 'on' as const,
+    line: 'A constraint review: less, but better. Every finding is a removal, and each one has to carry its reason.',
+  },
+  {
+    name: 'access',
+    state: 'soon' as const,
+    line: 'Contrast, target sizes, keyboard path. Not running yet.',
+  },
+];
+---
+
+<AppShell
+  title="Canon v2 preview — run a review"
+  description="A scripted preview of queueing a Canon v2 review run: choosing the skill, and the rule that a person triggers every run."
+  active="prototypes"
+>
+  <a
+    href={withBase('/v2-preview/map-layers/')}
+    class="-ml-1 inline-flex min-h-11 items-center px-1 text-[13px] font-medium text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    ← {prototype.name}
+  </a>
+
+  <h1 class="mt-2 text-3xl font-bold tracking-tight">Run a review</h1>
+  <p class="mt-1 font-mono text-[13px] break-all text-ink-soft">{prototype.ref}</p>
+
+  <div class="mt-6 max-w-xl">
+    <fieldset>
+      <legend class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Skill</legend>
+      <div class="mt-1.5 flex flex-col gap-2">
+        {SKILLS.map((skill) => (
+          <div
+            class:list={[
+              'flex items-start gap-3 rounded-md border px-4 py-3',
+              skill.state === 'on' ? 'border-ink bg-surface/40' : 'border-rule bg-bg',
+            ]}
+            aria-disabled={skill.state === 'soon' ? 'true' : undefined}
+          >
+            <span class="mt-0.5">
+              <DrawnMark
+                shape="round"
+                on={skill.state === 'on'}
+                label={skill.state === 'on' ? 'Selected' : 'Not available yet'}
+              />
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <span
+                  class:list={[
+                    'font-mono text-sm font-semibold',
+                    skill.state === 'on' ? 'text-ink' : 'text-ink-soft',
+                  ]}
+                >
+                  {skill.name}
+                </span>
+                {skill.state === 'soon' && (
+                  <span class="rounded-sm border border-rule-strong px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                    Soon
+                  </span>
+                )}
+              </span>
+              <span class="mt-0.5 block text-[13px] leading-relaxed font-medium text-ink-soft">
+                {skill.line}
+              </span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </fieldset>
+
+    <div class="mt-5 overflow-hidden rounded-md border border-rule">
+      <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+        Runs against
+      </p>
+      <p class="bg-bg px-4 py-3 font-mono text-[13px] break-all text-ink">{SCRIPTED_RUN.target}</p>
+    </div>
+
+    <div class="mt-5 rounded-md border border-rule px-4 py-3">
+      <p class="text-sm leading-relaxed font-medium text-ink">
+        A person triggers every run. Nothing executes on push.
+      </p>
+      <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+        No webhook, no run on merge, no bill that arrives because a branch was busy. If a review
+        happened, somebody asked for it, and that person's name is on it.
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-8 flex max-w-xl items-center justify-between gap-4">
+    <a
+      href={withBase('/v2-preview/map-layers/')}
+      class="flex min-h-11 items-center rounded-md px-2 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-ink"
+    >
+      Cancel
+    </a>
+    <a
+      href={withBase('/v2-preview/map-layers/run/result/')}
+      class="flex min-h-11 items-center rounded-md bg-ink px-5 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      Queue run
+    </a>
+  </div>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/flows/')}
+    class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Flow map
+  </a>
+</AppShell>
