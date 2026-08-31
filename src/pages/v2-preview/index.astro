@@ -4,9 +4,11 @@ import PrototypeCard from '../../components/PrototypeCard.astro';
 import { withBase } from '../../lib/withBase';
 import { isStale, STALE_AFTER_DAYS } from '../../lib/staleness';
 import { spellNumber } from '../../lib/spellNumber';
+import { STRENGTH_SCALE } from '../../lib/evidence';
 import {
   BRANCHES,
   CANON_NAMED_REFS,
+  RECORD_ENTRIES,
   FIGMA_PROTOTYPES,
   GIT_PROTOTYPES,
   OPENED_SINCE,
@@ -37,6 +39,21 @@ const STATS = [
   },
   { label: 'Stale', value: String(staleCount), note: `Quiet ${STALE_AFTER_DAYS} days or more` },
   { label: 'Review runs', value: String(REVIEW_RUNS), note: 'Every one triggered by a\u00A0person' },
+];
+
+const recordVoices = new Set(RECORD_ENTRIES.map((entry) => entry.speaker)).size;
+
+const RECORD_LINKS = [
+  {
+    label: 'The record',
+    href: '/v2-preview/research/',
+    line: 'Every entry, newest first, with the count of voices behind each question.',
+  },
+  {
+    label: 'The open report',
+    href: '/v2-preview/research/report/',
+    line: 'The same entries grouped into patterns, possible patterns, and open loops.',
+  },
 ];
 ---
 
@@ -130,6 +147,38 @@ const STATS = [
       Anything with no activity for {STALE_AFTER_DAYS} days gets flagged. The flag is not a
       scolding — retiring a prototype is a normal end state, and a project that never retires
       anything is the one with a problem.
+    </p>
+  </section>
+
+  <section class="mt-8" aria-labelledby="record-heading">
+    <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      <h2 id="record-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+        The record
+      </h2>
+      <p class="text-[11px] font-medium text-ink-soft tabular-nums">
+        {RECORD_ENTRIES.length} entries · {recordVoices} voices
+      </p>
+    </div>
+
+    <div class="overflow-hidden rounded-md border border-rule">
+      <div class="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-2">
+        {RECORD_LINKS.map((link) => (
+          <a
+            href={withBase(link.href)}
+            class="group flex flex-col gap-1 border-r border-b border-rule bg-bg px-4 py-4 transition-colors duration-[120ms] hover:border-rule-strong hover:bg-surface/30 active:bg-surface/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+          >
+            <span class="text-[15px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors group-hover:decoration-ink">
+              {link.label}
+            </span>
+            <span class="text-[13px] leading-relaxed font-medium text-ink-soft">{link.line}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <p class="mt-2 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
+      Feedback lands as entries, not as opinions: said, meant, decided. The report counts the
+      people behind each question rather than the entries — {STRENGTH_SCALE}.
     </p>
   </section>
 
