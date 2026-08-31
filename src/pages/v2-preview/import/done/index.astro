@@ -15,11 +15,11 @@ const heading = count.charAt(0).toUpperCase() + count.slice(1);
   description="A scripted preview of Canon v2 confirming an imported repository, and saying plainly what the preview cannot show."
   active="overview"
 >
-  <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Source connected</p>
+  <p class="label">Source connected</p>
   <h1 class="mt-1 text-xl font-bold tracking-tight">
     {heading} prototypes added from&nbsp;{repoName}
   </h1>
-  <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+  <p class="mt-2 max-w-2xl text-base leading-relaxed font-medium text-ink-soft">
     <span class="font-mono text-[13px]">{PROJECT.secondRepo}</span> is connected read-only.{' '}
     {spellNumber(IMPORT_BRANCHES.length)} branches were found and {spellNumber(IMPORT_SELECTED)}{' '}
     were picked; the others stayed branches.

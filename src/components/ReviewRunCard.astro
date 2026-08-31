@@ -15,7 +15,7 @@ const hidden = run.findings.length - findings.length;
 <div class="bg-bg">
   <div class="border-b border-rule px-4 py-3">
     <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[11px] font-medium text-ink-soft tabular-nums">
-      <span class="rounded-sm border border-rule-strong px-2 py-1 font-mono font-semibold text-ink">
+      <span class="rounded-full bg-recess px-2 py-1 font-mono font-semibold text-ink">
         {run.skill}
       </span>
       <span>run {run.ranOn} · {run.findings.length} findings, all of them removals</span>
@@ -26,7 +26,7 @@ const hidden = run.findings.length - findings.length;
   <ul>
     {findings.map((finding) => (
       <li class="border-b border-rule px-4 py-3">
-        <p class="text-[15px] leading-snug font-semibold text-ink">{finding.remove}</p>
+        <p class="text-base leading-snug font-semibold text-ink">{finding.remove}</p>
         <p class="mt-1 text-[13px] leading-relaxed font-medium text-ink-soft">{finding.because}</p>
       </li>
     ))}

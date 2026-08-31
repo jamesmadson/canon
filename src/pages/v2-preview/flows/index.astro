@@ -109,7 +109,7 @@ const FLOWS = [
   description="Every flow in the scripted Canon v2 preview, as a numbered sequence of links: first run, create, import, review, feedback."
 >
   <h1 class="text-xl font-bold tracking-tight">Flow map</h1>
-  <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+  <p class="mt-2 max-w-2xl text-base leading-relaxed font-medium text-ink-soft">
     Every screen in the {PROJECT.name} preview, grouped into the {spellNumber(FLOWS.length)} paths
     worth walking. Each step is a link to the screen it names, so this page doubles as the script
     for showing somebody&nbsp;around.
@@ -123,7 +123,7 @@ const FLOWS = [
     {FLOWS.map((flow, flowIndex) => (
       <section aria-labelledby={`${flow.id}-heading`}>
         <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h2 id={`${flow.id}-heading`} class="text-[15px] font-semibold tracking-tight text-ink">
+          <h2 id={`${flow.id}-heading`} class="text-base font-semibold tracking-tight text-ink">
             <span class="text-ink-soft tabular-nums">{flowIndex + 1}.</span> {flow.name}
           </h2>
           <p class="text-[11px] font-medium text-ink-soft tabular-nums">{flow.steps.length} screens</p>
@@ -141,11 +141,11 @@ const FLOWS = [
               >
                 <span
                   aria-hidden="true"
-                  class="flex size-6 shrink-0 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink-soft tabular-nums"
+                  class="flex size-6 shrink-0 items-center justify-center rounded-full bg-recess text-[11px] font-semibold text-ink-soft tabular-nums"
                 >
                   {i + 1}
                 </span>
-                <span class="text-[15px] font-semibold text-ink underline decoration-rule-strong underline-offset-4">
+                <span class="text-base font-semibold text-ink underline decoration-rule-strong underline-offset-4">
                   {step.label}
                 </span>
                 <span class="ml-auto font-mono text-[11px] break-all text-ink-soft">

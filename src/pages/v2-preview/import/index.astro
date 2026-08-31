@@ -17,7 +17,7 @@ import { PROJECT } from '../../../data/v2Preview';
   </a>
 
   <h1 class="mt-2 text-xl font-bold tracking-tight">Connect a source</h1>
-  <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+  <p class="mt-2 max-w-2xl text-base leading-relaxed font-medium text-ink-soft">
     {PROJECT.name} already reads <span class="font-mono text-[13px]">{PROJECT.repo}</span> and one
     Figma file. A project can hold more than one of each — a second repository joins the same
     grid, marked with where it came from.
@@ -25,12 +25,12 @@ import { PROJECT } from '../../../data/v2Preview';
 
   <div class="mt-6 max-w-xl">
     <div class="rounded-md border border-rule bg-surface/50 px-4 py-3">
-      <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Connected as</p>
+      <p class="label">Connected as</p>
       <p class="mt-1 font-mono text-[13px] text-ink">{PROJECT.handle} · via your sign-in</p>
     </div>
 
     <label class="mt-4 block">
-      <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Repository</span>
+      <span class="label">Repository</span>
       <input
         type="text"
         value={PROJECT.secondRepo}

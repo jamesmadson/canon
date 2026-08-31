@@ -7,17 +7,28 @@ import { spellNumber } from '../lib/spellNumber';
 interface Props {
   title: string;
   description?: string;
+  /**
+   * Put the whole page inside the app scope rather than a slab within it.
+   * The v2 preview routes carry their own shell, so this is for the one page
+   * that is the app without being a screen of it: /alpha.
+   */
+  app?: boolean;
 }
 
 const {
   title,
   description = 'A curated gallery of design and design-engineering skills for AI agents.',
+  app = false,
 } = Astro.props;
 
 // Derived, not written down: hiding a skill must not leave the footer
 // claiming a count the gallery no longer shows.
 const publishedSkills = await getCollection('skills', ({ data }) => data.status === 'active');
 const skillCount = spellNumber(publishedSkills.length);
+
+// The app's face is only worth a preload on a page that draws it. The gallery
+// never asks for Public Sans, so it should not pay for it.
+const appFace = app || Astro.url.pathname.includes('/v2-preview');
 ---
 
 <!doctype html>
@@ -37,6 +48,9 @@ const skillCount = spellNumber(publishedSkills.length);
     <meta name="twitter:description" content={description} />
     <meta name="theme-color" content="#ffffff" />
     <link rel="preload" href={withBase('/fonts/archivo/Archivo-400.woff2')} as="font" type="font/woff2" crossorigin />
+    {appFace && (
+      <link rel="preload" href={withBase('/fonts/public-sans/PublicSans-Variable.woff2')} as="font" type="font/woff2" crossorigin />
+    )}
     {/* The app's theme choice, applied before the first paint so the shell is
         never drawn light and then repainted dark. It sets one attribute on the
         root; the dark tokens are scoped to the app shell, so this is inert on
@@ -51,7 +65,7 @@ const skillCount = spellNumber(publishedSkills.length);
       }
     </script>
   </head>
-  <body class="bg-bg font-sans font-medium text-ink antialiased">
+  <body data-app-shell={app ? '' : undefined} class="bg-bg font-sans font-medium text-ink antialiased">
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:border focus:border-rule-strong focus:bg-bg focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-ink"

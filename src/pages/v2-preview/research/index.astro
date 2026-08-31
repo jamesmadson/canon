@@ -35,14 +35,14 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
   <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
     <div class="min-w-0">
       <h1 class="text-2xl font-bold tracking-tight">The record</h1>
-      <p class="mt-1 text-[15px] font-medium text-ink-soft">
+      <p class="mt-1 text-base font-medium text-ink-soft">
         Everything anyone has said about {PROJECT.name}, one entry at a time.
       </p>
     </div>
     <a href={withBase('/v2-preview/research/report/')} class="btn btn-quiet">Open the report</a>
   </div>
 
-  <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+  <p class="mt-3 max-w-2xl text-base leading-relaxed font-medium text-ink-soft">
     An entry is three lines: the words a person used, your reading of them marked as yours, and
     whatever was decided — which for most entries is nothing, and the record says so rather than
     tidying it away. People are pseudonyms; the mapping never enters the&nbsp;record.
@@ -57,7 +57,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
         { label: 'Decisions', value: String(decisions), note: 'Everything else is open' },
       ].map((stat) => (
         <div class="flex flex-col gap-1 border-r border-b border-rule bg-bg px-4 py-3">
-          <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+          <dt class="label">
             {stat.label}
           </dt>
           <dd class="text-2xl leading-none font-semibold tracking-tight text-ink tabular-nums">
@@ -70,7 +70,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
   </div>
 
   <p class="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 border-t border-rule pt-4 text-[13px] font-medium text-ink-soft">
-    <span class="text-[11px] font-semibold uppercase tracking-wide text-ink">Evidence strength</span>
+    <span class="label text-ink">Evidence strength</span>
     <span class="tabular-nums">{STRENGTH_SCALE}</span>
   </p>
   <p class="mt-1 max-w-2xl text-[11px] leading-relaxed font-medium text-ink-soft">
@@ -79,7 +79,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
   </p>
 
   <section class="mt-8" aria-labelledby="intake-heading">
-    <h2 id="intake-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+    <h2 id="intake-heading" class="mb-3 label">
       Add to the record
     </h2>
 
@@ -91,7 +91,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
             data-intake-paste
             class="flex min-h-11 w-full flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-rule-strong bg-surface/25 px-4 py-10 text-center transition-colors duration-[120ms] hover:bg-surface/50 hover:border-ink active:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
           >
-            <span class="text-[15px] font-semibold text-ink">Paste a transcript, or drop a file</span>
+            <span class="text-base font-semibold text-ink">Paste a transcript, or drop a file</span>
             <span class="max-w-md text-[13px] leading-relaxed font-medium text-ink-soft">
               Canon splits it into entries and drafts the Meant line. Nothing is filed until you
               confirm&nbsp;it.
@@ -104,12 +104,12 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
       </div>
 
       <div data-intake-step="draft" hidden>
-        <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+        <p class="border-b border-rule bg-surface/50 px-4 py-2 label">
           Drafted — not filed yet
         </p>
         <div class="bg-bg px-4 py-4">
           <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[11px] font-medium text-ink-soft tabular-nums">
-            <span class="rounded-sm border border-rule-strong px-2 py-1 font-mono font-semibold text-ink">
+            <span class="rounded-full bg-recess px-2 py-1 font-mono font-semibold text-ink">
               {DRAFT_ENTRY.speaker}
             </span>
             <time datetime={DRAFT_ENTRY.date}>{DRAFT_ENTRY.date}</time>
@@ -118,13 +118,13 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
           <p class="mt-2 text-[13px] font-semibold text-ink">{DRAFT_ENTRY.theme}</p>
           <dl class="mt-3 flex flex-col gap-3">
             <div>
-              <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Said</dt>
-              <dd class="mt-1 border-l border-rule-strong pl-3 text-[15px] leading-relaxed font-medium text-ink">
+              <dt class="label">Said</dt>
+              <dd class="mt-1 border-l border-rule-strong pl-3 text-base leading-relaxed font-medium text-ink">
                 “{DRAFT_ENTRY.said}”
               </dd>
             </div>
             <div>
-              <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+              <dt class="label">
                 Meant <span class="font-medium normal-case">— unverified, drafted for you</span>
               </dt>
               <dd class="mt-1 border-l border-rule pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
@@ -132,7 +132,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
               </dd>
             </div>
             <div>
-              <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Decided</dt>
+              <dt class="label">Decided</dt>
               <dd class="mt-1 border-l border-rule pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
                 — Nothing yet, and drafting one would be putting words in your mouth.
               </dd>
@@ -146,11 +146,11 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
       </div>
 
       <div data-intake-step="filed" hidden>
-        <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+        <p class="border-b border-rule bg-surface/50 px-4 py-2 label">
           Filed
         </p>
         <div class="bg-bg px-4 py-4">
-          <p class="text-[15px] leading-relaxed font-medium text-ink">
+          <p class="text-base leading-relaxed font-medium text-ink">
             Filed as <span class="font-mono text-[13px]">{DRAFT_ENTRY.date}-02</span>, attributed to{' '}
             <span class="font-mono text-[13px]">{DRAFT_ENTRY.speaker}</span>, with your name on the
             Meant line.
@@ -170,7 +170,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
 
   <section class="mt-8" aria-labelledby="entries-heading">
     <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <h2 id="entries-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+      <h2 id="entries-heading" class="label">
         Entries
       </h2>
       <p class="text-[11px] font-medium text-ink-soft tabular-nums">

@@ -41,7 +41,7 @@ const SKILLS = [
 
   <div class="mt-6 max-w-xl">
     <fieldset>
-      <legend class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Skill</legend>
+      <legend class="label">Skill</legend>
       <div class="mt-2 flex flex-col gap-2">
         {SKILLS.map((skill) => (
           <div
@@ -69,7 +69,7 @@ const SKILLS = [
                   {skill.name}
                 </span>
                 {skill.state === 'soon' && (
-                  <span class="rounded-sm border border-rule-strong px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                  <span class="rounded-full bg-recess px-2 py-1 label">
                     Soon
                   </span>
                 )}
@@ -84,7 +84,7 @@ const SKILLS = [
     </fieldset>
 
     <div class="mt-6 overflow-hidden rounded-md border border-rule">
-      <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+      <p class="border-b border-rule bg-surface/50 px-4 py-2 label">
         Runs against
       </p>
       <p class="bg-bg px-4 py-3 font-mono text-[13px] break-all text-ink">{SCRIPTED_RUN.target}</p>

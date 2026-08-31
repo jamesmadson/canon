@@ -66,12 +66,12 @@ const RECORD_LINKS = [
   <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
     <div class="min-w-0">
       <h1 class="text-2xl font-bold tracking-tight">{PROJECT.name}</h1>
-      <p class="mt-1 text-[15px] font-medium text-ink-soft">{PROJECT.tagline}</p>
+      <p class="mt-1 text-base font-medium text-ink-soft">{PROJECT.tagline}</p>
     </div>
     <a href={withBase('/v2-preview/new/')} class="btn btn-primary">New prototype</a>
   </div>
 
-  <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+  <p class="mt-3 max-w-2xl text-base leading-relaxed font-medium text-ink-soft">
     {PROJECT.blurb}
   </p>
 
@@ -79,7 +79,7 @@ const RECORD_LINKS = [
     <dl class="-mr-px -mb-px grid grid-cols-2 lg:grid-cols-4">
       {STATS.map((stat) => (
         <div class="flex flex-col gap-1 border-r border-b border-rule bg-bg px-4 py-3">
-          <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+          <dt class="label">
             {stat.label}
           </dt>
           <dd class="text-2xl leading-none font-semibold tracking-tight text-ink tabular-nums">
@@ -94,19 +94,19 @@ const RECORD_LINKS = [
   <div class="mt-6 flex flex-col gap-2 border-t border-rule pt-4 sm:flex-row sm:items-start sm:gap-8">
     <dl class="flex flex-col gap-2 text-[13px] font-medium sm:flex-row sm:gap-8">
       <div>
-        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Repository</dt>
+        <dt class="label">Repository</dt>
         <dd class="mt-1 font-mono break-all text-ink">{PROJECT.repo}</dd>
       </div>
       <div>
-        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Figma file</dt>
+        <dt class="label">Figma file</dt>
         <dd class="mt-1 text-ink">{PROJECT.figmaFile}</dd>
       </div>
       <div>
-        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Access</dt>
+        <dt class="label">Access</dt>
         <dd class="mt-1 text-ink">Read-only</dd>
       </div>
       <div>
-        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">People</dt>
+        <dt class="label">People</dt>
         <dd class="mt-1 text-ink tabular-nums">
           <a
             href={withBase('/v2-preview/members/')}
@@ -127,7 +127,7 @@ const RECORD_LINKS = [
 
   <section class="mt-8 scroll-mt-6" id="prototypes" aria-labelledby="prototypes-heading">
     <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <h2 id="prototypes-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+      <h2 id="prototypes-heading" class="label">
         Prototypes
       </h2>
       <p class="text-[11px] font-medium text-ink-soft tabular-nums">
@@ -164,7 +164,7 @@ const RECORD_LINKS = [
 
   <section class="mt-8" aria-labelledby="record-heading">
     <div class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <h2 id="record-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+      <h2 id="record-heading" class="label">
         The record
       </h2>
       <p class="text-[11px] font-medium text-ink-soft tabular-nums">
@@ -179,7 +179,7 @@ const RECORD_LINKS = [
             href={withBase(link.href)}
             class="group flex flex-col gap-1 border-r border-b border-rule bg-bg px-4 py-4 transition-colors duration-[120ms] hover:border-rule-strong hover:bg-surface/30 active:bg-surface/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
           >
-            <span class="text-[15px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors group-hover:decoration-ink">
+            <span class="text-base font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors group-hover:decoration-ink">
               {link.label}
             </span>
             <span class="text-[13px] leading-relaxed font-medium text-ink-soft">{link.line}</span>

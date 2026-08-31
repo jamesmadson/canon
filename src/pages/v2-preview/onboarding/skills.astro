@@ -49,9 +49,9 @@ const SKILLS = [
             <p class="mt-1 text-[13px] leading-snug font-medium text-ink-soft">{skill.line}</p>
           </div>
           {skill.state === 'on' ? (
-            <span class="shrink-0 rounded-sm bg-ink px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-bg">On</span>
+            <span class="shrink-0 rounded-sm bg-ink px-2 py-1 label text-bg">On</span>
           ) : (
-            <span class="shrink-0 rounded-sm border border-rule-strong px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Soon</span>
+            <span class="shrink-0 rounded-full bg-recess px-2 py-1 label">Soon</span>
           )}
         </div>
       ))}

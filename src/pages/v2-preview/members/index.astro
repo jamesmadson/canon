@@ -23,21 +23,21 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
   <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
     <div class="min-w-0">
       <h1 class="text-2xl font-bold tracking-tight">Members</h1>
-      <p class="mt-1 text-[15px] font-medium text-ink-soft tabular-nums">
+      <p class="mt-1 text-base font-medium text-ink-soft tabular-nums">
         {MEMBERS.length} people on {PROJECT.name}
       </p>
     </div>
     <a href={withBase('/v2-preview/members/#invite')} class="btn btn-primary">Invite with a link</a>
   </div>
 
-  <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+  <p class="mt-3 max-w-2xl text-base leading-relaxed font-medium text-ink-soft">
     {spellNumber(designers).charAt(0).toUpperCase() + spellNumber(designers).slice(1)} designers,
     one engineer, one PM. Everybody signs in with their own account, and the project is a list of
     those accounts — teams, billing and roles that mean something come&nbsp;later.
   </p>
 
   <section class="mt-6" aria-labelledby="people-heading">
-    <h2 id="people-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+    <h2 id="people-heading" class="mb-3 label">
       People
     </h2>
 
@@ -47,15 +47,15 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
           <li class="flex flex-wrap items-start gap-x-3 gap-y-2 border-b border-rule bg-bg px-4 py-4">
             <span
               aria-hidden="true"
-              class="flex size-8 shrink-0 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink"
+              class="flex size-8 shrink-0 items-center justify-center rounded-full bg-recess text-[11px] font-semibold text-ink"
             >
               {member.initials}
             </span>
             <span class="min-w-0 flex-1">
               <span class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <span class="text-[15px] font-semibold text-ink">{member.name}</span>
+                <span class="text-base font-semibold text-ink">{member.name}</span>
                 {member.you && (
-                  <span class="rounded-sm border border-rule px-2 py-1 text-[11px] font-semibold text-ink-soft">
+                  <span class="rounded-full bg-recess px-2 py-1 text-[11px] font-semibold text-ink-soft">
                     You
                   </span>
                 )}
@@ -66,7 +66,7 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
               </span>
               {member.buddy && (
                 <span class="mt-2 flex flex-wrap items-center gap-2">
-                  <span class="rounded-sm border border-rule-strong px-2 py-1 text-[11px] font-semibold text-ink">
+                  <span class="rounded-full bg-recess px-2 py-1 text-[11px] font-semibold text-ink">
                     Engineering buddy
                   </span>
                   <span class="text-[11px] font-medium text-ink-soft tabular-nums">
@@ -75,7 +75,7 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
                 </span>
               )}
             </span>
-            <span class="ml-auto rounded-sm border border-rule px-2 py-1 text-[11px] font-semibold whitespace-nowrap text-ink-soft">
+            <span class="ml-auto rounded-full bg-recess px-2 py-1 text-[11px] font-semibold whitespace-nowrap text-ink-soft">
               {member.role}
             </span>
           </li>
@@ -92,12 +92,12 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
   </section>
 
   <section class="mt-8 scroll-mt-6" id="invite" aria-labelledby="invite-heading">
-    <h2 id="invite-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+    <h2 id="invite-heading" class="mb-3 label">
       Invite with a link
     </h2>
 
     <div class="overflow-hidden rounded-md border border-rule">
-      <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+      <p class="border-b border-rule bg-surface/50 px-4 py-2 label">
         Anyone with this link can join {PROJECT.name}
       </p>
       <p class="bg-bg px-4 py-3 font-mono text-[13px] break-all text-ink">{inviteLink}</p>

@@ -42,6 +42,30 @@
   font-display: swap;
 }
 
+/* The app's two faces. Public Sans ships as one variable file covering the
+   whole axis, so the 200 used for display and the 400 used for body are the
+   same download. IBM Plex Mono is two static cuts — 400 for data, 500 for the
+   silkscreened control labels. These are declared for everyone but only ever
+   asked for inside the app scope below, so the gallery keeps Archivo. */
+@font-face {
+  font-family: "Public Sans";
+  font-weight: 100 900;
+  src: url("/canon/fonts/public-sans/PublicSans-Variable.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-weight: 400;
+  src: url("/canon/fonts/ibm-plex-mono/IBMPlexMono-400.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-weight: 500;
+  src: url("/canon/fonts/ibm-plex-mono/IBMPlexMono-500.woff2") format("woff2");
+  font-display: swap;
+}
+
 @theme {
   --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
@@ -52,11 +76,69 @@
   --color-rule: oklch(85% 0.005 210);
   --color-rule-strong: oklch(66% 0.005 210);
 
+  /* App-only families and fills. Declared here so Tailwind emits bg-ground,
+     bg-panel and bg-recess as utilities; no gallery page asks for one, so
+     adding them changes nothing outside the product. */
+  --font-app: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-app-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-ground: #eeede9;
+  --color-panel: #fafaf8;
+  --color-recess: #e4e2dc;
+
   /* Deliberately small. Enough to take the wireframe edge off a 1px border,
      not enough to read as a "card UI". Concentric rule: inner = outer − padding. */
   --radius-sm: 3px;
   --radius-md: 5px;
   --radius-lg: 8px;
+}
+
+/* ── The app palette ──────────────────────────────────────────────────────
+   Everything the product needs is redefined on the app scope rather than on
+   :root, so the gallery renders from the same stylesheet and the same tokens
+   and comes out exactly as it did before.
+
+   Three of these are remaps rather than new names — radius, weight, family —
+   and they work because Tailwind's utilities resolve their variable at the
+   point of use. `rounded-md` inside the shell reads the shell's --radius-md.
+   That is what keeps the diff a restyle: the markup keeps saying rounded-md
+   and font-medium, and the scope decides what those mean.
+
+   No hue anywhere. The neutrals carry a faint warm bias, which is the one
+   opinion in the palette — it is why the grey reads as chosen rather than
+   defaulted. Colour lives only inside RamsMark and MeshPanel. */
+[data-app-shell] {
+  font-family: var(--font-app);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+
+  --font-sans: var(--font-app);
+  --font-mono: var(--font-app-mono);
+
+  --color-ground: #eeede9;
+  --color-panel: #fafaf8;
+  --color-recess: #e4e2dc;
+  --color-bg: #eeede9;
+  --color-surface: #e4e2dc;
+  --color-rule: #d8d6d0;
+  --color-ink-soft: #6e6b64;
+  --color-ink: #1a1815;
+  /* Not a seventh colour: the hairline, carried toward the ink far enough to
+     read as a deliberate divider where a section genuinely needs one. */
+  --color-rule-strong: color-mix(in oklab, var(--color-rule) 55%, var(--color-ink-soft));
+
+  /* 9 / 11 / 14. Concentric rule holds: inner = outer − padding. */
+  --radius-sm: 9px;
+  --radius-md: 11px;
+  --radius-lg: 14px;
+
+  /* Public Sans at 200 for display and 400 for body, with one step of
+     emphasis between. The old 600/700 markup keeps its class names and lands
+     on the new ladder. */
+  --font-weight-normal: 400;
+  --font-weight-medium: 400;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 500;
 }
 
 /* Dark mode, and only inside the app.
@@ -72,23 +154,27 @@
    into the other — an explicit Light has to win over a dark OS. */
 [data-app-theme="dark"] [data-app-shell] {
   color-scheme: dark;
-  --color-bg: oklch(18% 0 0);
-  --color-ink: oklch(96% 0 0);
-  --color-ink-soft: oklch(74% 0 0);
-  --color-surface: oklch(27% 0 0);
-  --color-rule: oklch(33% 0 0);
-  --color-rule-strong: oklch(55% 0 0);
+  --color-ground: #191817;
+  --color-panel: #232120;
+  --color-recess: #2e2b29;
+  --color-bg: #191817;
+  --color-surface: #2e2b29;
+  --color-rule: #35322f;
+  --color-ink-soft: #9a968d;
+  --color-ink: #edebe6;
 }
 
 @media (prefers-color-scheme: dark) {
   [data-app-theme="system"] [data-app-shell] {
     color-scheme: dark;
-    --color-bg: oklch(18% 0 0);
-    --color-ink: oklch(96% 0 0);
-    --color-ink-soft: oklch(74% 0 0);
-    --color-surface: oklch(27% 0 0);
-    --color-rule: oklch(33% 0 0);
-    --color-rule-strong: oklch(55% 0 0);
+    --color-ground: #191817;
+    --color-panel: #232120;
+    --color-recess: #2e2b29;
+    --color-bg: #191817;
+    --color-surface: #2e2b29;
+    --color-rule: #35322f;
+    --color-ink-soft: #9a968d;
+    --color-ink: #edebe6;
   }
 }
 
@@ -132,53 +218,102 @@ summary,
   cursor: pointer;
 }
 
-/* Two button shapes, and only two. Primary is an ink fill; quiet is a border.
-   One height, one radius, one horizontal padding — written here rather than
-   spelled out per screen so a third variant cannot quietly appear. */
+/* Two shapes, four values. Pill for the two that carry a decision, rounded
+   rect for the two that carry a tool. No borders on any of them — the fill is
+   the control. One height, one press, one focus ring, written here rather than
+   spelled out per screen so a fifth variant cannot quietly appear.
+
+   The house rule that goes with this ladder is not enforceable in CSS: at most
+   one primary per view. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 44px;
   padding-inline: 20px;
-  border-radius: var(--radius-md);
-  border: 1px solid transparent;
+  border: 0;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   text-align: center;
   transition:
     background-color 120ms ease,
-    border-color 120ms ease,
     color 120ms ease,
     transform 120ms ease;
 }
 .btn:focus-visible {
   outline: 2px solid var(--color-ink);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 .btn:active {
-  transform: scale(0.99);
+  transform: scale(0.96);
 }
 
 .btn-primary {
+  border-radius: 999px;
   background-color: var(--color-ink);
-  border-color: var(--color-ink);
-  color: var(--color-bg);
+  color: var(--color-ground);
 }
 .btn-primary:hover {
-  background-color: color-mix(in oklab, var(--color-ink) 88%, var(--color-bg));
-  border-color: color-mix(in oklab, var(--color-ink) 88%, var(--color-bg));
+  background-color: color-mix(in oklab, var(--color-ink) 86%, var(--color-ground));
+}
+
+.btn-secondary {
+  border-radius: 999px;
+  background-color: var(--color-recess);
+  color: var(--color-ink);
+}
+.btn-secondary:hover {
+  background-color: color-mix(in oklab, var(--color-recess) 80%, var(--color-ink));
+}
+
+.btn-utility {
+  border-radius: 9px;
+  background-color: var(--color-recess);
+  color: var(--color-ink);
+}
+.btn-utility:hover {
+  background-color: color-mix(in oklab, var(--color-recess) 80%, var(--color-ink));
 }
 
 .btn-quiet {
-  background-color: var(--color-bg);
-  border-color: var(--color-rule-strong);
-  color: var(--color-ink);
+  border-radius: 9px;
+  background-color: transparent;
+  color: var(--color-ink-soft);
 }
 .btn-quiet:hover {
-  background-color: var(--color-surface);
-  border-color: var(--color-ink);
+  background-color: color-mix(in oklab, var(--color-recess) 55%, transparent);
+  color: var(--color-ink);
+}
+
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  color: var(--color-ink-soft);
+  background-color: var(--color-recess);
+  cursor: default;
+}
+
+/* One field shape. The recess fill defines the edge, so there is no border to
+   thicken on focus — the ring does that job on its own. */
+.field {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding-inline: 14px;
+  border: 0;
+  border-radius: 9px;
+  background-color: var(--color-recess);
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.field::placeholder {
+  color: var(--color-ink-soft);
+}
+.field:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -187,5 +322,44 @@ summary,
   }
   .btn:active {
     transform: none;
+  }
+}
+
+/* Silkscreened control labels: the eyebrows, the dt in a definition list, the
+   caption over a group. Mono, small, wide, and never a sentence. In the
+   components layer so a text-ink on the markup can still win. */
+@layer components {
+  .label {
+    font-family: var(--font-app-mono);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Display sizes. Weight 200 only lives up here — at 28px and above the thin
+     axis has enough stem to hold, and below it the body weight takes over. */
+  .display {
+    font-size: 30px;
+    font-weight: 200;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .display-lg {
+    font-size: 34px;
+    font-weight: 200;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  @media (min-width: 640px) {
+    .display {
+      font-size: 34px;
+    }
+    .display-lg {
+      font-size: 46px;
+    }
   }
 }

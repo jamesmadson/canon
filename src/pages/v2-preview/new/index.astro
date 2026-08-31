@@ -39,7 +39,7 @@ const SOURCES = [
   </a>
 
   <h1 class="mt-2 text-xl font-bold tracking-tight">New prototype</h1>
-  <p class="mt-2 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+  <p class="mt-2 max-w-2xl text-base leading-relaxed font-medium text-ink-soft">
     A prototype is a version of a screen, kept where it already lives. Name it,
     then say where it comes from — Canon opens a branch for it, or points at a
     frame you already have.
@@ -47,17 +47,17 @@ const SOURCES = [
 
   <div class="mt-6 max-w-xl">
     <label class="block">
-      <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Name</span>
+      <span class="label">Name</span>
       <input
         type="text"
         value={NEW_PROTOTYPE.name}
         readonly
-        class="mt-2 h-11 w-full rounded-md border bg-bg px-3 text-[15px] font-medium focus-visible:outline-2 focus-visible:outline-ink border-rule-strong text-ink"
+        class="mt-2 h-11 w-full rounded-md border bg-bg px-3 text-base font-medium focus-visible:outline-2 focus-visible:outline-ink border-rule-strong text-ink"
       />
     </label>
 
     <fieldset class="mt-6">
-      <legend class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Source</legend>
+      <legend class="label">Source</legend>
       <div class="mt-2 flex flex-col gap-2">
         {SOURCES.map((source) => (
           <div
@@ -85,7 +85,7 @@ const SOURCES = [
     </fieldset>
 
     <label class="mt-6 block">
-      <span class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+      <span class="label">
         Base branch
       </span>
       <input

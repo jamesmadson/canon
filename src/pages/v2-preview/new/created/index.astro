@@ -25,11 +25,11 @@ const NEXT = [
   description="A scripted preview of Canon v2 confirming a new prototype: the branch it opened, and the two ways to give it something to show."
   active="prototypes"
 >
-  <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">New prototype</p>
+  <p class="label">New prototype</p>
   <h1 class="mt-1 text-xl font-bold tracking-tight">{NEW_PROTOTYPE.name} is ready</h1>
 
   <div class="mt-6 max-w-xl rounded-md border border-rule bg-surface/40 px-4 py-3">
-    <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Branch created</p>
+    <p class="label">Branch created</p>
     <p class="mt-1 font-mono text-[13px] break-all text-ink">{NEW_PROTOTYPE.branch}</p>
     <p class="mt-1 text-[13px] leading-relaxed font-medium text-ink-soft">
       Opened from <span class="font-mono">{NEW_PROTOTYPE.baseBranch}</span> on{' '}
@@ -39,14 +39,14 @@ const NEXT = [
   </div>
 
   <section class="mt-8 max-w-xl" aria-labelledby="next-heading">
-    <h2 id="next-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+    <h2 id="next-heading" class="mb-3 label">
       What happens next
     </h2>
     <div class="overflow-hidden rounded-md border border-rule">
       <div class="-mb-px">
         {NEXT.map((step) => (
           <div class="border-b border-rule bg-bg px-4 py-3">
-            <p class="text-[15px] font-semibold text-ink">{step.title}</p>
+            <p class="text-base font-semibold text-ink">{step.title}</p>
             <p class="mt-1 text-[13px] leading-relaxed font-medium text-ink-soft">{step.detail}</p>
           </div>
         ))}

@@ -31,7 +31,7 @@ const THEMES = [
     <span class="hidden sm:inline">{PROJECT.viewer.name}</span>
     <span
       aria-hidden="true"
-      class="flex size-8 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink"
+      class="flex size-8 items-center justify-center rounded-full bg-recess text-[11px] font-semibold text-ink"
     >
       {PROJECT.viewer.initials}
     </span>
@@ -44,12 +44,12 @@ const THEMES = [
     class="absolute right-0 z-20 mt-1 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border border-rule-strong bg-bg"
   >
     <div class="border-b border-rule px-3 py-3">
-      <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Signed in as</p>
+      <p class="label">Signed in as</p>
       <p class="mt-1 font-mono text-[13px] break-all text-ink">{PROJECT.account}</p>
     </div>
 
     <div class="border-b border-rule px-3 py-3">
-      <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft" id="theme-label">
+      <p class="label" id="theme-label">
         Theme
       </p>
       <div
