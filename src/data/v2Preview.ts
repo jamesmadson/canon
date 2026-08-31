@@ -569,6 +569,67 @@ export const DRAFT_ENTRY = {
 };
 
 /**
+ * The people on the project. All invented, like everything else here.
+ *
+ * One of them is the engineering buddy: the person a prototype is handed to
+ * when it graduates. Naming one is the whole feature — a handoff addressed to
+ * a team is a handoff addressed to nobody.
+ */
+export interface Member {
+  name: string;
+  initials: string;
+  role: 'Design' | 'Engineering' | 'PM';
+  handle: string;
+  line: string;
+  /** The one person prototypes get handed to. */
+  buddy?: boolean;
+  /** The signed-in viewer. */
+  you?: boolean;
+}
+
+export const MEMBERS: Member[] = [
+  {
+    name: PROJECT.viewer.name,
+    initials: PROJECT.viewer.initials,
+    role: 'Design',
+    handle: PROJECT.handle,
+    line: 'Connected the repository and the Figma file. Keeps the record.',
+    you: true,
+  },
+  {
+    name: 'Ruth Vantine',
+    initials: 'RV',
+    role: 'Design',
+    handle: '@ruth-fernlabs',
+    line: 'Streaks and the week view. Runs most of the sessions.',
+  },
+  {
+    name: 'Piet Halvorsen',
+    initials: 'PH',
+    role: 'Engineering',
+    handle: '@piet-fernlabs',
+    line: 'Builds what graduates. Opens the PR and says what it will cost.',
+    buddy: true,
+  },
+  {
+    name: 'Noor Ekelund',
+    initials: 'NE',
+    role: 'Design',
+    handle: '@noor-fernlabs',
+    line: 'Onboarding concepts, in Figma. Not in the repository yet.',
+  },
+  {
+    name: 'Marit Loveday',
+    initials: 'ML',
+    role: 'PM',
+    handle: '@marit-fernlabs',
+    line: 'Decides what a pattern is worth. Writes the Decided lines.',
+  },
+];
+
+export const ENGINEERING_BUDDY = MEMBERS.find((m) => m.buddy)!;
+
+/**
  * Comments anchored to a running build.
  *
  * A pin is a point on the screen as it runs, not a point on a picture of it —

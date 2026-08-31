@@ -8,10 +8,10 @@ import { PROJECT } from '../data/v2Preview';
  * The platform chrome the v2 preview lives inside: a slim top bar, a left
  * sidebar, and one content well.
  *
- * The two sections that exist in the preview are links; the two that don't are
- * rows that say so. A disabled row that looks clickable would be the one lie
- * this preview cannot afford — the whole page is an argument that the product
- * shows you what is actually there.
+ * Every row in the sidebar is a section that exists and a link that goes to it.
+ * A disabled row that looks clickable would be the one lie this preview cannot
+ * afford — the whole page is an argument that the product shows you what is
+ * actually there — so a section either ships or is not in the list.
  */
 interface Props {
   title: string;
@@ -21,7 +21,7 @@ interface Props {
    * the product rather than inside a section — the flow map, for one — where
    * marking a row current would point at a page you are not on.
    */
-  active?: 'overview' | 'prototypes' | 'research';
+  active?: 'overview' | 'prototypes' | 'research' | 'members';
 }
 
 const { title, description, active } = Astro.props;
@@ -30,9 +30,8 @@ const NAV = [
   { id: 'overview', label: 'Overview', href: '/v2-preview/' },
   { id: 'prototypes', label: 'Prototypes', href: '/v2-preview/#prototypes' },
   { id: 'research', label: 'Research', href: '/v2-preview/research/' },
+  { id: 'members', label: 'Members', href: '/v2-preview/members/' },
 ] as const;
-
-const SOON = ['Members'];
 
 // One row height and one row shape for every sidebar entry, so the two live
 // sections and the two that only say what they would be sit on the same grid.
@@ -90,20 +89,6 @@ const rowBase =
               >
                 {item.label}
               </a>
-            </li>
-          ))}
-          {SOON.map((item) => (
-            <li class="md:w-full">
-              <span
-                aria-disabled="true"
-                class:list={[
-                  rowBase,
-                  'cursor-default flex-wrap gap-x-2 text-ink-soft/70 md:justify-between',
-                ]}
-              >
-                {item}
-                <span class="text-[11px] font-medium whitespace-nowrap">in the full product</span>
-              </span>
             </li>
           ))}
         </ul>
