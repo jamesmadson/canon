@@ -5,7 +5,7 @@ import FeedbackEntryCard from '../../components/FeedbackEntryCard.astro';
 import ReviewRunCard from '../../components/ReviewRunCard.astro';
 import ScriptedCopyButton from '../../components/ScriptedCopyButton.astro';
 import { withBase } from '../../lib/withBase';
-import { daysIdle, idleLabel, isStale } from '../../lib/staleness';
+import { idleLabel, isStale, staleLabel, updatedLabel } from '../../lib/staleness';
 import {
   annotationsFor,
   ENGINEERING_BUDDY,
@@ -26,7 +26,6 @@ export function getStaticPaths() {
 const { prototype } = Astro.props;
 const record = RECORDS[prototype.slug];
 const stale = isStale(prototype.lastActivity, PREVIEW_AS_OF);
-const idle = daysIdle(prototype.lastActivity, PREVIEW_AS_OF);
 const source = sourceLine(prototype);
 const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
 const pins = annotationsFor(prototype.slug);
@@ -48,7 +47,7 @@ const pins = annotationsFor(prototype.slug);
     <h1 class="text-2xl font-bold tracking-tight">{prototype.name}</h1>
     {stale && (
       <span class="rounded-sm border border-rule-strong px-2 py-1 text-[11px] font-semibold tracking-wide text-ink tabular-nums">
-        Idle {idle} days
+        {staleLabel(prototype.lastActivity, PREVIEW_AS_OF)}
       </span>
     )}
   </div>
@@ -286,7 +285,7 @@ const pins = annotationsFor(prototype.slug);
               {other.name}
             </span>
             <span class="text-[11px] font-medium text-ink-soft tabular-nums">
-              {other.author} · {idleLabel(other.lastActivity, PREVIEW_AS_OF)}
+              {other.author} · {updatedLabel(other.lastActivity, PREVIEW_AS_OF)}
             </span>
           </a>
         ))}

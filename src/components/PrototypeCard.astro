@@ -1,7 +1,7 @@
 ---
 import ScreenArt from './ScreenArt.astro';
 import { withBase } from '../lib/withBase';
-import { daysIdle, idleLabel, isStale } from '../lib/staleness';
+import { isStale, staleLabel, updatedLabel } from '../lib/staleness';
 import { PREVIEW_AS_OF, sourceLine, type Prototype } from '../data/v2Preview';
 
 interface Props {
@@ -10,7 +10,6 @@ interface Props {
 
 const { prototype } = Astro.props;
 const stale = isStale(prototype.lastActivity, PREVIEW_AS_OF);
-const idle = daysIdle(prototype.lastActivity, PREVIEW_AS_OF);
 const source = sourceLine(prototype);
 ---
 
@@ -42,7 +41,7 @@ const source = sourceLine(prototype);
       </span>
       {stale && (
         <span class="rounded-sm border border-rule-strong px-2 py-1 text-[11px] font-semibold tracking-wide text-ink tabular-nums">
-          Idle {idle} days
+          {staleLabel(prototype.lastActivity, PREVIEW_AS_OF)}
         </span>
       )}
     </span>
@@ -57,7 +56,7 @@ const source = sourceLine(prototype);
     </span>
 
     <span class="mt-auto block pt-1 text-[11px] font-medium text-ink-soft tabular-nums">
-      {prototype.author} · {idleLabel(prototype.lastActivity, PREVIEW_AS_OF)}
+      {prototype.author} · {updatedLabel(prototype.lastActivity, PREVIEW_AS_OF)}
       <span class="block">{prototype.lastActivityNote}</span>
     </span>
   </span>
