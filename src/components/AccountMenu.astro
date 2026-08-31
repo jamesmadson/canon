@@ -1,0 +1,144 @@
+---
+import { withBase } from '../lib/withBase';
+import { PROJECT } from '../data/v2Preview';
+
+/**
+ * The account button in the top bar: who you are, how the app is lit, and the
+ * way out.
+ *
+ * The theme choice is the only thing in this preview that persists, because it
+ * is the only thing that belongs to the person rather than to the fiction. It
+ * is stored under one key, read before paint in BaseLayout, and falls back to
+ * System whenever storage refuses to answer.
+ */
+const THEMES = [
+  { id: 'light', label: 'Light' },
+  { id: 'dark', label: 'Dark' },
+  { id: 'system', label: 'System' },
+] as const;
+---
+
+<div class="relative ml-auto" data-account>
+  <button
+    type="button"
+    data-account-button
+    aria-expanded="false"
+    aria-haspopup="menu"
+    aria-controls="account-menu"
+    class="flex min-h-11 items-center gap-2 rounded-md px-2 text-[13px] font-medium text-ink-soft transition-colors duration-[120ms] hover:text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+  >
+    <span class="sr-only">Account —</span>
+    <span class="hidden sm:inline">{PROJECT.viewer.name}</span>
+    <span
+      aria-hidden="true"
+      class="flex size-8 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink"
+    >
+      {PROJECT.viewer.initials}
+    </span>
+  </button>
+
+  <div
+    id="account-menu"
+    data-account-menu
+    hidden
+    class="absolute right-0 z-20 mt-1 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border border-rule-strong bg-bg"
+  >
+    <div class="border-b border-rule px-3 py-3">
+      <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Signed in as</p>
+      <p class="mt-1 font-mono text-[13px] break-all text-ink">{PROJECT.account}</p>
+    </div>
+
+    <div class="border-b border-rule px-3 py-3">
+      <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft" id="theme-label">
+        Theme
+      </p>
+      <div
+        class="mt-2 -mr-px -mb-px flex overflow-hidden rounded-sm border border-rule"
+        role="group"
+        aria-labelledby="theme-label"
+      >
+        {THEMES.map((theme) => (
+          <button
+            type="button"
+            data-theme-option={theme.id}
+            aria-pressed="false"
+            class="min-h-11 flex-1 border-r border-rule bg-bg px-2 text-[13px] font-semibold text-ink-soft transition-colors duration-[120ms] last:border-r-0 hover:bg-surface/60 hover:text-ink active:bg-surface aria-pressed:bg-surface aria-pressed:text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+          >
+            {theme.label}
+          </button>
+        ))}
+      </div>
+      <p class="mt-2 text-[11px] leading-relaxed font-medium text-ink-soft">
+        Dark is for the app. The pages around it stay as they are.
+      </p>
+    </div>
+
+    <a
+      href={withBase('/v2-preview/signin/')}
+      data-account-signout
+      class="flex min-h-11 items-center px-3 text-[13px] font-semibold text-ink transition-colors duration-[120ms] hover:bg-surface/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+    >
+      Sign out
+    </a>
+  </div>
+</div>
+
+<script>
+  const KEY = 'canon-app-theme';
+  type Theme = 'light' | 'dark' | 'system';
+
+  function readTheme(): Theme {
+    try {
+      const stored = localStorage.getItem(KEY);
+      if (stored === 'light' || stored === 'dark') return stored;
+    } catch {
+      /* Private mode, blocked storage — System is the honest fallback. */
+    }
+    return 'system';
+  }
+
+  function applyTheme(theme: Theme) {
+    document.documentElement.dataset.appTheme = theme;
+    try {
+      localStorage.setItem(KEY, theme);
+    } catch {
+      /* Nothing to do: the choice holds for this page and no further. */
+    }
+    for (const option of document.querySelectorAll<HTMLButtonElement>('[data-theme-option]')) {
+      option.setAttribute('aria-pressed', String(option.dataset.themeOption === theme));
+    }
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-account]')) {
+    const button = root.querySelector<HTMLButtonElement>('[data-account-button]')!;
+    const menu = root.querySelector<HTMLElement>('[data-account-menu]')!;
+
+    function setOpen(open: boolean) {
+      menu.hidden = !open;
+      button.setAttribute('aria-expanded', String(open));
+    }
+
+    button.addEventListener('click', () => {
+      const open = button.getAttribute('aria-expanded') === 'true';
+      setOpen(!open);
+      if (!open) menu.querySelector<HTMLElement>('button, a')?.focus();
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!root.contains(event.target as Node)) setOpen(false);
+    });
+
+    root.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        button.focus();
+      }
+    });
+
+    for (const option of root.querySelectorAll<HTMLButtonElement>('[data-theme-option]')) {
+      option.addEventListener('click', () => applyTheme(option.dataset.themeOption as Theme));
+    }
+  }
+
+  applyTheme(readTheme());
+</script>

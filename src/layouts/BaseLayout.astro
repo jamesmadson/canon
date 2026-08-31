@@ -37,6 +37,19 @@ const skillCount = spellNumber(publishedSkills.length);
     <meta name="twitter:description" content={description} />
     <meta name="theme-color" content="#ffffff" />
     <link rel="preload" href={withBase('/fonts/archivo/Archivo-400.woff2')} as="font" type="font/woff2" crossorigin />
+    {/* The app's theme choice, applied before the first paint so the shell is
+        never drawn light and then repainted dark. It sets one attribute on the
+        root; the dark tokens are scoped to the app shell, so this is inert on
+        every page that isn't the product. */}
+    <script is:inline>
+      try {
+        const stored = localStorage.getItem('canon-app-theme');
+        document.documentElement.dataset.appTheme =
+          stored === 'light' || stored === 'dark' ? stored : 'system';
+      } catch {
+        document.documentElement.dataset.appTheme = 'system';
+      }
+    </script>
   </head>
   <body class="bg-bg font-sans font-medium text-ink antialiased">
     <a

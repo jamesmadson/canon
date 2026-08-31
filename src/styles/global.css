@@ -59,6 +59,39 @@
   --radius-lg: 8px;
 }
 
+/* Dark mode, and only inside the app.
+   The tokens are redefined on the shell rather than on :root, so the product
+   chrome inverts and the pages around it — the gallery, the alpha page — stay
+   the one paper they have always been. Same ramp, read from the other end:
+   near-black ground, paper ink, and the rules landing where they landed in
+   light. Monochrome on both sides; a dark mode that introduced a hue would be
+   a different design, not the same one after dark.
+
+   The two blocks below are the same declarations twice: once for an explicit
+   choice, once for "System" against the OS preference. Neither can be folded
+   into the other — an explicit Light has to win over a dark OS. */
+[data-app-theme="dark"] [data-app-shell] {
+  color-scheme: dark;
+  --color-bg: oklch(18% 0 0);
+  --color-ink: oklch(96% 0 0);
+  --color-ink-soft: oklch(74% 0 0);
+  --color-surface: oklch(27% 0 0);
+  --color-rule: oklch(33% 0 0);
+  --color-rule-strong: oklch(55% 0 0);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-app-theme="system"] [data-app-shell] {
+    color-scheme: dark;
+    --color-bg: oklch(18% 0 0);
+    --color-ink: oklch(96% 0 0);
+    --color-ink-soft: oklch(74% 0 0);
+    --color-surface: oklch(27% 0 0);
+    --color-rule: oklch(33% 0 0);
+    --color-rule-strong: oklch(55% 0 0);
+  }
+}
+
 /* Entrance motion. A visitor sees the first paint once, so the frequency gate
    allows it — but only transform and opacity, and only when motion is welcome.
    The whole block lives inside the media query so reduced-motion users never
