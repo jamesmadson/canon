@@ -669,8 +669,8 @@ export const ANNOTATIONS: Record<string, Annotation[]> = {
   'today-ring-v2': [
     {
       n: 1,
-      x: 50,
-      y: 30,
+      x: 46,
+      y: 17,
       author: 'Ruth Vantine',
       date: '2026-08-19',
       anchor: 'Today ring · gap at the top',

@@ -85,19 +85,21 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
 
     <div class="overflow-hidden rounded-md border border-rule" data-intake>
       <div data-intake-step="zone">
-        <button
-          type="button"
-          data-intake-paste
-          class="flex w-full min-h-11 flex-col items-center justify-center gap-2 border-b border-dashed border-rule-strong bg-surface/25 px-4 py-10 text-center transition-colors duration-[120ms] hover:bg-surface/50 active:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
-        >
-          <span class="text-[15px] font-semibold text-ink">Paste a transcript, or drop a file</span>
-          <span class="max-w-md text-[13px] leading-relaxed font-medium text-ink-soft">
-            Canon splits it into entries and drafts the Meant line. Nothing is filed until you
-            confirm&nbsp;it.
-          </span>
-        </button>
-        <p class="px-4 py-2 text-[11px] font-medium text-ink-soft">
-          Scripted in this preview — the button below drafts one prepared entry.
+        <div class="p-3">
+          <button
+            type="button"
+            data-intake-paste
+            class="flex min-h-11 w-full flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-rule-strong bg-surface/25 px-4 py-10 text-center transition-colors duration-[120ms] hover:bg-surface/50 hover:border-ink active:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+          >
+            <span class="text-[15px] font-semibold text-ink">Paste a transcript, or drop a file</span>
+            <span class="max-w-md text-[13px] leading-relaxed font-medium text-ink-soft">
+              Canon splits it into entries and drafts the Meant line. Nothing is filed until you
+              confirm&nbsp;it.
+            </span>
+          </button>
+        </div>
+        <p class="border-t border-rule px-4 py-2 text-[11px] font-medium text-ink-soft">
+          Scripted in this preview — pressing it drafts one prepared entry.
         </p>
       </div>
 

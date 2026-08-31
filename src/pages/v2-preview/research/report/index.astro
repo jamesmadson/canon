@@ -65,7 +65,9 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
       <h2 id="patterns-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
         Patterns — three voices or more
       </h2>
-      <p class="text-[11px] font-medium text-ink-soft tabular-nums">{patterns.length}</p>
+      <p class="text-[11px] font-medium text-ink-soft tabular-nums">
+        {patterns.length} {patterns.length === 1 ? 'question' : 'questions'}
+      </p>
     </div>
 
     {patterns.length > 0 ? (
@@ -108,7 +110,9 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
       <h2 id="possible-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
         Possible patterns — two voices
       </h2>
-      <p class="text-[11px] font-medium text-ink-soft tabular-nums">{possible.length}</p>
+      <p class="text-[11px] font-medium text-ink-soft tabular-nums">
+        {possible.length} {possible.length === 1 ? 'question' : 'questions'}
+      </p>
     </div>
 
     <div class="overflow-hidden rounded-md border border-rule">
@@ -148,7 +152,9 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
       <h2 id="loops-heading" class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
         Open loops — said, never decided
       </h2>
-      <p class="text-[11px] font-medium text-ink-soft tabular-nums">{loops.length}</p>
+      <p class="text-[11px] font-medium text-ink-soft tabular-nums">
+        {loops.length} {loops.length === 1 ? 'question' : 'questions'}
+      </p>
     </div>
 
     <div class="overflow-hidden rounded-md border border-rule">
