@@ -3,10 +3,12 @@ import AppShell from '../../components/AppShell.astro';
 import DevicePreview from '../../components/DevicePreview.astro';
 import FeedbackEntryCard from '../../components/FeedbackEntryCard.astro';
 import ReviewRunCard from '../../components/ReviewRunCard.astro';
+import ScriptedCopyButton from '../../components/ScriptedCopyButton.astro';
 import { withBase } from '../../lib/withBase';
 import { daysIdle, idleLabel, isStale } from '../../lib/staleness';
 import {
   annotationsFor,
+  ENGINEERING_BUDDY,
   PREVIEW_AS_OF,
   PROJECT,
   PROTOTYPES,
@@ -208,6 +210,64 @@ const pins = annotationsFor(prototype.slug);
     <p class="mt-2 max-w-2xl text-[11px] font-medium text-ink-soft">
       <span class="font-mono">deter</span> is a constraint review: less, but better. It only
       proposes removals, and each one has to carry its reason.
+    </p>
+  </section>
+
+  <section class="mt-8" aria-labelledby="handoff-heading">
+    <h2 id="handoff-heading" class="mb-3 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+      Hand off
+    </h2>
+
+    <div class="overflow-hidden rounded-md border border-rule">
+      <div class="flex flex-wrap items-start gap-x-3 gap-y-2 border-b border-rule bg-bg px-4 py-4">
+        <span
+          aria-hidden="true"
+          class="flex size-8 shrink-0 items-center justify-center rounded-sm border border-rule-strong text-[11px] font-semibold text-ink"
+        >
+          {ENGINEERING_BUDDY.initials}
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block text-[15px] font-semibold text-ink">{ENGINEERING_BUDDY.name}</span>
+          <span class="mt-1 block text-[13px] leading-relaxed font-medium text-ink-soft">
+            Engineering buddy on {PROJECT.name} —{' '}
+            <a
+              href={withBase('/v2-preview/members/')}
+              class="font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            >
+              members
+            </a>
+          </span>
+        </span>
+        <span class="ml-auto rounded-sm border border-rule px-2 py-1 text-[11px] font-semibold whitespace-nowrap text-ink-soft">
+          {ENGINEERING_BUDDY.role}
+        </span>
+      </div>
+
+      <div class="flex flex-col gap-1 border-b border-rule bg-bg px-4 py-3 sm:flex-row sm:items-baseline sm:gap-4">
+        <p class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft sm:w-28 sm:shrink-0">
+          Graduated
+        </p>
+        <p class="text-[13px] font-medium text-ink tabular-nums">
+          {prototype.pr ? (
+            <><span class="font-mono">{prototype.pr}</span> open</>
+          ) : (
+            'Not opened yet'
+          )}
+        </p>
+      </div>
+
+      <div class="bg-bg px-4 py-4">
+        <ScriptedCopyButton
+          label="Copy the context"
+          note="Copies a brief an agent or an engineer can start from: the branch, the screen, the entries filed against it and what was decided. Scripted here — the clipboard stays empty."
+        />
+      </div>
+    </div>
+
+    <p class="mt-2 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
+      Handing off is a person telling another person where to start, so it is addressed to one
+      name and carries the record with it. Most prototypes never graduate, and the row above says
+      so rather than leaving the question open.
     </p>
   </section>
 

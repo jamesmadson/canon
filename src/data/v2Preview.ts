@@ -43,6 +43,12 @@ export interface Prototype {
   lastActivity: string;
   lastActivityNote: string;
   sources: { label: string; detail: string }[];
+  /**
+   * The pull request this prototype graduated into, if it has. Graduating is
+   * the end of a prototype's life in Canon, and most of them never get there —
+   * which is why the empty case is the common one and says so plainly.
+   */
+  pr: string | null;
 }
 
 export interface FeedbackEntry {
@@ -167,6 +173,7 @@ export const PROTOTYPES: Prototype[] = [
       { label: 'Preview', detail: 'today-ring-v2.preview.fernlabs.example' },
       { label: 'Figma frame', detail: 'Fernwell — concepts · Today v6' },
     ],
+    pr: 'PR #142',
   },
   {
     slug: 'streak-cards',
@@ -184,6 +191,7 @@ export const PROTOTYPES: Prototype[] = [
       { label: 'Branch', detail: 'fern-labs/fernwell · exp/streak-cards' },
       { label: 'Preview', detail: 'streak-cards.preview.fernlabs.example' },
     ],
+    pr: null,
   },
   {
     slug: 'map-layers',
@@ -201,6 +209,7 @@ export const PROTOTYPES: Prototype[] = [
       { label: 'Branch', detail: 'fern-labs/fernwell · prototype-map-layers' },
       { label: 'Preview', detail: 'map-layers.preview.fernlabs.example' },
     ],
+    pr: null,
   },
   {
     slug: 'onboarding-concepts',
@@ -215,6 +224,7 @@ export const PROTOTYPES: Prototype[] = [
     lastActivity: '2026-08-18',
     lastActivityNote: 'Figma edit — third card rewritten',
     sources: [{ label: 'Figma frame', detail: 'Fernwell — concepts · Onboarding 1–3' }],
+    pr: null,
   },
   {
     slug: NEW_PROTOTYPE.slug,
@@ -229,6 +239,7 @@ export const PROTOTYPES: Prototype[] = [
     lastActivity: PREVIEW_AS_OF,
     lastActivityNote: `Branch opened from ${NEW_PROTOTYPE.baseBranch} — no commits yet`,
     sources: [{ label: 'Branch', detail: `${PROJECT.repo} · ${NEW_PROTOTYPE.branch}` }],
+    pr: null,
   },
 ];
 

@@ -41,7 +41,10 @@ const rowBase =
 ---
 
 <BaseLayout title={title} description={description}>
-  <div data-app-shell class="overflow-hidden rounded-lg border border-rule-strong bg-bg">
+  {/* bg-bg and text-ink are spelled out here rather than inherited: the dark
+      tokens are redefined on this element, and an inherited colour would have
+      been resolved against the light ones a level up. */}
+  <div data-app-shell class="overflow-hidden rounded-lg border border-rule-strong bg-bg text-ink">
     <PreviewLabel placement="top" />
 
     <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule px-4 py-2">
