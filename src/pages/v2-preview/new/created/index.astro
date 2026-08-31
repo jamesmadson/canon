@@ -42,15 +42,13 @@ const NEXT = [
     <h2 id="next-heading" class="mb-3 label">
       What happens next
     </h2>
-    <div class="overflow-hidden rounded-md bg-panel">
-      <div class="-mb-px">
-        {NEXT.map((step) => (
-          <div class="border-b border-rule bg-bg px-4 py-3">
-            <p class="text-base font-semibold text-ink">{step.title}</p>
-            <p class="mt-1 text-[13px] leading-relaxed font-medium text-ink-soft">{step.detail}</p>
-          </div>
-        ))}
-      </div>
+    <div class="flex flex-col gap-[10px]">
+      {NEXT.map((step) => (
+        <div class="rounded-md bg-panel px-4 py-3">
+          <p class="text-base font-semibold text-ink">{step.title}</p>
+          <p class="mt-1 text-[13px] leading-relaxed font-medium text-ink-soft">{step.detail}</p>
+        </div>
+      ))}
     </div>
     <p class="mt-3 text-[13px] leading-relaxed font-medium text-ink-soft">
       Until one of those happens there is nothing to look at, and {NEW_PROTOTYPE.name}'s page

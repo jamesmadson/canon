@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import MeshPanel from './MeshPanel.astro';
 import PreviewLabel from './PreviewLabel.astro';
+import RamsMark from './RamsMark.astro';
+import type { MarkName } from './RamsMark.astro';
 import { withBase } from '../lib/withBase';
 
 interface Props {
@@ -10,11 +13,16 @@ interface Props {
   step: number;
 }
 
-const STEPS = [
-  { label: 'Project', href: '/v2-preview/onboarding/project/' },
-  { label: 'GitHub', href: '/v2-preview/onboarding/github/' },
-  { label: 'Figma', href: '/v2-preview/onboarding/figma/' },
-  { label: 'Skills', href: '/v2-preview/onboarding/skills/' },
+/**
+ * One mark per step, chosen so the four read as a sequence rather than four
+ * unrelated pictures: a whole disc, then it splits into rules, then into
+ * stripes, then into faders you can set.
+ */
+const STEPS: { label: string; href: string; mark: MarkName }[] = [
+  { label: 'Project', href: '/v2-preview/onboarding/project/', mark: 'disc' },
+  { label: 'GitHub', href: '/v2-preview/onboarding/github/', mark: 'line-stack' },
+  { label: 'Figma', href: '/v2-preview/onboarding/figma/', mark: 'split-stripe' },
+  { label: 'Skills', href: '/v2-preview/onboarding/skills/', mark: 'fader' },
 ];
 
 const { title, description, step } = Astro.props;
@@ -55,7 +63,11 @@ const { title, description, step } = Astro.props;
       ))}
     </ol>
 
-    <div class="px-4 pb-6 sm:px-6 sm:pb-8">
+    <MeshPanel radius="sm" class="mx-2 flex items-center justify-center px-6 py-8">
+      <RamsMark name={STEPS[step - 1].mark} size={80} />
+    </MeshPanel>
+
+    <div class="px-4 pt-6 pb-6 sm:px-6 sm:pb-8">
       <slot />
     </div>
   </div>

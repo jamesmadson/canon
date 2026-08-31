@@ -46,8 +46,8 @@ const SKILLS = [
         {SKILLS.map((skill) => (
           <div
             class:list={[
-              'flex items-start gap-3 rounded-md border px-4 py-3',
-              skill.state === 'on' ? 'border-ink bg-surface/40' : 'border-rule bg-bg',
+              'flex items-start gap-3 rounded-md px-4 py-3',
+              skill.state === 'on' ? 'bg-panel' : '',
             ]}
             aria-disabled={skill.state === 'soon' ? 'true' : undefined}
           >
@@ -87,7 +87,7 @@ const SKILLS = [
       <p class="bg-recess px-4 py-2 label">
         Runs against
       </p>
-      <p class="bg-bg px-4 py-3 font-mono text-[13px] break-all text-ink">{SCRIPTED_RUN.target}</p>
+      <p class="px-4 py-3 font-mono text-[13px] break-all text-ink">{SCRIPTED_RUN.target}</p>
     </div>
 
     <div class="mt-6 rounded-md bg-panel px-4 py-3">

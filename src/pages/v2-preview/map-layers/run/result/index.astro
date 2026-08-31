@@ -45,7 +45,7 @@ const LIFECYCLE = [
     </h2>
     <ol class="max-w-xl overflow-hidden rounded-md bg-panel">
       {LIFECYCLE.map((stage) => (
-        <li class="flex items-start gap-3 border-b border-rule bg-bg px-4 py-3 last:border-b-0">
+        <li class="flex items-start gap-3 border-b border-rule px-4 py-3 last:border-b-0">
           <span class="mt-1">
             <DrawnMark on={true} label="Done" />
           </span>
@@ -83,7 +83,7 @@ const LIFECYCLE = [
     </p>
   </section>
 
-  <div class="mt-6 max-w-2xl border-l border-rule-strong pl-4">
+  <div class="mt-6 max-w-2xl rounded-md bg-recess px-4 py-4">
     <p class="text-[13px] leading-relaxed font-medium text-ink-soft">
       <span class="font-semibold text-ink">A seam in this preview —</span> these pages hold no
       state, so this run lives on this page only. Go back to {prototype.name} and it still reads

@@ -62,8 +62,10 @@ const SOURCES = [
         {SOURCES.map((source) => (
           <div
             class:list={[
-              'flex items-start gap-3 rounded-md border px-4 py-3',
-              source.selected ? 'border-ink bg-surface/40' : 'border-rule bg-bg',
+              /* The chosen option is the one carrying a fill at all. No outline
+                 switches on — value carries the state, as everywhere else. */
+              'flex items-start gap-3 rounded-md px-4 py-3',
+              source.selected ? 'bg-panel' : '',
             ]}
           >
             <span class="mt-1">
@@ -92,7 +94,7 @@ const SOURCES = [
         type="text"
         value={NEW_PROTOTYPE.baseBranch}
         readonly
-        class="mt-2 h-11 w-full rounded-md border bg-bg px-3 font-mono text-[13px] focus-visible:outline-2 focus-visible:outline-ink border-rule text-ink"
+        class="mt-2 field font-mono text-[13px]"
       />
       <span class="mt-2 block text-[11px] leading-relaxed font-medium text-ink-soft">
         The branch the new one starts from. Whatever is on{' '}

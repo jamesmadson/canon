@@ -25,18 +25,16 @@ const heading = count.charAt(0).toUpperCase() + count.slice(1);
     were picked; the others stayed branches.
   </p>
 
-  <div class="mt-6 max-w-xl overflow-hidden rounded-md bg-panel">
-    <div class="-mb-px">
-      {added.map((branch) => (
-        <div class="border-b border-rule bg-bg px-4 py-3">
-          <p class="font-mono text-[13px] break-all text-ink">{branch.name}</p>
-          <p class="mt-1 text-[13px] font-medium text-ink-soft">{branch.note}</p>
-        </div>
-      ))}
-    </div>
+  <div class="mt-6 flex max-w-xl flex-col gap-[10px]">
+    {added.map((branch) => (
+      <div class="rounded-md bg-panel px-4 py-3">
+        <p class="font-mono text-[13px] break-all text-ink">{branch.name}</p>
+        <p class="mt-1 text-[13px] font-medium text-ink-soft">{branch.note}</p>
+      </div>
+    ))}
   </div>
 
-  <div class="mt-6 max-w-xl border-l border-rule-strong pl-4">
+  <div class="mt-6 max-w-xl rounded-md bg-recess px-4 py-4">
     <p class="text-[13px] leading-relaxed font-medium text-ink-soft">
       <span class="font-semibold text-ink">A seam in this preview —</span> the dashboard keeps
       showing the {spellNumber(PROTOTYPES.length)} {PROJECT.name} prototypes and nothing else.

@@ -132,12 +132,12 @@ const FLOWS = [
           {flow.blurb}
         </p>
 
-        <ol class="mt-3 overflow-hidden rounded-md bg-panel">
+        <ol class="mt-3 flex flex-col gap-[10px]">
           {flow.steps.map((step, i) => (
-            <li class="border-b border-rule last:border-b-0">
+            <li>
               <a
                 href={withBase(step.href)}
-                class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 bg-bg px-4 py-3 transition-colors duration-[120ms] hover:bg-surface/60 active:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+                class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 rounded-md bg-panel px-4 py-3 transition-colors duration-[120ms] hover:bg-recess active:bg-recess focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
               >
                 <span
                   aria-hidden="true"

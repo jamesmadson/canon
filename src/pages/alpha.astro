@@ -1,8 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import MeshPanel from '../components/MeshPanel.astro';
 import PreviewLabel from '../components/PreviewLabel.astro';
 import PrototypeRow from '../components/PrototypeRow.astro';
 import FeedbackEntryCard from '../components/FeedbackEntryCard.astro';
+import RamsMark from '../components/RamsMark.astro';
 import ReviewRunCard from '../components/ReviewRunCard.astro';
 import { withBase } from '../lib/withBase';
 import { PROTOTYPES, RECORDS } from '../data/v2Preview';
@@ -13,7 +15,11 @@ const featuredEntry = record.feedback.find((entry) => entry.decided) ?? record.f
 const paneHeading = 'label';
 ---
 
+{/* This page is the app rather than a page about it, so it takes the app scope
+    whole: the warm ground, Public Sans, the mono labels, and the dark theme
+    when the person has chosen one. The gallery around it is untouched. */}
 <BaseLayout
+  app
   title="Canon v2 alpha"
   description="Canon v2 keeps your team's prototypes, their feedback, and their reviews in one place. Join the alpha."
 >
@@ -51,23 +57,27 @@ const paneHeading = 'label';
       taking things away.
     </p>
 
-    <div class="overflow-hidden rounded-lg bg-panel">
-      <div class="grid grid-cols-1 lg:grid-cols-3">
-        <section class="overflow-hidden border-b border-rule lg:border-r lg:border-b-0" aria-label="Prototypes pane">
-          <p class={`border-b border-rule px-4 py-2 ${paneHeading}`}>Prototypes</p>
-          <div class="-mb-px">
-            {PROTOTYPES.map((prototype) => <PrototypeRow prototype={prototype} />)}
-          </div>
+    {/* Three panes, three fills, a real gap between them. The old version was
+        one bordered slab cut into thirds by hairlines. */}
+    <div class="overflow-hidden rounded-lg bg-ground">
+      <div class="grid grid-cols-1 gap-[10px] p-[10px] lg:grid-cols-3">
+        <section class="flex flex-col gap-[10px]" aria-label="Prototypes pane">
+          <p class={`px-1 ${paneHeading}`}>Prototypes</p>
+          {PROTOTYPES.map((prototype) => <PrototypeRow prototype={prototype} />)}
         </section>
 
-        <section class="border-b border-rule lg:border-r lg:border-b-0" aria-label="Feedback pane">
-          <p class={`border-b border-rule px-4 py-2 ${paneHeading}`}>Feedback — said, meant, decided</p>
+        <section class="flex flex-col gap-[10px]" aria-label="Feedback pane">
+          <p class={`px-1 ${paneHeading}`}>Feedback — said, meant, decided</p>
           <FeedbackEntryCard entry={featuredEntry} compact />
         </section>
 
-        <section aria-label="Review pane">
-          <p class={`border-b border-rule px-4 py-2 ${paneHeading}`}>Review — what to remove</p>
-          {record.review && <ReviewRunCard run={record.review} compact />}
+        <section class="flex flex-col gap-[10px]" aria-label="Review pane">
+          <p class={`px-1 ${paneHeading}`}>Review — what to remove</p>
+          {record.review && (
+            <div class="overflow-hidden rounded-md bg-panel">
+              <ReviewRunCard run={record.review} compact />
+            </div>
+          )}
         </section>
       </div>
 
@@ -95,32 +105,33 @@ const paneHeading = 'label';
     <h2 id="how-heading" class="mb-4 label">
       What the alpha does
     </h2>
-    <div class="overflow-hidden rounded-lg bg-panel">
-      <div class="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-3">
-        <div class="border-r border-b border-rule bg-bg p-4">
-          <h3 class="text-base font-semibold text-ink">Indexes what exists</h3>
-          <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
-            Connect a repository read-only and attach a Figma file, then tick the branches
-            that are prototypes. Keep the names you already use — each one shows up as a
-            screen, with its author, its last commit, and how long it has been quiet.
-          </p>
-        </div>
-        <div class="border-r border-b border-rule bg-bg p-4">
-          <h3 class="text-base font-semibold text-ink">Turns feedback into evidence</h3>
-          <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
-            Comments pin to the running build and file as dated entries: what a person said,
-            word for word; what you think it meant, marked as your reading; and what was
-            decided. The report counts the voices behind each question — one is a quote, three
-            is a pattern. Names never enter the record.
-          </p>
-        </div>
-        <div class="border-r border-b border-rule bg-bg p-4">
-          <h3 class="text-base font-semibold text-ink">Reviews on request</h3>
-          <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
-            Press a button and a review runs against a prototype. The first one only
-            proposes removals, each with a reason. Nothing runs on its own.
-          </p>
-        </div>
+    <div class="grid grid-cols-1 gap-[10px] sm:grid-cols-3">
+      <div class="rounded-md bg-panel p-4">
+        <RamsMark name="dot-grid" size={48} class="mb-4" />
+        <h3 class="text-base font-semibold text-ink">Indexes what exists</h3>
+        <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+          Connect a repository read-only and attach a Figma file, then tick the branches
+          that are prototypes. Keep the names you already use — each one shows up as a
+          screen, with its author, its last commit, and how long it has been quiet.
+        </p>
+      </div>
+      <div class="rounded-md bg-panel p-4">
+        <RamsMark name="line-stack" size={48} class="mb-4" />
+        <h3 class="text-base font-semibold text-ink">Turns feedback into evidence</h3>
+        <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+          Comments pin to the running build and file as dated entries: what a person said,
+          word for word; what you think it meant, marked as your reading; and what was
+          decided. The report counts the voices behind each question — one is a quote, three
+          is a pattern. Names never enter the record.
+        </p>
+      </div>
+      <div class="rounded-md bg-panel p-4">
+        <RamsMark name="dial" size={48} class="mb-4" />
+        <h3 class="text-base font-semibold text-ink">Reviews on request</h3>
+        <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
+          Press a button and a review runs against a prototype. The first one only
+          proposes removals, each with a reason. Nothing runs on its own.
+        </p>
       </div>
     </div>
   </section>
@@ -132,7 +143,11 @@ const paneHeading = 'label';
       by hand, a few at a time.
     </p>
 
-    <div class="mt-5 rounded-lg border border-rule-strong p-4 sm:p-5">
+    <MeshPanel class="mt-5 flex items-center justify-center px-6 py-10">
+      <RamsMark name="disc" size={104} />
+    </MeshPanel>
+
+    <div class="mt-[10px] rounded-lg bg-panel p-4 sm:p-5">
       <label for="waitlist-email" class="block label">
         Work email
       </label>
