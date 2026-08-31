@@ -8,6 +8,9 @@
  *
  * Square reads as many-of, round as one-of — the same grammar a real form
  * would use, so the shape still tells you what kind of choice this is.
+ *
+ * Both wells are the recess fill rather than an outline, which is the same
+ * rule the fields and the buttons follow: the fill is the control.
  */
 interface Props {
   shape?: 'square' | 'round';
@@ -22,10 +25,13 @@ const { shape = 'square', on, label } = Astro.props;
 <span
   aria-hidden="true"
   class:list={[
-    'flex size-4 shrink-0 items-center justify-center border text-[11px] leading-none',
-    shape === 'round' ? 'rounded-full' : 'rounded-sm',
-    on ? 'border-ink' : 'border-rule-strong bg-bg',
-    on && shape === 'square' && 'bg-ink font-bold text-bg',
+    /* 4px, written out rather than taken from the radius scale: at 16px square
+       the app's 9px would round the mark into a lozenge. */
+    'flex size-4 shrink-0 items-center justify-center text-[11px] leading-none',
+    shape === 'round' ? 'rounded-full' : 'rounded-[4px]',
+    /* The mark is a fill like everything else: the well is always the recess,
+       and a square that is on fills solid while a round one takes a dot. */
+    on && shape === 'square' ? 'bg-ink font-bold text-ground' : 'bg-recess',
   ]}
 >
   {on && shape === 'square' && '✓'}

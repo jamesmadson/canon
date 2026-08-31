@@ -16,7 +16,7 @@ const heading = count.charAt(0).toUpperCase() + count.slice(1);
   active="overview"
 >
   <p class="label">Source connected</p>
-  <h1 class="mt-1 text-xl font-bold tracking-tight">
+  <h1 class="mt-1 display">
     {heading} prototypes added from&nbsp;{repoName}
   </h1>
   <p class="mt-2 max-w-2xl text-base leading-relaxed font-medium text-ink-soft">
@@ -25,7 +25,7 @@ const heading = count.charAt(0).toUpperCase() + count.slice(1);
     were picked; the others stayed branches.
   </p>
 
-  <div class="mt-6 max-w-xl overflow-hidden rounded-md border border-rule">
+  <div class="mt-6 max-w-xl overflow-hidden rounded-md bg-panel">
     <div class="-mb-px">
       {added.map((branch) => (
         <div class="border-b border-rule bg-bg px-4 py-3">

@@ -108,7 +108,7 @@ const FLOWS = [
   title="Canon v2 preview — flow map"
   description="Every flow in the scripted Canon v2 preview, as a numbered sequence of links: first run, create, import, review, feedback."
 >
-  <h1 class="text-xl font-bold tracking-tight">Flow map</h1>
+  <h1 class="display">Flow map</h1>
   <p class="mt-2 max-w-2xl text-base leading-relaxed font-medium text-ink-soft">
     Every screen in the {PROJECT.name} preview, grouped into the {spellNumber(FLOWS.length)} paths
     worth walking. Each step is a link to the screen it names, so this page doubles as the script
@@ -132,7 +132,7 @@ const FLOWS = [
           {flow.blurb}
         </p>
 
-        <ol class="mt-3 overflow-hidden rounded-md border border-rule">
+        <ol class="mt-3 overflow-hidden rounded-md bg-panel">
           {flow.steps.map((step, i) => (
             <li class="border-b border-rule last:border-b-0">
               <a

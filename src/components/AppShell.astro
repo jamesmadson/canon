@@ -37,14 +37,16 @@ const NAV = [
 // One row height and one row shape for every sidebar entry, so the two live
 // sections and the two that only say what they would be sit on the same grid.
 const rowBase =
-  'flex min-h-11 items-center rounded-md px-3 text-[13px] font-semibold transition-[background-color,color,box-shadow] duration-[120ms] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink';
+  'flex min-h-11 items-center rounded-sm px-3 text-[13px] font-semibold transition-[background-color,color] duration-[120ms] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink';
 ---
 
 <BaseLayout title={title} description={description}>
   {/* bg-bg and text-ink are spelled out here rather than inherited: the dark
       tokens are redefined on this element, and an inherited colour would have
-      been resolved against the light ones a level up. */}
-  <div data-app-shell class="overflow-hidden rounded-lg border border-rule-strong bg-bg text-ink">
+      been resolved against the light ones a level up.
+
+      The shell is a fill on the page, not a box with a line around it. */}
+  <div data-app-shell class="overflow-hidden rounded-lg bg-ground text-ink">
     <PreviewLabel placement="top" />
 
     <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule px-4 py-2">
@@ -54,7 +56,7 @@ const rowBase =
       >
         Canon
       </a>
-      <span aria-hidden="true" class="text-rule-strong">|</span>
+      <span aria-hidden="true" class="text-rule">|</span>
       <p class="flex min-w-0 items-center gap-2 text-[13px] font-medium text-ink-soft">
         <span class="truncate">{PROJECT.team}</span>
         <span aria-hidden="true" class="text-rule-strong">/</span>
@@ -66,7 +68,7 @@ const rowBase =
     <div class="flex flex-col md:flex-row">
       <nav
         aria-label="Project sections"
-        class="shrink-0 border-b border-rule bg-surface/25 p-2 md:w-48 md:border-r md:border-b-0"
+        class="shrink-0 border-b border-rule p-2 md:w-48 md:border-r md:border-b-0"
       >
         <ul class="flex flex-wrap gap-1 md:flex-col md:flex-nowrap">
           {NAV.map((item) => (
@@ -77,8 +79,8 @@ const rowBase =
                 class:list={[
                   rowBase,
                   active === item.id
-                    ? 'bg-bg text-ink shadow-[inset_2px_0_0_var(--color-ink)]'
-                    : 'text-ink-soft hover:bg-bg/70 hover:text-ink active:bg-bg',
+                    ? 'bg-panel text-ink'
+                    : 'text-ink-soft hover:bg-panel/60 hover:text-ink active:bg-panel',
                 ]}
               >
                 {item.label}

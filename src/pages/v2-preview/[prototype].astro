@@ -44,7 +44,7 @@ const pins = annotationsFor(prototype.slug);
   </a>
 
   <div class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-    <h1 class="text-2xl font-bold tracking-tight">{prototype.name}</h1>
+    <h1 class="display">{prototype.name}</h1>
     {stale && (
       <span class="rounded-full bg-recess px-2 py-1 text-[11px] font-semibold tracking-wide text-ink tabular-nums">
         {staleLabel(prototype.lastActivity, PREVIEW_AS_OF)}
@@ -68,7 +68,7 @@ const pins = annotationsFor(prototype.slug);
     {prototype.screen ? (
       <DevicePreview screen={prototype.screen} screenName={prototype.name} idBase="device" />
     ) : (
-      <div class="overflow-hidden rounded-md border border-rule">
+      <div class="overflow-hidden rounded-md bg-panel">
         <div class="flex min-h-[300px] items-center justify-center bg-surface/30 px-4 py-6 sm:min-h-[420px]">
           <div
             class="flex w-full max-w-[240px] flex-col items-center justify-center gap-2 px-6 py-10 text-center"
@@ -132,7 +132,7 @@ const pins = annotationsFor(prototype.slug);
     <h2 id="sources-heading" class="mb-3 label">
       Sources
     </h2>
-    <div class="overflow-hidden rounded-md border border-rule">
+    <div class="overflow-hidden rounded-md bg-panel">
       <dl class="-mb-px">
         {prototype.sources.map((s) => (
           <div class="flex flex-col gap-1 border-b border-rule px-4 py-3 sm:flex-row sm:gap-4">
@@ -169,7 +169,7 @@ const pins = annotationsFor(prototype.slug);
     </p>
 
     {record.feedback.length > 0 ? (
-      <div class="overflow-hidden rounded-md border border-rule">
+      <div class="overflow-hidden rounded-md bg-panel">
         {record.feedback.map((entry) => <FeedbackEntryCard entry={entry} />)}
       </div>
     ) : (
@@ -188,7 +188,7 @@ const pins = annotationsFor(prototype.slug);
       Review runs
     </h2>
     {record.review ? (
-      <div class="overflow-hidden rounded-md border border-rule">
+      <div class="overflow-hidden rounded-md bg-panel">
         <ReviewRunCard run={record.review} />
       </div>
     ) : (
@@ -217,7 +217,7 @@ const pins = annotationsFor(prototype.slug);
       Hand off
     </h2>
 
-    <div class="overflow-hidden rounded-md border border-rule">
+    <div class="overflow-hidden rounded-md bg-panel">
       <div class="flex flex-wrap items-start gap-x-3 gap-y-2 border-b border-rule bg-bg px-4 py-4">
         <span
           aria-hidden="true"
@@ -274,7 +274,7 @@ const pins = annotationsFor(prototype.slug);
     <h2 id="others-heading" class="mb-3 label">
       Elsewhere in {PROJECT.name}
     </h2>
-    <div class="overflow-hidden rounded-md border border-rule">
+    <div class="overflow-hidden rounded-md bg-panel">
       <div class="-mb-px">
         {others.map((other) => (
           <a

@@ -32,7 +32,7 @@ const SKILLS = [
   description="Onboarding step 4 of the scripted Canon v2 preview: the skills that run against the project."
   step={4}
 >
-  <h1 class="text-xl font-bold tracking-tight">Your skills</h1>
+  <h1 class="display">Your skills</h1>
   <p class="mt-2 text-sm leading-relaxed font-medium text-ink-soft">
     These run against {PROJECT.name} two ways: inside your own agent as you work
     — Claude Code, Cursor — and here as review runs.
@@ -40,7 +40,7 @@ const SKILLS = [
     Nothing executes on push, and nothing bills you by surprise.
   </p>
 
-  <div class="mt-6 overflow-hidden rounded-lg border border-rule">
+  <div class="mt-6 overflow-hidden rounded-lg bg-panel">
     <div class="-mb-px grid grid-cols-1">
       {SKILLS.map((skill) => (
         <div class="flex items-baseline justify-between gap-4 border-b border-rule bg-bg px-4 py-4">

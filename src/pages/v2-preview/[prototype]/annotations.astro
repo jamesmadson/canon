@@ -42,7 +42,7 @@ const filed = pins.length - drafts;
   </a>
 
   <div class="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
-    <h1 class="text-2xl font-bold tracking-tight">Comments</h1>
+    <h1 class="display">Comments</h1>
     <p class="text-[11px] font-medium text-ink-soft tabular-nums">
       {pins.length} pinned · {drafts} draft · {filed} filed
     </p>
@@ -55,7 +55,7 @@ const filed = pins.length - drafts;
   </p>
 
   <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]" data-pins>
-    <section class="overflow-hidden rounded-md border border-rule" aria-labelledby="frame-heading">
+    <section class="overflow-hidden rounded-md bg-panel" aria-labelledby="frame-heading">
       <h2 id="frame-heading" class="border-b border-rule px-4 py-2 label">
         The build
       </h2>
@@ -100,7 +100,7 @@ const filed = pins.length - drafts;
 
     <section class="min-w-0" aria-labelledby="comments-heading">
       <h2 id="comments-heading" class="sr-only">Comments</h2>
-      <div class="overflow-hidden rounded-md border border-rule">
+      <div class="overflow-hidden rounded-md bg-panel">
         {pins.map((pin) => (
           <article
             data-comment={pin.n}
@@ -157,7 +157,7 @@ const filed = pins.length - drafts;
                 </div>
 
                 <div data-file-step="drafted" hidden>
-                  <div class="overflow-hidden rounded-md border border-rule-strong">
+                  <div class="overflow-hidden rounded-md bg-panel">
                     <p class="border-b border-rule bg-surface/50 px-4 py-2 label">
                       Drafted — awaiting your confirmation
                     </p>

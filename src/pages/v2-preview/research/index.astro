@@ -34,7 +34,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
 >
   <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
     <div class="min-w-0">
-      <h1 class="text-2xl font-bold tracking-tight">The record</h1>
+      <h1 class="display">The record</h1>
       <p class="mt-1 text-base font-medium text-ink-soft">
         Everything anyone has said about {PROJECT.name}, one entry at a time.
       </p>
@@ -48,7 +48,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
     tidying it away. People are pseudonyms; the mapping never enters the&nbsp;record.
   </p>
 
-  <div class="mt-6 overflow-hidden rounded-md border border-rule">
+  <div class="mt-6 overflow-hidden rounded-md bg-panel">
     <dl class="-mr-px -mb-px grid grid-cols-2 lg:grid-cols-4">
       {[
         { label: 'Entries', value: String(RECORD_ENTRIES.length), note: `Across ${spellNumber(themes.length)} questions` },
@@ -60,7 +60,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
           <dt class="label">
             {stat.label}
           </dt>
-          <dd class="text-2xl leading-none font-semibold tracking-tight text-ink tabular-nums">
+          <dd class="text-[28px] leading-none font-extralight tracking-[-0.03em] text-ink tabular-nums">
             {stat.value}
           </dd>
           <dd class="text-[11px] font-medium text-ink-soft tabular-nums">{stat.note}</dd>
@@ -83,7 +83,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
       Add to the record
     </h2>
 
-    <div class="overflow-hidden rounded-md border border-rule" data-intake>
+    <div class="overflow-hidden rounded-md bg-panel" data-intake>
       <div data-intake-step="zone">
         <div class="p-3">
           <button
@@ -178,7 +178,7 @@ const patterns = themes.filter((t) => t.strength === 'pattern').length;
       </p>
     </div>
 
-    <div class="overflow-hidden rounded-md border border-rule">
+    <div class="overflow-hidden rounded-md bg-panel">
       {entries.map((entry) => (
         <RecordEntryCard entry={entry} tag={tagFor.get(entry.id)!} />
       ))}

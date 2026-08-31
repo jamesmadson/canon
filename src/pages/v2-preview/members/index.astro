@@ -22,7 +22,7 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
 >
   <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
     <div class="min-w-0">
-      <h1 class="text-2xl font-bold tracking-tight">Members</h1>
+      <h1 class="display">Members</h1>
       <p class="mt-1 text-base font-medium text-ink-soft tabular-nums">
         {MEMBERS.length} people on {PROJECT.name}
       </p>
@@ -41,7 +41,7 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
       People
     </h2>
 
-    <div class="overflow-hidden rounded-md border border-rule">
+    <div class="overflow-hidden rounded-md bg-panel">
       <ul class="-mb-px">
         {MEMBERS.map((member) => (
           <li class="flex flex-wrap items-start gap-x-3 gap-y-2 border-b border-rule bg-bg px-4 py-4">
@@ -96,7 +96,7 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
       Invite with a link
     </h2>
 
-    <div class="overflow-hidden rounded-md border border-rule">
+    <div class="overflow-hidden rounded-md bg-panel">
       <p class="border-b border-rule bg-surface/50 px-4 py-2 label">
         Anyone with this link can join {PROJECT.name}
       </p>

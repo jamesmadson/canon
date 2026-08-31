@@ -15,20 +15,22 @@ const source = sourceLine(prototype);
 
 <a
   href={withBase(`/v2-preview/${prototype.slug}/`)}
-  class="group flex flex-col border-r border-b border-rule bg-bg transition-colors duration-[120ms] hover:border-rule-strong hover:bg-surface/30 active:bg-surface/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+  class="group flex flex-col overflow-hidden rounded-md bg-panel transition-colors duration-[120ms] hover:bg-recess active:bg-recess focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
 >
   {/* One well, one inset, one phone-shaped box — a capture and its absence are
-      drawn to the same geometry, so the empty card is the same card. */}
-  <span class="flex aspect-[3/2] items-center justify-center overflow-hidden border-b border-rule bg-surface/40 p-4">
+      drawn to the same geometry, so the empty card is the same card. The well
+      is a recess in the card rather than a bordered band; concentric radius,
+      so the inner frame is the outer 11 minus the 4 of padding. */}
+  <span class="m-1 flex aspect-[3/2] items-center justify-center overflow-hidden rounded-[7px] bg-recess p-4">
     {prototype.screen ? (
-      <span class="block h-full overflow-hidden rounded-md border border-rule-strong bg-bg">
+      <span class="block h-full overflow-hidden rounded-[5px] bg-panel">
         <span class="block h-full aspect-[390/844]">
           <ScreenArt screen={prototype.screen} w={390} h={844} />
         </span>
       </span>
     ) : (
       /* No capture, so no wireframe — the same box, drawn open. */
-      <span class="flex h-full aspect-[390/844] items-center justify-center rounded-md border border-dashed border-rule-strong px-2 text-center text-[11px] leading-snug font-medium text-ink-soft">
+      <span class="flex h-full aspect-[390/844] items-center justify-center rounded-[5px] border border-dashed border-rule-strong px-2 text-center text-[11px] leading-snug font-medium text-ink-soft">
         No capture
       </span>
     )}

@@ -1,0 +1,57 @@
+---
+/**
+ * A section wrapper with warmth in the paper.
+ *
+ * Four soft radial gradients, layered and pushed past the edges so no single
+ * blob has a visible centre — amber, peach and pale cream in light; deep umber
+ * with one faint orange bloom in dark. No image, no external asset, nothing
+ * animated. It should read as the surface having been warmed rather than as a
+ * gradient someone applied, which is why the stops stay close to the ground
+ * colour and the whole thing sits behind illustration only — never behind
+ * working UI, where a shifting background would fight the fills that define
+ * the controls.
+ */
+interface Props {
+  /** Radius token to match whatever it sits beside. */
+  radius?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const { radius = 'lg', class: className = '' } = Astro.props;
+const radiusClass = { sm: 'rounded-sm', md: 'rounded-md', lg: 'rounded-lg' }[radius];
+---
+
+<div class:list={['mesh-panel overflow-hidden', radiusClass, className]}>
+  <slot />
+</div>
+
+<style>
+  .mesh-panel {
+    background-color: var(--color-panel);
+    background-image:
+      radial-gradient(58% 74% at 8% 6%, color-mix(in oklab, var(--mark-yellow) 26%, transparent), transparent 68%),
+      radial-gradient(52% 62% at 92% 12%, color-mix(in oklab, var(--mark-orange) 16%, transparent), transparent 66%),
+      radial-gradient(64% 78% at 74% 96%, color-mix(in oklab, var(--mark-yellow) 18%, transparent), transparent 72%),
+      radial-gradient(70% 60% at 26% 88%, color-mix(in oklab, var(--mark-orange) 9%, transparent), transparent 70%);
+  }
+
+  /* After dark the same four blobs, pulled right down: an umber floor and one
+     orange bloom that is barely there. */
+  :global([data-app-theme='dark']) .mesh-panel {
+    background-image:
+      radial-gradient(58% 74% at 8% 6%, color-mix(in oklab, var(--mark-yellow) 12%, transparent), transparent 66%),
+      radial-gradient(52% 62% at 92% 12%, color-mix(in oklab, var(--mark-orange) 14%, transparent), transparent 62%),
+      radial-gradient(64% 78% at 74% 96%, color-mix(in oklab, var(--mark-orange) 8%, transparent), transparent 70%),
+      radial-gradient(70% 60% at 26% 88%, color-mix(in oklab, var(--mark-yellow) 6%, transparent), transparent 70%);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global([data-app-theme='system']) .mesh-panel {
+      background-image:
+        radial-gradient(58% 74% at 8% 6%, color-mix(in oklab, var(--mark-yellow) 12%, transparent), transparent 66%),
+        radial-gradient(52% 62% at 92% 12%, color-mix(in oklab, var(--mark-orange) 14%, transparent), transparent 62%),
+        radial-gradient(64% 78% at 74% 96%, color-mix(in oklab, var(--mark-orange) 8%, transparent), transparent 70%),
+        radial-gradient(70% 60% at 26% 88%, color-mix(in oklab, var(--mark-yellow) 6%, transparent), transparent 70%);
+    }
+  }
+</style>

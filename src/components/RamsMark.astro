@@ -1,0 +1,170 @@
+---
+/**
+ * The eight marks.
+ *
+ * A device face reduced to its geometry: a grid of indicator dots, a stack of
+ * printed rules, a dial, a fader. Each one is drawn almost entirely in ink,
+ * with exactly one element in orange or yellow — an index tick, one lit dot,
+ * a knocked-out circle. That single accent is the whole colour budget of the
+ * product; every other surface in the app is monochrome, and the marks are the
+ * one place a hue is allowed to appear.
+ *
+ * Both hues are read from --mark-* on the app scope, so the set retunes with
+ * the theme rather than carrying two copies of every path.
+ */
+export type MarkName =
+  | 'dot-grid'
+  | 'line-stack'
+  | 'dial'
+  | 'split-stripe'
+  | 'rings'
+  | 'disc'
+  | 'arc'
+  | 'fader';
+
+interface Props {
+  name: MarkName;
+  /** Rendered edge length in px. The art is drawn on a 120 grid and scales. */
+  size?: number;
+  /**
+   * Marks are ornament by default. Pass a label only where the mark is the
+   * only thing standing in for a piece of content.
+   */
+  label?: string;
+  class?: string;
+}
+
+const { name, size = 96, label, class: className = '' } = Astro.props;
+
+const INK = 'var(--mark-ink)';
+const ORANGE = 'var(--mark-orange)';
+const YELLOW = 'var(--mark-yellow)';
+
+// Five by five, one lit. The lit dot is off-centre on purpose — a centred
+// accent reads as a target, an offset one reads as a state.
+const gridDots: { x: number; y: number; on: boolean }[] = [];
+for (let row = 0; row < 5; row++) {
+  for (let col = 0; col < 5; col++) {
+    gridDots.push({ x: 18 + col * 21, y: 18 + row * 21, on: row === 1 && col === 3 });
+  }
+}
+
+const stackBars = [
+  { y: 22, w: 84, accent: false },
+  { y: 40, w: 62, accent: false },
+  { y: 58, w: 84, accent: false },
+  { y: 76, w: 30, accent: true },
+  { y: 94, w: 48, accent: false },
+];
+
+// Twelve ticks around the dial; one of them is the index.
+const dialTicks = Array.from({ length: 12 }, (_, i) => {
+  const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+  const inner = i === 10 ? 34 : 40;
+  return {
+    x1: 60 + Math.cos(angle) * inner,
+    y1: 60 + Math.sin(angle) * inner,
+    x2: 60 + Math.cos(angle) * 48,
+    y2: 60 + Math.sin(angle) * 48,
+    index: i === 10,
+  };
+});
+
+const stripes = [14, 32, 50, 68, 86].map((x, i) => ({ x, accent: i === 3 }));
+
+const faders = [24, 46, 68, 90].map((x, i) => ({ x, thumb: 34 + i * 16, accent: i === 2 }));
+---
+
+<svg
+  class:list={['rams-mark', className]}
+  viewBox="0 0 120 120"
+  width={size}
+  height={size}
+  fill="none"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+>
+  {name === 'dot-grid' &&
+    gridDots.map((dot) => (
+      <circle cx={dot.x} cy={dot.y} r={dot.on ? 6 : 4} fill={dot.on ? ORANGE : INK} />
+    ))}
+
+  {name === 'line-stack' &&
+    stackBars.map((bar) => (
+      <rect x="18" y={bar.y} width={bar.w} height="6" rx="3" fill={bar.accent ? YELLOW : INK} />
+    ))}
+
+  {name === 'dial' && (
+    <>
+      <circle cx="60" cy="60" r="30" fill={INK} />
+      {dialTicks.map((tick) => (
+        <line
+          x1={tick.x1}
+          y1={tick.y1}
+          x2={tick.x2}
+          y2={tick.y2}
+          stroke={tick.index ? ORANGE : INK}
+          stroke-width={tick.index ? 5 : 3}
+          stroke-linecap="butt"
+        />
+      ))}
+    </>
+  )}
+
+  {name === 'split-stripe' &&
+    stripes.map((stripe) => (
+      <rect x={stripe.x} y="18" width="12" height="84" rx="6" fill={stripe.accent ? YELLOW : INK} />
+    ))}
+
+  {name === 'rings' && (
+    <>
+      <circle cx="60" cy="60" r="46" stroke={INK} stroke-width="5" />
+      <circle cx="60" cy="60" r="30" stroke={INK} stroke-width="5" />
+      <circle cx="60" cy="60" r="12" fill={ORANGE} />
+    </>
+  )}
+
+  {name === 'disc' && (
+    <>
+      {/* The disc is whole ink except for what is taken out of it. */}
+      <path
+        d="M60 12a48 48 0 1 0 0 96 48 48 0 0 0 0-96Zm14 26a14 14 0 1 1 0 28 14 14 0 0 1 0-28Z"
+        fill={INK}
+        fill-rule="evenodd"
+      />
+      <circle cx="74" cy="52" r="9" fill={YELLOW} />
+    </>
+  )}
+
+  {name === 'arc' && (
+    <>
+      <path d="M16 88a44 44 0 0 1 88 0" stroke={INK} stroke-width="8" stroke-linecap="round" />
+      <line x1="60" y1="88" x2="60" y2="52" stroke={INK} stroke-width="6" stroke-linecap="round" />
+      <circle cx="60" cy="88" r="7" fill={ORANGE} />
+    </>
+  )}
+
+  {name === 'fader' &&
+    faders.map((fader) => (
+      <>
+        <line
+          x1={fader.x}
+          y1="18"
+          x2={fader.x}
+          y2="102"
+          stroke={INK}
+          stroke-width="3"
+          stroke-linecap="round"
+        />
+        <rect
+          x={fader.x - 8}
+          y={fader.thumb}
+          width="16"
+          height="10"
+          rx="5"
+          fill={fader.accent ? ORANGE : INK}
+        />
+      </>
+    ))}
+</svg>

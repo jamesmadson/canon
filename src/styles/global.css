@@ -139,6 +139,12 @@
   --font-weight-medium: 400;
   --font-weight-semibold: 500;
   --font-weight-bold: 500;
+
+  /* The only hues in the product, and they are quarantined here: nothing but
+     RamsMark and MeshPanel is allowed to read them. Chrome stays monochrome. */
+  --mark-ink: #1a1815;
+  --mark-orange: #ff4b12;
+  --mark-yellow: #e9b824;
 }
 
 /* Dark mode, and only inside the app.
@@ -162,6 +168,9 @@
   --color-rule: #35322f;
   --color-ink-soft: #9a968d;
   --color-ink: #edebe6;
+  --mark-ink: #edebe6;
+  --mark-orange: #ff5c28;
+  --mark-yellow: #f0c441;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -175,6 +184,9 @@
     --color-rule: #35322f;
     --color-ink-soft: #9a968d;
     --color-ink: #edebe6;
+    --mark-ink: #edebe6;
+    --mark-orange: #ff5c28;
+    --mark-yellow: #f0c441;
   }
 }
 

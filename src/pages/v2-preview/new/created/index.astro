@@ -26,7 +26,7 @@ const NEXT = [
   active="prototypes"
 >
   <p class="label">New prototype</p>
-  <h1 class="mt-1 text-xl font-bold tracking-tight">{NEW_PROTOTYPE.name} is ready</h1>
+  <h1 class="mt-1 display">{NEW_PROTOTYPE.name} is ready</h1>
 
   <div class="mt-6 max-w-xl rounded-md border border-rule bg-surface/40 px-4 py-3">
     <p class="label">Branch created</p>
@@ -42,7 +42,7 @@ const NEXT = [
     <h2 id="next-heading" class="mb-3 label">
       What happens next
     </h2>
-    <div class="overflow-hidden rounded-md border border-rule">
+    <div class="overflow-hidden rounded-md bg-panel">
       <div class="-mb-px">
         {NEXT.map((step) => (
           <div class="border-b border-rule bg-bg px-4 py-3">

@@ -28,8 +28,11 @@ const DEVICES = [
 ];
 ---
 
-<div class="overflow-hidden rounded-md border border-rule" data-device-preview={idBase}>
-  <div role="tablist" aria-label="Preview size" class="flex flex-wrap border-b border-rule">
+<div class="overflow-hidden rounded-md bg-panel" data-device-preview={idBase}>
+  {/* The size tabs are utility controls: rounded rects, with only the selected
+      one carrying a fill. No dividers — the gap does that job. The ink fill is
+      reserved for the one primary a view is allowed, and a tab is not it. */}
+  <div role="tablist" aria-label="Preview size" class="flex flex-wrap gap-[2px] p-1">
     {DEVICES.map((device, i) => (
       <button
         type="button"
@@ -39,7 +42,7 @@ const DEVICES = [
         aria-selected={i === 0 ? 'true' : 'false'}
         tabindex={i === 0 ? 0 : -1}
         data-device-tab={device.id}
-        class="min-h-11 flex-1 border-r border-rule bg-bg px-3 py-3 text-[13px] font-semibold whitespace-nowrap text-ink-soft transition-colors duration-[120ms] last:border-r-0 hover:bg-surface/50 hover:text-ink active:bg-surface aria-selected:bg-surface aria-selected:text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+        class="min-h-11 flex-1 rounded-[7px] px-3 py-3 text-[13px] font-semibold whitespace-nowrap text-ink-soft transition-colors duration-[120ms] hover:bg-recess/60 hover:text-ink active:scale-[0.96] aria-selected:bg-recess aria-selected:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
       >
         {device.label}
       </button>
@@ -53,14 +56,16 @@ const DEVICES = [
       aria-labelledby={`${idBase}-tab-${device.id}`}
       data-device-panel={device.id}
       hidden={i !== 0}
-      class="flex min-h-[300px] items-center justify-center bg-surface/30 px-4 py-6 sm:min-h-[560px]"
+      class="mx-1 flex min-h-[300px] items-center justify-center rounded-[7px] bg-recess px-4 py-6 sm:min-h-[560px]"
     >
+      {/* The bezel is a fill too: the frame is the panel, and the screen sits
+          in it as a hole. Radius stays concentric against the 6px bezel. */}
       <div
-        class="w-full bg-bg"
-        style={`max-width:${device.frame}px;border:1px solid var(--color-rule-strong);border-radius:${device.radius}px;padding:6px`}
+        class="w-full bg-panel"
+        style={`max-width:${device.frame}px;border-radius:${device.radius}px;padding:6px`}
       >
         <div
-          class="overflow-hidden border border-rule"
+          class="overflow-hidden bg-ground"
           style={`aspect-ratio:${device.w}/${device.h};border-radius:${Math.max(2, device.radius - 6)}px`}
         >
           <ScreenArt
@@ -74,7 +79,7 @@ const DEVICES = [
     </div>
   ))}
 
-  <p class="border-t border-rule px-4 py-2 text-[11px] font-medium text-ink-soft">
+  <p class="px-4 py-3 text-[11px] font-medium text-ink-soft">
     Wireframes, drawn for the preview — the real product frames the team's own
     running prototype. Sizes are the device's points, scaled to fit.
   </p>

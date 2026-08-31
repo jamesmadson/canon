@@ -37,32 +37,31 @@ const THEMES = [
     </span>
   </button>
 
+  {/* The menu floats over both the ground and the panels beneath it, and there
+      are no shadows to lift it — so it takes the recess, the one fill that
+      reads as distinct against either. */}
   <div
     id="account-menu"
     data-account-menu
     hidden
-    class="absolute right-0 z-20 mt-1 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-md border border-rule-strong bg-bg"
+    class="absolute right-0 z-20 mt-1 flex w-64 max-w-[calc(100vw-2rem)] flex-col gap-[2px] overflow-hidden rounded-md bg-recess p-1"
   >
-    <div class="border-b border-rule px-3 py-3">
+    <div class="rounded-sm bg-panel px-3 py-3">
       <p class="label">Signed in as</p>
       <p class="mt-1 font-mono text-[13px] break-all text-ink">{PROJECT.account}</p>
     </div>
 
-    <div class="border-b border-rule px-3 py-3">
+    <div class="rounded-sm bg-panel px-3 py-3">
       <p class="label" id="theme-label">
         Theme
       </p>
-      <div
-        class="mt-2 -mr-px -mb-px flex overflow-hidden rounded-sm border border-rule"
-        role="group"
-        aria-labelledby="theme-label"
-      >
+      <div class="mt-2 flex gap-[2px]" role="group" aria-labelledby="theme-label">
         {THEMES.map((theme) => (
           <button
             type="button"
             data-theme-option={theme.id}
             aria-pressed="false"
-            class="min-h-11 flex-1 border-r border-rule bg-bg px-2 text-[13px] font-semibold text-ink-soft transition-colors duration-[120ms] last:border-r-0 hover:bg-surface/60 hover:text-ink active:bg-surface aria-pressed:bg-surface aria-pressed:text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+            class="min-h-11 flex-1 rounded-[5px] px-2 text-[13px] font-semibold text-ink-soft transition-colors duration-[120ms] hover:bg-recess/60 hover:text-ink active:scale-[0.96] aria-pressed:bg-recess aria-pressed:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           >
             {theme.label}
           </button>
@@ -76,7 +75,7 @@ const THEMES = [
     <a
       href={withBase('/v2-preview/signin/')}
       data-account-signout
-      class="flex min-h-11 items-center px-3 text-[13px] font-semibold text-ink transition-colors duration-[120ms] hover:bg-surface/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+      class="flex min-h-11 items-center rounded-sm bg-panel px-3 text-[13px] font-semibold text-ink transition-colors duration-[120ms] hover:bg-recess focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
     >
       Sign out
     </a>

@@ -33,7 +33,7 @@ const LIFECYCLE = [
     ← Run a review
   </a>
 
-  <h1 class="mt-2 text-xl font-bold tracking-tight">Review run</h1>
+  <h1 class="mt-2 display">Review run</h1>
   <p class="mt-1 font-mono text-[13px] break-all text-ink-soft">{SCRIPTED_RUN.target}</p>
 
   <section class="mt-6" aria-labelledby="lifecycle-heading">
@@ -43,7 +43,7 @@ const LIFECYCLE = [
     >
       What happened
     </h2>
-    <ol class="max-w-xl overflow-hidden rounded-md border border-rule">
+    <ol class="max-w-xl overflow-hidden rounded-md bg-panel">
       {LIFECYCLE.map((stage) => (
         <li class="flex items-start gap-3 border-b border-rule bg-bg px-4 py-3 last:border-b-0">
           <span class="mt-1">
@@ -73,7 +73,7 @@ const LIFECYCLE = [
         {SCRIPTED_RUN.findings.length} removals · 1 kept
       </p>
     </div>
-    <div class="overflow-hidden rounded-md border border-rule">
+    <div class="overflow-hidden rounded-md bg-panel">
       <ReviewRunCard run={SCRIPTED_RUN} />
     </div>
     <p class="mt-2 max-w-2xl text-[11px] leading-relaxed font-medium text-ink-soft">

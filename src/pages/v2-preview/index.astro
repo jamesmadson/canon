@@ -65,7 +65,7 @@ const RECORD_LINKS = [
 >
   <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
     <div class="min-w-0">
-      <h1 class="text-2xl font-bold tracking-tight">{PROJECT.name}</h1>
+      <h1 class="display">{PROJECT.name}</h1>
       <p class="mt-1 text-base font-medium text-ink-soft">{PROJECT.tagline}</p>
     </div>
     <a href={withBase('/v2-preview/new/')} class="btn btn-primary">New prototype</a>
@@ -75,21 +75,21 @@ const RECORD_LINKS = [
     {PROJECT.blurb}
   </p>
 
-  <div class="mt-6 overflow-hidden rounded-md border border-rule">
-    <dl class="-mr-px -mb-px grid grid-cols-2 lg:grid-cols-4">
-      {STATS.map((stat) => (
-        <div class="flex flex-col gap-1 border-r border-b border-rule bg-bg px-4 py-3">
-          <dt class="label">
-            {stat.label}
-          </dt>
-          <dd class="text-2xl leading-none font-semibold tracking-tight text-ink tabular-nums">
-            {stat.value}
-          </dd>
-          <dd class="text-[11px] font-medium text-ink-soft tabular-nums">{stat.note}</dd>
-        </div>
-      ))}
-    </dl>
-  </div>
+  {/* Four fills separated by a real gap, not four cells of one bordered table.
+      An empty track would now show the ground rather than a hairline box. */}
+  <dl class="mt-6 grid grid-cols-2 gap-[10px] lg:grid-cols-4">
+    {STATS.map((stat) => (
+      <div class="flex flex-col gap-1 rounded-md bg-panel px-4 py-3">
+        <dt class="label">
+          {stat.label}
+        </dt>
+        <dd class="text-[28px] leading-none font-extralight tracking-[-0.03em] text-ink tabular-nums">
+          {stat.value}
+        </dd>
+        <dd class="text-[11px] font-medium text-ink-soft tabular-nums">{stat.note}</dd>
+      </div>
+    ))}
+  </dl>
 
   <div class="mt-6 flex flex-col gap-2 border-t border-rule pt-4 sm:flex-row sm:items-start sm:gap-8">
     <dl class="flex flex-col gap-2 text-[13px] font-medium sm:flex-row sm:gap-8">
@@ -135,10 +135,8 @@ const RECORD_LINKS = [
       </p>
     </div>
 
-    <div class="overflow-hidden rounded-md border border-rule">
-      <div class="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-2">
-        {PROTOTYPES.map((prototype) => <PrototypeCard prototype={prototype} />)}
-      </div>
+    <div class="grid grid-cols-1 gap-[10px] sm:grid-cols-2">
+      {PROTOTYPES.map((prototype) => <PrototypeCard prototype={prototype} />)}
     </div>
 
     <p class="mt-4 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
@@ -172,20 +170,18 @@ const RECORD_LINKS = [
       </p>
     </div>
 
-    <div class="overflow-hidden rounded-md border border-rule">
-      <div class="-mr-px -mb-px grid grid-cols-1 sm:grid-cols-2">
-        {RECORD_LINKS.map((link) => (
-          <a
-            href={withBase(link.href)}
-            class="group flex flex-col gap-1 border-r border-b border-rule bg-bg px-4 py-4 transition-colors duration-[120ms] hover:border-rule-strong hover:bg-surface/30 active:bg-surface/50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
-          >
-            <span class="text-base font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors group-hover:decoration-ink">
-              {link.label}
-            </span>
-            <span class="text-[13px] leading-relaxed font-medium text-ink-soft">{link.line}</span>
-          </a>
-        ))}
-      </div>
+    <div class="grid grid-cols-1 gap-[10px] sm:grid-cols-2">
+      {RECORD_LINKS.map((link) => (
+        <a
+          href={withBase(link.href)}
+          class="group flex flex-col gap-1 rounded-md bg-panel px-4 py-4 transition-colors duration-[120ms] hover:bg-recess active:bg-recess focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+        >
+          <span class="text-base font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors group-hover:decoration-ink">
+            {link.label}
+          </span>
+          <span class="text-[13px] leading-relaxed font-medium text-ink-soft">{link.line}</span>
+        </a>
+      ))}
     </div>
 
     <p class="mt-2 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">

@@ -37,7 +37,7 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
     ← The record
   </a>
 
-  <h1 class="mt-2 text-2xl font-bold tracking-tight">The open report</h1>
+  <h1 class="mt-2 display">The open report</h1>
   <p class="mt-1 text-[13px] font-medium text-ink-soft tabular-nums">
     {PROJECT.name} · {RECORD_ENTRIES.length} entries as of {PREVIEW_AS_OF}
   </p>
@@ -71,7 +71,7 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
     </div>
 
     {patterns.length > 0 ? (
-      <div class="overflow-hidden rounded-md border border-rule">
+      <div class="overflow-hidden rounded-md bg-panel">
         {patterns.map((theme) => {
           const quote = representative(theme.entries);
           return (
@@ -115,7 +115,7 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
       </p>
     </div>
 
-    <div class="overflow-hidden rounded-md border border-rule">
+    <div class="overflow-hidden rounded-md bg-panel">
       {possible.map((theme) => {
         const quote = representative(theme.entries);
         return (
@@ -157,7 +157,7 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
       </p>
     </div>
 
-    <div class="overflow-hidden rounded-md border border-rule">
+    <div class="overflow-hidden rounded-md bg-panel">
       {loops.map((theme) => {
         const quote = representative(theme.entries);
         return (
