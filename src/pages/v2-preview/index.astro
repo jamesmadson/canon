@@ -11,6 +11,7 @@ import {
   RECORD_ENTRIES,
   FIGMA_PROTOTYPES,
   GIT_PROTOTYPES,
+  MEMBERS,
   OPENED_SINCE,
   PREVIEW_AS_OF,
   PROJECT,
@@ -103,6 +104,17 @@ const RECORD_LINKS = [
       <div>
         <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Access</dt>
         <dd class="mt-1 text-ink">Read-only</dd>
+      </div>
+      <div>
+        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">People</dt>
+        <dd class="mt-1 text-ink tabular-nums">
+          <a
+            href={withBase('/v2-preview/members/')}
+            class="font-semibold underline decoration-rule-strong underline-offset-4 transition-colors duration-[120ms] hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            {MEMBERS.length} members
+          </a>
+        </dd>
       </div>
     </dl>
     <a
