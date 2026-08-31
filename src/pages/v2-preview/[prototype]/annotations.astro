@@ -59,12 +59,12 @@ const filed = pins.length - drafts;
       <h2 id="frame-heading" class="border-b border-rule px-4 py-2 label">
         The build
       </h2>
-      <div class="flex items-center justify-center bg-surface/30 px-4 py-6">
+      <div class="mx-1 flex items-center justify-center rounded-[7px] bg-recess px-4 py-6">
         <div
-          class="relative w-full max-w-[240px] bg-bg"
-          style="border:1px solid var(--color-rule-strong);border-radius:22px;padding:6px"
+          class="relative w-full max-w-[240px] bg-panel"
+          style="border-radius:22px;padding:6px"
         >
-          <div class="overflow-hidden border border-rule" style="aspect-ratio:390/844;border-radius:16px">
+          <div class="overflow-hidden bg-ground" style="aspect-ratio:390/844;border-radius:16px">
             <ScreenArt
               screen={prototype.screen!}
               w={390}
@@ -92,7 +92,7 @@ const filed = pins.length - drafts;
           ))}
         </div>
       </div>
-      <p class="border-t border-rule px-4 py-2 text-[11px] leading-relaxed font-medium text-ink-soft">
+      <p class="px-4 py-3 text-[11px] leading-relaxed font-medium text-ink-soft">
         A wireframe stands in for the running build here. Press a pin to bring its comment
         forward.
       </p>
@@ -100,11 +100,11 @@ const filed = pins.length - drafts;
 
     <section class="min-w-0" aria-labelledby="comments-heading">
       <h2 id="comments-heading" class="sr-only">Comments</h2>
-      <div class="overflow-hidden rounded-md bg-panel">
+      <div class="flex flex-col gap-[10px]">
         {pins.map((pin) => (
           <article
             data-comment={pin.n}
-            class="border-b border-rule bg-bg px-4 py-4 transition-colors duration-[120ms] last:border-b-0 data-[active]:bg-surface/40"
+            class="rounded-md bg-panel px-4 py-4 transition-colors duration-[120ms] data-[active]:bg-recess"
           >
             <header class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
               <span
@@ -117,10 +117,8 @@ const filed = pins.length - drafts;
               <span class="text-[11px] font-medium text-ink-soft tabular-nums">{pin.date}</span>
               <span
                 class:list={[
-                  'ml-auto rounded-sm px-2 py-1 text-[11px] font-semibold whitespace-nowrap',
-                  pin.status === 'filed'
-                    ? 'border border-rule-strong text-ink'
-                    : 'border border-rule text-ink-soft',
+                  'ml-auto rounded-full bg-recess px-2 py-1 text-[11px] font-semibold whitespace-nowrap',
+                  pin.status === 'filed' ? 'text-ink' : 'text-ink-soft',
                 ]}
               >
                 {pin.status === 'filed' ? 'Filed' : 'Draft → record'}
@@ -147,7 +145,7 @@ const filed = pins.length - drafts;
             {pin.draft && (
               <div class="mt-3" data-file>
                 <div data-file-step="idle">
-                  <button type="button" data-file-start class="btn btn-quiet">
+                  <button type="button" data-file-start class="btn btn-utility">
                     File as record entry
                   </button>
                   <p class="mt-2 max-w-2xl text-[11px] leading-relaxed font-medium text-ink-soft">
@@ -158,10 +156,10 @@ const filed = pins.length - drafts;
 
                 <div data-file-step="drafted" hidden>
                   <div class="overflow-hidden rounded-md bg-panel">
-                    <p class="border-b border-rule bg-surface/50 px-4 py-2 label">
+                    <p class="bg-recess px-4 py-2 label">
                       Drafted — awaiting your confirmation
                     </p>
-                    <dl class="flex flex-col gap-3 bg-bg px-4 py-4">
+                    <dl class="flex flex-col gap-3 px-4 py-4">
                       <div>
                         <dt class="label">
                           Said
@@ -205,7 +203,7 @@ const filed = pins.length - drafts;
                 </div>
 
                 <div data-file-step="done" hidden>
-                  <p class="rounded-md border border-rule-strong px-4 py-3 text-[13px] leading-relaxed font-medium text-ink">
+                  <p class="rounded-md bg-recess px-4 py-3 text-[13px] leading-relaxed font-medium text-ink">
                     Filed. The comment stays pinned here and the entry lives in{' '}
                     <a
                       href={withBase('/v2-preview/research/')}
@@ -250,9 +248,8 @@ const filed = pins.length - drafts;
 </AppShell>
 
 <style>
-  [data-comment][data-active] {
-    box-shadow: inset 2px 0 0 var(--color-ink);
-  }
+  /* The active comment used to carry an inset bar. There are no shadows in
+     this design, and it does not need one: the recess fill says it. */
   [data-pin][data-active] [data-pin-dot] {
     transform: scale(1.25);
   }

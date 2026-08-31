@@ -71,11 +71,11 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
     </div>
 
     {patterns.length > 0 ? (
-      <div class="overflow-hidden rounded-md bg-panel">
+      <div class="flex flex-col gap-[10px]">
         {patterns.map((theme) => {
           const quote = representative(theme.entries);
           return (
-            <article class="border-b border-rule bg-bg px-4 py-4 last:border-b-0">
+            <article class="rounded-md bg-panel px-4 py-4">
               <header class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                 <h3 class="text-base font-semibold tracking-tight text-ink">{theme.theme}</h3>
                 <span class="rounded-full bg-recess px-2 py-1 text-[11px] font-semibold whitespace-nowrap text-ink tabular-nums">
@@ -99,7 +99,7 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
         })}
       </div>
     ) : (
-      <p class="rounded-md border border-rule px-4 py-4 text-[13px] font-medium text-ink-soft">
+      <p class="rounded-md bg-panel px-4 py-4 text-[13px] font-medium text-ink-soft">
         Nothing has three voices behind it yet.
       </p>
     )}
@@ -115,11 +115,11 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
       </p>
     </div>
 
-    <div class="overflow-hidden rounded-md bg-panel">
+    <div class="flex flex-col gap-[10px]">
       {possible.map((theme) => {
         const quote = representative(theme.entries);
         return (
-          <article class="border-b border-rule bg-bg px-4 py-4 last:border-b-0">
+          <article class="rounded-md bg-panel px-4 py-4">
             <header class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
               <h3 class="text-base font-semibold tracking-tight text-ink">{theme.theme}</h3>
               <span class="rounded-full bg-recess px-2 py-1 text-[11px] font-semibold whitespace-nowrap text-ink-soft tabular-nums">
@@ -157,11 +157,11 @@ function representative(entries: (typeof RECORD_ENTRIES)[number][]) {
       </p>
     </div>
 
-    <div class="overflow-hidden rounded-md bg-panel">
+    <div class="flex flex-col gap-[10px]">
       {loops.map((theme) => {
         const quote = representative(theme.entries);
         return (
-          <div class="border-b border-rule bg-bg px-4 py-4 last:border-b-0">
+          <div class="rounded-md bg-panel px-4 py-4">
             <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
               <p class="text-base font-semibold text-ink">{theme.theme}</p>
               <span class="rounded-full bg-recess px-2 py-1 text-[11px] font-semibold whitespace-nowrap text-ink-soft tabular-nums">

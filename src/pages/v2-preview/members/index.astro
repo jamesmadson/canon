@@ -41,10 +41,10 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
       People
     </h2>
 
-    <div class="overflow-hidden rounded-md bg-panel">
-      <ul class="-mb-px">
+    <div>
+      <ul class="flex flex-col gap-[10px]">
         {MEMBERS.map((member) => (
-          <li class="flex flex-wrap items-start gap-x-3 gap-y-2 border-b border-rule bg-bg px-4 py-4">
+          <li class="flex flex-wrap items-start gap-x-3 gap-y-2 rounded-md bg-panel px-4 py-4">
             <span
               aria-hidden="true"
               class="flex size-8 shrink-0 items-center justify-center rounded-full bg-recess text-[11px] font-semibold text-ink"
@@ -97,12 +97,12 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
     </h2>
 
     <div class="overflow-hidden rounded-md bg-panel">
-      <p class="border-b border-rule bg-surface/50 px-4 py-2 label">
+      <p class="bg-recess px-4 py-2 label">
         Anyone with this link can join {PROJECT.name}
       </p>
-      <p class="bg-bg px-4 py-3 font-mono text-[13px] break-all text-ink">{inviteLink}</p>
-      <div class="flex flex-wrap items-center gap-3 border-t border-rule px-4 py-3">
-        <button type="button" class="btn btn-quiet" data-invite-copy data-label="Copy link">
+      <p class="px-4 py-3 font-mono text-[13px] break-all text-ink">{inviteLink}</p>
+      <div class="flex flex-wrap items-center gap-3 px-4 pb-3">
+        <button type="button" class="btn btn-utility" data-invite-copy data-label="Copy link">
           Copy link
         </button>
         <button type="button" class="btn btn-quiet" data-invite-new>New link</button>
@@ -115,7 +115,7 @@ const designers = MEMBERS.filter((m) => m.role === 'Design').length;
       product a new link retires the old one.
     </p>
 
-    <div class="mt-6 rounded-md border border-rule px-4 py-3">
+    <div class="mt-6 rounded-md bg-panel px-4 py-3">
       <p class="text-sm leading-relaxed font-medium text-ink">
         Personal accounts and invite links now. Teams later.
       </p>

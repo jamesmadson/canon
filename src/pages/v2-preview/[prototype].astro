@@ -1,6 +1,8 @@
 ---
 import AppShell from '../../components/AppShell.astro';
 import DevicePreview from '../../components/DevicePreview.astro';
+import MeshPanel from '../../components/MeshPanel.astro';
+import RamsMark from '../../components/RamsMark.astro';
 import FeedbackEntryCard from '../../components/FeedbackEntryCard.astro';
 import ReviewRunCard from '../../components/ReviewRunCard.astro';
 import ScriptedCopyButton from '../../components/ScriptedCopyButton.astro';
@@ -69,18 +71,17 @@ const pins = annotationsFor(prototype.slug);
       <DevicePreview screen={prototype.screen} screenName={prototype.name} idBase="device" />
     ) : (
       <div class="overflow-hidden rounded-md bg-panel">
-        <div class="flex min-h-[300px] items-center justify-center bg-surface/30 px-4 py-6 sm:min-h-[420px]">
-          <div
-            class="flex w-full max-w-[240px] flex-col items-center justify-center gap-2 px-6 py-10 text-center"
-            style="aspect-ratio:390/844;border:1px dashed var(--color-rule-strong);border-radius:22px"
-          >
-            <p class="text-base leading-relaxed font-medium text-ink-soft">
-              <strong class="font-semibold text-ink">No capture yet</strong> — this prototype
-              hasn't run anywhere Canon can see.
-            </p>
-          </div>
-        </div>
-        <p class="border-t border-rule px-4 py-2 text-[11px] font-medium text-ink-soft">
+        {/* An empty state is one of the four places a mark is allowed. The arc
+            is the frame with nothing in it — drawn, rather than a dashed
+            rectangle pretending to be a phone. */}
+        <MeshPanel radius="sm" class="m-1 flex min-h-[300px] flex-col items-center justify-center gap-5 px-6 py-10 text-center sm:min-h-[420px]">
+          <RamsMark name="arc" size={88} />
+          <p class="max-w-xs text-base leading-relaxed font-medium text-ink-soft">
+            <strong class="font-semibold text-ink">No capture yet</strong> — this prototype
+            hasn't run anywhere Canon can see.
+          </p>
+        </MeshPanel>
+        <p class="px-4 py-3 text-[11px] font-medium text-ink-soft">
           The frame stays empty until there is something to frame. Canon will not draw a
           placeholder screen and let it pass for the work.
         </p>
@@ -91,17 +92,17 @@ const pins = annotationsFor(prototype.slug);
   <section class="mt-4" aria-labelledby="comments-heading">
     <h2 id="comments-heading" class="sr-only">Comments</h2>
     {pins.length > 0 ? (
-      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-rule px-4 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md bg-panel px-4 py-3">
         <p class="max-w-xl text-[13px] leading-relaxed font-medium text-ink-soft">
           <span class="font-semibold text-ink tabular-nums">{pins.length} comments</span> pinned to
           this build. They file into the record as drafts a person confirms.
         </p>
-        <a href={withBase(`/v2-preview/${prototype.slug}/annotations/`)} class="btn btn-quiet">
+        <a href={withBase(`/v2-preview/${prototype.slug}/annotations/`)} class="btn btn-utility">
           Open comments
         </a>
       </div>
     ) : (
-      <p class="rounded-md border border-rule px-4 py-3 text-[13px] font-medium text-ink-soft">
+      <p class="rounded-md bg-panel px-4 py-3 text-[13px] font-medium text-ink-soft">
         No comments pinned to this build yet.
       </p>
     )}
@@ -133,9 +134,9 @@ const pins = annotationsFor(prototype.slug);
       Sources
     </h2>
     <div class="overflow-hidden rounded-md bg-panel">
-      <dl class="-mb-px">
+      <dl>
         {prototype.sources.map((s) => (
-          <div class="flex flex-col gap-1 border-b border-rule px-4 py-3 sm:flex-row sm:gap-4">
+          <div class="flex flex-col gap-1 border-b border-rule px-4 py-3 last:border-b-0 sm:flex-row sm:gap-4">
             <dt class="label sm:w-28 sm:shrink-0">
               {s.label}
             </dt>
@@ -169,11 +170,11 @@ const pins = annotationsFor(prototype.slug);
     </p>
 
     {record.feedback.length > 0 ? (
-      <div class="overflow-hidden rounded-md bg-panel">
+      <div class="flex flex-col gap-[10px]">
         {record.feedback.map((entry) => <FeedbackEntryCard entry={entry} />)}
       </div>
     ) : (
-      <div class="rounded-md border border-rule px-4 py-4 text-[13px] font-medium text-ink-soft">
+      <div class="rounded-md bg-panel px-4 py-4 text-[13px] font-medium text-ink-soft">
         {record.emptyFeedbackNote}
       </div>
     )}
@@ -192,7 +193,7 @@ const pins = annotationsFor(prototype.slug);
         <ReviewRunCard run={record.review} />
       </div>
     ) : (
-      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-rule px-4 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md bg-panel px-4 py-3">
         <p class="text-[13px] font-medium text-ink-soft">
           No run yet. Reviews are triggered by a person, never on every push.
         </p>
@@ -218,7 +219,7 @@ const pins = annotationsFor(prototype.slug);
     </h2>
 
     <div class="overflow-hidden rounded-md bg-panel">
-      <div class="flex flex-wrap items-start gap-x-3 gap-y-2 border-b border-rule bg-bg px-4 py-4">
+      <div class="flex flex-wrap items-start gap-x-3 gap-y-2 border-b border-rule px-4 py-4">
         <span
           aria-hidden="true"
           class="flex size-8 shrink-0 items-center justify-center rounded-full bg-recess text-[11px] font-semibold text-ink"
@@ -242,7 +243,7 @@ const pins = annotationsFor(prototype.slug);
         </span>
       </div>
 
-      <div class="flex flex-col gap-1 border-b border-rule bg-bg px-4 py-3 sm:flex-row sm:items-baseline sm:gap-4">
+      <div class="flex flex-col gap-1 border-b border-rule px-4 py-3 sm:flex-row sm:items-baseline sm:gap-4">
         <p class="label sm:w-28 sm:shrink-0">
           Graduated
         </p>
@@ -255,7 +256,7 @@ const pins = annotationsFor(prototype.slug);
         </p>
       </div>
 
-      <div class="bg-bg px-4 py-4">
+      <div class="px-4 py-4">
         <ScriptedCopyButton
           label="Copy the context"
           note="Copies a brief an agent or an engineer can start from: the branch, the screen, the entries filed against it and what was decided. Scripted here — the clipboard stays empty."
@@ -274,22 +275,20 @@ const pins = annotationsFor(prototype.slug);
     <h2 id="others-heading" class="mb-3 label">
       Elsewhere in {PROJECT.name}
     </h2>
-    <div class="overflow-hidden rounded-md bg-panel">
-      <div class="-mb-px">
-        {others.map((other) => (
-          <a
-            href={withBase(`/v2-preview/${other.slug}/`)}
-            class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-rule bg-bg px-4 py-3 transition-colors duration-[120ms] hover:border-rule-strong hover:bg-surface/60 active:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
-          >
-            <span class="text-base font-semibold text-ink underline decoration-rule-strong underline-offset-4">
-              {other.name}
-            </span>
-            <span class="text-[11px] font-medium text-ink-soft tabular-nums">
-              {other.author} · {updatedLabel(other.lastActivity, PREVIEW_AS_OF)}
-            </span>
-          </a>
-        ))}
-      </div>
+    <div class="flex flex-col gap-[10px]">
+      {others.map((other) => (
+        <a
+          href={withBase(`/v2-preview/${other.slug}/`)}
+          class="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 rounded-md bg-panel px-4 py-3 transition-colors duration-[120ms] hover:bg-recess active:bg-recess focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
+        >
+          <span class="text-base font-semibold text-ink underline decoration-rule-strong underline-offset-4">
+            {other.name}
+          </span>
+          <span class="text-[11px] font-medium text-ink-soft tabular-nums">
+            {other.author} · {updatedLabel(other.lastActivity, PREVIEW_AS_OF)}
+          </span>
+        </a>
+      ))}
     </div>
   </section>
 
