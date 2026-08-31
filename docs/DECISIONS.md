@@ -257,3 +257,45 @@ Survey, promotion, Linear, the contextual skills, and the CLI remain
 sequenced or held, unbuilt until the ladder clears them. The positioning
 sentence tightens to match: prototypes in one place, feedback that
 becomes evidence.
+
+### D-36 · The interface language: grey housing, thin type, surfaces — 2026-08-31
+The app takes a Rams / Teenage Engineering direction: warm-grey monochrome
+ground (the faint warmth is the palette's one opinion), Public Sans with
+weight-200 display, IBM Plex Mono for silkscreen-style labels, radii up to
+9/11/14, fills instead of borders, and a four-value button ladder where at
+most one solid-ink primary appears per view. D-01 stands unchanged:
+emphasis is value, never hue. Akzidenz-Grotesk was the reference; Public
+Sans chosen over paying for Berthold or Aktiv. Orange as a CTA accent was
+proposed and rejected: Canon's primary action color is ink. Open: whether
+the gallery site adopts the same language or keeps its own.
+
+### D-37 · Color lives in illustrations only — 2026-08-31
+Orange and yellow enter the system exclusively inside flat, Rams-inspired
+geometric marks: each mark mostly ink with a single colored element, no
+texture or grain, optionally set on a warm mesh-gradient panel. This is
+D-01's own reasoning extended, not an exception to it: subjects supply the
+color, and illustrations are subjects; interface chrome is frame and stays
+monochrome, so a colored control remains a defect. Copy-machine texture
+was tried in the direction page and cut the same day: clean and sterile.
+
+### D-38 · The voice: considered, and no dashes — 2026-08-31
+Product copy is clear, concise, and professional, the way Rams wrote:
+authoritative but helpful. No en or em dashes anywhere in product copy;
+restructure the sentence instead. The voice gets encoded three ways so it
+survives contact with generated text: a guidelines section with rewrite
+pairs, a copy skill in the contextual-skills lineup, and a lint test that
+makes the dash rule testable the way D-01 is.
+
+### D-39 · The mark: the name, and a lined circle behind it — 2026-08-31
+No logo icon in the lockup; the wordmark alone. The brand mark, where one
+is needed, is a circle whose default form is the lined speaker-grille
+circle from the Braun vocabulary, swapping to sibling geometric forms
+(dots, rings, disc) in hover states and motion. Animation throughout the
+product is subtle and deferred: dialed in later, never scattered.
+
+### D-40 · The decision log becomes a page: numbered, horizontal — 2026-08-31
+The design rules and guidelines publish as a horizontally scrolling grid
+in the manner of the Vitsœ ten-principles poster: oversized thin numerals,
+D-01 through D-NN, each with its call in a sentence. The log's numbering
+is already the content; the page is a view of this file, derived, never
+retyped.
