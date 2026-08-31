@@ -1,0 +1,309 @@
+---
+import AppShell from '../../../components/AppShell.astro';
+import ScreenArt from '../../../components/ScreenArt.astro';
+import { withBase } from '../../../lib/withBase';
+import { ANNOTATIONS, PROTOTYPES, type Annotation, type Prototype } from '../../../data/v2Preview';
+
+/**
+ * The annotation layer.
+ *
+ * Comments anchor to the running build — a pin names an element, not a pixel —
+ * and file into the record as drafts a person confirms. Only prototypes that
+ * have comments get a page; a prototype with none has nothing to show and its
+ * detail page says so instead of linking here.
+ */
+export function getStaticPaths() {
+  return PROTOTYPES.filter((p) => ANNOTATIONS[p.slug]?.length).map((prototype) => ({
+    params: { prototype: prototype.slug },
+    props: { prototype, pins: ANNOTATIONS[prototype.slug] },
+  }));
+}
+
+interface Props {
+  prototype: Prototype;
+  pins: Annotation[];
+}
+
+const { prototype, pins } = Astro.props;
+const drafts = pins.filter((pin) => pin.status === 'draft').length;
+const filed = pins.length - drafts;
+---
+
+<AppShell
+  title={`Canon v2 preview — ${prototype.name} comments`}
+  description="A scripted preview of Canon v2's annotation layer: comments pinned to a running prototype, filed into the record as drafts a person confirms."
+  active="prototypes"
+>
+  <a
+    href={withBase(`/v2-preview/${prototype.slug}/`)}
+    class="-ml-1 inline-flex min-h-11 items-center px-1 text-[13px] font-medium text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    ← {prototype.name}
+  </a>
+
+  <div class="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+    <h1 class="text-2xl font-bold tracking-tight">Comments</h1>
+    <p class="text-[11px] font-medium text-ink-soft tabular-nums">
+      {pins.length} pinned · {drafts} draft · {filed} filed
+    </p>
+  </div>
+  <p class="mt-1 font-mono text-[13px] break-all text-ink-soft">{prototype.ref}</p>
+
+  <p class="mt-3 max-w-2xl text-[15px] leading-relaxed font-medium text-ink-soft">
+    Comments anchor to the running build, and they file into the record as drafts a person
+    confirms — nothing becomes evidence on its&nbsp;own.
+  </p>
+
+  <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]" data-pins>
+    <section class="overflow-hidden rounded-md border border-rule" aria-labelledby="frame-heading">
+      <h2 id="frame-heading" class="border-b border-rule px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+        The build
+      </h2>
+      <div class="flex items-center justify-center bg-surface/30 px-4 py-6">
+        <div
+          class="relative w-full max-w-[240px] bg-bg"
+          style="border:1px solid var(--color-rule-strong);border-radius:22px;padding:6px"
+        >
+          <div class="overflow-hidden border border-rule" style="aspect-ratio:390/844;border-radius:16px">
+            <ScreenArt
+              screen={prototype.screen!}
+              w={390}
+              h={844}
+              label={`${prototype.name} — phone wireframe with ${pins.length} comment pins`}
+            />
+          </div>
+
+          {pins.map((pin) => (
+            <button
+              type="button"
+              data-pin={pin.n}
+              aria-label={`Comment ${pin.n} — ${pin.anchor}`}
+              class="absolute flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              style={`left:${pin.x}%;top:${pin.y}%`}
+            >
+              <span
+                aria-hidden="true"
+                class="flex size-7 items-center justify-center rounded-full border border-bg bg-ink text-[11px] font-semibold text-bg tabular-nums transition-transform duration-[120ms]"
+                data-pin-dot
+              >
+                {pin.n}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <p class="border-t border-rule px-4 py-2 text-[11px] leading-relaxed font-medium text-ink-soft">
+        A wireframe stands in for the running build here. Press a pin to bring its comment
+        forward.
+      </p>
+    </section>
+
+    <section class="min-w-0" aria-labelledby="comments-heading">
+      <h2 id="comments-heading" class="sr-only">Comments</h2>
+      <div class="overflow-hidden rounded-md border border-rule">
+        {pins.map((pin) => (
+          <article
+            data-comment={pin.n}
+            class="border-b border-rule bg-bg px-4 py-4 transition-colors duration-[120ms] last:border-b-0 data-[active]:bg-surface/40"
+          >
+            <header class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <span
+                aria-hidden="true"
+                class="flex size-6 shrink-0 items-center justify-center rounded-full border border-rule-strong text-[11px] font-semibold text-ink tabular-nums"
+              >
+                {pin.n}
+              </span>
+              <span class="text-[15px] font-semibold text-ink">{pin.author}</span>
+              <span class="text-[11px] font-medium text-ink-soft tabular-nums">{pin.date}</span>
+              <span
+                class:list={[
+                  'ml-auto rounded-sm px-2 py-1 text-[11px] font-semibold whitespace-nowrap',
+                  pin.status === 'filed'
+                    ? 'border border-rule-strong text-ink'
+                    : 'border border-rule text-ink-soft',
+                ]}
+              >
+                {pin.status === 'filed' ? 'Filed' : 'Draft → record'}
+              </span>
+            </header>
+
+            <p class="mt-2 font-mono text-[11px] break-words text-ink-soft">{pin.anchor}</p>
+
+            <p class="mt-2 text-[15px] leading-relaxed font-medium text-ink">{pin.comment}</p>
+
+            {pin.status === 'filed' && pin.entryId && (
+              <p class="mt-3 text-[13px] font-medium text-ink-soft">
+                Became entry{' '}
+                <a
+                  href={withBase(`/v2-preview/research/#${pin.entryId}`)}
+                  class="font-mono text-[13px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                >
+                  {pin.entryId}
+                </a>{' '}
+                in the record.
+              </p>
+            )}
+
+            {pin.draft && (
+              <div class="mt-3" data-file>
+                <div data-file-step="idle">
+                  <button type="button" data-file-start class="btn btn-quiet">
+                    File as record entry
+                  </button>
+                  <p class="mt-2 max-w-2xl text-[11px] leading-relaxed font-medium text-ink-soft">
+                    Drafts the entry and hands it back to you. Canon does not file its own reading
+                    of what somebody meant.
+                  </p>
+                </div>
+
+                <div data-file-step="drafted" hidden>
+                  <div class="overflow-hidden rounded-md border border-rule-strong">
+                    <p class="border-b border-rule bg-surface/50 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                      Drafted — awaiting your confirmation
+                    </p>
+                    <dl class="flex flex-col gap-3 bg-bg px-4 py-4">
+                      <div>
+                        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                          Said
+                        </dt>
+                        <dd class="mt-1 border-l border-rule-strong pl-3 text-[15px] leading-relaxed font-medium text-ink">
+                          “{pin.draft.said}”
+                        </dd>
+                      </div>
+                      <div>
+                        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                          Meant <span class="font-medium normal-case">— unverified</span>
+                        </dt>
+                        <dd class="mt-1 border-l border-rule pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+                          {pin.draft.meant}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                          Decided
+                        </dt>
+                        <dd class="mt-1 border-l border-rule pl-3 text-[13px] leading-relaxed font-medium text-ink-soft">
+                          —
+                        </dd>
+                      </div>
+                      <div>
+                        <dt class="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                          Attributed to
+                        </dt>
+                        <dd class="mt-1 border-l border-rule pl-3 font-mono text-[13px] text-ink">
+                          {pin.draft.speaker}
+                        </dd>
+                      </div>
+                    </dl>
+                    <div class="flex flex-wrap items-center gap-3 border-t border-rule px-4 py-3">
+                      <button type="button" data-file-confirm class="btn btn-primary">
+                        Confirm entry
+                      </button>
+                      <button type="button" data-file-cancel class="btn btn-quiet">Keep as a comment</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div data-file-step="done" hidden>
+                  <p class="rounded-md border border-rule-strong px-4 py-3 text-[13px] leading-relaxed font-medium text-ink">
+                    Filed. The comment stays pinned here and the entry lives in{' '}
+                    <a
+                      href={withBase('/v2-preview/research/')}
+                      class="font-semibold underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                    >
+                      the record
+                    </a>
+                    . This preview keeps no state, so the record is unchanged.
+                  </p>
+                  <div class="mt-3">
+                    <button type="button" data-file-reset class="btn btn-quiet">Undo</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </article>
+        ))}
+      </div>
+
+      <p class="mt-3 max-w-2xl text-[13px] leading-relaxed font-medium text-ink-soft">
+        A comment is not evidence. It becomes evidence when somebody confirms the entry it drafted,
+        which is where the pseudonym, the date, and your name on the Meant line come&nbsp;from.
+      </p>
+    </section>
+  </div>
+
+  <a
+    slot="footer-nav"
+    href={withBase('/v2-preview/research/')}
+    class="flex min-h-11 items-center font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Next screen — the record
+  </a>
+
+  <a
+    slot="footer-nav"
+    href={withBase(`/v2-preview/${prototype.slug}/`)}
+    class="flex min-h-11 items-center text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+  >
+    Back to {prototype.name}
+  </a>
+</AppShell>
+
+<style>
+  [data-comment][data-active] {
+    box-shadow: inset 2px 0 0 var(--color-ink);
+  }
+  [data-pin][data-active] [data-pin-dot] {
+    transform: scale(1.25);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-pin-dot] {
+      transition-duration: 0s;
+    }
+  }
+</style>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-pins]')) {
+    const pins = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-pin]'));
+    const comments = Array.from(root.querySelectorAll<HTMLElement>('[data-comment]'));
+
+    function select(n: string) {
+      for (const pin of pins) pin.toggleAttribute('data-active', pin.dataset.pin === n);
+      for (const comment of comments) {
+        const active = comment.dataset.comment === n;
+        comment.toggleAttribute('data-active', active);
+        if (active) comment.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+
+    for (const pin of pins) {
+      pin.addEventListener('click', () => select(pin.dataset.pin!));
+    }
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-file]')) {
+    const steps = new Map<string, HTMLElement>();
+    for (const step of root.querySelectorAll<HTMLElement>('[data-file-step]')) {
+      steps.set(step.dataset.fileStep!, step);
+    }
+
+    function show(name: string, focusSelector: string) {
+      for (const [id, el] of steps) el.hidden = id !== name;
+      steps.get(name)?.querySelector<HTMLElement>(focusSelector)?.focus();
+    }
+
+    root
+      .querySelector<HTMLButtonElement>('[data-file-start]')
+      ?.addEventListener('click', () => show('drafted', '[data-file-confirm]'));
+    root
+      .querySelector<HTMLButtonElement>('[data-file-confirm]')
+      ?.addEventListener('click', () => show('done', '[data-file-reset]'));
+    root
+      .querySelector<HTMLButtonElement>('[data-file-cancel]')
+      ?.addEventListener('click', () => show('idle', '[data-file-start]'));
+    root
+      .querySelector<HTMLButtonElement>('[data-file-reset]')
+      ?.addEventListener('click', () => show('idle', '[data-file-start]'));
+  }
+</script>

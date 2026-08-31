@@ -568,6 +568,80 @@ export const DRAFT_ENTRY = {
     'Draft reading — yours to keep, rewrite, or delete. Reads like the fourth account of the ring closing early, which would hold the pattern rather than change it.',
 };
 
+/**
+ * Comments anchored to a running build.
+ *
+ * A pin is a point on the screen as it runs, not a point on a picture of it —
+ * which is why the anchor names an element rather than a coordinate. Filing is
+ * the whole contract: a comment becomes a draft entry, and a person confirms
+ * it before it is evidence.
+ */
+export interface Annotation {
+  n: number;
+  /** Where the pin sits on the frame, in percent of its width and height. */
+  x: number;
+  y: number;
+  author: string;
+  date: string;
+  /** The element the comment is pinned to, in the build's own words. */
+  anchor: string;
+  comment: string;
+  status: 'draft' | 'filed';
+  /** For a filed comment, the record entry it became. */
+  entryId?: string;
+  /** The draft this comment would file, shown by the one pin that offers it. */
+  draft?: { speaker: string; said: string; meant: string };
+}
+
+export const ANNOTATIONS: Record<string, Annotation[]> = {
+  'today-ring-v2': [
+    {
+      n: 1,
+      x: 50,
+      y: 30,
+      author: 'Ruth Vantine',
+      date: '2026-08-19',
+      anchor: 'Today ring · gap at the top',
+      comment:
+        'P-02 stopped at forty-eight minutes here and said it looked finished. The gap is about four degrees on this build.',
+      status: 'filed',
+      entryId: '2026-08-19-01',
+    },
+    {
+      n: 2,
+      x: 76,
+      y: 59,
+      author: 'Noor Ekelund',
+      date: '2026-08-26',
+      anchor: 'Target row · 60m tick',
+      comment:
+        'The tick is the only mark that says where the target actually is, and it is a hairline at the far right. Worth a session on its own.',
+      status: 'draft',
+      draft: {
+        speaker: 'P-04',
+        said: 'I stop when the circle joins up. That is the whole thing, really.',
+        meant:
+          'Draft reading: the target line under the ring is not part of how anyone reads this screen. Yours to rewrite before it is filed.',
+      },
+    },
+    {
+      n: 3,
+      x: 20,
+      y: 76,
+      author: 'Marit Loveday',
+      date: '2026-08-26',
+      anchor: 'Stat row · left card',
+      comment:
+        'Three numbers, no labels a person could read out loud. Nobody in a session has mentioned this row yet — that is the note, not a finding.',
+      status: 'draft',
+    },
+  ],
+};
+
+export function annotationsFor(slug: string): Annotation[] {
+  return ANNOTATIONS[slug] ?? [];
+}
+
 export function prototypeBySlug(slug: string): Prototype | undefined {
   return PROTOTYPES.find((p) => p.slug === slug);
 }

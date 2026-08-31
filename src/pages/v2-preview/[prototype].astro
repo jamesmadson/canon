@@ -5,7 +5,14 @@ import FeedbackEntryCard from '../../components/FeedbackEntryCard.astro';
 import ReviewRunCard from '../../components/ReviewRunCard.astro';
 import { withBase } from '../../lib/withBase';
 import { daysIdle, idleLabel, isStale } from '../../lib/staleness';
-import { PREVIEW_AS_OF, PROJECT, PROTOTYPES, RECORDS, sourceLine } from '../../data/v2Preview';
+import {
+  annotationsFor,
+  PREVIEW_AS_OF,
+  PROJECT,
+  PROTOTYPES,
+  RECORDS,
+  sourceLine,
+} from '../../data/v2Preview';
 
 export function getStaticPaths() {
   return PROTOTYPES.map((prototype) => ({
@@ -20,6 +27,7 @@ const stale = isStale(prototype.lastActivity, PREVIEW_AS_OF);
 const idle = daysIdle(prototype.lastActivity, PREVIEW_AS_OF);
 const source = sourceLine(prototype);
 const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
+const pins = annotationsFor(prototype.slug);
 ---
 
 <AppShell
@@ -76,6 +84,25 @@ const others = PROTOTYPES.filter((p) => p.slug !== prototype.slug);
           placeholder screen and let it pass for the work.
         </p>
       </div>
+    )}
+  </section>
+
+  <section class="mt-4" aria-labelledby="comments-heading">
+    <h2 id="comments-heading" class="sr-only">Comments</h2>
+    {pins.length > 0 ? (
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-md border border-rule px-4 py-3">
+        <p class="max-w-xl text-[13px] leading-relaxed font-medium text-ink-soft">
+          <span class="font-semibold text-ink tabular-nums">{pins.length} comments</span> pinned to
+          this build. They file into the record as drafts a person confirms.
+        </p>
+        <a href={withBase(`/v2-preview/${prototype.slug}/annotations/`)} class="btn btn-quiet">
+          Open comments
+        </a>
+      </div>
+    ) : (
+      <p class="rounded-md border border-rule px-4 py-3 text-[13px] font-medium text-ink-soft">
+        No comments pinned to this build yet.
+      </p>
     )}
   </section>
 
