@@ -312,3 +312,28 @@ Storybook first, Chromatic when the field demands what a laptop cannot do.
 Names: `canon` and `canon-design` are taken on npm; `usecanon` and
 `canon-cli` are free; a scoped `@canon-design/cli` needs the org claimed.
 Open until James picks one.
+
+### D-42 · Motion: the reference, and the one adopted pattern — 2026-09-01
+Aim, not yet built; extends D-39's "subtle and deferred." The reference
+is Rauno Freiberg's devouringdetails.com and rauno.me/craft, captured in
+eight recordings. Credited as reference, never copied (D-07).
+
+What the references share is a ruler motif, and the pattern worth taking
+is this: **hover and selection are changes in length and position, not
+color.** On the contents nav, a short tick beside each item extends into
+a full rule as the pointer nears it. In a monochrome system that is the
+answer to a real problem, because motion and dimension do the work hue
+is forbidden from doing. It is D-01 solved in the time axis.
+
+Also noted for later: corner brackets with a numeric readout on a
+pressed control, which is the honest home for the measurement idea
+(measurement as annotation attached to one element, never a floating
+tool).
+
+Refused: physics piles and the radial-timeline unroll. Both are
+beautiful and both are marketing-page spectacle; a tool people open
+daily cannot spend attention that way.
+
+Timing discipline when it is built: one shared easing curve, durations
+between 120ms and 400ms, transform and opacity only, every effect inside
+a `prefers-reduced-motion` guard. Dialed in one pass, never per feature.
