@@ -106,8 +106,9 @@ technology list:
 "HTML/CSS/JS only" is the wrong frame: anything web gets the full
 experience; native degrades honestly to captures-plus-record. A Mac app in
 a repo is Repo-tier for structure and Reference-tier for annotation.
-Evidence note: web prototyping in code is the thread's confirmed pattern;
-Mac-app demand has zero field voices — hold it until one appears.
+Evidence note: web prototyping in code is the thread's confirmed pattern.
+Native has exactly one voice — a SwiftUI-in-simulator prototyper (P-17,
+filed 2026-09-01) — up from zero; still held until it counts to three.
 
 **A prototype is a branch family.** Root branch plus variants branched off
 it. For Canon-created work the hierarchy is *derived from the branch name*
