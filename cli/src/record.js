@@ -1,0 +1,187 @@
+/**
+ * The record: reading and writing .strata entries.
+ *
+ * Two disciplines carried straight from the skill and not softened here:
+ *
+ *   Said, Meant and Decided stay separate. Verbatim, interpretation and
+ *   action are different epistemic states, and an empty Decided is
+ *   information rather than an omission, because it powers the open report.
+ *
+ *   Evidence counts people, not entries. The same participant twice is
+ *   persistence, not a pattern. Anything that is not a P code is not a voice.
+ */
+
+import { readdirSync, readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+/** What a new entry carries under Decided until a person fills it in. */
+export const DECIDED_PLACEHOLDER = 'Not yet decided.';
+const MEANT_PLACEHOLDER = 'Not yet interpreted.';
+
+export function isParticipant(code) {
+  return /^P-\d+$/.test(code);
+}
+
+function parseList(value) {
+  const inner = value.trim().replace(/^\[/, '').replace(/\]$/, '').trim();
+  if (!inner) return [];
+  return inner
+    .split(',')
+    .map((item) => item.trim().replace(/^["']|["']$/g, ''))
+    .filter(Boolean);
+}
+
+function sectionBody(text, heading) {
+  const pattern = new RegExp(`^## ${heading}\\s*$([\\s\\S]*?)(?=^## |\\s*$(?![\\s\\S]))`, 'm');
+  const match = text.match(pattern);
+  return match ? match[1].trim() : '';
+}
+
+/**
+ * Frontmatter and the three sections out of one entry file. Deliberately
+ * forgiving: a hand written entry that is missing a key is still readable,
+ * because the record predates this tool and must keep working without it.
+ */
+export function parseEntry(text, file) {
+  const front = text.startsWith('---') ? text.slice(3).split(/^---\s*$/m)[0] : '';
+  const fields = {};
+  for (const line of front.split('\n')) {
+    const cut = line.indexOf(':');
+    if (cut === -1) continue;
+    fields[line.slice(0, cut).trim()] = line.slice(cut + 1).trim();
+  }
+
+  const fromName = file.match(/^(\d{4}-\d{2}-\d{2})-(.+)\.md$/);
+  const decidedRaw = sectionBody(text, 'Decided');
+  const decided = decidedRaw === DECIDED_PLACEHOLDER ? '' : decidedRaw;
+  const meantRaw = sectionBody(text, 'Meant');
+
+  return {
+    file,
+    slug: fromName ? fromName[2] : file.replace(/\.md$/, ''),
+    date: fields.date || (fromName ? fromName[1] : ''),
+    source: fields.source || 'field-note',
+    participants: fields.participants ? parseList(fields.participants) : [],
+    about: fields.about ? parseList(fields.about) : [],
+    assets: fields.assets ? parseList(fields.assets) : [],
+    said: sectionBody(text, 'Said'),
+    meant: meantRaw === MEANT_PLACEHOLDER ? '' : meantRaw,
+    decided,
+    open: decided === '',
+  };
+}
+
+/** Every entry in a record directory, newest first. */
+export function readRecord(dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((name) => name.endsWith('.md'))
+    .map((name) => parseEntry(readFileSync(join(dir, name), 'utf8'), name))
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.file < b.file ? 1 : -1));
+}
+
+export function slugify(topic) {
+  const slug = String(topic)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return slug || 'entry';
+}
+
+/** The file a new entry lands in, numbered rather than overwriting a sibling. */
+export function entryFileName(date, slug, existing) {
+  const taken = new Set(existing);
+  const first = `${date}-${slug}.md`;
+  if (!taken.has(first)) return first;
+  for (let n = 2; ; n += 1) {
+    const candidate = `${date}-${slug}-${n}.md`;
+    if (!taken.has(candidate)) return candidate;
+  }
+}
+
+/** Wraps the verbatim into blockquote lines without rewording any of it. */
+function quoteLines(said, width = 72) {
+  const lines = [];
+  for (const paragraph of String(said).split('\n')) {
+    let current = '';
+    for (const word of paragraph.trim().split(/\s+/).filter(Boolean)) {
+      if (current && `${current} ${word}`.length > width) {
+        lines.push(`> ${current}`);
+        current = word;
+      } else {
+        current = current ? `${current} ${word}` : word;
+      }
+    }
+    lines.push(`> ${current}`);
+  }
+  return lines;
+}
+
+export function renderEntry({ date, about, participants, said, source = 'field-note' }) {
+  const codes = (participants || []).filter(isParticipant);
+  return [
+    '---',
+    `date: ${date}`,
+    `source: ${source}`,
+    `participants: [${codes.join(', ')}]`,
+    `about: [${(about || []).join(', ')}]`,
+    'assets: []',
+    '---',
+    '',
+    '## Said',
+    '',
+    `*Filed at the terminal with canon note, ${date}.*`,
+    '',
+    ...quoteLines(said),
+    '',
+    '## Meant',
+    '',
+    MEANT_PLACEHOLDER,
+    '',
+    '## Decided',
+    '',
+    DECIDED_PLACEHOLDER,
+    '',
+  ].join('\n');
+}
+
+const STRENGTH = ['none', 'a quote', 'a possible pattern', 'a pattern'];
+
+/** The scale, said out loud wherever a count is shown. */
+export const STRENGTH_SCALE = '1 voice is a quote, 2 is a possible pattern, 3 or more is a pattern';
+
+export function strengthOf(voices) {
+  return STRENGTH[Math.min(voices, 3)];
+}
+
+/**
+ * Topics with something Said and nothing Decided, strongest first. Strength is
+ * the number of distinct participants, never the number of entries.
+ */
+export function openReport(entries) {
+  const byTopic = new Map();
+  for (const entry of entries) {
+    if (!entry.open) continue;
+    for (const topic of entry.about) {
+      if (!byTopic.has(topic)) byTopic.set(topic, { topic, entries: 0, people: new Set(), latest: '' });
+      const bucket = byTopic.get(topic);
+      bucket.entries += 1;
+      for (const code of entry.participants) if (isParticipant(code)) bucket.people.add(code);
+      if (entry.date > bucket.latest) bucket.latest = entry.date;
+    }
+  }
+
+  const decidedTopics = new Set();
+  for (const entry of entries) if (!entry.open) for (const topic of entry.about) decidedTopics.add(topic);
+
+  return [...byTopic.values()]
+    .filter((bucket) => !decidedTopics.has(bucket.topic))
+    .map((bucket) => ({
+      topic: bucket.topic,
+      entries: bucket.entries,
+      voices: bucket.people.size,
+      strength: strengthOf(bucket.people.size),
+      latest: bucket.latest,
+    }))
+    .sort((a, b) => b.voices - a.voices || (a.latest < b.latest ? 1 : a.latest > b.latest ? -1 : 0));
+}
