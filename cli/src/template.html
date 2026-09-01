@@ -220,6 +220,7 @@
       .state {
         display: inline-flex;
         align-items: center;
+        align-self: start;
         gap: 6px;
         font-family: var(--mono);
         font-size: 11px;
@@ -527,7 +528,7 @@
 
         function familyCard(family) {
           var meta = el('dl', { class: 'meta' }, [
-            row('Branch', family.root),
+            row(family.virtualRoot ? 'Prefix' : 'Branch', family.root),
             row('Last commit', family.lastCommit || 'unknown'),
             row('Variants', String(family.size)),
           ]);

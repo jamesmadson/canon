@@ -68,14 +68,30 @@ export function inlineThumbnail(root, relativePath) {
   }
 }
 
+/**
+ * The verbatim out of a Said section.
+ *
+ * The blockquote is the words themselves and is preferred. Where an entry has
+ * none, the prose underneath stands in, minus the italic provenance line: that
+ * line says where the words came from, which is not something anybody said,
+ * and it is where the source links live.
+ */
 function excerpt(said, limit = 320) {
-  const quoted = said
-    .split('\n')
+  const lines = said.split('\n');
+  const quoted = lines
     .filter((line) => line.startsWith('>'))
     .map((line) => line.replace(/^>\s?/, ''))
     .join(' ')
     .trim();
-  const text = quoted || said.split('\n').filter(Boolean).join(' ').trim();
+  // The provenance is an italic block that can run over several lines, so it
+  // is removed from the text rather than filtered line by line.
+  const prose = said
+    .replace(/^[ \t]*\*[\s\S]*?\*[ \t]*$/gm, '')
+    .split('\n')
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  const text = quoted || prose;
   return text.length > limit ? `${text.slice(0, limit).trimEnd()}...` : text;
 }
 
@@ -100,6 +116,10 @@ export function buildDashboardData({
   }).map((family) => ({
     root: family.root,
     name: family.name,
+    // A family whose root is a shared prefix rather than a branch. The card
+    // says prefix instead of branch, because calling it a branch would name
+    // something you could not check out.
+    virtualRoot: Boolean(family.virtualRoot),
     size: family.size,
     maxDepth: family.maxDepth,
     lastCommit: family.lastCommit,

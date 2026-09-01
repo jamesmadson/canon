@@ -104,6 +104,24 @@ describe('buildDashboardData', () => {
     expect(ring.nodes.map((n) => n.staleness.state)).toEqual(['active', 'stale']);
   });
 
+  it('marks a family whose root is a prefix rather than a branch', () => {
+    const grouped = buildDashboardData({
+      repo: 'demo',
+      defaultBranch: 'main',
+      branches: [
+        { name: 'main', lastCommit: '2026-09-01' },
+        { name: 'proto/ring/a', lastCommit: '2026-09-01' },
+        { name: 'proto/ring/b', lastCommit: '2026-09-01' },
+      ],
+      config,
+      entries: [],
+      generatedAt: '2026-09-01',
+    });
+    expect(grouped.families).toHaveLength(1);
+    expect(grouped.families[0]).toMatchObject({ root: 'proto/ring', virtualRoot: true, size: 2 });
+    expect(built.families.every((f) => f.virtualRoot === false)).toBe(true);
+  });
+
   it('carries the fork date when git could read one', () => {
     const ring = built.families.find((f) => f.root === 'proto/today-ring');
     expect(ring.forkedFrom).toBe('2026-08-20');
@@ -118,6 +136,50 @@ describe('buildDashboardData', () => {
 
   it('quotes the verbatim rather than the whole entry body', () => {
     expect(built.record.entries[0].quote).toBe('the ring is the thing');
+  });
+
+  it('drops the italic provenance line, which is where the source links live', () => {
+    const withSource = buildDashboardData({
+      repo: 'demo',
+      defaultBranch: 'main',
+      branches,
+      config,
+      generatedAt: '2026-09-01',
+      entries: [
+        {
+          date: '2026-08-27',
+          slug: 'essay',
+          about: ['x'],
+          participants: ['P-11'],
+          open: false,
+          said: '*Observation of an essay\n(https://example.com/), read 2026-08-27.*\n\nThe argument itself.',
+        },
+      ],
+    });
+    expect(withSource.record.entries[0].quote).toBe('The argument itself.');
+  });
+
+  it('shortens a long excerpt rather than carrying the whole entry', () => {
+    const long = buildDashboardData({
+      repo: 'demo',
+      defaultBranch: 'main',
+      branches,
+      config,
+      generatedAt: '2026-09-01',
+      entries: [
+        {
+          date: '2026-08-27',
+          slug: 'long',
+          about: ['x'],
+          participants: [],
+          open: true,
+          said: `> ${'word '.repeat(200)}`,
+        },
+      ],
+    });
+    const quote = long.record.entries[0].quote;
+    expect(quote.length).toBeLessThanOrEqual(323);
+    expect(quote.endsWith('...')).toBe(true);
   });
 
   it('respects a person selection over every branch', () => {
