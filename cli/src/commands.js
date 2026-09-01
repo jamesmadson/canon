@@ -73,7 +73,7 @@ function prompter(io) {
   };
 }
 
-export async function init(argv, io) {
+export async function init(_argv, io) {
   const root = locate(io);
   if (!root) return 1;
 

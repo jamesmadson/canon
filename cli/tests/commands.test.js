@@ -48,7 +48,7 @@ function capture(cwd, { answers = null } = {}) {
   const input = new PassThrough();
   let asked = 0;
   const output = new Writable({
-    write(chunk, encoding, done) {
+    write(_chunk, _encoding, done) {
       if (answers && asked < answers.length) {
         const answer = answers[asked];
         asked += 1;
