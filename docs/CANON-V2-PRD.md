@@ -485,6 +485,44 @@ Prototypes indexed per project · feedback entries per week · % of
 feedback with a later `Decided` · review runs acted on · weekly returning
 users per team. Vanity counts (signups, stars) tracked but never steering.
 
+## Pricing — draft thesis, 2026-09-01, proposed
+
+James's frame: tiered access by org size and seats; free through
+alpha/beta, charged after. Vetted against the open-core comparables and
+adjusted in one place:
+
+**Seats never gate the package.** The local package is MIT, serverless,
+and cannot honestly meter anything (D-41: nothing leaves the machine).
+License checks in OSS are forkable in an afternoon and poison the
+security line. The package is free forever at any team size — that is
+distribution, and saying it loudly is the trust signal.
+
+**Seats gate the hosted layer, where seats physically exist.** The
+billable unit is the guest surface: the field's confirmed pattern is
+screens piped to boards so legal, copy, and PMs can review — people who
+never open the repo. The model the target buyer already budgets for is
+Figma's: charge editors, viewers free and unlimited.
+
+Tiers: **Local** (free forever, everything, no trial clock) · **Team**
+(per editor/month: guest links, hosted captures, the annotation relay) ·
+**Org** (per editor, higher: cross-repo aggregation and the unified
+evidence count, SSO). Price band per the category: $10–20/editor/month;
+the exact number is a post-beta decision.
+
+**The boundary is stated now, not later.** Landing page carries one
+sentence: the package is free and stays free; the hosted service, when it
+exists, will be paid; alpha teams get it free for a year. Grandfathering
+costs nothing today and converts monetization from a fear into a
+published plan.
+
+**Vetting, without asking "would you pay":** (1) the wall test — guest-
+surface requests during alpha file as record entries under the evidence
+bar; three independent teams hitting the wall validates the Team tier;
+(2) comparables — every adjacency (Figma, Chromatic, Linear, Vercel) runs
+free-core plus per-maker hosting, so the model is category-standard;
+(3) a zero-build pricing section on the landing page with "Team: coming
+after beta — talk to us" as the buyer-intent signal.
+
 ## Risks
 
 - **Scope: this is a platform ask on a solo maintainer.** Mitigation is
