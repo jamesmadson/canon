@@ -584,9 +584,35 @@ publishing (stays on the GTM track), MCP server (revisit after alpha).
 
 ## Build order
 
-1. `/alpha` page + waitlist (needs the form account) + preview mock
-2. App shell: auth, project, GitHub App branch index, staleness
-3. Prototype page + Figma embed + Strata-backed feedback
-4. `deter` + `access` skills (TDD, baseline-first, like Strata)
-5. Review runs UI
-6. NatureQuant onboarding, then widen
+**Superseded 2026-09-01 by D-41.** The original order below assumed a
+hosted app first (auth, GitHub App, server-side index). The alpha ships
+as a local package instead, so the order is rewritten. The old list is
+kept because the change of mind is data:
+
+> 1. `/alpha` page + waitlist + preview mock · 2. App shell: auth,
+> project, GitHub App branch index, staleness · 3. Prototype page +
+> Figma embed + Strata-backed feedback · 4. `deter` + `access` skills ·
+> 5. Review runs UI · 6. NatureQuant onboarding, then widen
+
+### Current order
+
+1. **CLI core.** `init`, git branch reading, family derivation from
+   branch names, staleness, `.canon/` config. Pure functions under test
+   first, per the repo's TDD norm.
+2. **The local dashboard.** A single self-contained HTML file written to
+   `.canon/` and opened: family cards, the simplest node canvas,
+   thumbnail precedence. Built from the restyled design language,
+   shipped as a template with the repo's data injected at run time. No
+   server, no runtime dependencies, nothing to phone home with.
+3. **`note` and the report.** Dated Said/Meant/Decided files into
+   `.strata/`; the open report rendered from those files with the
+   evidence bar applied.
+4. **The landing page.** Book-cover hero, the install block, the
+   sideways rail carrying app content, pricing with the free-forever
+   line, footer, closing strip.
+5. **Dogfood on this repo**, harden, tester brief.
+6. **Publish and send** (gated).
+
+Then, only if the alpha earns them: the annotation script, capture,
+the Figma adapter, and the hosted layer that makes the guest surface
+possible.
