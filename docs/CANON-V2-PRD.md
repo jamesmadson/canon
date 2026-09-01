@@ -87,6 +87,60 @@ A prototype is a *reference*, not a copy — Canon indexes and annotates; the
 work stays in GitHub and Figma. This is what keeps the MVP lean and the
 security story honest.
 
+## The prototype model — 2026-09-01, proposed, James reviewing
+
+Drafted from James's strategic pass; nothing here is a recorded decision
+yet except where it cites one.
+
+**Runtime never gates entry; it gates capability.** Canon points at,
+captures, and records against prototypes — it never runs them (D-15). So
+"what does Canon support" resolves into the adapter tiers, not a
+technology list:
+
+| Tier | What qualifies | What you get |
+| --- | --- | --- |
+| Reference | Anything with a URL: Figma, a deployed site, a TestFlight build, a Mac app (via captures) | Indexed, thumbnail, captures annotated, record entries |
+| Live | Web builds you control (any framework — the script tag doesn't care) | Everything above, plus the live annotation layer |
+| Repo | Anything on a git branch | Everything above, plus families, staleness, diffs, PR graduation |
+
+"HTML/CSS/JS only" is the wrong frame: anything web gets the full
+experience; native degrades honestly to captures-plus-record. A Mac app in
+a repo is Repo-tier for structure and Reference-tier for annotation.
+Evidence note: web prototyping in code is the thread's confirmed pattern;
+Mac-app demand has zero field voices — hold it until one appears.
+
+**A prototype is a branch family.** Root branch plus variants branched off
+it. For Canon-created work the hierarchy is *derived from the branch name*
+(`proto/today-ring`, `proto/today-ring/streaks-alt`) — levels are path
+depth, so the tree is computed from git, never stored. Imported branches
+keep their names (D-22 stands); the person groups them into a family and
+names the root at selection time. The family view — divergence points,
+per-branch staleness, which variant graduated — is Graft's time map given
+a product surface.
+
+**The IA is four levels, and hierarchy appears only when it exists.**
+Repo → prototype families → variants → screens. One person with one
+prototype sees the family page as home; a single-branch family shows no
+tree chrome at all. The many-people/many-prototypes repo gets the full
+ladder. Cross-repo aggregation stays the paid layer, per the held
+architecture discussion.
+
+**Thumbnails are derived, then chosen.** Precedence: person-set image →
+captured screenshot of the designated main page → wireframe placeholder
+mark. Captures carry their age ("captured 6 days ago") in the staleness
+discipline. No live iframes in grids — heavy, fragile, and a grid that
+animates is a grid that shimmers. The capture engine is the same
+capability Survey needs; every arrow keeps pointing at capture as the
+service layer.
+
+**Import is the adapter seam; export is a clone.** Import: one adapter at
+alpha (per the seam design), Figma first since the target person is a
+Figma/Miro user who codes. Export needs no engine: the work and the
+record are already files in the team's repo, portable by construction —
+the write-paths into other tools (Linear D-33, promotion D-31) are the
+real "export" and stay sequenced. The selling line is honest: leaving
+Canon is `git clone`.
+
 ## MVP scope
 
 | In (alpha) | Out (explicitly) |
