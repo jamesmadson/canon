@@ -110,14 +110,31 @@ Evidence note: web prototyping in code is the thread's confirmed pattern.
 Native has exactly one voice — a SwiftUI-in-simulator prototyper (P-17,
 filed 2026-09-01) — up from zero; still held until it counts to three.
 
-**A prototype is a branch family.** Root branch plus variants branched off
-it. For Canon-created work the hierarchy is *derived from the branch name*
-(`proto/today-ring`, `proto/today-ring/streaks-alt`) — levels are path
-depth, so the tree is computed from git, never stored. Imported branches
-keep their names (D-22 stands); the person groups them into a family and
-names the root at selection time. The family view — divergence points,
-per-branch staleness, which variant graduated — is Graft's time map given
-a product surface.
+**A prototype is a branch family.** A root plus the variants branched off
+it, with the hierarchy *derived from the branch name* so the tree is
+computed from git and never stored.
+
+**Corrected 2026-09-01, during the CLI build.** The first draft of this
+model had a root branch `proto/today-ring` with a child
+`proto/today-ring/streaks-alt`. **Git cannot represent that.** A branch
+is a file at `refs/heads/<name>`, so a name cannot be both a file and a
+directory; the second branch is refused outright (verified, git 2.45:
+`cannot lock ref ... 'refs/heads/proto/today-ring' exists`). The feature
+as originally specified would never have fired in a real repository.
+
+The working model is **virtual roots**: a shared path prefix that no
+branch occupies becomes a family node with no commit of its own.
+`proto/today-ring/streaks-alt` and `proto/today-ring/ring-v2` coexist
+happily, and `proto/today-ring` is the family they belong to. This is
+better than the original: the family is a *grouping*, which is what it
+always meant conceptually, rather than a privileged branch that variants
+must be nested beneath. A branch whose parent prefix is real and
+unselected still stands as its own root.
+
+Imported branches keep their names (D-22 stands); the person groups them
+into a family and names the root at selection time. The family view,
+showing divergence points, per-branch staleness, and which variant
+graduated, is Graft's time map given a product surface.
 
 **The IA is four levels, and hierarchy appears only when it exists.**
 Repo → prototype families → variants → screens. One person with one
