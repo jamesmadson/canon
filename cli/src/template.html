@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Canon</title>
+    <style>
+      /* The app palette, monochrome on both sides. Every token is defined here
+         on :root and only redefined for dark, so nothing has a value that
+         exists in one colour scheme and not the other. The warm bias in the
+         neutrals is the palette's one opinion. No hue in the chrome. */
+      :root {
+        --ground: #eeede9;
+        --panel: #fafaf8;
+        --recess: #e4e2dc;
+        --rule: #d8d6d0;
+        --ink-soft: #6e6b64;
+        --ink: #1a1815;
+
+        --radius-sm: 9px;
+        --radius-md: 11px;
+        --radius-lg: 14px;
+
+        --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+        color-scheme: light;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --ground: #191817;
+          --panel: #232120;
+          --recess: #2e2b29;
+          --rule: #35322f;
+          --ink-soft: #9a968d;
+          --ink: #edebe6;
+          color-scheme: dark;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--ground);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      .page {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 20px 16px 56px;
+      }
+
+      @media (min-width: 720px) {
+        .page {
+          padding: 28px 24px 64px;
+        }
+      }
+
+      /* Silkscreened labels. Mono, small, wide, never a sentence. */
+      .label {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        font-variant-numeric: tabular-nums;
+        margin: 0;
+      }
+
+      .display {
+        font-size: 30px;
+        font-weight: 200;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        margin: 0;
+      }
+
+      /* The one solid ink surface in the page. */
+      .titlebar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 8px 16px;
+        justify-content: space-between;
+        background: var(--ink);
+        color: var(--ground);
+        border-radius: var(--radius-lg);
+        padding: 14px 18px;
+      }
+
+      .titlebar .repo {
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+
+      .titlebar .counts {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-variant-numeric: tabular-nums;
+        opacity: 0.78;
+        margin: 0;
+      }
+
+      section {
+        margin-top: 34px;
+      }
+
+      .section-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px 16px;
+        margin-bottom: 14px;
+      }
+
+      .note {
+        color: var(--ink-soft);
+        font-size: 13px;
+        margin: 0;
+        max-width: 62ch;
+      }
+
+      /* Fills instead of borders. The recess is the edge. */
+      .grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      }
+
+      .card {
+        background: var(--recess);
+        border: 0;
+        border-radius: var(--radius-lg);
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .thumb {
+        background: var(--panel);
+        border-radius: var(--radius-md);
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        display: grid;
+        place-items: center;
+      }
+
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .card h3 {
+        font-size: 17px;
+        font-weight: 500;
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .meta {
+        display: grid;
+        gap: 4px;
+        margin: 0;
+      }
+
+      .meta div {
+        display: flex;
+        gap: 10px;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+
+      .meta dt {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+      }
+
+      .meta dd {
+        margin: 0;
+        font-family: var(--mono);
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        overflow-wrap: anywhere;
+        min-width: 0;
+      }
+
+      /* Staleness reads as a value shift, never a colour. */
+      .state {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-radius: 999px;
+        padding: 3px 10px;
+        background: var(--panel);
+        color: var(--ink-soft);
+      }
+
+      .state[data-state='quiet'] {
+        color: var(--ink);
+      }
+
+      .state[data-state='stale'] {
+        background: var(--ink);
+        color: var(--ground);
+      }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .filters button {
+        min-height: 44px;
+        min-width: 44px;
+        padding-inline: 16px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--recess);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 120ms ease, color 120ms ease;
+      }
+
+      .filters button:hover {
+        background: var(--rule);
+      }
+
+      .filters button[aria-pressed='true'] {
+        background: var(--ink);
+        color: var(--ground);
+      }
+
+      :where(button, a, [tabindex]):focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 3px;
+      }
+
+      /* Wide content scrolls in its own container, never the page. */
+      .scroller {
+        overflow-x: auto;
+        overflow-y: hidden;
+        background: var(--panel);
+        border-radius: var(--radius-md);
+        padding: 12px;
+      }
+
+      .tree {
+        margin-top: 34px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .tree .card {
+        gap: 10px;
+      }
+
+      .node-name {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 500;
+      }
+
+      .node-sub {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .record {
+        display: grid;
+        gap: 14px;
+        align-items: start;
+      }
+
+      @media (min-width: 900px) {
+        .record {
+          grid-template-columns: 1.5fr 1fr;
+        }
+      }
+
+      .entry {
+        background: var(--recess);
+        border-radius: var(--radius-lg);
+        padding: 14px;
+        margin-bottom: 10px;
+      }
+
+      .entry blockquote {
+        margin: 10px 0 0;
+        padding-left: 12px;
+        background: var(--panel);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+        font-size: 14px;
+        color: var(--ink);
+        overflow-wrap: anywhere;
+      }
+
+      .topics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+        padding: 0;
+        list-style: none;
+      }
+
+      .topics li {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: var(--panel);
+        color: var(--ink-soft);
+        border-radius: 999px;
+        padding: 3px 10px;
+      }
+
+      .open-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 0;
+      }
+
+      .open-row + .open-row {
+        border-top: 1px solid var(--rule);
+      }
+
+      .open-row .topic {
+        font-family: var(--mono);
+        font-size: 12px;
+        overflow-wrap: anywhere;
+      }
+
+      .open-row .strength {
+        font-size: 12px;
+        color: var(--ink-soft);
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .empty {
+        background: var(--recess);
+        border-radius: var(--radius-lg);
+        padding: 18px;
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+
+      footer {
+        margin-top: 40px;
+        color: var(--ink-soft);
+        font-size: 12px;
+        font-family: var(--mono);
+        line-height: 1.7;
+        overflow-wrap: anywhere;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition-duration: 0s;
+          animation-duration: 0s;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="titlebar">
+        <p class="repo" id="repo-name">Canon</p>
+        <p class="counts" id="counts"></p>
+      </header>
+
+      <section aria-labelledby="families-head">
+        <div class="section-head">
+          <div>
+            <h2 class="display" id="families-head">Prototypes</h2>
+            <p class="note" id="families-note"></p>
+          </div>
+          <div class="filters" id="filters" role="group" aria-label="Filter by state"></div>
+        </div>
+        <div class="grid" id="families"></div>
+      </section>
+
+      <section aria-labelledby="canvas-head">
+        <div class="section-head">
+          <div>
+            <h2 class="display" id="canvas-head">Node canvas</h2>
+            <p class="note">
+              One tree per family with variants. Edges are read from the branch
+              names on every run, so the shape cannot drift from the repository.
+            </p>
+          </div>
+        </div>
+        <div class="tree" id="canvas"></div>
+      </section>
+
+      <section aria-labelledby="record-head">
+        <div class="section-head">
+          <div>
+            <h2 class="display" id="record-head">The record</h2>
+            <p class="note" id="record-note"></p>
+          </div>
+        </div>
+        <div class="record">
+          <div>
+            <p class="label" id="entries-label">Entries, newest first</p>
+            <div id="entries"></div>
+          </div>
+          <div>
+            <p class="label">Open</p>
+            <div class="card" id="open"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer id="footer"></footer>
+    </main>
+
+    <script id="canon-data" type="application/json">
+      __CANON_DATA__
+    </script>
+    <script>
+      (function () {
+        var data = JSON.parse(document.getElementById('canon-data').textContent);
+
+        function el(name, attrs, children) {
+          var node = document.createElement(name);
+          Object.keys(attrs || {}).forEach(function (key) {
+            if (key === 'text') node.textContent = attrs[key];
+            else if (attrs[key] !== null && attrs[key] !== undefined) node.setAttribute(key, attrs[key]);
+          });
+          (children || []).forEach(function (child) {
+            node.appendChild(child);
+          });
+          return node;
+        }
+
+        function row(term, value) {
+          return el('div', {}, [el('dt', { text: term }), el('dd', { text: value })]);
+        }
+
+        function stateChip(staleness) {
+          return el('span', { class: 'state', 'data-state': staleness.state, text: staleness.label });
+        }
+
+        /* The drawn mark a family falls back to when nobody has set a
+           thumbnail. A lined circle from the Braun vocabulary, ink only. It is
+           always drawn rather than fetched, so it can never break. */
+        function placeholderMark() {
+          var lines = '';
+          for (var i = 0; i < 9; i += 1) {
+            var y = 18 + i * 8;
+            var half = Math.sqrt(Math.max(0, 36 * 36 - (y - 54) * (y - 54)));
+            lines +=
+              '<line x1="' +
+              (54 - half) +
+              '" y1="' +
+              y +
+              '" x2="' +
+              (54 + half) +
+              '" y2="' +
+              y +
+              '" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />';
+          }
+          var wrap = el('div', { class: 'mark', style: 'color: var(--ink-soft); opacity: 0.5' });
+          wrap.innerHTML =
+            '<svg viewBox="0 0 108 108" width="76" height="76" role="img" aria-label="No thumbnail set">' +
+            '<circle cx="54" cy="54" r="42" fill="none" stroke="currentColor" stroke-width="2.5" />' +
+            lines +
+            '</svg>';
+          return wrap;
+        }
+
+        function thumbnail(family) {
+          var slot = el('div', { class: 'thumb' });
+          if (family.thumbnail) {
+            slot.appendChild(el('img', { src: family.thumbnail, alt: '', loading: 'lazy' }));
+          } else {
+            slot.appendChild(placeholderMark());
+          }
+          return slot;
+        }
+
+        function familyCard(family) {
+          var meta = el('dl', { class: 'meta' }, [
+            row('Branch', family.root),
+            row('Last commit', family.lastCommit || 'unknown'),
+            row('Variants', String(family.size)),
+          ]);
+          if (family.forkedFrom) meta.appendChild(row('Forked', family.forkedFrom));
+
+          return el('article', { class: 'card', 'data-state': family.staleness.state }, [
+            thumbnail(family),
+            el('h3', { text: family.name }),
+            stateChip(family.staleness),
+            meta,
+          ]);
+        }
+
+        function esc(value) {
+          return String(value).replace(/[&<>"]/g, function (ch) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch];
+          });
+        }
+
+        /* The tree, in its simplest honest form: one row per node, indented by
+           derived depth, joined by elbows. Static and correct beats a canvas
+           that pans badly. The edges are drawn from ancestry and do nothing. */
+        function treeSvg(family) {
+          var COL = 168;
+          var ROW = 58;
+          var W = 152;
+          var H = 42;
+          var order = [];
+
+          function walk(parent, depth) {
+            family.nodes
+              .filter(function (node) {
+                return node.parent === parent;
+              })
+              .forEach(function (node) {
+                order.push({ node: node, depth: depth });
+                walk(node.name, depth + 1);
+              });
+          }
+          walk(null, 0);
+
+          var index = {};
+          order.forEach(function (item, i) {
+            index[item.node.name] = { x: item.depth * COL, y: i * ROW, depth: item.depth };
+          });
+
+          var maxDepth = order.reduce(function (max, item) {
+            return Math.max(max, item.depth);
+          }, 0);
+          var width = maxDepth * COL + W + 4;
+          var height = order.length * ROW;
+
+          var edges = '';
+          order.forEach(function (item) {
+            var child = index[item.node.name];
+            var parent = item.node.parent ? index[item.node.parent] : null;
+            if (!parent) return;
+            var startX = parent.x + 20;
+            var startY = parent.y + H;
+            var endY = child.y + H / 2;
+            edges +=
+              '<path d="M ' +
+              startX +
+              ' ' +
+              startY +
+              ' V ' +
+              endY +
+              ' H ' +
+              child.x +
+              '" fill="none" stroke="var(--rule)" stroke-width="1.5" />';
+          });
+
+          var cards = '';
+          order.forEach(function (item) {
+            var pos = index[item.node.name];
+            var sub = item.node.staleness.label;
+            cards +=
+              '<g>' +
+              '<rect x="' +
+              pos.x +
+              '" y="' +
+              pos.y +
+              '" width="' +
+              W +
+              '" height="' +
+              H +
+              '" rx="9" fill="var(--recess)" />' +
+              '<text class="node-name" x="' +
+              (pos.x + 12) +
+              '" y="' +
+              (pos.y + 18) +
+              '" fill="var(--ink)">' +
+              esc(item.node.label) +
+              '</text>' +
+              '<text class="node-sub" x="' +
+              (pos.x + 12) +
+              '" y="' +
+              (pos.y + 32) +
+              '" fill="var(--ink-soft)">' +
+              esc(sub) +
+              '</text>' +
+              '</g>';
+          });
+
+          var scroller = el('div', { class: 'scroller' });
+          scroller.innerHTML =
+            '<svg width="' +
+            width +
+            '" height="' +
+            height +
+            '" viewBox="0 0 ' +
+            width +
+            ' ' +
+            height +
+            '" role="img" aria-label="Branch family tree for ' +
+            esc(family.name) +
+            '">' +
+            edges +
+            cards +
+            '</svg>';
+          return scroller;
+        }
+
+        function entryCard(entry) {
+          var head = el('div', { class: 'meta' }, [
+            row(entry.date, entry.open ? 'open' : 'decided'),
+          ]);
+          var card = el('article', { class: 'entry' }, [
+            head,
+            el('h3', { class: 'node-name', text: entry.slug }),
+          ]);
+          if (entry.quote) card.appendChild(el('blockquote', { text: entry.quote }));
+          if (entry.about.length) {
+            var list = el('ul', { class: 'topics' });
+            entry.about.forEach(function (topic) {
+              list.appendChild(el('li', { text: topic }));
+            });
+            card.appendChild(list);
+          }
+          return card;
+        }
+
+        /* Render */
+        document.title = data.repo + ' prototypes';
+        document.getElementById('repo-name').textContent = data.repo;
+        document.getElementById('counts').textContent = [
+          data.counts.families + ' families',
+          data.counts.branches + ' branches',
+          data.counts.entries + ' entries',
+          data.counts.open + ' open',
+        ].join(' · ');
+
+        document.getElementById('families-note').textContent =
+          'Branch families read from ' +
+          data.repo +
+          ' on ' +
+          data.generatedAt +
+          '. The default branch, ' +
+          data.defaultBranch +
+          ', is never a prototype.';
+
+        var familiesHost = document.getElementById('families');
+        var filtersHost = document.getElementById('filters');
+
+        function draw(filter) {
+          familiesHost.textContent = '';
+          var shown = data.families.filter(function (family) {
+            return filter === 'all' || family.staleness.state === filter;
+          });
+          if (!shown.length) {
+            familiesHost.appendChild(
+              el('p', { class: 'empty', text: 'No prototypes in this state.' }),
+            );
+            return;
+          }
+          shown.forEach(function (family) {
+            familiesHost.appendChild(familyCard(family));
+          });
+        }
+
+        [
+          ['all', 'All'],
+          ['active', 'Active'],
+          ['quiet', 'Quiet'],
+          ['stale', 'Stale'],
+        ].forEach(function (pair) {
+          var button = el('button', {
+            type: 'button',
+            text: pair[1],
+            'aria-pressed': pair[0] === 'all' ? 'true' : 'false',
+          });
+          button.addEventListener('click', function () {
+            Array.prototype.forEach.call(filtersHost.children, function (other) {
+              other.setAttribute('aria-pressed', other === button ? 'true' : 'false');
+            });
+            draw(pair[0]);
+          });
+          filtersHost.appendChild(button);
+        });
+        draw('all');
+
+        var canvasHost = document.getElementById('canvas');
+        var branching = data.families.filter(function (family) {
+          return family.size > 1;
+        });
+        if (!branching.length) {
+          canvasHost.appendChild(
+            el('p', {
+              class: 'empty',
+              text: 'No family has a variant yet, so there is no tree to draw.',
+            }),
+          );
+        } else {
+          branching.forEach(function (family) {
+            canvasHost.appendChild(
+              el('article', { class: 'card' }, [
+                el('h3', { text: family.name }),
+                el('p', { class: 'label', text: family.root }),
+                treeSvg(family),
+              ]),
+            );
+          });
+        }
+
+        document.getElementById('record-note').textContent =
+          data.counts.entries +
+          ' entries in ' +
+          data.record.dir +
+          '. Open topics count people, not entries: ' +
+          data.scale +
+          '.';
+
+        var entriesHost = document.getElementById('entries');
+        if (!data.record.entries.length) {
+          entriesHost.appendChild(
+            el('p', { class: 'empty', text: 'The record is empty. Run canon note to file the first entry.' }),
+          );
+        } else {
+          data.record.entries.forEach(function (entry) {
+            entriesHost.appendChild(entryCard(entry));
+          });
+        }
+
+        var openHost = document.getElementById('open');
+        if (!data.record.open.length) {
+          openHost.appendChild(el('p', { class: 'note', text: 'Nothing is open.' }));
+        } else {
+          data.record.open.forEach(function (topic) {
+            openHost.appendChild(
+              el('div', { class: 'open-row' }, [
+                el('span', { class: 'topic', text: topic.topic }),
+                el('span', {
+                  class: 'strength',
+                  text:
+                    topic.voices +
+                    (topic.voices === 1 ? ' voice, ' : ' voices, ') +
+                    topic.strength,
+                }),
+              ]),
+            );
+          });
+        }
+
+        document.getElementById('footer').textContent =
+          'Generated by canon open on ' +
+          data.generatedAt +
+          '. This file is written from your local repository, it makes no network requests, and it is safe to delete.';
+      })();
+    </script>
+  </body>
+</html>
