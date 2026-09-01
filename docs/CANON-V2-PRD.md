@@ -340,6 +340,25 @@ Alpha ships `strata` + `deter` + `access`; `system` is next once
 assumption 3 proves review runs get acted on. `interface`, `ux`, and
 `copy` follow the same mold and are cheap once the mold is proven.
 
+**Reference note for `interface`, checked 2026-09-01.** Rauno Freiberg's
+Web Interface Guidelines (interfaces.rauno.me, repo
+`raunofreiberg/interfaces`) is the obvious prior art: seven sections
+(interactivity, typography, motion, touch, optimizations, accessibility,
+design) of concrete, checkable rules. Two facts govern how it may be
+used. It carries **no license** (GitHub reports none) and has not been
+updated since 2023-09-07, which puts it in D-05 territory: unlicensed
+work is not listed in the gallery and its rules are not lifted into
+anything Canon ships. Reading it, citing it, and disagreeing with it in
+public are all fine under D-06. So: influence and citation yes,
+absorption no. Any Canon `interface` skill states its own rules in its
+own words and credits the prior art by link.
+
+Also checked: a `web-design-guidelines` skill implementing these
+guidelines already exists and is installed in James's environment. Per
+the remove-before-add rule, the honest first step before authoring
+`interface` is to run the existing one against a real prototype and
+record what it fails to say. The gap is the spec.
+
 ### Promotion — prototypes feed the system (held, not committed)
 
 Held idea (D-31): connect a project's Storybook / design-system repo, and
