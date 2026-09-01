@@ -12,15 +12,7 @@
  * Both hues are read from --mark-* on the app scope, so the set retunes with
  * the theme rather than carrying two copies of every path.
  */
-export type MarkName =
-  | 'dot-grid'
-  | 'line-stack'
-  | 'dial'
-  | 'split-stripe'
-  | 'rings'
-  | 'disc'
-  | 'arc'
-  | 'fader';
+import type { MarkName } from '../lib/marks';
 
 interface Props {
   name: MarkName;
