@@ -31,10 +31,10 @@ function parseList(value) {
     .filter(Boolean);
 }
 
+/** The body under one heading, read by splitting rather than by lookahead. */
 function sectionBody(text, heading) {
-  const pattern = new RegExp(`^## ${heading}\\s*$([\\s\\S]*?)(?=^## |\\s*$(?![\\s\\S]))`, 'm');
-  const match = text.match(pattern);
-  return match ? match[1].trim() : '';
+  const section = text.split(/^## /m).find((part) => part.trimEnd() === heading || part.startsWith(`${heading}\n`));
+  return section === undefined ? '' : section.slice(heading.length).trim();
 }
 
 /**

@@ -159,6 +159,95 @@ describe('deriveFamilies', () => {
   });
 });
 
+/**
+ * Git stores a branch as a file under refs/heads, so proto/ring and
+ * proto/ring/alt cannot both exist: git refuses the second. The family a real
+ * repository can actually hold is a shared prefix that no branch occupies,
+ * with the variants under it, so that shape gets its own block.
+ */
+describe('deriveFamilies with a prefix no branch occupies', () => {
+  it('groups siblings under a virtual root', () => {
+    const families = deriveFamilies(
+      [branch('proto/today-ring/base'), branch('proto/today-ring/streaks-alt')],
+      { defaultBranch: 'main' },
+    );
+    expect(families).toHaveLength(1);
+    const [family] = families;
+    expect(family.root).toBe('proto/today-ring');
+    expect(family.name).toBe('today-ring');
+    expect(family.virtualRoot).toBe(true);
+    expect(family.nodes.map((n) => n.name)).toEqual([
+      'proto/today-ring',
+      'proto/today-ring/base',
+      'proto/today-ring/streaks-alt',
+    ]);
+    expect(family.nodes[0].virtual).toBe(true);
+    expect(family.nodes[1].parent).toBe('proto/today-ring');
+  });
+
+  it('counts only real branches in the family size', () => {
+    const [family] = deriveFamilies(
+      [branch('proto/ring/a'), branch('proto/ring/b')],
+      { defaultBranch: 'main' },
+    );
+    expect(family.size).toBe(2);
+    expect(family.nodes).toHaveLength(3);
+  });
+
+  it('gives the virtual root the newest date underneath it', () => {
+    const [family] = deriveFamilies(
+      [branch('proto/ring/a', '2026-01-01'), branch('proto/ring/b', '2026-08-20')],
+      { defaultBranch: 'main' },
+    );
+    expect(family.lastCommit).toBe('2026-08-20');
+    expect(family.nodes[0].lastCommit).toBe('2026-08-20');
+  });
+
+  it('leaves a lone branch under a prefix alone rather than inventing a parent', () => {
+    const families = deriveFamilies([branch('proto/ring/only')], { defaultBranch: 'main' });
+    expect(families).toHaveLength(1);
+    expect(families[0].root).toBe('proto/ring/only');
+    expect(families[0].virtualRoot).toBe(false);
+  });
+
+  it('never invents a prefix that a real branch already occupies', () => {
+    const families = deriveFamilies(
+      [branch('proto/ring'), branch('proto/ring-alt/a'), branch('proto/ring-alt/b')],
+      { defaultBranch: 'main' },
+    );
+    expect(families.map((f) => f.root)).toEqual(['proto/ring', 'proto/ring-alt']);
+  });
+
+  it('nests one virtual root under another', () => {
+    const families = deriveFamilies(
+      [
+        branch('proto/ring/dense/a'),
+        branch('proto/ring/dense/b'),
+        branch('proto/ring/loose/a'),
+        branch('proto/ring/loose/b'),
+      ],
+      { defaultBranch: 'main' },
+    );
+    expect(families).toHaveLength(1);
+    expect(families[0].root).toBe('proto/ring');
+    expect(families[0].nodes.filter((n) => n.virtual).map((n) => n.name)).toEqual([
+      'proto/ring',
+      'proto/ring/dense',
+      'proto/ring/loose',
+    ]);
+    expect(families[0].nodes.find((n) => n.name === 'proto/ring/dense').parent).toBe('proto/ring');
+  });
+
+  it('lets a configured familyRoot point at a virtual root', () => {
+    const families = deriveFamilies(
+      [branch('proto/ring/a'), branch('proto/ring/b'), branch('feat/x')],
+      { defaultBranch: 'main', familyRoots: { 'feat/x': 'proto/ring' } },
+    );
+    expect(families).toHaveLength(1);
+    expect(families[0].nodes.find((n) => n.name === 'feat/x').parent).toBe('proto/ring');
+  });
+});
+
 describe('familyDisplayName', () => {
   it('reads the last segment of the root branch', () => {
     expect(familyDisplayName('proto/today-ring')).toBe('today-ring');

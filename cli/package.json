@@ -1,0 +1,29 @@
+{
+  "name": "@canon-design/cli",
+  "_name": "TODO(name): the package name is not picked yet. canon and canon-design are taken on npm, usecanon and canon-cli are free, and the scoped name here needs the org claimed. The bin name canon is final either way.",
+  "version": "0.1.0",
+  "description": "Index the prototype branches in a repository, keep a feedback record beside them, and draw both into one local HTML file.",
+  "type": "module",
+  "license": "MIT",
+  "author": "James Madson",
+  "bin": {
+    "canon": "./bin/canon.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "keywords": [
+    "prototype",
+    "design",
+    "research",
+    "cli"
+  ],
+  "dependencies": {},
+  "scripts": {
+    "test": "vitest run --root .. cli/tests"
+  }
+}

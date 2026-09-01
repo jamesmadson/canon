@@ -67,9 +67,13 @@ describe('the tool never writes to a repo it did not create', () => {
     }
   });
 
-  it('shells out from one module only', () => {
-    const callers = files.filter((file) => readFileSync(file, 'utf8').includes('node:child_process'));
-    expect(callers.map((f) => f.replace(cliDir, ''))).toEqual([join('src', 'git.js')]);
+  it('spawns from two modules only, and only one of them knows about git', () => {
+    const callers = files
+      .filter((file) => readFileSync(file, 'utf8').includes('node:child_process'))
+      .map((f) => f.replace(cliDir, ''))
+      .sort();
+    expect(callers).toEqual([join('src', 'git.js'), join('src', 'opener.js')]);
+    expect(readFileSync(join(cliDir, 'src', 'opener.js'), 'utf8')).not.toContain('git');
   });
 
   it('keeps the allowlist to commands that only read', () => {
