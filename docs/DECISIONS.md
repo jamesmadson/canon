@@ -299,3 +299,16 @@ in the manner of the Vitsœ ten-principles poster: oversized thin numerals,
 D-01 through D-NN, each with its call in a sentence. The log's numbering
 is already the content; the page is a view of this file, derived, never
 retyped.
+
+### D-41 · The alpha ships as a package — 2026-09-01
+"We need the npm or npx package ability to install," with the install
+script on the landing page. This resolves the held architecture fork *for
+the alpha only*: local-first, `npx` into the team's repo, no account, no
+server, nothing leaves the machine. It tests the riskiest assumptions at
+near-zero infrastructure cost and makes the security line true by
+construction. The hosted layer (capture, aggregation, the guest surface)
+remains the monetization thesis and is deliberately not foreclosed —
+Storybook first, Chromatic when the field demands what a laptop cannot do.
+Names: `canon` and `canon-design` are taken on npm; `usecanon` and
+`canon-cli` are free; a scoped `@canon-design/cli` needs the org claimed.
+Open until James picks one.

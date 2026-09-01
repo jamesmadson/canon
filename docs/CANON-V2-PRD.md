@@ -141,6 +141,29 @@ the write-paths into other tools (Linear D-33, promotion D-31) are the
 real "export" and stay sequenced. The selling line is honest: leaving
 Canon is `git clone`.
 
+**The family view is a node canvas — proposed 2026-09-01.** Instead of an
+indented branch list, the family renders as a node graph on a pan/zoom
+canvas: each variant a card-node (thumbnail, name, staleness), ancestry as
+orthogonal edges, the root at the head. This is the canvas interaction the
+field loves (D-32) applied to one prototype's history, and it is Graft's
+time map with direct manipulation. Not a visual-programming editor: edges
+show git ancestry and are never draggable wires — the graph is derived,
+read-only structure, computed from branch names and merge-bases.
+
+Each node carries a `···` menu. The verbs and their honest limits:
+
+| Verb | What it does | The limit stated in-product |
+| --- | --- | --- |
+| Open | Enter the variant | — |
+| Copy preview link | Copies the team's own preview URL | Absent until a preview URL is set; Canon does not host |
+| Set thumbnail | Person-set image takes precedence | — |
+| Archive | Retires it from the index; staleness graduates to intent | Reversible; the branch is untouched |
+| Remove from Canon | Deletes the *reference* | Never deletes the branch — the repo is yours (D-15) |
+| Share | Viewer link | Held until the guest surface exists; greyed with the reason |
+
+There is no "delete branch." Canon never destroys anything in the team's
+repo; a verb that could is not in the menu at any tier.
+
 ## MVP scope
 
 | In (alpha) | Out (explicitly) |
@@ -426,6 +449,27 @@ is partial — replies could see each other:
   worth a follow-up.
 
 ## Alpha plan
+
+**Alpha zero — the installable slice (added 2026-09-01, D-41).** The alpha
+ships as a package, not a hosted app: `npx` into any repo, no account, no
+server, nothing leaves the machine. The smallest real thing that does both
+D-35 jobs:
+
+1. `init` — detects the repo, writes `.canon/` config, gitignores the
+   local pieces correctly
+2. Branch families derived from branch names plus a selection step for
+   existing branches (D-22); staleness computed from commit dates
+3. A local dashboard (the restyled design language) served on localhost:
+   family cards, the node canvas in its simplest form, thumbnails
+   (person-set or placeholder)
+4. Record entries as files: a `canon note` flow filing dated
+   Said/Meant/Decided markdown into `.strata/`, plus the open report
+   rendered from those files
+
+Explicitly not in alpha zero: accounts, hosting, the live annotation
+script, capture, adapters. The v2 preview remains the vision demo the
+landing page links to; the package is the working slice. Leaving is
+`git clone` — true from day one because there is nothing else.
 
 - **Week 1 — NatureQuant.** Hand-onboarded. One project, one repo, Figma
   links, feedback filed through the product. Success: ten real feedback
