@@ -151,6 +151,30 @@ time map with direct manipulation. Not a visual-programming editor: edges
 show git ancestry and are never draggable wires — the graph is derived,
 read-only structure, computed from branch names and merge-bases.
 
+**What the canvas takes from the references, and what it refuses.**
+Surveyed 2026-09-01: GitHub's network view, Le Git Graph, gitvize,
+git-branch-visualizer.
+
+- *Take the time axis.* gitvize plots branches against dates, which a
+  plain tree cannot show. Staleness, divergence, and abandonment are
+  temporal facts, and they are the ones this product cares about. Time
+  runs left to right.
+- *Take the lane.* One horizontal line per variant, commits as marks
+  along it, the branch name at the point it diverges.
+- *Refuse per-author swimlanes.* gitvize gives every contributor a row,
+  most of them empty. A design team has a handful of prototypes and does
+  not need twenty-five empty lanes. Group by family, never by person.
+- *Refuse the commit-level graph.* GitHub's network view and Le Git
+  Graph render every commit and every merge. Canon's unit is the
+  prototype, not the commit; showing commits invites reading the graph
+  as engineering history, which is a different product.
+- *Refuse color as identity.* The reference tools assign a hue per
+  branch. D-01 stands: lanes separate by position and label, not hue.
+
+The result is a *family timeline*: few lanes, dated, monochrome, one
+prototype per view. At alpha it renders static; pan and zoom arrive only
+if the field asks.
+
 Each node carries a `···` menu. The verbs and their honest limits:
 
 | Verb | What it does | The limit stated in-product |
@@ -164,6 +188,19 @@ Each node carries a `···` menu. The verbs and their honest limits:
 
 There is no "delete branch." Canon never destroys anything in the team's
 repo; a verb that could is not in the menu at any tier.
+
+**The annotation vocabulary has a public reference.** GitHub's Annotation
+Toolkit (github/annotation-toolkit) is a Figma asset library for
+diagramming UI anatomy and marking accessibility details, licensed
+CC-BY-4.0 and actively maintained. It is a *Figma* library, so it cannot
+be installed into Canon and points the opposite way (annotating designs
+rather than running builds). Its value is as a vocabulary reference for
+the annotation layer and the handoff view: how a pin, a leader line, and
+an anatomy callout should read. CC-BY-4.0 permits adaptation with
+attribution, but the standing rule is references, not copies (D-07), so
+Canon studies and credits it and ships nothing of theirs. The visual
+grammar we adopt is the annotated-specification one already identified:
+numbered marks on the artifact, leader lines to the entries beside it.
 
 ## MVP scope
 
