@@ -251,6 +251,40 @@ describe('index', () => {
   });
 });
 
+describe('the branch table', () => {
+  /**
+   * A configured familyRoot can put a shallow root after a deeper child once
+   * the nodes are sorted by name. Indenting from the first node then asks for a
+   * negative number of spaces, which throws rather than printing a table.
+   */
+  it('indents from the shallowest node when the root sorts after its child', async () => {
+    const root = scratchRepo(['proto/zz', 'proto/aa/x']);
+    await main(['init'], capture(root));
+    const path = join(root, '.canon', 'config.json');
+    const config = JSON.parse(readFileSync(path, 'utf8'));
+    writeFileSync(
+      path,
+      JSON.stringify(
+        { ...config, prototypes: ['proto/zz', 'proto/aa/x'], familyRoots: { 'proto/aa/x': 'proto/zz' } },
+        null,
+        2,
+      ),
+    );
+
+    const io = capture(root);
+    expect(await main(['index'], io)).toBe(0);
+    const lines = io
+      .text()
+      .split('\n')
+      .filter((line) => line.includes('proto/'));
+    const zz = lines.find((line) => line.includes('proto/zz'));
+    const child = lines.find((line) => line.includes('proto/aa/x'));
+    // The root sits flush and the child sits one step in, whatever the sort did.
+    expect(zz.startsWith('  zz')).toBe(true);
+    expect(child.startsWith('    x')).toBe(true);
+  });
+});
+
 describe('index, asked rather than told', () => {
   it('lists the branches and takes the numbers chosen', async () => {
     const root = scratchRepo(['proto/ring/base', 'proto/ring/alt', 'feat/x']);

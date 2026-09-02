@@ -120,15 +120,24 @@ export function sharedSegments(a, b) {
   return shared;
 }
 
+/**
+ * The tree as indented text.
+ *
+ * Indentation is measured from the shallowest node in the family, not from the
+ * first one after sorting. A configured familyRoot can put a shallow root after
+ * a deeper child, and subtracting the first node's depth then asks repeat for a
+ * negative count, which throws instead of printing.
+ */
 function branchTable(families) {
-  const rows = families.flatMap((family) =>
-    family.nodes.map((node) => [
-      `${'  '.repeat(node.depth - family.nodes[0].depth)}${node.label}`,
+  const rows = families.flatMap((family) => {
+    const base = family.nodes.reduce((least, node) => Math.min(least, node.depth), Infinity);
+    return family.nodes.map((node) => [
+      `${'  '.repeat(Math.max(0, node.depth - base))}${node.label}`,
       node.name,
       node.lastCommit || '',
       node.staleness.label,
-    ]),
-  );
+    ]);
+  });
   const widths = [0, 1, 2].map((column) =>
     rows.reduce((max, row) => Math.max(max, row[column].length), 0),
   );
