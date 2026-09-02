@@ -15,7 +15,7 @@ import { PassThrough, Writable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 
 import { main, parseArgv } from '../bin/canon.js';
-import { sharedSegments } from '../src/commands.js';
+import { sharedSegments, parseSelection, orderCandidates } from '../src/commands.js';
 import { openerFor } from '../src/opener.js';
 
 const binPath = fileURLToPath(new URL('../bin/canon.js', import.meta.url));
@@ -305,6 +305,179 @@ describe('index, asked rather than told', () => {
     const io = capture(root, { answers: ['all'] });
     await main(['index'], io);
     expect(JSON.parse(readFileSync(join(root, '.canon', 'config.json'), 'utf8')).prototypes).toHaveLength(3);
+  });
+});
+
+describe('parseSelection', () => {
+  it('reads single numbers', () => {
+    expect(parseSelection('1 3', 5)).toEqual({ picked: [1, 3], bad: [] });
+  });
+
+  it('reads a range written with a dash or with dots', () => {
+    expect(parseSelection('1-4', 9).picked).toEqual([1, 2, 3, 4]);
+    expect(parseSelection('1..4', 9).picked).toEqual([1, 2, 3, 4]);
+  });
+
+  it('reads a mixed list separated by spaces or commas', () => {
+    expect(parseSelection('1-4 7 9-12', 12).picked).toEqual([1, 2, 3, 4, 7, 9, 10, 11, 12]);
+    expect(parseSelection('1-3,5', 12).picked).toEqual([1, 2, 3, 5]);
+  });
+
+  it('sorts and de-duplicates overlapping ranges', () => {
+    expect(parseSelection('3 1-3 2', 5).picked).toEqual([1, 2, 3]);
+  });
+
+  it('reads a descending range as the same span', () => {
+    expect(parseSelection('4-1', 9).picked).toEqual([1, 2, 3, 4]);
+  });
+
+  it('names a token it did not understand rather than dropping it', () => {
+    expect(parseSelection('1 wat 3', 5)).toEqual({ picked: [1, 3], bad: ['wat'] });
+  });
+
+  it('names a number outside the list the same way', () => {
+    expect(parseSelection('1 99', 5)).toEqual({ picked: [1], bad: ['99'] });
+    expect(parseSelection('0', 5).bad).toEqual(['0']);
+    expect(parseSelection('1-99', 5).bad).toEqual(['1-99']);
+  });
+});
+
+describe('index, when the answer is not understood', () => {
+  const branches = ['a-one', 'b-two', 'c-three'];
+
+  it('takes a range, which is what a person types for a long list', async () => {
+    const root = scratchRepo(branches);
+    await main(['init'], capture(root));
+    const io = capture(root, { answers: ['1-2'] });
+    expect(await main(['index'], io)).toBe(0);
+    expect(JSON.parse(readFileSync(join(root, '.canon', 'config.json'), 'utf8')).prototypes).toEqual([
+      'a-one',
+      'b-two',
+    ]);
+  });
+
+  it('says which tokens it did not understand and asks again', async () => {
+    const root = scratchRepo(branches);
+    await main(['init'], capture(root));
+    const io = capture(root, { answers: ['wat', '1'] });
+    expect(await main(['index'], io)).toBe(0);
+    expect(io.text()).toContain('Did not understand: wat');
+    expect(io.text()).toContain('Numbers, ranges like 1-12, or all');
+    expect(JSON.parse(readFileSync(join(root, '.canon', 'config.json'), 'utf8')).prototypes).toEqual([
+      'a-one',
+    ]);
+  });
+
+  /**
+   * The tester's run wrote prototypes: [] from a typo and then said "Next:
+   * canon open", so the tool reported success for having understood nothing.
+   */
+  it('never writes an empty selection from an answer it could not read', async () => {
+    const root = scratchRepo(branches);
+    await main(['init'], capture(root));
+    const io = capture(root, { answers: ['wat', 'nope', 'still-wrong'] });
+    expect(await main(['index'], io)).toBe(1);
+    expect(JSON.parse(readFileSync(join(root, '.canon', 'config.json'), 'utf8')).prototypes).toBe(null);
+    expect(io.text()).not.toContain('Next: canon open');
+  });
+
+  it('gives up after three tries rather than asking forever', async () => {
+    const root = scratchRepo(branches);
+    await main(['init'], capture(root));
+    const io = capture(root, { answers: ['wat', 'nope', 'still-wrong'] });
+    await main(['index'], io);
+    expect(io.text().match(/Did not understand/g)).toHaveLength(3);
+  });
+
+  it('does not read an empty answer as every branch, and says the next step only on success', async () => {
+    const root = scratchRepo(branches);
+    await main(['init'], capture(root));
+    const io = capture(root, { answers: ['', '', ''] });
+    expect(await main(['index'], io)).toBe(1);
+    expect(io.text()).toContain('an empty answer');
+    expect(io.text()).not.toContain('Next: canon open');
+    expect(io.errors()).toContain('Nothing was selected');
+    expect(JSON.parse(readFileSync(join(root, '.canon', 'config.json'), 'utf8')).prototypes).toBe(null);
+  });
+});
+
+describe('index with an empty selection already recorded', () => {
+  it('says there is nothing to draw rather than pointing at canon open', async () => {
+    const root = scratchRepo(['proto/ring', 'feat/x']);
+    await main(['init'], capture(root));
+    const path = join(root, '.canon', 'config.json');
+    const config = JSON.parse(readFileSync(path, 'utf8'));
+    writeFileSync(path, JSON.stringify({ ...config, prototypes: [] }, null, 2));
+    const io = capture(root);
+    expect(await main(['index'], io)).toBe(1);
+    expect(io.text()).not.toContain('Next: canon open');
+    expect(io.errors()).toContain('nothing to draw');
+  });
+});
+
+describe('orderCandidates', () => {
+  it('keeps the order given, then the likely tooling, and says where the cut is', () => {
+    const ordered = orderCandidates([
+      { name: 'worktree-agent-a' },
+      { name: 'proto/ring' },
+      { name: 'dependabot/x' },
+      { name: 'renovate/y' },
+      { name: 'feat/z' },
+    ]);
+    expect(ordered.list.map((b) => b.name)).toEqual([
+      'proto/ring',
+      'feat/z',
+      'worktree-agent-a',
+      'dependabot/x',
+      'renovate/y',
+    ]);
+    expect(ordered.firstTooling).toBe(2);
+  });
+
+  it('reports no cut when nothing looks like tooling', () => {
+    expect(orderCandidates([{ name: 'a' }, { name: 'b' }]).firstTooling).toBe(-1);
+  });
+});
+
+describe('the numbered list of branches', () => {
+  /**
+   * D-22: never assume. A worktree branch may well be the prototype, so it is
+   * listed and selectable. It is moved to the end under a caption so a person
+   * reading twenty one lines can skip the machinery by eye.
+   */
+  it('puts likely tooling branches last, under a caption', async () => {
+    const root = scratchRepo([
+      'worktree-agent-abc',
+      'proto/ring',
+      'dependabot/npm_and_yarn/x',
+      'renovate/y',
+      'feat/real',
+    ]);
+    await main(['init'], capture(root));
+    const io = capture(root, { answers: ['1'] });
+    await main(['index'], io);
+    const lines = io.text().split('\n');
+    const caption = lines.findIndex((line) => line.includes('likely tooling'));
+    expect(caption).toBeGreaterThan(-1);
+    const before = lines.slice(0, caption).join('\n');
+    const after = lines.slice(caption).join('\n');
+    expect(before).toContain('proto/ring');
+    expect(before).toContain('feat/real');
+    expect(after).toContain('worktree-agent-abc');
+    expect(after).toContain('dependabot/npm_and_yarn/x');
+    expect(after).toContain('renovate/y');
+    // Still numbered in one sequence, and still choosable.
+    expect(io.text()).toMatch(/\n\s*1\s+feat\/real/);
+  });
+
+  it('keeps the numbers matching the branches they are printed beside', async () => {
+    const root = scratchRepo(['worktree-agent-abc', 'proto/ring']);
+    await main(['init'], capture(root));
+    const io = capture(root, { answers: ['2'] });
+    await main(['index'], io);
+    expect(JSON.parse(readFileSync(join(root, '.canon', 'config.json'), 'utf8')).prototypes).toEqual([
+      'worktree-agent-abc',
+    ]);
   });
 });
 

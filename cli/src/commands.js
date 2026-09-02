@@ -144,6 +144,69 @@ export function sharedSegments(a, b) {
  * a deeper child, and subtracting the first node's depth then asks repeat for a
  * negative count, which throws instead of printing.
  */
+/**
+ * An answer to the numbered list, read as numbers and ranges.
+ *
+ * A person facing twenty one branches types `1-12`, not twelve numbers. The
+ * first version read only single numbers, so `1-12` became NaN, was silently
+ * dropped, and the run recorded a selection of nothing as though it had been
+ * chosen. Anything not understood comes back in `bad` rather than vanishing,
+ * so the caller can say what it could not read instead of guessing.
+ *
+ * @returns {{picked: number[], bad: string[]}} one based positions, and the
+ *   tokens that were not numbers, not ranges, or outside the list
+ */
+export function parseSelection(answer, count) {
+  const picked = new Set();
+  const bad = [];
+  const inRange = (n) => Number.isInteger(n) && n >= 1 && n <= count;
+
+  for (const token of String(answer).split(/[\s,]+/).filter(Boolean)) {
+    const range = token.match(/^(\d+)(?:-|\.\.)(\d+)$/);
+    if (range) {
+      // A person who types 12-1 means the same span as 1-12.
+      const from = Number(range[1]);
+      const to = Number(range[2]);
+      const low = Math.min(from, to);
+      const high = Math.max(from, to);
+      if (!inRange(low) || !inRange(high)) {
+        bad.push(token);
+        continue;
+      }
+      for (let n = low; n <= high; n += 1) picked.add(n);
+      continue;
+    }
+    if (/^\d+$/.test(token) && inRange(Number(token))) {
+      picked.add(Number(token));
+      continue;
+    }
+    bad.push(token);
+  }
+
+  return { picked: [...picked].sort((a, b) => a - b), bad };
+}
+
+/**
+ * Names that are almost always machinery rather than somebody's prototype.
+ *
+ * D-22 says never assume, so none of these are filtered out: a worktree branch
+ * may well be the work. They are moved to the end of the numbered list under a
+ * caption instead, so a person reading twenty one lines can skip them by eye
+ * and still choose one by number if it is the one they want.
+ */
+const LIKELY_TOOLING = [/^worktree-agent-/, /^dependabot\//, /^renovate\//];
+
+export function isLikelyTooling(name) {
+  return LIKELY_TOOLING.some((pattern) => pattern.test(name));
+}
+
+/** The candidates in the order they are shown, and where the tooling starts. */
+export function orderCandidates(candidates) {
+  const work = candidates.filter((b) => !isLikelyTooling(b.name));
+  const tooling = candidates.filter((b) => isLikelyTooling(b.name));
+  return { list: [...work, ...tooling], firstTooling: tooling.length ? work.length : -1 };
+}
+
 function branchTable(families) {
   const rows = families.flatMap((family) => {
     const base = family.nodes.reduce((least, node) => Math.min(least, node.depth), Infinity);
@@ -200,28 +263,53 @@ export async function index(argv, io) {
       io.err(unchosenMessage(candidates.length, defaultBranch));
       return 1;
     }
+    const { list, firstTooling } = orderCandidates(candidates);
     io.out(`Branches beside ${defaultBranch}:`);
-    candidates.forEach((b, i) => {
+    list.forEach((b, i) => {
+      if (i === firstTooling) {
+        io.out('');
+        io.out('  likely tooling');
+      }
       io.out(`  ${String(i + 1).padStart(3)}  ${b.name.padEnd(40)} ${b.lastCommit}`);
     });
     io.out('');
+
     const prompt = prompter(io);
-    let answer;
+    let answer = null;
+    let picked = null;
     try {
-      answer = await prompt.ask('Which are prototypes? Numbers separated by spaces, or all: ');
+      // Three tries. An answer that parsed to nothing is not a choice, so it is
+      // never recorded as one: the loop says what it could not read and asks
+      // again, and a run that never lands on an answer fails rather than
+      // writing an empty selection and calling it done.
+      for (let attempt = 0; attempt < 3 && picked === null; attempt += 1) {
+        answer = await prompt.ask('Which are prototypes? Numbers, ranges like 1-12, or all: ');
+        if (answer.trim().toLowerCase() === 'all') {
+          picked = list.map((b) => b.name);
+          break;
+        }
+        if (answer.trim() === '') {
+          io.out('Did not understand: an empty answer. Numbers, ranges like 1-12, or all.');
+          continue;
+        }
+        const read = parseSelection(answer, list.length);
+        if (read.bad.length || !read.picked.length) {
+          const named = read.bad.length ? read.bad.join(' ') : answer.trim();
+          io.out(`Did not understand: ${named}. Numbers, ranges like 1-12, or all.`);
+          continue;
+        }
+        picked = read.picked.map((n) => list[n - 1].name);
+      }
     } finally {
       prompt.close();
     }
-    chosenNow = true;
-    if (answer.toLowerCase() === 'all' || answer === '') {
-      selection = candidates.map((b) => b.name);
-    } else {
-      selection = answer
-        .split(/[\s,]+/)
-        .map((token) => candidates[Number(token) - 1])
-        .filter(Boolean)
-        .map((b) => b.name);
+
+    if (picked === null) {
+      io.err('Nothing was selected, so nothing was written. Run canon index again when you know.');
+      return 1;
     }
+    chosenNow = true;
+    selection = picked;
     io.out(`Selected ${selection.length} of ${candidates.length}.`);
   }
 
@@ -270,7 +358,13 @@ export async function index(argv, io) {
     io.out(`${unselected.length} branches are not indexed: ${unselected.map((b) => b.name).join(', ')}.`);
     io.out('Run canon index --all to take every branch.');
   }
+  // The next step depends on the result. A run that indexed nothing has nothing
+  // to draw, so pointing at canon open would be reporting success for it.
   io.out('');
+  if (!selection.length) {
+    io.err('Nothing is indexed, so there is nothing to draw. Run canon index again to choose.');
+    return 1;
+  }
   io.out('Next: canon open to draw the dashboard.');
   return 0;
 }
