@@ -393,7 +393,13 @@ export async function note(argv, io) {
     return 1;
   }
 
-  if (io.interactive) {
+  // Only what is missing is asked for. A prompt for a value already on the
+  // command line is a question with a known answer, and it stops a scripted run
+  // that happens to have a terminal attached. With the topic and the quote both
+  // supplied there is nothing left to ask: the participant code is optional, so
+  // its absence is an answer rather than a gap.
+  const missing = !about || !said;
+  if (io.interactive && missing) {
     const prompt = prompter(io);
     try {
       if (!about) about = await prompt.ask('About, one topic: ');

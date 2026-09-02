@@ -493,6 +493,34 @@ describe('note, asked rather than told', () => {
     expect(text).toContain('> the quote, word for word');
   });
 
+  /**
+   * A prompt for something already supplied is a question with a known answer.
+   * Under a TTY the old code asked for the participant code even when the topic
+   * and the quote came in on the command line, so a scripted run that happened
+   * to have a terminal attached would stop and wait.
+   */
+  it('asks for nothing when the topic and the quote were both supplied', async () => {
+    const root = scratchRepo(['proto/ring']);
+    await main(['init'], capture(root));
+    // answers: [] means interactive with nothing to say back. Any question here
+    // would hang rather than fail, so reaching the assertion is the assertion.
+    const io = capture(root, { answers: [] });
+    expect(await main(['note', '--about', 'ring', '--said', 'the ring is the thing'], io)).toBe(0);
+    const files = readdirSync(join(root, '.strata'));
+    expect(readFileSync(join(root, '.strata', files[0]), 'utf8')).toContain('participants: []');
+  });
+
+  it('asks only for the value that is missing', async () => {
+    const root = scratchRepo(['proto/ring']);
+    await main(['init'], capture(root));
+    const io = capture(root, { answers: ['the quote itself'] });
+    expect(await main(['note', '--about', 'ring', '--as', 'P-04'], io)).toBe(0);
+    const files = readdirSync(join(root, '.strata'));
+    const text = readFileSync(join(root, '.strata', files[0]), 'utf8');
+    expect(text).toContain('> the quote itself');
+    expect(text).toContain('participants: [P-04]');
+  });
+
   it('leaves the participant open when the answer is blank', async () => {
     const root = scratchRepo(['proto/ring']);
     await main(['init'], capture(root));
