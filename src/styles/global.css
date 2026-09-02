@@ -5,48 +5,14 @@
 /* Font URLs below are base-coupled: plain CSS can't read import.meta.env.BASE_URL,
    so the "/canon" deploy base is hardcoded here. If the deploy path ever changes,
    update these alongside astro.config.mjs (site/base) and buildInstallScript.ts. */
-@font-face {
-  font-family: "Archivo";
-  font-weight: 400;
-  src: url("/canon/fonts/archivo/Archivo-400.woff2") format("woff2");
-  font-display: swap;
-}
-@font-face {
-  font-family: "Archivo";
-  font-weight: 500;
-  src: url("/canon/fonts/archivo/Archivo-500.woff2") format("woff2");
-  font-display: swap;
-}
-@font-face {
-  font-family: "Archivo";
-  font-weight: 600;
-  src: url("/canon/fonts/archivo/Archivo-600.woff2") format("woff2");
-  font-display: swap;
-}
-@font-face {
-  font-family: "Archivo";
-  font-weight: 700;
-  src: url("/canon/fonts/archivo/Archivo-700.woff2") format("woff2");
-  font-display: swap;
-}
-@font-face {
-  font-family: "Archivo";
-  font-weight: 900;
-  src: url("/canon/fonts/archivo/Archivo-900.woff2") format("woff2");
-  font-display: swap;
-}
-@font-face {
-  font-family: "Geist Mono";
-  font-weight: 400;
-  src: url("/canon/fonts/geist/GeistMono-Regular.woff2") format("woff2");
-  font-display: swap;
-}
 
-/* The app's two faces. Public Sans ships as one variable file covering the
-   whole axis, so the 200 used for display and the 400 used for body are the
-   same download. IBM Plex Mono is two static cuts — 400 for data, 500 for the
-   silkscreened control labels. These are declared for everyone but only ever
-   asked for inside the app scope below, so the gallery keeps Archivo. */
+/* The two faces, and now the only two. Public Sans ships as one variable file
+   covering the whole axis, so the 200 used for display and the 400 used for
+   body are the same download. IBM Plex Mono is two static cuts: 400 for data,
+   500 for the silkscreened control labels.
+
+   These used to be asked for only inside the product, with the gallery kept on
+   Archivo. One site, one language, so Archivo and Geist Mono are gone. */
 @font-face {
   font-family: "Public Sans";
   font-weight: 100 900;
@@ -66,54 +32,19 @@
   font-display: swap;
 }
 
-@theme {
-  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, monospace;
-  --color-bg: oklch(100% 0 0);
-  --color-ink: oklch(20.02% 0 0);
-  --color-ink-soft: oklch(42% 0 0);
-  --color-surface: oklch(92% 0.003 210);
-  --color-rule: oklch(85% 0.005 210);
-  --color-rule-strong: oklch(66% 0.005 210);
-
-  /* App-only families and fills. Declared here so Tailwind emits bg-ground,
-     bg-panel and bg-recess as utilities; no gallery page asks for one, so
-     adding them changes nothing outside the product. */
-  --font-app: "Public Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-app-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --color-ground: #eeede9;
-  --color-panel: #fafaf8;
-  --color-recess: #e4e2dc;
-
-  /* Deliberately small. Enough to take the wireframe edge off a 1px border,
-     not enough to read as a "card UI". Concentric rule: inner = outer − padding. */
-  --radius-sm: 3px;
-  --radius-md: 5px;
-  --radius-lg: 8px;
-}
-
-/* ── The app palette ──────────────────────────────────────────────────────
-   Everything the product needs is redefined on the app scope rather than on
-   :root, so the gallery renders from the same stylesheet and the same tokens
-   and comes out exactly as it did before.
-
-   Three of these are remaps rather than new names — radius, weight, family —
-   and they work because Tailwind's utilities resolve their variable at the
-   point of use. `rounded-md` inside the shell reads the shell's --radius-md.
-   That is what keeps the diff a restyle: the markup keeps saying rounded-md
-   and font-medium, and the scope decides what those mean.
+/* ── The palette, now the site's ──────────────────────────────────────────
+   These lived on [data-app-shell] so the product could carry one language and
+   the gallery another. The gallery is a section of the product's site now, so
+   the scope is gone and the tokens are the site's.
 
    No hue anywhere. The neutrals carry a faint warm bias, which is the one
-   opinion in the palette — it is why the grey reads as chosen rather than
-   defaulted. Colour lives only inside RamsMark and MeshPanel. */
-[data-app-shell] {
-  font-family: var(--font-app);
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.6;
-
-  --font-sans: var(--font-app);
-  --font-mono: var(--font-app-mono);
+   opinion in the palette: it is why the grey reads as chosen rather than
+   defaulted. Colour lives only inside RamsMark, CanonMark and MeshPanel. */
+@theme {
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-app: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-app-mono: "IBM Plex Mono", ui-monospace, monospace;
 
   --color-ground: #eeede9;
   --color-panel: #fafaf8;
@@ -124,41 +55,47 @@
   --color-ink-soft: #6e6b64;
   --color-ink: #1a1815;
   /* Not a seventh colour: the hairline, carried toward the ink far enough to
-     read as a deliberate divider where a section genuinely needs one. */
-  --color-rule-strong: color-mix(in oklab, var(--color-rule) 55%, var(--color-ink-soft));
+     read as a deliberate divider where a section genuinely needs one. The live
+     value is the color-mix on :root below; this literal only exists so Tailwind
+     emits the utilities. */
+  --color-rule-strong: #a9a69f;
 
   /* 9 / 11 / 14. Concentric rule holds: inner = outer − padding. */
   --radius-sm: 9px;
   --radius-md: 11px;
   --radius-lg: 14px;
 
-  /* Public Sans at 200 for display and 400 for body, with one step of
-     emphasis between. The old 600/700 markup keeps its class names and lands
-     on the new ladder. */
+  /* Public Sans at 200 for display and 400 for body, with one step of emphasis
+     between. The markup keeps its old class names and lands on the new ladder. */
   --font-weight-normal: 400;
   --font-weight-medium: 400;
   --font-weight-semibold: 500;
   --font-weight-bold: 500;
 
-  /* The only hues in the product, and they are quarantined here: nothing but
-     RamsMark and MeshPanel is allowed to read them. Chrome stays monochrome. */
+  /* The only hues on the site, and they are quarantined here: nothing but the
+     illustration marks is allowed to read them. Chrome stays monochrome. */
   --mark-ink: #1a1815;
   --mark-orange: #ff4b12;
   --mark-yellow: #e9b824;
 }
 
-/* Dark mode, and only inside the app.
-   The tokens are redefined on the shell rather than on :root, so the product
-   chrome inverts and the pages around it — the gallery, the alpha page — stay
-   the one paper they have always been. Same ramp, read from the other end:
-   near-black ground, paper ink, and the rules landing where they landed in
-   light. Monochrome on both sides; a dark mode that introduced a hue would be
-   a different design, not the same one after dark.
+/* Unlayered, so these win over the @theme block Tailwind emits into a layer.
+   The rule-strong mix has to resolve against whichever --color-rule is current,
+   which is what keeps one declaration correct in both themes. */
+:root {
+  --color-rule-strong: color-mix(in oklab, var(--color-rule) 55%, var(--color-ink-soft));
+}
 
-   The two blocks below are the same declarations twice: once for an explicit
-   choice, once for "System" against the OS preference. Neither can be folded
-   into the other — an explicit Light has to win over a dark OS. */
-[data-app-theme="dark"] [data-app-shell] {
+/* Dark mode, site-wide.
+   Same ramp read from the other end: near-black ground, paper ink, the rules
+   landing where they landed in light. Monochrome on both sides; a dark mode
+   that introduced a hue would be a different design, not the same one after
+   dark.
+
+   The two blocks are the same declarations twice: once for an explicit choice,
+   once for "System" against the OS preference. Neither folds into the other,
+   because an explicit Light has to win over a dark OS. */
+:root[data-app-theme="dark"] {
   color-scheme: dark;
   --color-ground: #191817;
   --color-panel: #232120;
@@ -174,7 +111,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  [data-app-theme="system"] [data-app-shell] {
+  :root[data-app-theme="system"] {
     color-scheme: dark;
     --color-ground: #191817;
     --color-panel: #232120;
@@ -188,6 +125,17 @@
     --mark-orange: #ff5c28;
     --mark-yellow: #f0c441;
   }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-app);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
 }
 
 /* Entrance motion. A visitor sees the first paint once, so the frequency gate
@@ -374,4 +322,247 @@ summary,
       font-size: 46px;
     }
   }
+}
+
+/* ── The title bar ────────────────────────────────────────────────────────
+   Solid ink, a name on the left and a mono aside on the right. It is a heading
+   that has been given a fill, not a control: nothing inside it is clickable,
+   which is what keeps it clear of the one-primary-per-view rule. */
+.titlebar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-ink);
+  color: var(--color-ground);
+}
+.titlebar .titlebar-name {
+  font-family: var(--font-app-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.titlebar .titlebar-meta {
+  font-family: var(--font-app-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  opacity: 0.78;
+}
+
+/* ── Outlined chip ────────────────────────────────────────────────────────
+   The one place a line beats a fill: a chip has to read as a marker sitting on
+   a surface, and a second fill on a fill turns to mush. */
+.chip-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 999px;
+  font-family: var(--font-app-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+.chip-outline.chip-soft {
+  border-color: var(--color-rule-strong);
+  color: var(--color-ink-soft);
+}
+
+/* ── The tick rail ────────────────────────────────────────────────────────
+   Every nav row and list link: a 14px rule that extends to 64px and carries
+   from ink-soft to ink. Width and colour only, on the shared curve. */
+.tick-link {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: center;
+  gap: 14px;
+  min-height: 44px;
+  color: var(--color-ink-soft);
+  transition: color 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+.tick-link .tick {
+  display: block;
+  height: 1px;
+  width: 14px;
+  margin-left: auto;
+  background-color: var(--color-ink-soft);
+  opacity: 0.55;
+  transition:
+    width 260ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 260ms cubic-bezier(0.2, 0, 0, 1),
+    background-color 260ms cubic-bezier(0.2, 0, 0, 1);
+}
+.tick-link:hover,
+.tick-link:focus-visible {
+  color: var(--color-ink);
+}
+.tick-link:hover .tick,
+.tick-link:focus-visible .tick {
+  width: 64px;
+  opacity: 1;
+  background-color: var(--color-ink);
+}
+.tick-link:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+.tick-link[aria-current="page"] {
+  color: var(--color-ink);
+}
+.tick-link[aria-current="page"] .tick {
+  width: 30px;
+  opacity: 0.9;
+  background-color: var(--color-ink);
+}
+
+/* The same gesture in a horizontal bar, where a 64px rule has nowhere to go:
+   the tick sits under the label and grows to the label's width. */
+.tick-bar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 10px;
+  color: var(--color-ink-soft);
+  transition: color 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+.tick-bar::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  height: 1px;
+  width: 14px;
+  background-color: var(--color-ink-soft);
+  opacity: 0.55;
+  transition:
+    width 260ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 260ms cubic-bezier(0.2, 0, 0, 1),
+    background-color 260ms cubic-bezier(0.2, 0, 0, 1);
+}
+.tick-bar:hover,
+.tick-bar:focus-visible {
+  color: var(--color-ink);
+}
+.tick-bar:hover::after,
+.tick-bar:focus-visible::after {
+  width: calc(100% - 20px);
+  opacity: 1;
+  background-color: var(--color-ink);
+}
+.tick-bar:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tick-link,
+  .tick-link .tick,
+  .tick-bar,
+  .tick-bar::after {
+    transition-duration: 0s;
+  }
+}
+
+/* ── The mark ─────────────────────────────────────────────────────────────
+   A lined circle that swaps to its dotted sibling on hover and focus. Opacity
+   only, both forms stacked, so nothing reflows during the swap. */
+.canon-mark {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+}
+.canon-mark svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 300ms cubic-bezier(0.2, 0, 0, 1);
+}
+.canon-mark .form-alt {
+  opacity: 0;
+}
+a:hover .canon-mark .form-base,
+a:focus-visible .canon-mark .form-base,
+.canon-mark:hover .form-base {
+  opacity: 0;
+}
+a:hover .canon-mark .form-alt,
+a:focus-visible .canon-mark .form-alt,
+.canon-mark:hover .form-alt {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .canon-mark svg {
+    transition-duration: 0s;
+  }
+}
+
+/* ── The book-cover hero ──────────────────────────────────────────────────
+   Two columns of the name set bottom to top, monumental, ink on ground. At
+   phone width they un-rotate into a two-line display headline above the same
+   facts, because a rotated column that has to scroll sideways is a defect. */
+.cover-type {
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+.cover-type span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: 200;
+  font-size: clamp(4rem, 13vw, 10rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  color: var(--color-ink);
+  user-select: none;
+}
+@media (max-width: 639px) {
+  .cover-type {
+    justify-content: flex-start;
+  }
+  .cover-type span {
+    writing-mode: horizontal-tb;
+    transform: none;
+    display: block;
+    font-size: clamp(3rem, 17vw, 4.5rem);
+    line-height: 0.98;
+  }
+}
+
+/* ── The closing strip ────────────────────────────────────────────────────
+   The name giant, paper on near-black, drifting on scroll. Transform and
+   opacity only, and the whole drift is applied by script that never runs when
+   motion is unwelcome, so the static state is the authored one. */
+.closing-strip {
+  overflow: hidden;
+  background-color: #0e0d0b;
+  padding: clamp(30px, 5vw, 56px) clamp(20px, 4vw, 44px) clamp(18px, 3vw, 34px);
+}
+.closing-strip .giant {
+  font-weight: 200;
+  font-size: clamp(3.4rem, 12vw, 10rem);
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  text-align: center;
+  color: #edebe6;
+  will-change: transform;
+}
+.closing-strip .meta {
+  margin-top: 18px;
+  text-align: center;
+  font-family: var(--font-app-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9a968d;
 }

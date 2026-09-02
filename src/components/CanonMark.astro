@@ -1,0 +1,75 @@
+---
+/**
+ * The mark: a lined circle drawn from the Braun speaker vocabulary, with a
+ * dotted sibling underneath it. Hover or focus the link it sits in and the two
+ * cross-fade. Decision D-39.
+ *
+ * Both forms are ink only. The mark is an illustration, so it is allowed a hue
+ * by the colour rule, and it declines: at 24px in a header a hue would read as
+ * a status light rather than a name.
+ */
+import { uid } from '../lib/uid';
+
+interface Props {
+  size?: number;
+  class?: string;
+}
+
+const { size = 24, class: className = '' } = Astro.props;
+
+// clipPath ids are document-global, so two marks on one page would collide.
+const markId = uid('canon-mark');
+
+// Thirteen rules across the disc, with a hairline gap down the middle: the
+// grille reads as printed rather than drawn.
+const lines = Array.from({ length: 13 }, (_, i) => 10 + i * 7);
+
+// The dotted form is the same disc rendered as a speaker grille: a square grid
+// kept where it falls inside the circle.
+const dots: { x: number; y: number }[] = [];
+const CX = 52;
+const CY = 52;
+const RAD = 46;
+const STEP = 9.2;
+const DR = 2.5;
+for (let y = CY - RAD; y <= CY + RAD; y += STEP) {
+  for (let x = CX - RAD; x <= CX + RAD; x += STEP) {
+    const dx = x - CX;
+    const dy = y - CY;
+    if (Math.sqrt(dx * dx + dy * dy) <= RAD - DR) {
+      dots.push({ x: Math.round(x * 100) / 100, y: Math.round(y * 100) / 100 });
+    }
+  }
+}
+---
+
+<span
+  class:list={['canon-mark', className]}
+  style={`width:${size}px;height:${size}px`}
+  aria-hidden="true"
+>
+  <svg viewBox="0 0 104 104" class="form-base" fill="none">
+    <defs>
+      <clipPath id={`${markId}-c`}><circle cx="52" cy="52" r="46" /></clipPath>
+      <mask id={`${markId}-gap`}>
+        <rect width="104" height="104" fill="#fff" />
+        <rect x="50.6" y="0" width="2.8" height="104" fill="#000" />
+      </mask>
+    </defs>
+    <g
+      clip-path={`url(#${markId}-c)`}
+      mask={`url(#${markId}-gap)`}
+      stroke="var(--mark-ink)"
+      stroke-width="2.6"
+      stroke-linecap="round"
+    >
+      {lines.map((y) => <line x1="0" y1={y} x2="104" y2={y} />)}
+    </g>
+  </svg>
+
+  <svg viewBox="0 0 104 104" class="form-alt" fill="none">
+    <g fill="var(--mark-ink)">
+      {dots.map((dot) => <circle cx={dot.x} cy={dot.y} r={DR} />)}
+    </g>
+  </svg>
+</span>

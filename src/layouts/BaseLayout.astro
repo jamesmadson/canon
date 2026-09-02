@@ -1,6 +1,8 @@
 ---
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
+import CanonMark from '../components/CanonMark.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
 import { withBase } from '../lib/withBase';
 import { spellNumber } from '../lib/spellNumber';
 
@@ -8,17 +10,17 @@ interface Props {
   title: string;
   description?: string;
   /**
-   * Put the whole page inside the app scope rather than a slab within it.
-   * The v2 preview routes carry their own shell, so this is for the one page
-   * that is the app without being a screen of it: /alpha.
+   * Let the page draw to the edge of the viewport rather than sitting in the
+   * shared six-column well. The homepage is the only thing that needs it: the
+   * cover hero and the closing strip are full-bleed by construction.
    */
-  app?: boolean;
+  wide?: boolean;
 }
 
 const {
   title,
-  description = 'A curated gallery of design and design-engineering skills for AI agents.',
-  app = false,
+  description = 'Canon keeps your prototypes in one place and turns feedback into evidence.',
+  wide = false,
 } = Astro.props;
 
 // Derived, not written down: hiding a skill must not leave the footer
@@ -26,9 +28,16 @@ const {
 const publishedSkills = await getCollection('skills', ({ data }) => data.status === 'active');
 const skillCount = spellNumber(publishedSkills.length);
 
-// The app's face is only worth a preload on a page that draws it. The gallery
-// never asks for Public Sans, so it should not pay for it.
-const appFace = app || Astro.url.pathname.includes('/v2-preview');
+const NAV = [
+  { label: 'Preview', href: '/v2-preview/' },
+  { label: 'Skills', href: '/skills/' },
+  { label: 'Pricing', href: '/#pricing' },
+  { label: 'Alpha', href: '/alpha/' },
+];
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) =>
+  href.startsWith('/#') ? false : path.startsWith(withBase(href));
 ---
 
 <!doctype html>
@@ -46,15 +55,12 @@ const appFace = app || Astro.url.pathname.includes('/v2-preview');
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={`${title} · Canon`} />
     <meta name="twitter:description" content={description} />
-    <meta name="theme-color" content="#ffffff" />
-    <link rel="preload" href={withBase('/fonts/archivo/Archivo-400.woff2')} as="font" type="font/woff2" crossorigin />
-    {appFace && (
-      <link rel="preload" href={withBase('/fonts/public-sans/PublicSans-Variable.woff2')} as="font" type="font/woff2" crossorigin />
-    )}
-    {/* The app's theme choice, applied before the first paint so the shell is
-        never drawn light and then repainted dark. It sets one attribute on the
-        root; the dark tokens are scoped to the app shell, so this is inert on
-        every page that isn't the product. */}
+    <meta name="theme-color" content="#eeede9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#191817" media="(prefers-color-scheme: dark)" />
+    <link rel="preload" href={withBase('/fonts/public-sans/PublicSans-Variable.woff2')} as="font" type="font/woff2" crossorigin />
+    {/* The theme choice, applied before the first paint so no page is drawn
+        light and then repainted dark. It sets one attribute on the root; the
+        dark tokens hang off that attribute, so this is the whole mechanism. */}
     <script is:inline>
       try {
         const stored = localStorage.getItem('canon-app-theme');
@@ -65,42 +71,67 @@ const appFace = app || Astro.url.pathname.includes('/v2-preview');
       }
     </script>
   </head>
-  <body data-app-shell={app ? '' : undefined} class="bg-bg font-sans font-medium text-ink antialiased">
+  <body class="bg-ground font-sans text-ink antialiased">
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:border focus:border-rule-strong focus:bg-bg focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-ink"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-sm focus:bg-panel focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-ink"
     >
       Skip to content
     </a>
     <header class="rise">
-      <div class="mx-auto max-w-6xl px-6">
-        <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-rule py-7">
-          <a
-            href={withBase('/')}
-            class="rounded-sm text-xl font-semibold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
-          >
-            Canon
-          </a>
-          <nav class="-mr-2 -ml-2 flex flex-wrap items-center gap-x-1 text-sm font-semibold">
-            <a href={withBase('/use')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Use</a>
-            <a href={withBase('/kits')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Kits</a>
-            <a href={withBase('/skills')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Gallery</a>
-            <a href={withBase('/submit')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Submit</a>
-            <a href={withBase('/newsletter')} class="rounded-md px-2 py-3 text-ink-soft transition-colors hover:text-ink focus-visible:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">Newsletter</a>
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 py-5">
+        <a
+          href={withBase('/')}
+          class="flex min-h-11 items-center gap-3 rounded-sm text-xl font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+        >
+          <CanonMark size={24} />
+          Canon
+        </a>
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <nav aria-label="Sections" class="-mx-2 flex flex-wrap items-center text-sm">
+            {NAV.map((item) => (
+              <a
+                href={withBase(item.href)}
+                aria-current={isCurrent(item.href) ? 'page' : undefined}
+                class="tick-bar rounded-sm aria-[current=page]:text-ink"
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
+          <ThemeToggle />
         </div>
       </div>
     </header>
-    <main id="main" class="rise rise-2 mx-auto max-w-6xl px-6 pt-10 pb-24 sm:pt-14">
+    <main
+      id="main"
+      class:list={[
+        'rise rise-2',
+        wide ? 'pb-0' : 'mx-auto max-w-6xl px-6 pt-8 pb-24 sm:pt-12',
+      ]}
+    >
       <slot />
     </main>
     <footer class="mx-auto max-w-6xl px-6">
-      <div class="border-t border-rule py-12 text-sm font-medium text-ink-soft">
-        <p>
+      <div class="flex flex-col gap-6 py-12 text-sm text-ink-soft sm:flex-row sm:items-end sm:justify-between">
+        <p class="max-w-md">
           Every skill here was read in full, license-checked, and written up by hand.
           {` ${skillCount.charAt(0).toUpperCase()}${skillCount.slice(1)} of them, chosen from many more.`}
         </p>
+        <nav aria-label="More" class="-mx-2 flex flex-wrap items-center text-sm">
+          <a href={withBase('/newsletter/')} class="tick-bar rounded-sm">Newsletter</a>
+          <a href={withBase('/submit/')} class="tick-bar rounded-sm">Submit</a>
+          <a
+            href="https://github.com/jamesmadson/canon"
+            target="_blank"
+            rel="noopener"
+            class="tick-bar rounded-sm"
+          >
+            GitHub
+          </a>
+        </nav>
       </div>
     </footer>
+    <slot name="after-footer" />
   </body>
 </html>

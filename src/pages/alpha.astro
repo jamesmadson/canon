@@ -15,11 +15,9 @@ const featuredEntry = record.feedback.find((entry) => entry.decided) ?? record.f
 const paneHeading = 'label';
 ---
 
-{/* This page is the app rather than a page about it, so it takes the app scope
-    whole: the warm ground, Public Sans, the mono labels, and the dark theme
-    when the person has chosen one. The gallery around it is untouched. */}
+{/* This page needed a scope of its own while the product and the gallery spoke
+    two languages. They speak one now, so it is an ordinary page. */}
 <BaseLayout
-  app
   title="Canon v2 alpha"
   description="Canon v2 keeps your team's prototypes, their feedback, and their reviews in one place. Join the alpha."
 >
