@@ -76,17 +76,42 @@ export function inlineThumbnail(root, relativePath) {
  * line says where the words came from, which is not something anybody said,
  * and it is where the source links live.
  */
-function excerpt(said, limit = 320) {
+/**
+ * Is this paragraph the italic provenance line?
+ *
+ * Markdown already draws the line this needs. An asterisk followed by a space
+ * opens a list item; an asterisk followed by anything else opens emphasis. So a
+ * paragraph that opens with emphasis, closes with it, and contains no bullet is
+ * the provenance, and a bullet list never is.
+ *
+ * The test is on the paragraph rather than the line because the provenance in
+ * this repository wraps over three lines and carries the source URL on the
+ * second. A line by line rule leaves that URL in the page.
+ */
+function isProvenance(paragraph) {
+  const text = paragraph.trim();
+  if (!text) return false;
+  const opensEmphasis = /^\*[^\s*]/.test(text);
+  const closesEmphasis = /[^\s*]\*$/.test(text);
+  const hasBullet = /^[ \t]*\*[ \t]/m.test(text);
+  return opensEmphasis && closesEmphasis && !hasBullet;
+}
+
+export function excerpt(said, limit = 320) {
   const lines = said.split('\n');
   const quoted = lines
     .filter((line) => line.startsWith('>'))
     .map((line) => line.replace(/^>\s?/, ''))
     .join(' ')
     .trim();
-  // The provenance is an italic block that can run over several lines, so it
-  // is removed from the text rather than filtered line by line.
+  // The provenance is dropped a paragraph at a time. Matching across newlines
+  // without that boundary ran from the first asterisk to the last one anywhere
+  // below it, so a bullet list, which is how a summary is ordinarily written,
+  // was eaten whole and the entry showed an empty quote.
   const prose = said
-    .replace(/^[ \t]*\*[\s\S]*?\*[ \t]*$/gm, '')
+    .split(/\n[ \t]*\n/)
+    .filter((paragraph) => !isProvenance(paragraph))
+    .join('\n')
     .split('\n')
     .filter(Boolean)
     .join(' ')

@@ -9,6 +9,7 @@ import {
   buildDashboardData,
   readTemplate,
   renderDashboard,
+  excerpt,
 } from '../src/render.js';
 import { defaultConfig } from '../src/config.js';
 
@@ -62,6 +63,62 @@ describe('encodeData', () => {
 
   it('round trips ordinary text unchanged', () => {
     expect(JSON.parse(encodeData({ a: 'plain & simple' })).a).toBe('plain & simple');
+  });
+});
+
+describe('excerpt', () => {
+  it('drops the italic provenance line', () => {
+    expect(excerpt('*Reply in a thread, 2026-08-27.*\n\nthe words themselves')).toBe(
+      'the words themselves',
+    );
+  });
+
+  /**
+   * The provenance strip used to match across newlines, so it ran from the
+   * first asterisk to the last one anywhere below it. A bullet list, which is
+   * the ordinary way a summary is written, was eaten whole and the entry showed
+   * an empty quote.
+   */
+  it('leaves a bullet list alone', () => {
+    const said = ['* the first point', '* the second point', '* the third point'].join('\n');
+    const text = excerpt(said);
+    expect(text).toContain('the first point');
+    expect(text).toContain('the second point');
+    expect(text).toContain('the third point');
+  });
+
+  it('drops the provenance and keeps the bullets under it', () => {
+    const said = ['*Filed at the terminal, 2026-09-01.*', '', '* one point', '* another point'].join('\n');
+    const text = excerpt(said);
+    expect(text).not.toContain('Filed at the terminal');
+    expect(text).toContain('one point');
+    expect(text).toContain('another point');
+  });
+
+  /**
+   * The provenance in this repository wraps over three lines and carries the
+   * source URL on the second, so a rule that only strips a single line leaves
+   * that URL in the generated page.
+   */
+  it('drops a provenance block that wraps over several lines', () => {
+    const said = [
+      '*Observation of an essay',
+      '(https://example.com/), read 2026-08-27. Summary, not',
+      'quotation.*',
+      '',
+      'The argument itself.',
+    ].join('\n');
+    const text = excerpt(said);
+    expect(text).toBe('The argument itself.');
+    expect(text).not.toMatch(/https?:\/\//);
+  });
+
+  it('keeps emphasis that sits inside a sentence', () => {
+    expect(excerpt('the *whole* point is this')).toContain('the *whole* point is this');
+  });
+
+  it('prefers the blockquote when there is one', () => {
+    expect(excerpt('*provenance*\n\n> the verbatim\n\nsome prose')).toBe('the verbatim');
   });
 });
 
