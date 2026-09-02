@@ -42,6 +42,22 @@ const NOT_A_REPO = [
 
 const NOT_SET_UP = 'No .canon/config.json here. Run canon init first.';
 
+/**
+ * The refusal, in one place so index and open say the same thing.
+ *
+ * Choosing which branches are prototypes is the one judgement this tool will
+ * not make for a person. index refuses to guess it; open has to refuse the same
+ * way, or the refusal is cosmetic and a person sees a dashboard of everything
+ * and reasonably believes they chose it.
+ */
+function unchosenMessage(count, defaultBranch) {
+  return [
+    `${count} branches sit beside ${defaultBranch} and none are chosen yet.`,
+    'Choosing is a call for a person to make, so this run will not guess.',
+    'Run canon index again in a terminal, or canon index --all to take every branch.',
+  ].join('\n');
+}
+
 function today() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -181,13 +197,7 @@ export async function index(argv, io) {
     io.out(`One branch beside ${defaultBranch}, so it is the prototype: ${selection[0]}.`);
   } else if (selection === null) {
     if (!io.interactive) {
-      io.err(
-        [
-          `${candidates.length} branches sit beside ${defaultBranch} and none are chosen yet.`,
-          'Choosing is a call for a person to make, so this run will not guess.',
-          'Run canon index again in a terminal, or canon index --all to take every branch.',
-        ].join('\n'),
-      );
+      io.err(unchosenMessage(candidates.length, defaultBranch));
       return 1;
     }
     io.out(`Branches beside ${defaultBranch}:`);
@@ -345,8 +355,19 @@ export async function open(argv, io) {
   const branches = listBranches(io.cwd);
   const defaultBranch = config.defaultBranch || pickDefaultBranch(branches.map((b) => b.name), currentBranch(io.cwd));
 
+  // Nobody has chosen yet. One candidate is not a choice, so take it as index
+  // does; more than one is, so refuse in the same words rather than guess.
+  let selected = config.prototypes;
+  if (selected === null) {
+    const candidates = branches.filter((b) => b.name !== defaultBranch).map((b) => b.name);
+    if (candidates.length > 1) {
+      io.err(unchosenMessage(candidates.length, defaultBranch));
+      return 1;
+    }
+    selected = candidates;
+  }
+
   const forkDates = {};
-  const selected = config.prototypes ?? branches.filter((b) => b.name !== defaultBranch).map((b) => b.name);
   for (const name of selected) {
     const date = forkDate(name, defaultBranch, io.cwd);
     if (date) forkDates[name] = date;
@@ -357,7 +378,9 @@ export async function open(argv, io) {
     repo: config.repo || repoName(io.cwd),
     defaultBranch,
     branches,
-    config,
+    // The resolved selection, so the page draws what was chosen rather than
+    // reading the null again and falling back to everything.
+    config: { ...config, prototypes: selected },
     entries,
     generatedAt: today(),
     root,

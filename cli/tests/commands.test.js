@@ -406,6 +406,30 @@ describe('open', () => {
     expect(io.text()).toContain('1 families, 2 branches, 1 entries, 1 open');
   });
 
+  /**
+   * index refuses to guess a selection. open drawing every branch instead would
+   * make the refusal cosmetic: a person would see a dashboard of everything and
+   * reasonably believe they had chosen it.
+   */
+  it('refuses to guess a selection, in the words index uses', async () => {
+    const root = scratchRepo(['proto/ring', 'feat/x', 'spike/y']);
+    await main(['init'], capture(root));
+    const io = capture(root);
+    expect(await main(['open', '--no-open'], io)).toBe(1);
+    expect(io.errors()).toContain('none are chosen yet');
+    expect(io.errors()).toContain('will not guess');
+    expect(io.errors()).toContain('--all');
+    expect(existsSync(join(root, '.canon', 'dashboard.html'))).toBe(false);
+  });
+
+  it('takes the only branch beside the default without being told, as index does', async () => {
+    const root = scratchRepo(['proto/ring']);
+    await main(['init'], capture(root));
+    const io = capture(root);
+    expect(await main(['open', '--no-open'], io)).toBe(0);
+    expect(io.text()).toContain('1 branches');
+  });
+
   it('touches nothing outside .canon, .gitignore and the record', async () => {
     const root = scratchRepo(['proto/ring']);
     const before = execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' });
