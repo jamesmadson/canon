@@ -789,6 +789,19 @@ describe('open', () => {
   });
 });
 
+describe('the one gate command', () => {
+  /**
+   * A suite that silently does not run a file is the one failure mode a suite
+   * must not have. The root config named only *.test, so a file written as
+   * *.spec would have been collected by nobody and reported by nobody.
+   */
+  it('collects both spellings on both sides of the repository', () => {
+    const source = readFileSync(fileURLToPath(new URL('../../vitest.config.ts', import.meta.url)), 'utf8');
+    expect(source).toContain('tests/**/*.{test,spec}.ts');
+    expect(source).toContain('cli/tests/**/*.{test,spec}.js');
+  });
+});
+
 describe('openerFor', () => {
   it('names the platform viewer', () => {
     expect(openerFor('darwin').command).toBe('open');
