@@ -247,6 +247,35 @@ describe('openReport', () => {
     expect(three[0].strength).toBe('a pattern');
   });
 
+  /**
+   * A decision is a fact about a moment, not about a topic forever. Treating
+   * any decided entry as closing the topic means a question reopened after a
+   * decision never reappears, which is exactly the case the report exists for.
+   */
+  it('reopens a topic whose most recent entry is open again', () => {
+    const reopened = openReport([
+      { about: ['ring'], participants: ['P-01'], open: false, date: '2026-08-01' },
+      { about: ['ring'], participants: ['P-02'], open: true, date: '2026-09-01' },
+    ]);
+    expect(reopened.map((t) => t.topic)).toContain('ring');
+  });
+
+  it('keeps a topic closed when the decision is the most recent word on it', () => {
+    const closed = openReport([
+      { about: ['ring'], participants: ['P-01'], open: true, date: '2026-08-01' },
+      { about: ['ring'], participants: ['P-02'], open: false, date: '2026-09-01' },
+    ]);
+    expect(closed.map((t) => t.topic)).not.toContain('ring');
+  });
+
+  it('reads the same day as decided, because the decision is the later word', () => {
+    const sameDay = openReport([
+      { about: ['ring'], participants: ['P-01'], open: true, date: '2026-09-01' },
+      { about: ['ring'], participants: ['P-02'], open: false, date: '2026-09-01' },
+    ]);
+    expect(sameDay.map((t) => t.topic)).not.toContain('ring');
+  });
+
   it('leaves out topics that already have a decision', () => {
     expect(openReport(entries).map((t) => t.topic)).not.toContain('closed');
   });

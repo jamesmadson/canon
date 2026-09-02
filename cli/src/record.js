@@ -189,11 +189,26 @@ export function openReport(entries) {
     }
   }
 
-  const decidedTopics = new Set();
-  for (const entry of entries) if (!entry.open) for (const topic of entry.about) decidedTopics.add(topic);
+  /**
+   * A topic is open when the most recent thing said about it is open.
+   *
+   * A decision is a fact about a moment, not about a topic forever. Treating
+   * any decided entry as closing the topic for good means a question reopened
+   * after a decision never comes back to the report, which is exactly the case
+   * the report exists to catch. On the same date the decision is taken as the
+   * later word, because a decision is filed in response to what was said.
+   */
+  const latestWord = new Map();
+  for (const entry of entries) {
+    for (const topic of entry.about) {
+      const held = latestWord.get(topic);
+      const newer = !held || entry.date > held.date || (entry.date === held.date && held.open);
+      if (newer) latestWord.set(topic, { date: entry.date, open: entry.open });
+    }
+  }
 
   return [...byTopic.values()]
-    .filter((bucket) => !decidedTopics.has(bucket.topic))
+    .filter((bucket) => latestWord.get(bucket.topic)?.open)
     .map((bucket) => ({
       topic: bucket.topic,
       entries: bucket.entries,
