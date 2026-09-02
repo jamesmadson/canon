@@ -133,7 +133,8 @@ describe('canon with no command', () => {
   it('prints usage for --help and exits clean', async () => {
     const io = capture(process.cwd());
     expect(await main(['--help'], io)).toBe(0);
-    expect(io.text()).toContain('index [--all]');
+    expect(io.text()).toContain('--all');
+    expect(io.text()).toContain('--choose');
   });
 
   it('prints a version', async () => {
@@ -251,6 +252,54 @@ describe('index', () => {
     expect(await main(['index'], io)).toBe(0);
     expect(JSON.parse(readFileSync(path, 'utf8')).prototypes).toEqual(['proto/ring']);
     expect(io.text()).toContain('1 branches are not indexed: feat/x');
+  });
+
+  /**
+   * A tool that quietly reuses a decision made a week ago looks broken when the
+   * decision was wrong. Saying what it is reusing, and how to change it, is the
+   * difference between a memory and a trap.
+   */
+  it('says what selection it is reusing and when it was made', async () => {
+    const root = scratchRepo(['proto/ring', 'feat/x']);
+    await main(['init'], capture(root));
+    await main(['index', '--all'], capture(root));
+    const io = capture(root);
+    expect(await main(['index'], io)).toBe(0);
+    expect(io.text()).toMatch(/Using 2 branches chosen on \d{4}-\d{2}-\d{2}\./);
+    expect(io.text()).toContain('Run canon index --choose to pick again.');
+  });
+
+  it('does not say it is reusing anything on the run that chooses', async () => {
+    const root = scratchRepo(['proto/ring', 'feat/x']);
+    await main(['init'], capture(root));
+    const io = capture(root);
+    await main(['index', '--all'], io);
+    expect(io.text()).not.toContain('Using');
+  });
+
+  it('ignores the stored selection with --choose and asks again', async () => {
+    const root = scratchRepo(['a-one', 'b-two', 'c-three']);
+    await main(['init'], capture(root));
+    await main(['index', '--all'], capture(root));
+    const io = capture(root, { answers: ['2'] });
+    expect(await main(['index', '--choose'], io)).toBe(0);
+    expect(io.text()).toContain('Branches beside main');
+    expect(JSON.parse(readFileSync(join(root, '.canon', 'config.json'), 'utf8')).prototypes).toEqual([
+      'b-two',
+    ]);
+  });
+
+  it('refuses --choose where it cannot ask, as a first run does', async () => {
+    const root = scratchRepo(['a-one', 'b-two', 'c-three']);
+    await main(['init'], capture(root));
+    await main(['index', '--all'], capture(root));
+    const io = capture(root);
+    expect(await main(['index', '--choose'], io)).toBe(1);
+    expect(io.errors()).toContain('will not guess');
+    // The stored selection is left exactly as it was.
+    expect(
+      JSON.parse(readFileSync(join(root, '.canon', 'config.json'), 'utf8')).prototypes,
+    ).toHaveLength(3);
   });
 
   it('adopts a new variant that shares a family with one already selected', async () => {

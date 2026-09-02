@@ -25,13 +25,21 @@ const VALUE_FLAGS = { '--about': 'about', '--said': 'said', '--as': 'as' };
  * is still a quote.
  */
 export function parseArgv(argv) {
-  const parsed = { command: null, all: false, noOpen: false, help: false, version: false };
+  const parsed = {
+    command: null,
+    all: false,
+    choose: false,
+    noOpen: false,
+    help: false,
+    version: false,
+  };
   const rest = [];
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
     if (token === '--help' || token === '-h') parsed.help = true;
     else if (token === '--version' || token === '-v') parsed.version = true;
     else if (token === '--all') parsed.all = true;
+    else if (token === '--choose') parsed.choose = true;
     else if (token === '--no-open') parsed.noOpen = true;
     else if (VALUE_FLAGS[token]) {
       const value = argv[i + 1];

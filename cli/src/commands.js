@@ -258,10 +258,23 @@ export async function index(argv, io) {
     return 0;
   }
 
-  let selection = config.prototypes;
+  // --choose sets the stored selection aside and asks again, which is the only
+  // way back out of a choice made once. It never edits the config on its own:
+  // a run that fails to land on an answer leaves the old selection in place.
+  let selection = argv.choose ? null : config.prototypes;
   // Adoption applies to a selection carried over from an earlier run. A choice
   // made on this run is honoured exactly as it was made.
   let chosenNow = false;
+
+  // Said out loud rather than assumed. A tool that quietly reuses a decision
+  // made a week ago looks broken when the decision was wrong, so the run names
+  // what it is reusing and how to change it.
+  if (!argv.all && selection !== null && selection.length) {
+    io.out(
+      `Using ${selection.length} branches chosen on ${config.indexedAt || 'an earlier run'}. ` +
+        'Run canon index --choose to pick again.',
+    );
+  }
 
   if (argv.all) {
     selection = candidates.map((b) => b.name);
@@ -525,7 +538,9 @@ export const USAGE = [
   'Usage: canon <command> [options]',
   '',
   '  init                 set up .canon in this repository',
-  '  index [--all]        read branches, derive families, record the selection',
+  '  index                read branches, derive families, record the selection',
+  '    --all              take every branch beside the default, no questions',
+  '    --choose           set the recorded selection aside and pick again',
   '  note                 file a record entry',
   '    --about <topic>    the question the entry is evidence about',
   '    --said <quote>     the words, verbatim',
