@@ -12,6 +12,7 @@ import {
   openReport,
   DECIDED_PLACEHOLDER,
   isParticipant,
+  parseList,
 } from '../src/record.js';
 
 const EN_DASH = String.fromCharCode(0x2013);
@@ -110,6 +111,29 @@ describe('parseEntry', () => {
     expect(entry2.participants).toEqual([]);
     expect(entry2.about).toEqual([]);
     expect(entry2.date).toBe('2026-01-01');
+  });
+});
+
+describe('parseList', () => {
+  it('reads a plain list', () => {
+    expect(parseList('[review-surface, annotation]')).toEqual(['review-surface', 'annotation']);
+    expect(parseList('[]')).toEqual([]);
+  });
+
+  /**
+   * A topic with a comma in it is one topic. Splitting on every comma turned
+   * ["review, surface", "P-01"] into three items, two of them fragments.
+   */
+  it('does not split a comma that sits inside quotes', () => {
+    expect(parseList('["review, surface", "P-01"]')).toEqual(['review, surface', 'P-01']);
+  });
+
+  it('handles single quotes the same way', () => {
+    expect(parseList("['a, b', 'c']")).toEqual(['a, b', 'c']);
+  });
+
+  it('leaves an unquoted item unquoted', () => {
+    expect(parseList('[a, "b, c", d]')).toEqual(['a', 'b, c', 'd']);
   });
 });
 

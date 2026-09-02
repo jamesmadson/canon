@@ -40,13 +40,40 @@ export function isUndecided(body) {
   return trimmed === '' || trimmed === DECIDED_PLACEHOLDER || BARE_DASH.test(trimmed);
 }
 
-function parseList(value) {
+/**
+ * A bracketed frontmatter list, split on the commas that separate items.
+ *
+ * A comma inside quotes belongs to the item, not to the list. Splitting on
+ * every comma turned ["review, surface", "P-01"] into three items, two of them
+ * fragments of a topic that then indexed under the wrong name.
+ */
+export function parseList(value) {
   const inner = value.trim().replace(/^\[/, '').replace(/\]$/, '').trim();
   if (!inner) return [];
-  return inner
-    .split(',')
-    .map((item) => item.trim().replace(/^["']|["']$/g, ''))
-    .filter(Boolean);
+
+  const items = [];
+  let current = '';
+  let quote = null;
+  for (const ch of inner) {
+    if (quote) {
+      if (ch === quote) quote = null;
+      else current += ch;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      continue;
+    }
+    if (ch === ',') {
+      items.push(current);
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  items.push(current);
+
+  return items.map((item) => item.trim()).filter(Boolean);
 }
 
 /** The body under one heading, read by splitting rather than by lookahead. */
