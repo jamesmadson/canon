@@ -3,7 +3,7 @@
  * Argv in, exit code out. Everything else lives in src.
  */
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { init, index, note, open, USAGE } from '../src/commands.js';
@@ -60,8 +60,26 @@ export async function main(argv, io) {
   return command(parsed, io);
 }
 
-const invoked = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
-if (invoked) {
+/**
+ * Was this file run, rather than imported by a test?
+ *
+ * A global install puts a symlink on PATH and points it at the real file under
+ * node_modules, so argv[1] is the link while import.meta.url is the target.
+ * Comparing the two as written strings is false in exactly the case every
+ * person installing the package lands in, which left the whole CLI silent.
+ * Both sides go through realpath so the link and its target compare equal.
+ */
+function wasRun() {
+  if (!process.argv[1]) return false;
+  const self = fileURLToPath(import.meta.url);
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(self);
+  } catch {
+    return process.argv[1] === self;
+  }
+}
+
+if (wasRun()) {
   const io = {
     cwd: process.cwd(),
     stdin: process.stdin,

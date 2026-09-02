@@ -1,6 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, existsSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  readdirSync,
+  existsSync,
+  symlinkSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { PassThrough, Writable } from 'node:stream';
@@ -407,6 +415,22 @@ describe('the executable', () => {
   it('runs help without throwing', () => {
     const out = execFileSync('node', [binPath, '--help'], { encoding: 'utf8' });
     expect(out).toContain('Usage: canon');
+  });
+
+  /**
+   * npm install -g puts a symlink on PATH and points it at the real file inside
+   * the global node_modules. Node then reports the symlink as argv[1] while
+   * import.meta.url resolves to the real path, so a guard that compares the two
+   * as written strings never fires and the whole CLI silently does nothing.
+   */
+  it('runs when invoked through a symlink, as a global install does', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'canon-link-'));
+    const link = join(dir, 'canon');
+    symlinkSync(binPath, link);
+    expect(execFileSync('node', [link, '--version'], { encoding: 'utf8' })).toMatch(
+      /^\d+\.\d+\.\d+\n$/,
+    );
+    expect(execFileSync('node', [link, '--help'], { encoding: 'utf8' })).toContain('Usage: canon');
   });
 
   it('runs every command end to end in a scratch repository', () => {
