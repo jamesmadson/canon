@@ -131,9 +131,18 @@ export function deriveFamilies(branches, options = {}) {
       parent,
       depth: branchDepth(node.name),
       label: familyDisplayName(node.name),
-      // A branch whose name implies a parent that nobody selected. Stated on
-      // the node so the tree can show it standing alone on purpose.
-      orphaned: !node.virtual && parent === null && namedParent(node.name) !== null,
+      // A branch whose named parent is a real branch that nobody selected.
+      // Stated on the node so the tree can show it standing alone on purpose.
+      //
+      // The parent has to exist as a branch. feat/solo in a repository with no
+      // feat branch is not an orphan, it is a branch with a slash in its name,
+      // and captioning it "parent not selected" would name a branch that was
+      // never there to leave out.
+      orphaned:
+        !node.virtual &&
+        parent === null &&
+        namedParent(node.name) !== null &&
+        everyName.has(namedParent(node.name)),
     });
   }
 

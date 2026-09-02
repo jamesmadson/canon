@@ -66,6 +66,54 @@ describe('encodeData', () => {
   });
 });
 
+describe('an orphaned node', () => {
+  /**
+   * A branch whose name says it has a parent, where that parent is a real
+   * branch the person chose to leave out. It stands as its own root, and the
+   * tree has to say why rather than drawing it as though it were one.
+   */
+  const orphanBranches = [
+    { name: 'main', lastCommit: '2026-09-01', sha: 'aaa1', subject: 'root' },
+    { name: 'proto/ring', lastCommit: '2026-09-01', sha: 'bbb2', subject: 'ring' },
+    { name: 'proto/ring/alt', lastCommit: '2026-08-30', sha: 'ccc3', subject: 'alt' },
+  ];
+
+  function orphanData() {
+    return buildDashboardData({
+      repo: 'demo',
+      defaultBranch: 'main',
+      branches: orphanBranches,
+      // proto/ring is a branch, and it was not selected.
+      config: { ...config, prototypes: ['proto/ring/alt'] },
+      entries: [],
+      generatedAt: '2026-09-01',
+    });
+  }
+
+  it('is marked in the data rather than quietly reparented', () => {
+    const family = orphanData().families.find((f) => f.root === 'proto/ring/alt');
+    expect(family).toBeDefined();
+    const node = family.nodes.find((n) => n.name === 'proto/ring/alt');
+    expect(node.orphaned).toBe(true);
+    expect(node.parent).toBe(null);
+  });
+
+  it('leaves an ordinary root unmarked', () => {
+    const family = data().families.find((f) => f.root === 'feat/solo');
+    expect(family.nodes[0].orphaned).toBe(false);
+  });
+
+  it('is drawn with the caption that says why it stands alone', () => {
+    const html = renderDashboard(orphanData());
+    expect(html).toContain('parent not selected');
+  });
+
+  it('draws the stub edge only for a node that is orphaned', () => {
+    const html = renderDashboard(orphanData());
+    expect(html).toContain('orphan-stub');
+  });
+});
+
 describe('excerpt', () => {
   it('drops the italic provenance line', () => {
     expect(excerpt('*Reply in a thread, 2026-08-27.*\n\nthe words themselves')).toBe(

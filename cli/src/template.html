@@ -570,21 +570,42 @@
           }
           walk(null, 0);
 
+          /* An orphan's stub edge reaches to the left of its card, so the tree
+             is padded to keep it inside the drawing. */
+          var hasOrphan = order.some(function (item) {
+            return item.node.orphaned;
+          });
+          var PAD = hasOrphan ? 22 : 0;
+
           var index = {};
           order.forEach(function (item, i) {
-            index[item.node.name] = { x: item.depth * COL, y: i * ROW, depth: item.depth };
+            index[item.node.name] = { x: PAD + item.depth * COL, y: i * ROW, depth: item.depth };
           });
 
           var maxDepth = order.reduce(function (max, item) {
             return Math.max(max, item.depth);
           }, 0);
-          var width = maxDepth * COL + W + 4;
+          var width = PAD + maxDepth * COL + W + 4;
           var height = order.length * ROW;
 
           var edges = '';
           order.forEach(function (item) {
             var child = index[item.node.name];
             var parent = item.node.parent ? index[item.node.parent] : null;
+            /* An orphan draws a short dashed stub going nowhere, which is the
+               honest picture: the edge exists in the branch name, and the node
+               it would reach was not selected. */
+            if (!parent && item.node.orphaned) {
+              edges +=
+                '<path class="orphan-stub" d="M ' +
+                (child.x - 18) +
+                ' ' +
+                (child.y + H / 2) +
+                ' H ' +
+                child.x +
+                '" fill="none" stroke="var(--rule)" stroke-width="1.5" stroke-dasharray="3 3" />';
+              return;
+            }
             if (!parent) return;
             var startX = parent.x + 20;
             var startY = parent.y + H;
@@ -630,6 +651,13 @@
               '" fill="var(--ink-soft)">' +
               esc(sub) +
               '</text>' +
+              (item.node.orphaned
+                ? '<text class="node-sub" x="' +
+                  (pos.x + 12) +
+                  '" y="' +
+                  (pos.y + H + 12) +
+                  '" fill="var(--ink-soft)">parent not selected</text>'
+                : '') +
               '</g>';
           });
 

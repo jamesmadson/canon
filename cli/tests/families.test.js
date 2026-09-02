@@ -106,6 +106,20 @@ describe('deriveFamilies', () => {
     expect(families[0].name).toBe('streaks-alt');
   });
 
+  /**
+   * An orphan is a branch whose parent was left out, which is a thing a person
+   * did. A branch under a prefix that no branch occupies had no parent to leave
+   * out, so captioning it "parent not selected" would name a branch that never
+   * existed.
+   */
+  it('does not call a branch an orphan when its named parent is not a branch', () => {
+    const families = deriveFamilies([branch('feat/solo'), branch('proto/ring')], {
+      defaultBranch: 'main',
+    });
+    const solo = families.find((f) => f.root === 'feat/solo');
+    expect(solo.nodes[0].orphaned).toBe(false);
+  });
+
   it('gives an arbitrary name a family of its own', () => {
     const families = deriveFamilies([branch('feat/x'), branch('proto/ring')], {
       defaultBranch: 'main',
