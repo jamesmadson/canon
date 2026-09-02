@@ -10,7 +10,20 @@ import { init, index, note, open, USAGE } from '../src/commands.js';
 
 const COMMANDS = { init, index, note, open };
 
-/** A tiny flag reader. A CLI framework would be a dependency, and there are none. */
+/** The flags that take a value, and the key each one lands under. */
+const VALUE_FLAGS = { '--about': 'about', '--said': 'said', '--as': 'as' };
+
+/**
+ * A tiny flag reader. A CLI framework would be a dependency, and there are none.
+ *
+ * A value flag at the end of the line, or followed by another flag, has no
+ * value. Taking the next token anyway turns `canon note --about --said "x"`
+ * into an entry filed about the literal string "--said", so a typo becomes a
+ * wrong record entry. The flag is named and the run stops instead.
+ *
+ * Only a leading `--` disqualifies a value, so a quote that opens with a dash
+ * is still a quote.
+ */
 export function parseArgv(argv) {
   const parsed = { command: null, all: false, noOpen: false, help: false, version: false };
   const rest = [];
@@ -20,10 +33,15 @@ export function parseArgv(argv) {
     else if (token === '--version' || token === '-v') parsed.version = true;
     else if (token === '--all') parsed.all = true;
     else if (token === '--no-open') parsed.noOpen = true;
-    else if (token === '--about') parsed.about = argv[++i];
-    else if (token === '--said') parsed.said = argv[++i];
-    else if (token === '--as') parsed.as = argv[++i];
-    else if (token.startsWith('-')) parsed.unknown = token;
+    else if (VALUE_FLAGS[token]) {
+      const value = argv[i + 1];
+      if (value === undefined || value.startsWith('--')) {
+        if (!parsed.missingValue) parsed.missingValue = token;
+        continue;
+      }
+      parsed[VALUE_FLAGS[token]] = value;
+      i += 1;
+    } else if (token.startsWith('-')) parsed.unknown = token;
     else rest.push(token);
   }
   parsed.command = rest[0] ?? null;
@@ -47,6 +65,10 @@ export async function main(argv, io) {
   if (parsed.help || !parsed.command) {
     io.out(USAGE);
     return parsed.command || parsed.help ? 0 : 1;
+  }
+  if (parsed.missingValue) {
+    io.err(`${parsed.missingValue} needs a value.`);
+    return 1;
   }
   if (parsed.unknown) {
     io.err(`${parsed.unknown} is not an option. Run canon --help for the list.`);

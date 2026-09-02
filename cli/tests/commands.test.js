@@ -92,6 +92,28 @@ describe('parseArgv', () => {
     expect(parseArgv(['index', '--wat']).unknown).toBe('--wat');
   });
 
+  /**
+   * `canon note --about --said "x"` used to file an entry about the literal
+   * string "--said". A flag that swallows the next flag as its value turns a
+   * typo into a wrong record entry, which is worse than an error.
+   */
+  it('errors when a value flag has no value after it', () => {
+    expect(parseArgv(['note', '--about']).missingValue).toBe('--about');
+    expect(parseArgv(['note', '--about', '--said', 'x']).missingValue).toBe('--about');
+    expect(parseArgv(['note', '--said']).missingValue).toBe('--said');
+    expect(parseArgv(['note', '--as', '--all']).missingValue).toBe('--as');
+  });
+
+  it('reports the first missing value and does not swallow the next flag', () => {
+    const parsed = parseArgv(['note', '--about', '--said', 'x']);
+    expect(parsed.about).toBeUndefined();
+    expect(parsed.said).toBe('x');
+  });
+
+  it('still reads a value that merely looks unusual', () => {
+    expect(parseArgv(['note', '--said', '-1 is the count']).said).toBe('-1 is the count');
+  });
+
   it('reads help and version from either spelling', () => {
     expect(parseArgv(['--help']).help).toBe(true);
     expect(parseArgv(['-v']).version).toBe(true);
@@ -116,6 +138,12 @@ describe('canon with no command', () => {
     const io = capture(process.cwd());
     expect(await main(['--version'], io)).toBe(0);
     expect(io.text()).toMatch(/^\d+\.\d+\.\d+$/);
+  });
+
+  it('names the flag that is missing its value and stops', async () => {
+    const io = capture(process.cwd());
+    expect(await main(['note', '--about'], io)).toBe(1);
+    expect(io.errors()).toContain('--about needs a value.');
   });
 
   it('names an unknown command', async () => {
