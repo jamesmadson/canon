@@ -27,6 +27,19 @@
  * parent the person chose to leave out.
  */
 
+/**
+ * Could this branch be a prototype?
+ *
+ * The default branch is what the others are variants of, so it is never one
+ * itself. That was the same line written three times, in deriveFamilies, in
+ * index and in open, which is three chances for the rule to drift. It is one
+ * function now, and all three call it.
+ */
+export function isCandidate(branch, defaultBranch) {
+  const name = typeof branch === 'string' ? branch : branch.name;
+  return Boolean(name) && name !== defaultBranch;
+}
+
 /** Path depth below the namespace segment: proto/today-ring is 1, its child is 2. */
 export function branchDepth(name) {
   return name.split('/').length - 1;
@@ -61,7 +74,7 @@ export function deriveFamilies(branches, options = {}) {
   const everyName = new Set(branches.map((b) => b.name));
 
   const chosen = branches
-    .filter((b) => b.name !== defaultBranch)
+    .filter((b) => isCandidate(b, defaultBranch))
     .filter((b) => (selected === null ? true : selected.includes(b.name)));
 
   const present = new Set(chosen.map((b) => b.name));

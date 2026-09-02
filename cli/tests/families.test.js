@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { deriveFamilies, familyDisplayName, branchDepth } from '../src/families.js';
+import { deriveFamilies, familyDisplayName, branchDepth, isCandidate } from '../src/families.js';
 
 /**
  * Branch names carry the hierarchy, so the tree is derived on every run and
@@ -112,6 +112,16 @@ describe('deriveFamilies', () => {
    * out, so captioning it "parent not selected" would name a branch that never
    * existed.
    */
+  it('never treats the default branch as a candidate, from any caller', () => {
+    expect(isCandidate('main', 'main')).toBe(false);
+    expect(isCandidate('proto/ring', 'main')).toBe(true);
+    expect(isCandidate({ name: 'main' }, 'main')).toBe(false);
+    expect(isCandidate({ name: 'proto/ring' }, 'main')).toBe(true);
+    // The families derivation reads it the same way its callers do.
+    const families = deriveFamilies([branch('main'), branch('proto/ring')], { defaultBranch: 'main' });
+    expect(families.map((f) => f.root)).toEqual(['proto/ring']);
+  });
+
   it('does not call a branch an orphan when its named parent is not a branch', () => {
     const families = deriveFamilies([branch('feat/solo'), branch('proto/ring')], {
       defaultBranch: 'main',

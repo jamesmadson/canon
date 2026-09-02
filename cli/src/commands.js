@@ -29,7 +29,7 @@ import {
   ensureGitignoreEntry,
   DASHBOARD_IGNORE_LINE,
 } from './config.js';
-import { deriveFamilies } from './families.js';
+import { deriveFamilies, isCandidate } from './families.js';
 import { stalenessOf } from './staleness.js';
 import { readRecord, renderEntry, slugify, entryFileName, isParticipant } from './record.js';
 import { buildDashboardData, renderDashboard } from './render.js';
@@ -251,7 +251,7 @@ export async function index(argv, io) {
   const branches = listBranches(io.cwd);
   const names = branches.map((b) => b.name);
   const defaultBranch = pickDefaultBranch(names, currentBranch(io.cwd));
-  const candidates = branches.filter((b) => b.name !== defaultBranch);
+  const candidates = branches.filter((b) => isCandidate(b, defaultBranch));
 
   if (!candidates.length) {
     io.out(`Only ${defaultBranch} is here, and the default branch is never a prototype.`);
@@ -485,7 +485,7 @@ export async function open(argv, io) {
   // does; more than one is, so refuse in the same words rather than guess.
   let selected = config.prototypes;
   if (selected === null) {
-    const candidates = branches.filter((b) => b.name !== defaultBranch).map((b) => b.name);
+    const candidates = branches.filter((b) => isCandidate(b, defaultBranch)).map((b) => b.name);
     if (candidates.length > 1) {
       io.err(unchosenMessage(candidates.length, defaultBranch));
       return 1;
