@@ -1,0 +1,66 @@
+---
+import { SIGNUP_ENDPOINT, SIGNUP_CLOSED_NOTE } from '../lib/install';
+
+/**
+ * The alpha sign-up.
+ *
+ * There is no endpoint yet, and the form says so rather than accepting an
+ * address and dropping it. When SIGNUP_ENDPOINT is set the field and the button
+ * come alive and the form posts to it; until then both are disabled and the
+ * reason is printed beside them.
+ */
+const open = SIGNUP_ENDPOINT !== '';
+---
+
+<section aria-labelledby="signup-heading" class="max-w-xl">
+  <h2 id="signup-heading" class="display">Join the alpha</h2>
+  <p class="mt-3 text-[15px] leading-relaxed text-ink-soft">
+    Teams of two to fifteen who prototype in code and Figma at the same time.
+    Onboarded by hand, a few at a time.
+  </p>
+
+  <form
+    class="mt-5"
+    method="post"
+    action={open ? SIGNUP_ENDPOINT : undefined}
+    data-signup-open={open ? '' : undefined}
+  >
+    <label for="signup-email" class="label block">Work email</label>
+    <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
+      <input
+        id="signup-email"
+        type="email"
+        name="email"
+        required
+        disabled={!open}
+        placeholder="you@studio.example"
+        aria-describedby={open ? undefined : 'signup-note'}
+        class="field sm:flex-1"
+      />
+      <button
+        type="submit"
+        disabled={!open}
+        aria-describedby={open ? undefined : 'signup-note'}
+        class="btn btn-primary shrink-0"
+      >
+        Join the alpha
+      </button>
+    </div>
+    {!open && (
+      <p id="signup-note" class="mt-3 font-mono text-[11px] tracking-[0.08em] text-ink-soft">
+        {SIGNUP_CLOSED_NOTE}
+      </p>
+    )}
+  </form>
+
+  <p class="mt-4 text-[13px] leading-relaxed text-ink-soft">
+    Or write to
+    <a
+      href="mailto:james@jamesmadson.me?subject=Canon%20alpha"
+      class="font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      james@jamesmadson.me
+    </a>
+    and say what your team builds.
+  </p>
+</section>

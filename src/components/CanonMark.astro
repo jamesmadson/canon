@@ -20,9 +20,10 @@ const { size = 24, class: className = '' } = Astro.props;
 // clipPath ids are document-global, so two marks on one page would collide.
 const markId = uid('canon-mark');
 
-// Thirteen rules across the disc, with a hairline gap down the middle: the
-// grille reads as printed rather than drawn.
-const lines = Array.from({ length: 13 }, (_, i) => 10 + i * 7);
+// Seven rules across the disc, with a hairline gap down the middle. The
+// direction page draws thirteen at 104px; at the 24px the header asks for,
+// thirteen close to a solid disc, so the count is set for the size it ships at.
+const lines = Array.from({ length: 7 }, (_, i) => 13 + i * 13);
 
 // The dotted form is the same disc rendered as a speaker grille: a square grid
 // kept where it falls inside the circle.
@@ -30,10 +31,13 @@ const dots: { x: number; y: number }[] = [];
 const CX = 52;
 const CY = 52;
 const RAD = 46;
-const STEP = 9.2;
-const DR = 2.5;
-for (let y = CY - RAD; y <= CY + RAD; y += STEP) {
-  for (let x = CX - RAD; x <= CX + RAD; x += STEP) {
+const STEP = 15;
+const DR = 4.2;
+// Centred on the disc rather than started from its edge, so the grille reads
+// as symmetrical at any size.
+const SPAN = Math.floor(RAD / STEP) * STEP;
+for (let y = CY - SPAN; y <= CY + SPAN; y += STEP) {
+  for (let x = CX - SPAN; x <= CX + SPAN; x += STEP) {
     const dx = x - CX;
     const dy = y - CY;
     if (Math.sqrt(dx * dx + dy * dy) <= RAD - DR) {
@@ -60,7 +64,7 @@ for (let y = CY - RAD; y <= CY + RAD; y += STEP) {
       clip-path={`url(#${markId}-c)`}
       mask={`url(#${markId}-gap)`}
       stroke="var(--mark-ink)"
-      stroke-width="2.6"
+      stroke-width="4.5"
       stroke-linecap="round"
     >
       {lines.map((y) => <line x1="0" y1={y} x2="104" y2={y} />)}
