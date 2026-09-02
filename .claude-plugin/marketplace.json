@@ -45,6 +45,16 @@
       },
       "category": "design",
       "source": "./plugin/deter"
+    },
+    {
+      "name": "raster",
+      "description": "Grids in numbers. Reads the grid out of CSS or a screenshot, recommends one grid per format instead of one stretched grid, and draws an overlay so you can check what got built.",
+      "author": {
+        "name": "James Madson",
+        "url": "https://jamesmadson.github.io/canon/"
+      },
+      "category": "design",
+      "source": "./plugin/raster"
     }
   ]
 }

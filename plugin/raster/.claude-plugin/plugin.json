@@ -1,0 +1,9 @@
+{
+  "name": "raster",
+  "description": "Grid systems as a spec rather than a habit. Reads the grid out of CSS, layout code, or a screenshot and returns baseline unit, columns, gutter, margin, and module proportion with the unknowns named; recommends one grid per format instead of one stretched grid; emits a CSS overlay for inspecting the result.",
+  "version": "0.1.0",
+  "author": {
+    "name": "James Madson",
+    "url": "https://jamesmadson.github.io/canon/"
+  }
+}
