@@ -22,6 +22,24 @@ export function isParticipant(code) {
   return /^P-\d+$/.test(code);
 }
 
+/**
+ * Is this Decided body a person saying "nothing here yet"?
+ *
+ * Three spellings mean the same thing. The placeholder this tool writes, an
+ * empty section, and a bare dash on its own, which is what a person types when
+ * filling an entry in by hand. The dashes are written by codepoint so this file
+ * stays plain ASCII, per D-38.
+ *
+ * A dash that starts a real sentence is a decision, so the whole body has to be
+ * the dash and nothing else.
+ */
+const BARE_DASH = new RegExp(`^[-${String.fromCharCode(0x2013)}${String.fromCharCode(0x2014)}]$`);
+
+export function isUndecided(body) {
+  const trimmed = String(body || '').trim();
+  return trimmed === '' || trimmed === DECIDED_PLACEHOLDER || BARE_DASH.test(trimmed);
+}
+
 function parseList(value) {
   const inner = value.trim().replace(/^\[/, '').replace(/\]$/, '').trim();
   if (!inner) return [];
@@ -53,7 +71,7 @@ export function parseEntry(text, file) {
 
   const fromName = file.match(/^(\d{4}-\d{2}-\d{2})-(.+)\.md$/);
   const decidedRaw = sectionBody(text, 'Decided');
-  const decided = decidedRaw === DECIDED_PLACEHOLDER ? '' : decidedRaw;
+  const decided = isUndecided(decidedRaw) ? '' : decidedRaw;
   const meantRaw = sectionBody(text, 'Meant');
 
   return {

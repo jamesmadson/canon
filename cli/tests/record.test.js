@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { mkdtempSync, writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   parseEntry,
   readRecord,
@@ -12,6 +13,9 @@ import {
   DECIDED_PLACEHOLDER,
   isParticipant,
 } from '../src/record.js';
+
+const EN_DASH = String.fromCharCode(0x2013);
+const EM_DASH = String.fromCharCode(0x2014);
 
 const SAMPLE = `---
 date: 2026-08-27
@@ -78,6 +82,27 @@ describe('parseEntry', () => {
   it('counts an empty Decided as still open', () => {
     const open = parseEntry(SAMPLE.replace(/2026-08-27 adopted.*/, ''), 'x.md');
     expect(open.open).toBe(true);
+  });
+
+  /**
+   * The record predates the tool, and a person filling in an entry by hand
+   * writes a dash to mean "nothing here yet". Reading that as a decision closes
+   * every hand written entry in this repository and empties the open report.
+   */
+  it('counts a bare dash Decided as still open, in any of the three spellings', () => {
+    for (const dash of [EM_DASH, EN_DASH, '-']) {
+      const open = parseEntry(SAMPLE.replace(/2026-08-27 adopted.*/, dash), `${dash}.md`);
+      expect(open.open, `dash ${dash.codePointAt(0)}`).toBe(true);
+      expect(open.decided).toBe('');
+    }
+  });
+
+  it('still reads a decision that merely starts with a dash', () => {
+    const entry3 = parseEntry(
+      SAMPLE.replace(/2026-08-27 adopted.*/, `${EM_DASH} adopted after all`),
+      'x.md',
+    );
+    expect(entry3.open).toBe(false);
   });
 
   it('survives a file with no frontmatter rather than throwing', () => {
@@ -235,6 +260,35 @@ describe('openReport', () => {
       { about: ['x'], participants: ['S-01', 'P-01'], open: true, date: '2026-09-01' },
     ]);
     expect(report[0].voices).toBe(1);
+  });
+});
+
+/**
+ * A fixture rather than a unit test. Every other case here builds its own
+ * input, so all of them can agree with each other and still be wrong about the
+ * record this tool exists to read. This one reads the real directory.
+ */
+describe('the record in this repository', () => {
+  const dir = fileURLToPath(new URL('../../.strata', import.meta.url));
+  const entries = readRecord(dir);
+
+  it('reads every entry on disk', () => {
+    expect(entries.length).toBeGreaterThan(10);
+  });
+
+  it('finds open entries, because the hand written ones have no decision yet', () => {
+    const open = entries.filter((entry) => entry.open);
+    expect(open.length).not.toBe(0);
+    expect(open.length).toBeGreaterThan(entries.length / 2);
+  });
+
+  it('still reads the one entry that carries a decision as closed', () => {
+    const decided = entries.find((entry) => entry.slug === 'annotation-layer');
+    expect(decided.open).toBe(false);
+  });
+
+  it('gives the open report something to report', () => {
+    expect(openReport(entries).length).toBeGreaterThan(0);
   });
 });
 
