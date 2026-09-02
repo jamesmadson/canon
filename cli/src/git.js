@@ -65,9 +65,16 @@ const FIELD = '\u001f';
  * fetch, so showing them would be showing something stale as if it were live.
  */
 export function listBranches(cwd) {
-  const format = ['%(refname:short)', '%(committerdate:short)', '%(objectname:short)', '%(contents:subject)'].join(
-    FIELD,
-  );
+  // format-local, not :short. The short form is the date in the committer's own
+  // timezone, so a commit pushed from another zone reads as a different day
+  // than the clock this tool compares it against. Every date the tool handles
+  // is the machine's local calendar date, on both sides of the subtraction.
+  const format = [
+    '%(refname:short)',
+    '%(committerdate:format-local:%Y-%m-%d)',
+    '%(objectname:short)',
+    '%(contents:subject)',
+  ].join(FIELD);
   const out = tryGit(['for-each-ref', `--format=${format}`, 'refs/heads'], cwd);
   if (!out) return [];
   return out
@@ -95,5 +102,5 @@ export function pickDefaultBranch(names, current) {
 export function forkDate(branch, defaultBranch, cwd) {
   const base = tryGit(['merge-base', branch, defaultBranch], cwd);
   if (!base) return null;
-  return tryGit(['log', '-1', '--format=%cs', base], cwd);
+  return tryGit(['log', '-1', '--format=%cd', '--date=format-local:%Y-%m-%d', base], cwd);
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import {
   mkdtempSync,
@@ -15,8 +15,10 @@ import { PassThrough, Writable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 
 import { main, parseArgv } from '../bin/canon.js';
-import { sharedSegments, parseSelection, orderCandidates } from '../src/commands.js';
+import { sharedSegments, parseSelection, orderCandidates, today } from '../src/commands.js';
 import { openerFor } from '../src/opener.js';
+import { listBranches } from '../src/git.js';
+import { stalenessOf } from '../src/staleness.js';
 
 const binPath = fileURLToPath(new URL('../bin/canon.js', import.meta.url));
 
@@ -333,6 +335,54 @@ describe('index, asked rather than told', () => {
     const io = capture(root, { answers: ['all'] });
     await main(['index'], io);
     expect(JSON.parse(readFileSync(join(root, '.canon', 'config.json'), 'utf8')).prototypes).toHaveLength(3);
+  });
+});
+
+describe('today', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  /**
+   * The two sides of every staleness number have to be the same calendar.
+   *
+   * git reports a commit date in the machine's local calendar, so reading the
+   * clock in UTC puts the tool a day out for the hours between local midnight
+   * and UTC midnight: a commit made minutes ago reads as made tomorrow, and the
+   * day count goes negative before it is clamped to zero.
+   */
+  it('is the local calendar date, not the UTC one', () => {
+    // 2026-09-01 late evening in a western zone is already 2026-09-02 in UTC.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-02T04:30:00Z'));
+    const local = new Date();
+    const expected = [
+      local.getFullYear(),
+      String(local.getMonth() + 1).padStart(2, '0'),
+      String(local.getDate()).padStart(2, '0'),
+    ].join('-');
+    expect(today()).toBe(expected);
+  });
+
+  it('agrees with the date git would print for the same instant', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-02T04:30:00Z'));
+    const stamped = today();
+    vi.useRealTimers();
+    const root = scratchRepo([]);
+    // A commit written at that instant, read back the way the tool reads it.
+    execFileSync('git', ['commit', '--allow-empty', '-m', 'midnight'], {
+      cwd: root,
+      stdio: 'ignore',
+      env: { ...process.env, GIT_COMMITTER_DATE: '2026-09-02T04:30:00Z', GIT_AUTHOR_DATE: '2026-09-02T04:30:00Z' },
+    });
+    expect(listBranches(root)[0].lastCommit).toBe(stamped);
+  });
+
+  it('never reports a commit made now as older or newer than today', () => {
+    const root = scratchRepo([]);
+    const branch = listBranches(root)[0];
+    expect(stalenessOf(branch.lastCommit, today()).days).toBe(0);
   });
 });
 

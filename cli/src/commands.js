@@ -58,8 +58,21 @@ function unchosenMessage(count, defaultBranch) {
   ].join('\n');
 }
 
-function today() {
-  return new Date().toISOString().slice(0, 10);
+/**
+ * Today, in the calendar the machine is in.
+ *
+ * Both sides of a staleness number have to be the same calendar. git reports a
+ * commit date in local time, so reading the clock in UTC puts the tool a day
+ * out for the hours between local midnight and UTC midnight: a commit made
+ * minutes ago reads as made tomorrow. Built from the local parts rather than
+ * from an ISO string, which is always UTC.
+ */
+export function today(now = new Date()) {
+  return [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, '0'),
+    String(now.getDate()).padStart(2, '0'),
+  ].join('-');
 }
 
 /** The repository a command is about, or a message saying why there is none. */
