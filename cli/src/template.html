@@ -18,18 +18,26 @@
         --ink-soft: #6e6b64;
         --ink: #1a1815;
 
+        /* 9 / 11 / 14. Concentric: inner equals outer minus the padding. */
         --radius-sm: 9px;
         --radius-md: 11px;
         --radius-lg: 14px;
 
-        --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        /* Public Sans and IBM Plex Mono where the machine already has them,
+           and the system stack where it does not. Named, never fetched: no
+           font link and no embedded face declaration anywhere in this file,
+           which is what keeps it honest about making no requests. */
+        --sans: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
         color-scheme: light;
       }
 
+      /* Three states, two blocks, and neither folds into the other: an
+         explicit Light has to win over a dark operating system, and the
+         default has to follow the operating system without being told. */
       @media (prefers-color-scheme: dark) {
-        :root {
+        :root:not([data-app-theme="light"]) {
           --ground: #191817;
           --panel: #232120;
           --recess: #2e2b29;
@@ -38,6 +46,16 @@
           --ink: #edebe6;
           color-scheme: dark;
         }
+      }
+
+      :root[data-app-theme="dark"] {
+        --ground: #191817;
+        --panel: #232120;
+        --recess: #2e2b29;
+        --rule: #35322f;
+        --ink-soft: #9a968d;
+        --ink: #edebe6;
+        color-scheme: dark;
       }
 
       * {
@@ -55,20 +73,21 @@
         color: var(--ink);
         font-family: var(--sans);
         font-size: 16px;
+        font-weight: 400;
         line-height: 1.6;
         overflow-x: hidden;
         -webkit-text-size-adjust: 100%;
       }
 
       .page {
-        max-width: 1120px;
+        max-width: 1180px;
         margin: 0 auto;
-        padding: 20px 16px 56px;
+        padding: 16px 12px 40px;
       }
 
       @media (min-width: 720px) {
         .page {
-          padding: 28px 24px 64px;
+          padding: 24px 20px 56px;
         }
       }
 
@@ -84,6 +103,8 @@
         margin: 0;
       }
 
+      /* Weight 200 only up here. At 28px and above the thin axis has enough
+         stem to hold, and below it the body weight takes over. */
       .display {
         font-size: 30px;
         font-weight: 200;
@@ -92,38 +113,289 @@
         margin: 0;
       }
 
-      /* The one solid ink surface in the page. */
-      .titlebar {
+      @media (min-width: 640px) {
+        .display {
+          font-size: 34px;
+        }
+      }
+
+      .note {
+        margin: 4px 0 0;
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+      }
+
+      .mono {
+        font-family: var(--mono);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* The shell is a fill on the page, not a box with a line around it. */
+      .shell {
+        background: var(--ground);
+        color: var(--ink);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+      }
+
+      /* ---- Top bar ---------------------------------------------------- */
+
+      .topbar {
         display: flex;
         flex-wrap: wrap;
-        align-items: baseline;
-        gap: 8px 16px;
-        justify-content: space-between;
-        background: var(--ink);
-        color: var(--ground);
-        border-radius: var(--radius-lg);
-        padding: 14px 18px;
+        align-items: center;
+        gap: 4px 12px;
+        padding: 6px 12px;
+        background: var(--panel);
       }
 
-      .titlebar .repo {
-        font-size: 15px;
+      .wordmark {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 8px;
+        margin-left: -8px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: none;
+        font: inherit;
+        font-size: 13px;
         font-weight: 500;
         letter-spacing: -0.01em;
-        margin: 0;
+        color: var(--ink-soft);
+        cursor: pointer;
       }
 
-      .titlebar .counts {
-        font-family: var(--mono);
+      .wordmark:hover {
+        color: var(--ink);
+      }
+
+      .crumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        margin: 0;
+        font-size: 13px;
+        color: var(--ink-soft);
+      }
+
+      .crumb .sep {
+        color: var(--rule);
+      }
+
+      .crumb .owner {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .crumb .repo {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--ink);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .account {
+        position: relative;
+        margin-left: auto;
+      }
+
+      .account-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 0 8px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: none;
+        font: inherit;
+        font-size: 13px;
+        color: var(--ink-soft);
+        cursor: pointer;
+      }
+
+      .account-button:hover {
+        color: var(--ink);
+      }
+
+      .avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        background: var(--recess);
+        color: var(--ink);
         font-size: 11px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        font-variant-numeric: tabular-nums;
-        opacity: 0.78;
-        margin: 0;
+        font-weight: 500;
+        letter-spacing: 0.02em;
       }
 
-      section {
-        margin-top: 34px;
+      /* The menu floats over both the ground and the panels beneath it, and
+         there are no shadows to lift it, so it takes the recess: the one fill
+         that reads as distinct against either. */
+      .account-menu {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        width: 264px;
+        max-width: calc(100vw - 24px);
+        margin-top: 4px;
+        padding: 4px;
+        border-radius: var(--radius-md);
+        background: var(--recess);
+      }
+
+      .account-menu[hidden] {
+        display: none;
+      }
+
+      .account-menu .block {
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        background: var(--panel);
+      }
+
+      .account-menu .who {
+        margin: 4px 0 0;
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink);
+        overflow-wrap: anywhere;
+      }
+
+      .theme-row {
+        display: flex;
+        gap: 2px;
+        margin-top: 8px;
+      }
+
+      .theme-option {
+        flex: 1;
+        min-height: 44px;
+        padding: 0 8px;
+        border: 0;
+        border-radius: 5px;
+        background: none;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink-soft);
+        cursor: pointer;
+      }
+
+      .theme-option[aria-pressed="true"] {
+        background: var(--recess);
+        color: var(--ink);
+      }
+
+      /* ---- Sidebar and well -------------------------------------------- */
+
+      .frame {
+        display: flex;
+        flex-direction: column;
+      }
+
+      @media (min-width: 760px) {
+        .frame {
+          flex-direction: row;
+        }
+      }
+
+      .sidebar {
+        flex-shrink: 0;
+        padding: 8px;
+      }
+
+      @media (min-width: 760px) {
+        .sidebar {
+          width: 192px;
+        }
+      }
+
+      .sidebar ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      @media (min-width: 760px) {
+        .sidebar ul {
+          flex-direction: column;
+          flex-wrap: nowrap;
+        }
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: none;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink-soft);
+        text-align: left;
+        cursor: pointer;
+      }
+
+      @media (min-width: 760px) {
+        .nav-item {
+          width: 100%;
+        }
+      }
+
+      .nav-item:hover {
+        color: var(--ink);
+      }
+
+      /* The current section is a fill, not a line. */
+      .nav-item[aria-current="page"] {
+        background: var(--panel);
+        color: var(--ink);
+      }
+
+      .well {
+        flex: 1;
+        min-width: 0;
+        padding: 16px 12px 24px;
+      }
+
+      @media (min-width: 760px) {
+        .well {
+          padding: 24px 20px 32px;
+        }
+      }
+
+      /* ---- Shared pieces ------------------------------------------------ */
+
+      .head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px 24px;
+      }
+
+      .section {
+        margin-top: 32px;
       }
 
       .section-head {
@@ -131,335 +403,495 @@
         flex-wrap: wrap;
         align-items: baseline;
         justify-content: space-between;
-        gap: 8px 16px;
-        margin-bottom: 14px;
+        gap: 4px 16px;
+        margin-bottom: 12px;
       }
 
-      .note {
-        color: var(--ink-soft);
-        font-size: 13px;
-        margin: 0;
-        max-width: 62ch;
-      }
-
-      /* Fills instead of borders. The recess is the edge. */
-      .grid {
+      .stats {
         display: grid;
-        gap: 14px;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin: 24px 0 0;
       }
 
-      .card {
-        background: var(--recess);
-        border: 0;
-        border-radius: var(--radius-lg);
-        padding: 14px;
+      @media (min-width: 900px) {
+        .stats {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+
+      .stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        background: var(--panel);
+      }
+
+      .stat .value {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 200;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .stat .under {
+        margin: 0;
+        font-size: 11px;
+        color: var(--ink-soft);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* The one place a hairline earns its keep: separating the facts row from
+         the numbers above it. */
+      .facts {
         display: flex;
         flex-direction: column;
         gap: 12px;
-        min-width: 0;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--rule);
       }
 
-      .thumb {
-        background: var(--panel);
-        border-radius: var(--radius-md);
-        aspect-ratio: 16 / 10;
-        overflow: hidden;
+      @media (min-width: 640px) {
+        .facts {
+          flex-direction: row;
+          gap: 32px;
+        }
+      }
+
+      .facts dd {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: var(--ink);
+        overflow-wrap: anywhere;
+      }
+
+      .grid {
         display: grid;
-        place-items: center;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+      }
+
+      @media (min-width: 620px) {
+        .grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (min-width: 1000px) {
+        .grid.wide {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .card {
+        display: flex;
+        flex-direction: column;
+        padding: 0;
+        border: 0;
+        border-radius: var(--radius-md);
+        background: var(--panel);
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        overflow: hidden;
+      }
+
+      button.card {
+        cursor: pointer;
+      }
+
+      button.card:hover {
+        background: var(--recess);
+      }
+
+      /* One well, one inset, one frame. A thumbnail and its absence are drawn
+         to the same geometry, so the empty card is the same card. */
+      .thumb {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 3 / 2;
+        margin: 4px;
+        padding: 14px;
+        border-radius: 7px;
+        background: var(--recess);
+        overflow: hidden;
       }
 
       .thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 5px;
       }
 
-      .card h3 {
-        font-size: 17px;
-        font-weight: 500;
-        line-height: 1.25;
-        letter-spacing: -0.01em;
-        margin: 0;
-        overflow-wrap: anywhere;
-      }
-
-      .meta {
-        display: grid;
-        gap: 4px;
-        margin: 0;
-      }
-
-      .meta div {
+      .card-body {
         display: flex;
-        gap: 10px;
-        align-items: baseline;
-        justify-content: space-between;
+        flex: 1;
+        flex-direction: column;
+        gap: 8px;
+        min-height: 44px;
+        padding: 14px 16px 16px;
       }
 
-      .meta dt {
-        font-family: var(--mono);
-        font-size: 10px;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--ink-soft);
-      }
-
-      .meta dd {
-        margin: 0;
-        font-family: var(--mono);
-        font-size: 12px;
-        font-variant-numeric: tabular-nums;
-        text-align: right;
-        overflow-wrap: anywhere;
-        min-width: 0;
-      }
-
-      /* Staleness reads as a value shift, never a colour. */
-      .state {
-        display: inline-flex;
-        align-items: center;
-        align-self: start;
-        gap: 6px;
-        font-family: var(--mono);
-        font-size: 11px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        border-radius: 999px;
-        padding: 3px 10px;
-        background: var(--panel);
-        color: var(--ink-soft);
-      }
-
-      .state[data-state='quiet'] {
-        color: var(--ink);
-      }
-
-      .state[data-state='stale'] {
-        background: var(--ink);
-        color: var(--ground);
-      }
-
-      .filters {
+      .card-title-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 4px 12px;
       }
 
-      .filters button {
-        min-height: 44px;
-        min-width: 44px;
-        padding-inline: 16px;
-        border: 0;
-        border-radius: 999px;
-        background: var(--recess);
-        color: var(--ink);
-        font-family: var(--sans);
-        font-size: 13px;
+      .card-title {
+        font-size: 16px;
         font-weight: 500;
-        cursor: pointer;
-        transition: background-color 120ms ease, color 120ms ease;
+        color: var(--ink);
       }
 
-      .filters button:hover {
-        background: var(--rule);
+      .card-source {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink-soft);
+        overflow-wrap: anywhere;
       }
 
-      .filters button[aria-pressed='true'] {
+      .card-foot {
+        margin-top: auto;
+        padding-top: 4px;
+        font-size: 11px;
+        color: var(--ink-soft);
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Staleness is a value shift, never a colour. Active sits on the panel,
+         quiet darkens the text, stale inverts to solid ink. */
+      .state {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        background: var(--recess);
+        color: var(--ink-soft);
+      }
+
+      .state[data-state="quiet"] {
+        color: var(--ink);
+      }
+
+      .state[data-state="stale"] {
         background: var(--ink);
         color: var(--ground);
       }
 
-      :where(button, a, [tabindex]):focus-visible {
-        outline: 2px solid var(--ink);
-        outline-offset: 3px;
+      .chip {
+        display: inline-block;
+        padding: 2px 8px;
+        border: 1px solid var(--rule);
+        border-radius: 999px;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        color: var(--ink-soft);
       }
 
-      /* Wide content scrolls in its own container, never the page. */
+      .empty {
+        margin: 0;
+        padding: 20px 16px;
+        border-radius: var(--radius-md);
+        background: var(--panel);
+        font-size: 13px;
+        color: var(--ink-soft);
+      }
+
+      /* Wide content scrolls inside its own box so the page never does. */
       .scroller {
         overflow-x: auto;
-        overflow-y: hidden;
-        background: var(--panel);
-        border-radius: var(--radius-md);
-        padding: 12px;
-      }
-
-      .tree {
-        margin-top: 34px;
-        display: grid;
-        gap: 14px;
-      }
-
-      .tree .card {
-        gap: 10px;
+        padding-bottom: 4px;
       }
 
       .node-name {
         font-family: var(--mono);
-        font-size: 11px;
-        font-weight: 500;
+        font-size: 12px;
       }
 
       .node-sub {
         font-family: var(--mono);
         font-size: 10px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        letter-spacing: 0.04em;
       }
 
-      .record {
-        display: grid;
-        gap: 14px;
-        align-items: start;
+      /* ---- Lists -------------------------------------------------------- */
+
+      .rows {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
       }
 
-      @media (min-width: 900px) {
-        .record {
-          grid-template-columns: 1.5fr 1fr;
-        }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 12px;
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        background: var(--panel);
       }
 
-      .entry {
-        background: var(--recess);
-        border-radius: var(--radius-lg);
-        padding: 14px;
-        margin-bottom: 10px;
+      .row .grow {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .row .name {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--ink);
+        overflow-wrap: anywhere;
+      }
+
+      .row .meta {
+        margin: 2px 0 0;
+        font-size: 11px;
+        color: var(--ink-soft);
+        font-variant-numeric: tabular-nums;
       }
 
       .entry blockquote {
-        margin: 10px 0 0;
+        margin: 8px 0 0;
         padding-left: 12px;
-        background: var(--panel);
-        border-radius: var(--radius-sm);
-        padding: 10px 12px;
-        font-size: 14px;
+        border-left: 1px solid var(--rule);
+        font-size: 15px;
+        line-height: 1.6;
         color: var(--ink);
-        overflow-wrap: anywhere;
       }
 
       .topics {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 10px;
+        gap: 4px;
+        margin-top: 8px;
+      }
+
+      .open-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 0;
         padding: 0;
         list-style: none;
       }
 
-      .topics li {
-        font-family: var(--mono);
-        font-size: 10px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        background: var(--panel);
-        color: var(--ink-soft);
-        border-radius: 999px;
-        padding: 3px 10px;
-      }
-
-      .open-row {
+      .open-item {
         display: flex;
+        flex-wrap: wrap;
         align-items: baseline;
         justify-content: space-between;
-        gap: 12px;
-        padding: 10px 0;
+        gap: 4px 12px;
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        background: var(--panel);
       }
 
-      .open-row + .open-row {
-        border-top: 1px solid var(--rule);
+      /* ---- The overflow menu -------------------------------------------- */
+
+      .menu-wrap {
+        position: relative;
       }
 
-      .open-row .topic {
+      .menu-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: var(--recess);
+        color: var(--ink);
+        font: inherit;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .menu {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        width: 280px;
+        max-width: calc(100vw - 24px);
+        margin-top: 4px;
+        padding: 4px;
+        border-radius: var(--radius-md);
+        background: var(--recess);
+      }
+
+      .menu[hidden] {
+        display: none;
+      }
+
+      .menu-item {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: var(--radius-sm);
+        background: var(--panel);
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--ink);
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .menu-note {
+        margin: 0;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        background: var(--panel);
+        font-size: 11px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+      }
+
+      .menu-note code {
         font-family: var(--mono);
-        font-size: 12px;
+        color: var(--ink);
         overflow-wrap: anywhere;
       }
 
-      .open-row .strength {
-        font-size: 12px;
+      .back {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 0 4px;
+        margin-left: -4px;
+        border: 0;
+        background: none;
+        font: inherit;
+        font-size: 13px;
         color: var(--ink-soft);
-        text-align: right;
+        cursor: pointer;
+      }
+
+      .back:hover {
+        color: var(--ink);
+      }
+
+      /* ---- Footer ------------------------------------------------------- */
+
+      .page-footer {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 20px 12px 0;
+        font-size: 11px;
+        line-height: 1.7;
+        color: var(--ink-soft);
+      }
+
+      @media (min-width: 720px) {
+        .page-footer {
+          padding: 20px 20px 0;
+        }
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
         white-space: nowrap;
       }
 
-      .empty {
-        background: var(--recess);
-        border-radius: var(--radius-lg);
-        padding: 18px;
-        color: var(--ink-soft);
-        font-size: 14px;
+      /* One ring, everywhere, and never a border that thickens. */
+      :focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 3px;
       }
 
-      footer {
-        margin-top: 40px;
-        color: var(--ink-soft);
-        font-size: 12px;
-        font-family: var(--mono);
-        line-height: 1.7;
-        overflow-wrap: anywhere;
+      .nav-item:focus-visible,
+      .card:focus-visible,
+      .menu-item:focus-visible {
+        outline-offset: -2px;
       }
 
       @media (prefers-reduced-motion: reduce) {
         * {
-          transition-duration: 0s;
-          animation-duration: 0s;
+          transition-duration: 0s !important;
+          animation-duration: 0s !important;
         }
       }
     </style>
   </head>
   <body>
-    <main class="page">
-      <header class="titlebar">
-        <p class="repo" id="repo-name">Canon</p>
-        <p class="counts" id="counts"></p>
-      </header>
+    <div class="page">
+      <div class="shell" data-app-shell>
+        <header class="topbar">
+          <button type="button" class="wordmark" id="wordmark">Canon</button>
+          <span aria-hidden="true" class="sep">|</span>
+          <p class="crumb" id="crumb"></p>
 
-      <section aria-labelledby="families-head">
-        <div class="section-head">
-          <div>
-            <h2 class="display" id="families-head">Prototypes</h2>
-            <p class="note" id="families-note"></p>
-          </div>
-          <div class="filters" id="filters" role="group" aria-label="Filter by state"></div>
-        </div>
-        <div class="grid" id="families"></div>
-      </section>
+          <div class="account" id="account">
+            <button
+              type="button"
+              class="account-button"
+              id="account-button"
+              aria-expanded="false"
+              aria-haspopup="menu"
+              aria-controls="account-menu"
+            >
+              <span class="visually-hidden">Account</span>
+              <span class="avatar" id="avatar" aria-hidden="true"></span>
+            </button>
 
-      <section aria-labelledby="canvas-head">
-        <div class="section-head">
-          <div>
-            <h2 class="display" id="canvas-head">Node canvas</h2>
-            <p class="note">
-              One tree per family with variants. Edges are read from the branch
-              names on every run, so the shape cannot drift from the repository.
-            </p>
+            <div class="account-menu" id="account-menu" hidden>
+              <div class="block">
+                <p class="label">Signed in as</p>
+                <p class="who" id="account-name"></p>
+              </div>
+              <div class="block">
+                <p class="label" id="theme-label">Theme</p>
+                <div class="theme-row" role="group" aria-labelledby="theme-label" id="theme-row"></div>
+                <p class="note" style="font-size: 11px">
+                  Dark is for the app. It is remembered on this machine only.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="tree" id="canvas"></div>
-      </section>
+        </header>
 
-      <section aria-labelledby="record-head">
-        <div class="section-head">
-          <div>
-            <h2 class="display" id="record-head">The record</h2>
-            <p class="note" id="record-note"></p>
-          </div>
+        <div class="frame">
+          <nav class="sidebar" aria-label="Project sections">
+            <ul id="nav"></ul>
+          </nav>
+          <main class="well" id="well" tabindex="-1"></main>
         </div>
-        <div class="record">
-          <div>
-            <p class="label" id="entries-label">Entries, newest first</p>
-            <div id="entries"></div>
-          </div>
-          <div>
-            <p class="label">Open</p>
-            <div class="card" id="open"></div>
-          </div>
-        </div>
-      </section>
+      </div>
 
-      <footer id="footer"></footer>
-    </main>
+      <footer class="page-footer" id="footer"></footer>
+    </div>
 
     <script id="canon-data" type="application/json">
       __CANON_DATA__
@@ -468,48 +900,72 @@
       (function () {
         var data = JSON.parse(document.getElementById('canon-data').textContent);
 
+        /* ---- Small helpers --------------------------------------------- */
+
+        /* Every user facing string goes in as text, never as markup. The only
+           innerHTML in this file is the SVG the tree draws, and everything
+           that reaches it is escaped first. */
         function el(name, attrs, children) {
           var node = document.createElement(name);
           Object.keys(attrs || {}).forEach(function (key) {
             if (key === 'text') node.textContent = attrs[key];
-            else if (attrs[key] !== null && attrs[key] !== undefined) node.setAttribute(key, attrs[key]);
+            else if (attrs[key] !== null && attrs[key] !== undefined) {
+              node.setAttribute(key, attrs[key]);
+            }
           });
           (children || []).forEach(function (child) {
-            node.appendChild(child);
+            if (child) node.appendChild(child);
           });
           return node;
         }
 
-        function row(term, value) {
-          return el('div', {}, [el('dt', { text: term }), el('dd', { text: value })]);
+        function esc(value) {
+          return String(value === null || value === undefined ? '' : value).replace(
+            /[&<>"']/g,
+            function (ch) {
+              return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+              }[ch];
+            }
+          );
+        }
+
+        function plural(count, one, many) {
+          return count === 1 ? one : many;
+        }
+
+        function clear(node) {
+          while (node.firstChild) node.removeChild(node.firstChild);
         }
 
         function stateChip(staleness) {
-          return el('span', { class: 'state', 'data-state': staleness.state, text: staleness.label });
+          return el('span', {
+            class: 'state',
+            'data-state': staleness.state,
+            text: staleness.label
+          });
         }
 
         /* The drawn mark a family falls back to when nobody has set a
-           thumbnail. A lined circle from the Braun vocabulary, ink only. It is
-           always drawn rather than fetched, so it can never break. */
+           thumbnail. A lined circle, ink only, always drawn rather than
+           fetched, so it can never break. */
         function placeholderMark() {
           var lines = '';
           for (var i = 0; i < 9; i += 1) {
             var y = 18 + i * 8;
             var half = Math.sqrt(Math.max(0, 36 * 36 - (y - 54) * (y - 54)));
             lines +=
-              '<line x1="' +
-              (54 - half) +
-              '" y1="' +
-              y +
-              '" x2="' +
-              (54 + half) +
-              '" y2="' +
-              y +
+              '<line x1="' + (54 - half) + '" y1="' + y +
+              '" x2="' + (54 + half) + '" y2="' + y +
               '" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />';
           }
-          var wrap = el('div', { class: 'mark', style: 'color: var(--ink-soft); opacity: 0.5' });
+          var wrap = el('div', { style: 'color: var(--ink-soft); opacity: 0.45; line-height: 0' });
           wrap.innerHTML =
-            '<svg viewBox="0 0 108 108" width="76" height="76" role="img" aria-label="No thumbnail set">' +
+            '<svg viewBox="0 0 108 108" width="74" height="74" role="img" aria-label="No thumbnail set">' +
             '<circle cx="54" cy="54" r="42" fill="none" stroke="currentColor" stroke-width="2.5" />' +
             lines +
             '</svg>';
@@ -519,38 +975,163 @@
         function thumbnail(family) {
           var slot = el('div', { class: 'thumb' });
           if (family.thumbnail) {
-            slot.appendChild(el('img', { src: family.thumbnail, alt: '', loading: 'lazy' }));
+            slot.appendChild(
+              el('img', { src: family.thumbnail, alt: '', loading: 'lazy' })
+            );
           } else {
             slot.appendChild(placeholderMark());
           }
           return slot;
         }
 
-        function familyCard(family) {
-          var meta = el('dl', { class: 'meta' }, [
-            row(family.virtualRoot ? 'Prefix' : 'Branch', family.root),
-            row('Last commit', family.lastCommit || 'unknown'),
-            row('Variants', String(family.size)),
-          ]);
-          if (family.forkedFrom) meta.appendChild(row('Forked', family.forkedFrom));
+        /* ---- The theme, the one thing that belongs to the person -------- */
 
-          return el('article', { class: 'card', 'data-state': family.staleness.state }, [
-            thumbnail(family),
-            el('h3', { text: family.name }),
-            stateChip(family.staleness),
-            meta,
-          ]);
+        var THEME_KEY = 'canon-app-theme';
+        var THEMES = [
+          { id: 'system', label: 'System' },
+          { id: 'light', label: 'Light' },
+          { id: 'dark', label: 'Dark' }
+        ];
+
+        function readTheme() {
+          try {
+            var stored = localStorage.getItem(THEME_KEY);
+            if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
+          } catch (err) {
+            /* Private mode or blocked storage. System is the honest fallback. */
+          }
+          return 'system';
         }
 
-        function esc(value) {
-          return String(value).replace(/[&<>"]/g, function (ch) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch];
+        function applyTheme(theme) {
+          document.documentElement.setAttribute('data-app-theme', theme);
+          try {
+            localStorage.setItem(THEME_KEY, theme);
+          } catch (err) {
+            /* The choice holds for this page and no further. */
+          }
+          var options = document.querySelectorAll('[data-theme-option]');
+          for (var i = 0; i < options.length; i += 1) {
+            options[i].setAttribute(
+              'aria-pressed',
+              String(options[i].getAttribute('data-theme-option') === theme)
+            );
+          }
+        }
+
+        function buildThemeRow() {
+          var row = document.getElementById('theme-row');
+          THEMES.forEach(function (theme) {
+            var button = el('button', {
+              type: 'button',
+              class: 'theme-option',
+              'data-theme-option': theme.id,
+              'aria-pressed': 'false',
+              text: theme.label
+            });
+            button.addEventListener('click', function () {
+              applyTheme(theme.id);
+            });
+            row.appendChild(button);
+          });
+          applyTheme(readTheme());
+        }
+
+        /* ---- The top bar ------------------------------------------------ */
+
+        function buildTopBar() {
+          var crumb = document.getElementById('crumb');
+          if (data.remote) {
+            crumb.appendChild(el('span', { class: 'owner', text: data.remote.owner }));
+            crumb.appendChild(el('span', { class: 'sep', 'aria-hidden': 'true', text: '/' }));
+            crumb.appendChild(el('span', { class: 'repo', text: data.remote.repo }));
+          } else {
+            /* No remote configured, so the folder name is all there is to say,
+               and saying only that is truer than inventing an owner. */
+            crumb.appendChild(el('span', { class: 'repo', text: data.repo }));
+          }
+
+          var viewer = data.viewer;
+          document.getElementById('avatar').textContent = viewer ? viewer.initials : '?';
+          document.getElementById('account-name').textContent = viewer
+            ? viewer.name
+            : 'No git user.name is set on this machine.';
+
+          var button = document.getElementById('account-button');
+          var menu = document.getElementById('account-menu');
+          button.addEventListener('click', function () {
+            var open = menu.hidden;
+            menu.hidden = !open;
+            button.setAttribute('aria-expanded', String(open));
+          });
+          document.addEventListener('click', function (event) {
+            if (!document.getElementById('account').contains(event.target)) {
+              menu.hidden = true;
+              button.setAttribute('aria-expanded', 'false');
+            }
+          });
+          document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+              menu.hidden = true;
+              button.setAttribute('aria-expanded', 'false');
+            }
+          });
+
+          document.getElementById('wordmark').addEventListener('click', function () {
+            go('overview');
           });
         }
 
-        /* The tree, in its simplest honest form: one row per node, indented by
-           derived depth, joined by elbows. Static and correct beats a canvas
-           that pans badly. The edges are drawn from ancestry and do nothing. */
+        /* ---- Routing ----------------------------------------------------- */
+
+        var VIEWS = [
+          { id: 'overview', label: 'Overview' },
+          { id: 'prototypes', label: 'Prototypes' },
+          { id: 'research', label: 'Research' },
+          { id: 'members', label: 'Members' }
+        ];
+
+        function go(hash) {
+          location.hash = '#' + hash;
+        }
+
+        function currentRoute() {
+          var raw = String(location.hash || '').replace(/^#/, '');
+          if (!raw) return { view: 'overview', param: null };
+          var cut = raw.indexOf('/');
+          if (cut === -1) return { view: raw, param: null };
+          return { view: raw.slice(0, cut), param: decodeURIComponent(raw.slice(cut + 1)) };
+        }
+
+        function buildNav() {
+          var list = document.getElementById('nav');
+          VIEWS.forEach(function (view) {
+            var item = el('li');
+            var button = el('button', {
+              type: 'button',
+              class: 'nav-item',
+              'data-view': view.id,
+              text: view.label
+            });
+            button.addEventListener('click', function () {
+              go(view.id);
+            });
+            item.appendChild(button);
+            list.appendChild(item);
+          });
+        }
+
+        function markNav(view) {
+          var items = document.querySelectorAll('[data-view]');
+          for (var i = 0; i < items.length; i += 1) {
+            var mine = items[i].getAttribute('data-view') === view;
+            if (mine) items[i].setAttribute('aria-current', 'page');
+            else items[i].removeAttribute('aria-current');
+          }
+        }
+
+        /* ---- The node canvas --------------------------------------------- */
+
         function treeSvg(family) {
           var COL = 168;
           var ROW = 58;
@@ -603,65 +1184,32 @@
                it would reach was not selected. */
             if (!parent && item.node.orphaned) {
               edges +=
-                '<path class="orphan-stub" d="M ' +
-                (child.x - 18) +
-                ' ' +
-                (child.y + H / 2) +
-                ' H ' +
-                child.x +
+                '<path class="orphan-stub" d="M ' + (child.x - 18) + ' ' + (child.y + H / 2) +
+                ' H ' + child.x +
                 '" fill="none" stroke="var(--rule)" stroke-width="1.5" stroke-dasharray="3 3" />';
               return;
             }
             if (!parent) return;
-            var startX = parent.x + 20;
-            var startY = parent.y + H;
-            var endY = child.y + H / 2;
             edges +=
-              '<path d="M ' +
-              startX +
-              ' ' +
-              startY +
-              ' V ' +
-              endY +
-              ' H ' +
-              child.x +
+              '<path d="M ' + (parent.x + 20) + ' ' + (parent.y + H) +
+              ' V ' + (child.y + H / 2) +
+              ' H ' + child.x +
               '" fill="none" stroke="var(--rule)" stroke-width="1.5" />';
           });
 
           var cards = '';
           order.forEach(function (item) {
             var pos = index[item.node.name];
-            var sub = item.node.staleness.label;
             cards +=
               '<g>' +
-              '<rect x="' +
-              pos.x +
-              '" y="' +
-              pos.y +
-              '" width="' +
-              W +
-              '" height="' +
-              H +
+              '<rect x="' + pos.x + '" y="' + pos.y + '" width="' + W + '" height="' + H +
               '" rx="9" fill="var(--recess)" />' +
-              '<text class="node-name" x="' +
-              (pos.x + 12) +
-              '" y="' +
-              (pos.y + 18) +
-              '" fill="var(--ink)">' +
-              esc(item.node.label) +
-              '</text>' +
-              '<text class="node-sub" x="' +
-              (pos.x + 12) +
-              '" y="' +
-              (pos.y + 32) +
-              '" fill="var(--ink-soft)">' +
-              esc(sub) +
-              '</text>' +
+              '<text class="node-name" x="' + (pos.x + 12) + '" y="' + (pos.y + 18) +
+              '" fill="var(--ink)">' + esc(item.node.label) + '</text>' +
+              '<text class="node-sub" x="' + (pos.x + 12) + '" y="' + (pos.y + 32) +
+              '" fill="var(--ink-soft)">' + esc(item.node.staleness.label) + '</text>' +
               (item.node.orphaned
-                ? '<text class="node-sub" x="' +
-                  (pos.x + 12) +
-                  '" y="' +
-                  (pos.y + H + 12) +
+                ? '<text class="node-sub" x="' + (pos.x + 12) + '" y="' + (pos.y + H + 12) +
                   '" fill="var(--ink-soft)">parent not selected</text>'
                 : '') +
               '</g>';
@@ -669,167 +1217,660 @@
 
           var scroller = el('div', { class: 'scroller' });
           scroller.innerHTML =
-            '<svg width="' +
-            width +
-            '" height="' +
-            height +
-            '" viewBox="0 0 ' +
-            width +
-            ' ' +
-            height +
-            '" role="img" aria-label="Branch family tree for ' +
-            esc(family.name) +
-            '">' +
-            edges +
-            cards +
-            '</svg>';
+            '<svg width="' + width + '" height="' + height +
+            '" viewBox="0 0 ' + width + ' ' + height +
+            '" role="img" aria-label="Branch family tree for ' + esc(family.name) + '">' +
+            edges + cards + '</svg>';
           return scroller;
         }
 
-        function entryCard(entry) {
-          var head = el('div', { class: 'meta' }, [
-            row(entry.date, entry.open ? 'open' : 'decided'),
+        /* ---- Views -------------------------------------------------------- */
+
+        /* What to call this repository.
+           The remote's name where there is one, because that is the name the
+           work is known by. The folder name otherwise. Checked out as a
+           worktree the folder is a generated hash, which is true and tells a
+           reader nothing, so the remote wins wherever it exists. */
+        function repoName() {
+          return data.remote ? data.remote.repo : data.repo;
+        }
+
+        function statBlock(label, value, under) {
+          return el('div', { class: 'stat' }, [
+            el('p', { class: 'label', text: label }),
+            el('p', { class: 'value', text: value }),
+            el('p', { class: 'under', text: under })
           ]);
-          var card = el('article', { class: 'entry' }, [
-            head,
-            el('h3', { class: 'node-name', text: entry.slug }),
+        }
+
+        function fact(term, value) {
+          return el('div', {}, [
+            el('dt', { class: 'label', text: term }),
+            el('dd', { class: 'mono', text: value })
           ]);
-          if (entry.quote) card.appendChild(el('blockquote', { text: entry.quote }));
-          if (entry.about.length) {
-            var list = el('ul', { class: 'topics' });
-            entry.about.forEach(function (topic) {
-              list.appendChild(el('li', { text: topic }));
-            });
-            card.appendChild(list);
-          }
+        }
+
+        function prototypeCard(family) {
+          var card = el('button', { type: 'button', class: 'card' });
+          card.appendChild(thumbnail(family));
+
+          var body = el('div', { class: 'card-body' });
+          body.appendChild(
+            el('div', { class: 'card-title-row' }, [
+              el('span', { class: 'card-title', text: family.name }),
+              stateChip(family.staleness)
+            ])
+          );
+          /* A family whose root is a shared prefix says PREFIX rather than
+             BRANCH, because calling it a branch would name something you
+             could not check out. */
+          body.appendChild(
+            el('p', { class: 'label', text: family.virtualRoot ? 'Prefix' : 'Branch' })
+          );
+          body.appendChild(el('span', { class: 'card-source', text: family.root }));
+
+          var variants = family.size - (family.virtualRoot ? 0 : 1);
+          body.appendChild(
+            el('p', {
+              class: 'card-foot',
+              text:
+                (family.lastCommit || 'no commit date') +
+                ' · ' +
+                (variants > 0
+                  ? variants + ' ' + plural(variants, 'variant', 'variants')
+                  : 'no variants')
+            })
+          );
+
+          card.appendChild(body);
+          card.addEventListener('click', function () {
+            go('prototypes/' + encodeURIComponent(family.root));
+          });
           return card;
         }
 
-        /* Render */
-        document.title = data.repo + ' prototypes';
-        document.getElementById('repo-name').textContent = data.repo;
-        document.getElementById('counts').textContent = [
-          data.counts.families + ' families',
-          data.counts.branches + ' branches',
-          data.counts.entries + ' entries',
-          data.counts.open + ' open',
-        ].join(' · ');
-
-        document.getElementById('families-note').textContent =
-          'Branch families read from ' +
-          data.repo +
-          ' on ' +
-          data.generatedAt +
-          '. The default branch, ' +
-          data.defaultBranch +
-          ', is never a prototype.';
-
-        var familiesHost = document.getElementById('families');
-        var filtersHost = document.getElementById('filters');
-
-        function draw(filter) {
-          familiesHost.textContent = '';
-          var shown = data.families.filter(function (family) {
-            return filter === 'all' || family.staleness.state === filter;
-          });
-          if (!shown.length) {
-            familiesHost.appendChild(
-              el('p', { class: 'empty', text: 'No prototypes in this state.' }),
-            );
-            return;
+        function prototypeGrid(wide) {
+          if (!data.families.length) {
+            return el('p', {
+              class: 'empty',
+              text:
+                'No branches are indexed yet. Run canon index in this repository to choose which ones are prototypes.'
+            });
           }
-          shown.forEach(function (family) {
-            familiesHost.appendChild(familyCard(family));
+          var grid = el('div', { class: wide ? 'grid wide' : 'grid' });
+          data.families.forEach(function (family) {
+            grid.appendChild(prototypeCard(family));
           });
+          return grid;
         }
 
-        [
-          ['all', 'All'],
-          ['active', 'Active'],
-          ['quiet', 'Quiet'],
-          ['stale', 'Stale'],
-        ].forEach(function (pair) {
+        function overviewView() {
+          var frag = document.createDocumentFragment();
+
+          frag.appendChild(
+            el('div', { class: 'head' }, [
+              el('div', { style: 'min-width: 0' }, [
+                el('h1', { class: 'display', text: repoName() }),
+                data.description ? el('p', { class: 'note', text: data.description }) : null
+              ])
+            ])
+          );
+
+          var chosen = data.counts.branches;
+          frag.appendChild(
+            el('dl', { class: 'stats' }, [
+              statBlock(
+                'Prototypes',
+                String(data.counts.families),
+                data.counts.families + ' from git'
+              ),
+              statBlock(
+                'Branches',
+                String(data.counts.candidates),
+                data.counts.candidates +
+                  ' beside ' +
+                  data.defaultBranch +
+                  ', ' +
+                  chosen +
+                  ' chosen'
+              ),
+              statBlock('Stale', String(data.counts.stale), 'quiet 21 days or more'),
+              statBlock(
+                'Entries',
+                String(data.counts.entries),
+                data.counts.open + ' open'
+              )
+            ])
+          );
+
+          frag.appendChild(
+            el('dl', { class: 'facts' }, [
+              fact('Repository', data.remote ? data.remote.owner + '/' + data.remote.repo : data.repo),
+              fact('Default branch', data.defaultBranch),
+              fact('Record', data.record.dir)
+            ])
+          );
+
+          var protoSection = el('section', { class: 'section' });
+          protoSection.appendChild(
+            el('div', { class: 'section-head' }, [
+              el('h2', { class: 'label', text: 'Prototypes' }),
+              el('p', {
+                class: 'under',
+                text:
+                  data.counts.families +
+                  ' indexed, ' +
+                  data.counts.stale +
+                  ' stale'
+              })
+            ])
+          );
+          protoSection.appendChild(prototypeGrid(false));
+          frag.appendChild(protoSection);
+
+          var recordSection = el('section', { class: 'section' });
+          recordSection.appendChild(
+            el('div', { class: 'section-head' }, [
+              el('h2', { class: 'label', text: 'The record' }),
+              el('p', {
+                class: 'under',
+                text:
+                  data.counts.entries +
+                  ' ' +
+                  plural(data.counts.entries, 'entry', 'entries') +
+                  ', ' +
+                  data.counts.open +
+                  ' open'
+              })
+            ])
+          );
+
+          var links = el('div', { class: 'grid' });
+          [
+            {
+              label: 'The record',
+              line: 'Every entry, newest first, with the topics it is filed under.'
+            },
+            {
+              label: 'The open report',
+              line: 'The same entries grouped by question, counting the people behind each one.'
+            }
+          ].forEach(function (link) {
+            var card = el('button', { type: 'button', class: 'card' }, [
+              el('div', { class: 'card-body' }, [
+                el('span', { class: 'card-title', text: link.label }),
+                el('span', { class: 'note', text: link.line })
+              ])
+            ]);
+            card.addEventListener('click', function () {
+              go('research');
+            });
+            links.appendChild(card);
+          });
+          recordSection.appendChild(links);
+          recordSection.appendChild(el('p', { class: 'note', text: data.scale + '.' }));
+          frag.appendChild(recordSection);
+
+          return frag;
+        }
+
+        function prototypesView() {
+          var frag = document.createDocumentFragment();
+          frag.appendChild(
+            el('div', { class: 'head' }, [
+              el('div', { style: 'min-width: 0' }, [
+                el('h1', { class: 'display', text: 'Prototypes' }),
+                el('p', {
+                  class: 'note',
+                  text:
+                    data.counts.families +
+                    ' ' +
+                    plural(data.counts.families, 'family', 'families') +
+                    ' across ' +
+                    data.counts.branches +
+                    plural(data.counts.branches, ' branch', ' branches') +
+                    ', derived from the branch names on every run.'
+                })
+              ])
+            ])
+          );
+          var section = el('section', { class: 'section' });
+          section.appendChild(prototypeGrid(true));
+          frag.appendChild(section);
+          return frag;
+        }
+
+        /* The overflow menu on a family page. Neither item touches git and
+           neither writes to disk: the page is a file, so setting a thumbnail
+           is a config key it can name but not change. */
+        function familyMenu(family) {
+          var wrap = el('div', { class: 'menu-wrap' });
           var button = el('button', {
             type: 'button',
-            text: pair[1],
-            'aria-pressed': pair[0] === 'all' ? 'true' : 'false',
+            class: 'menu-button',
+            'aria-expanded': 'false',
+            'aria-haspopup': 'menu'
           });
+          button.appendChild(el('span', { 'aria-hidden': 'true', text: '···' }));
+          button.appendChild(el('span', { class: 'visually-hidden', text: 'More about this family' }));
+
+          var menu = el('div', { class: 'menu', role: 'menu', hidden: 'hidden' });
+          var status = el('p', { class: 'menu-note', role: 'status' });
+
+          var copy = el('button', {
+            type: 'button',
+            class: 'menu-item',
+            role: 'menuitem',
+            text: 'Copy branch name'
+          });
+          copy.addEventListener('click', function () {
+            function said(message) {
+              status.textContent = message;
+            }
+            try {
+              navigator.clipboard.writeText(family.root).then(
+                function () {
+                  said('Copied ' + family.root);
+                },
+                function () {
+                  said('Could not reach the clipboard. The name is ' + family.root);
+                }
+              );
+            } catch (err) {
+              said('Could not reach the clipboard. The name is ' + family.root);
+            }
+          });
+
+          var thumb = el('button', {
+            type: 'button',
+            class: 'menu-item',
+            role: 'menuitem',
+            text: 'Set thumbnail path'
+          });
+          thumb.addEventListener('click', function () {
+            clear(status);
+            status.appendChild(document.createTextNode('This page cannot write to disk. Set '));
+            status.appendChild(
+              el('code', { text: 'thumbnails["' + family.root + '"]' })
+            );
+            status.appendChild(
+              document.createTextNode(' in .canon/config.json and run canon open again.')
+            );
+          });
+
+          menu.appendChild(copy);
+          menu.appendChild(thumb);
+          menu.appendChild(status);
+
           button.addEventListener('click', function () {
-            Array.prototype.forEach.call(filtersHost.children, function (other) {
-              other.setAttribute('aria-pressed', other === button ? 'true' : 'false');
-            });
-            draw(pair[0]);
+            var open = menu.hidden;
+            menu.hidden = !open;
+            button.setAttribute('aria-expanded', String(open));
           });
-          filtersHost.appendChild(button);
-        });
-        draw('all');
+          document.addEventListener('click', function (event) {
+            if (!wrap.contains(event.target)) {
+              menu.hidden = true;
+              button.setAttribute('aria-expanded', 'false');
+            }
+          });
 
-        var canvasHost = document.getElementById('canvas');
-        var branching = data.families.filter(function (family) {
-          return family.size > 1;
-        });
-        if (!branching.length) {
-          canvasHost.appendChild(
-            el('p', {
-              class: 'empty',
-              text: 'No family has a variant yet, so there is no tree to draw.',
-            }),
-          );
-        } else {
-          branching.forEach(function (family) {
-            canvasHost.appendChild(
-              el('article', { class: 'card' }, [
-                el('h3', { text: family.name }),
-                el('p', { class: 'label', text: family.root }),
-                treeSvg(family),
+          wrap.appendChild(button);
+          wrap.appendChild(menu);
+          return wrap;
+        }
+
+        function familyView(root) {
+          var family = null;
+          for (var i = 0; i < data.families.length; i += 1) {
+            if (data.families[i].root === root) family = data.families[i];
+          }
+
+          var frag = document.createDocumentFragment();
+
+          var back = el('button', { type: 'button', class: 'back', text: 'All prototypes' });
+          back.addEventListener('click', function () {
+            go('prototypes');
+          });
+          frag.appendChild(back);
+
+          if (!family) {
+            frag.appendChild(
+              el('p', {
+                class: 'empty',
+                text: 'No family called ' + root + ' is indexed in this repository.'
+              })
+            );
+            return frag;
+          }
+
+          frag.appendChild(
+            el('div', { class: 'head' }, [
+              el('div', { style: 'min-width: 0' }, [
+                el('h1', { class: 'display', text: family.name }),
+                el('p', { class: 'card-source', text: family.root })
               ]),
+              familyMenu(family)
+            ])
+          );
+
+          frag.appendChild(
+            el('p', { class: 'topics' }, [
+              stateChip(family.staleness),
+              el('span', { class: 'chip', text: family.virtualRoot ? 'prefix' : 'one branch' }),
+              family.forkedFrom
+                ? el('span', { class: 'chip', text: 'forked ' + family.forkedFrom })
+                : null
+            ])
+          );
+
+          var canvas = el('section', { class: 'section' });
+          canvas.appendChild(
+            el('div', { class: 'section-head' }, [el('h2', { class: 'label', text: 'Node canvas' })])
+          );
+          if (family.nodes.length > 1) {
+            canvas.appendChild(treeSvg(family));
+          } else {
+            canvas.appendChild(
+              el('p', {
+                class: 'empty',
+                text: 'This family has one node, so there is no tree to draw.'
+              })
+            );
+          }
+          frag.appendChild(canvas);
+
+          var list = el('section', { class: 'section' });
+          list.appendChild(
+            el('div', { class: 'section-head' }, [
+              el('h2', { class: 'label', text: 'Branches' }),
+              el('p', {
+                class: 'under',
+                text: family.size + plural(family.size, ' branch', ' branches')
+              })
+            ])
+          );
+          var rows = el('ul', { class: 'rows' });
+          family.nodes.forEach(function (node) {
+            rows.appendChild(
+              el('li', { class: 'row' }, [
+                el('div', { class: 'grow' }, [
+                  el('span', { class: 'name mono', text: node.name }),
+                  el('p', {
+                    class: 'meta',
+                    text:
+                      (node.lastCommit || 'no commit date') +
+                      (node.sha ? ' · ' + node.sha : '') +
+                      (node.orphaned ? ' · parent not selected' : '')
+                  })
+                ]),
+                stateChip(node.staleness)
+              ])
             );
           });
+          list.appendChild(rows);
+          frag.appendChild(list);
+
+          return frag;
         }
 
-        document.getElementById('record-note').textContent =
-          data.counts.entries +
-          ' entries in ' +
-          data.record.dir +
-          '. Open topics count people, not entries: ' +
-          data.scale +
-          '.';
-
-        var entriesHost = document.getElementById('entries');
-        if (!data.record.entries.length) {
-          entriesHost.appendChild(
-            el('p', { class: 'empty', text: 'The record is empty. Run canon note to file the first entry.' }),
-          );
-        } else {
-          data.record.entries.forEach(function (entry) {
-            entriesHost.appendChild(entryCard(entry));
-          });
-        }
-
-        var openHost = document.getElementById('open');
-        if (!data.record.open.length) {
-          openHost.appendChild(el('p', { class: 'note', text: 'Nothing is open.' }));
-        } else {
-          data.record.open.forEach(function (topic) {
-            openHost.appendChild(
-              el('div', { class: 'open-row' }, [
-                el('span', { class: 'topic', text: topic.topic }),
-                el('span', {
-                  class: 'strength',
+        function researchView() {
+          var frag = document.createDocumentFragment();
+          frag.appendChild(
+            el('div', { class: 'head' }, [
+              el('div', { style: 'min-width: 0' }, [
+                el('h1', { class: 'display', text: 'Research' }),
+                el('p', {
+                  class: 'note',
                   text:
-                    topic.voices +
-                    (topic.voices === 1 ? ' voice, ' : ' voices, ') +
-                    topic.strength,
-                }),
-              ]),
+                    'Everything filed in ' +
+                    data.record.dir +
+                    ', newest first. An entry keeps what was said apart from what it was read to mean.'
+                })
+              ])
+            ])
+          );
+
+          var open = el('section', { class: 'section' });
+          open.appendChild(
+            el('div', { class: 'section-head' }, [
+              el('h2', { class: 'label', text: 'Open' }),
+              el('p', { class: 'under', text: data.scale })
+            ])
+          );
+          if (!data.record.open.length) {
+            open.appendChild(
+              el('p', { class: 'empty', text: 'Every topic in the record has a decision on it.' })
             );
-          });
+          } else {
+            var openList = el('ul', { class: 'open-list' });
+            data.record.open.forEach(function (topic) {
+              openList.appendChild(
+                el('li', { class: 'open-item' }, [
+                  el('div', { class: 'grow' }, [
+                    el('span', { class: 'name mono', text: topic.topic }),
+                    el('p', {
+                      class: 'meta',
+                      /* The count that decides the strength is people, not
+                         entries, so both are named rather than one standing
+                         in for the other. */
+                      text:
+                        topic.voices +
+                        ' ' +
+                        plural(topic.voices, 'voice', 'voices') +
+                        ' across ' +
+                        topic.entries +
+                        ' ' +
+                        plural(topic.entries, 'entry', 'entries') +
+                        ', latest ' +
+                        topic.latest
+                    })
+                  ]),
+                  /* Zero voices is not a rung on the scale. It means every
+                     entry on the topic was filed without a participant code,
+                     so saying "none" beside "a quote" would read as a
+                     strength rather than as a gap in the record. */
+                  el('span', {
+                    class: 'chip',
+                    text: topic.voices === 0 ? 'no participant code yet' : topic.strength
+                  })
+                ])
+              );
+            });
+            open.appendChild(openList);
+          }
+          frag.appendChild(open);
+
+          var entries = el('section', { class: 'section' });
+          entries.appendChild(
+            el('div', { class: 'section-head' }, [
+              el('h2', { class: 'label', text: 'Entries' }),
+              el('p', {
+                class: 'under',
+                text:
+                  data.counts.entries +
+                  ' filed, ' +
+                  data.counts.open +
+                  ' open ' +
+                  plural(data.counts.open, 'topic', 'topics')
+              })
+            ])
+          );
+          if (!data.record.entries.length) {
+            entries.appendChild(
+              el('p', {
+                class: 'empty',
+                text: 'Nothing is filed yet. Run canon note to add the first entry.'
+              })
+            );
+          } else {
+            var rows = el('ul', { class: 'rows' });
+            data.record.entries.forEach(function (entry) {
+              var topics = el('p', { class: 'topics' });
+              entry.about.forEach(function (topic) {
+                topics.appendChild(el('span', { class: 'chip', text: topic }));
+              });
+
+              rows.appendChild(
+                el('li', { class: 'row entry', style: 'display: block' }, [
+                  el('div', { class: 'section-head', style: 'margin-bottom: 0' }, [
+                    el('span', { class: 'label', text: entry.date }),
+                    el('span', {
+                      class: 'under',
+                      text:
+                        entry.participants.length +
+                        ' ' +
+                        plural(entry.participants.length, 'participant', 'participants') +
+                        (entry.open ? ', open' : ', decided')
+                    })
+                  ]),
+                  topics,
+                  entry.quote ? el('blockquote', { text: entry.quote }) : null
+                ])
+              );
+            });
+            entries.appendChild(rows);
+          }
+          frag.appendChild(entries);
+
+          return frag;
         }
 
-        document.getElementById('footer').textContent =
-          'Generated by canon open on ' +
-          data.generatedAt +
-          '. This file is written from your local repository, it makes no network requests, and it is safe to delete.';
+        function membersView() {
+          var frag = document.createDocumentFragment();
+          frag.appendChild(
+            el('div', { class: 'head' }, [
+              el('div', { style: 'min-width: 0' }, [
+                el('h1', { class: 'display', text: 'Members' }),
+                el('p', {
+                  class: 'note',
+                  /* A repository has no member list. It knows who has written
+                     to it, and the page says which of the two this is. */
+                  text:
+                    'Read from commit history. A repository has no roster, so this is everyone who has committed here.'
+                })
+              ])
+            ])
+          );
+
+          var section = el('section', { class: 'section' });
+          section.appendChild(
+            el('div', { class: 'section-head' }, [
+              el('h2', { class: 'label', text: 'From commit history' }),
+              el('p', {
+                class: 'under',
+                text:
+                  data.counts.people +
+                  ' ' +
+                  plural(data.counts.people, 'person', 'people')
+              })
+            ])
+          );
+
+          if (!data.people.length) {
+            section.appendChild(
+              el('p', { class: 'empty', text: 'No commits have been made in this repository yet.' })
+            );
+          } else {
+            var rows = el('ul', { class: 'rows' });
+            data.people.forEach(function (person) {
+              rows.appendChild(
+                el('li', { class: 'row' }, [
+                  el('span', {
+                    class: 'avatar',
+                    'aria-hidden': 'true',
+                    text: initials(person.name)
+                  }),
+                  el('div', { class: 'grow' }, [
+                    el('span', { class: 'name', text: person.name }),
+                    el('p', {
+                      class: 'meta',
+                      /* The space lives inside the literal on purpose. The
+                         git guard fails on a bare quoted subcommand anywhere
+                         in the shipped files, and it should stay that blunt,
+                         so the English noun is never spelled as one. */
+                      text:
+                        person.commits +
+                        plural(person.commits, ' commit', ' commits') +
+                        ', last on ' +
+                        person.lastCommit
+                    })
+                  ])
+                ])
+              );
+            });
+            section.appendChild(rows);
+          }
+          frag.appendChild(section);
+          return frag;
+        }
+
+        function initials(name) {
+          var words = String(name || '').trim().split(/\s+/).filter(Boolean);
+          if (!words.length) return '?';
+          var last = words.length > 1 ? words[words.length - 1][0] : '';
+          return (words[0][0] + last).toUpperCase();
+        }
+
+        /* ---- The footer ---------------------------------------------------- */
+
+        function buildFooter() {
+          var footer = document.getElementById('footer');
+          footer.appendChild(
+            el('p', {
+              style: 'margin: 0',
+              text:
+                'Generated by canon open on ' +
+                data.generatedAt +
+                '. It reads this repository and never writes to it.'
+            })
+          );
+          footer.appendChild(
+            el('p', {
+              style: 'margin: 4px 0 0',
+              text:
+                'Everything here is local to this machine, and the page makes no request of any kind. It is safe to delete: canon open writes it again.'
+            })
+          );
+        }
+
+        /* ---- Render -------------------------------------------------------- */
+
+        function render() {
+          var route = currentRoute();
+          var well = document.getElementById('well');
+          clear(well);
+
+          var view = route.view;
+          if (view === 'prototypes' && route.param) {
+            well.appendChild(familyView(route.param));
+            markNav('prototypes');
+          } else if (view === 'prototypes') {
+            well.appendChild(prototypesView());
+            markNav('prototypes');
+          } else if (view === 'research') {
+            well.appendChild(researchView());
+            markNav('research');
+          } else if (view === 'members') {
+            well.appendChild(membersView());
+            markNav('members');
+          } else {
+            well.appendChild(overviewView());
+            markNav('overview');
+          }
+        }
+
+        buildThemeRow();
+        buildTopBar();
+        buildNav();
+        buildFooter();
+        render();
+
+        window.addEventListener('hashchange', function () {
+          render();
+          /* The view changed without a page load, so focus is moved to the
+             new content rather than left where the old view was. */
+          document.getElementById('well').focus();
+        });
       })();
     </script>
   </body>

@@ -130,6 +130,32 @@ describe('deriveFamilies', () => {
     expect(solo.nodes[0].orphaned).toBe(false);
   });
 
+  /**
+   * The reachable orphan, and the only one a real repository can produce. Git
+   * cannot hold proto/ring beside proto/ring/alt, so a parent that is itself a
+   * branch is a case the filesystem forbids. A sibling left out of the
+   * selection is the case that actually happens.
+   */
+  it('calls a branch an orphan when its sibling was left out of the selection', () => {
+    const families = deriveFamilies(
+      [branch('main'), branch('proto/ring/base'), branch('proto/ring/alt')],
+      { defaultBranch: 'main', selected: ['proto/ring/base'] },
+    );
+    expect(families).toHaveLength(1);
+    expect(families[0].root).toBe('proto/ring/base');
+    expect(families[0].nodes[0].orphaned).toBe(true);
+  });
+
+  it('stops calling it an orphan once the sibling is selected too', () => {
+    const families = deriveFamilies(
+      [branch('main'), branch('proto/ring/base'), branch('proto/ring/alt')],
+      { defaultBranch: 'main', selected: ['proto/ring/base', 'proto/ring/alt'] },
+    );
+    // Both under one virtual root, so neither is standing alone.
+    expect(families).toHaveLength(1);
+    for (const node of families[0].nodes) expect(node.orphaned).toBe(false);
+  });
+
   it('gives an arbitrary name a family of its own', () => {
     const families = deriveFamilies([branch('feat/x'), branch('proto/ring')], {
       defaultBranch: 'main',

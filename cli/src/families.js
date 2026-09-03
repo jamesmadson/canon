@@ -134,6 +134,28 @@ export function deriveFamilies(branches, options = {}) {
     return name;
   }
 
+  /**
+   * Is there anything else under this branch's parent prefix?
+   *
+   * Git stores a branch as a file under refs/heads, so a repository can never
+   * hold proto/ring and proto/ring/alt at the same time. A parent that is
+   * itself a branch is therefore all but unreachable, and testing only for
+   * that would make the orphan state impossible to reach in a real repository.
+   *
+   * What is reachable, and what the caption is actually about, is a branch
+   * whose siblings were left out of the selection: the family exists in the
+   * names, and this node is the only part of it in the tree.
+   */
+  function hasKin(name) {
+    const parent = namedParent(name);
+    if (!parent) return false;
+    if (everyName.has(parent)) return true;
+    for (const other of everyName) {
+      if (other !== name && namedParent(other) === parent) return true;
+    }
+    return false;
+  }
+
   const byRoot = new Map();
   for (const node of allNodes) {
     const root = rootOf(node.name);
@@ -144,18 +166,17 @@ export function deriveFamilies(branches, options = {}) {
       parent,
       depth: branchDepth(node.name),
       label: familyDisplayName(node.name),
-      // A branch whose named parent is a real branch that nobody selected.
-      // Stated on the node so the tree can show it standing alone on purpose.
+      // A branch standing alone with a family it could have joined.
       //
-      // The parent has to exist as a branch. feat/solo in a repository with no
-      // feat branch is not an orphan, it is a branch with a slash in its name,
-      // and captioning it "parent not selected" would name a branch that was
-      // never there to leave out.
-      orphaned:
-        !node.virtual &&
-        parent === null &&
-        namedParent(node.name) !== null &&
-        everyName.has(namedParent(node.name)),
+      // Stated on the node so the tree can show it standing alone on purpose
+      // rather than looking like an ordinary root.
+      //
+      // What makes it an orphan is that something else sits under the same
+      // parent prefix and was left out. feat/solo in a repository with nothing
+      // else under feat is not an orphan: it is a branch with a slash in its
+      // name, and captioning it "parent not selected" would name a parent that
+      // was never there to leave out.
+      orphaned: !node.virtual && parent === null && hasKin(node.name),
     });
   }
 
