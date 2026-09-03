@@ -7,12 +7,18 @@ import FeedbackEntryCard from '../components/FeedbackEntryCard.astro';
 import RamsMark from '../components/RamsMark.astro';
 import ReviewRunCard from '../components/ReviewRunCard.astro';
 import { withBase } from '../lib/withBase';
+import { spellNumber } from '../lib/spellNumber';
+import { getCollection } from 'astro:content';
 import { PROTOTYPES, RECORDS } from '../data/v2Preview';
 
 const record = RECORDS['today-ring-v2'];
-// The entry with a Decided line — the pane should show the shape end to end.
+// The entry with a Decided line: the pane should show the shape end to end.
 const featuredEntry = record.feedback.find((entry) => entry.decided) ?? record.feedback[0];
 const paneHeading = 'label';
+
+// Derived rather than written down, so the sentence cannot outlive the gallery.
+const publishedSkills = await getCollection('skills', ({ data }) => data.status === 'active');
+const skillCount = spellNumber(publishedSkills.length);
 ---
 
 {/* This page needed a scope of its own while the product and the gallery spoke
@@ -28,7 +34,7 @@ const paneHeading = 'label';
     </h1>
     <p class="mt-5 text-base leading-relaxed font-medium text-ink-soft">
       AI made it easy to build five versions of a screen in an afternoon. It did nothing
-      about what comes next — branches nobody can find, Figma links buried in a chat
+      about what comes next: branches nobody can find, Figma links buried in a chat
       thread, and feedback scattered across three of them.
     </p>
     <p class="mt-3 text-base leading-relaxed font-medium text-ink-soft">
@@ -36,7 +42,7 @@ const paneHeading = 'label';
       and <strong class="font-semibold text-ink">feedback that becomes evidence</strong>. It lists
       every prototype your team has made, from GitHub and Figma, and shows each one as the screen
       it actually is. Comments pin to the running build and file into a record as drafts you
-      confirm — so what a person said, what you think it meant, and what got decided all stay in
+      confirm, so what a person said, what you think it meant, and what got decided all stay in
       one place, with the number of voices behind each one printed next to it.
     </p>
     <p class="mt-3 text-base leading-relaxed font-medium text-ink-soft">
@@ -50,7 +56,7 @@ const paneHeading = 'label';
       What it looks like
     </h2>
     <p class="mb-4 max-w-2xl text-sm font-medium text-ink-soft">
-      Three parts of one project — an invented app called Fernwell: the prototypes it has,
+      Three parts of one project, an invented app called Fernwell: the prototypes it has,
       one piece of feedback filed against one of them, and a review that only ever suggests
       taking things away.
     </p>
@@ -65,12 +71,12 @@ const paneHeading = 'label';
         </section>
 
         <section class="flex flex-col gap-[10px]" aria-label="Feedback pane">
-          <p class={`px-1 ${paneHeading}`}>Feedback — said, meant, decided</p>
+          <p class={`px-1 ${paneHeading}`}>Feedback: said, meant, decided</p>
           <FeedbackEntryCard entry={featuredEntry} compact />
         </section>
 
         <section class="flex flex-col gap-[10px]" aria-label="Review pane">
-          <p class={`px-1 ${paneHeading}`}>Review — what to remove</p>
+          <p class={`px-1 ${paneHeading}`}>Review: what to remove</p>
           {record.review && (
             <div class="overflow-hidden rounded-md bg-panel">
               <ReviewRunCard run={record.review} compact />
@@ -109,7 +115,7 @@ const paneHeading = 'label';
         <h3 class="text-base font-semibold text-ink">Indexes what exists</h3>
         <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
           Connect a repository read-only and attach a Figma file, then tick the branches
-          that are prototypes. Keep the names you already use — each one shows up as a
+          that are prototypes. Keep the names you already use, and each one shows up as a
           screen, with its author, its last commit, and how long it has been quiet.
         </p>
       </div>
@@ -119,7 +125,7 @@ const paneHeading = 'label';
         <p class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
           Comments pin to the running build and file as dated entries: what a person said,
           word for word; what you think it meant, marked as your reading; and what was
-          decided. The report counts the voices behind each question — one is a quote, three
+          decided. The report counts the voices behind each question: one is a quote, three
           is a pattern. Names never enter the record.
         </p>
       </div>
@@ -169,7 +175,7 @@ const paneHeading = 'label';
         </button>
       </div>
       <p id="waitlist-note" class="mt-2 text-[13px] leading-relaxed font-medium text-ink-soft">
-        The waitlist opens shortly — or email
+        The waitlist opens shortly. Or email
         <a
           href="mailto:james@jamesmadson.me"
           class="inline-flex min-h-11 items-center font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
@@ -181,8 +187,8 @@ const paneHeading = 'label';
     </div>
 
     <p class="mt-5 text-[13px] leading-relaxed font-medium text-ink-soft">
-      Built by the practice behind the Canon gallery — twenty design skills, each read in
-      full, license-checked, and written up by hand.
+      Built by the practice behind the Canon gallery: {skillCount} design skills,
+      each read in full, license-checked, and written up by hand.
     </p>
     <a
       href={withBase('/skills/')}

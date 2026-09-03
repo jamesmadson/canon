@@ -1,5 +1,5 @@
 ---
-import { SIGNUP_ENDPOINT, SIGNUP_CLOSED_NOTE } from '../lib/install';
+import { signupState } from '../lib/install';
 
 /**
  * The alpha sign-up.
@@ -9,7 +9,8 @@ import { SIGNUP_ENDPOINT, SIGNUP_CLOSED_NOTE } from '../lib/install';
  * come alive and the form posts to it; until then both are disabled and the
  * reason is printed beside them.
  */
-const open = SIGNUP_ENDPOINT !== '';
+const state = signupState();
+const open = state.open;
 ---
 
 <section aria-labelledby="signup-heading" class="max-w-xl">
@@ -22,7 +23,7 @@ const open = SIGNUP_ENDPOINT !== '';
   <form
     class="mt-5"
     method="post"
-    action={open ? SIGNUP_ENDPOINT : undefined}
+    action={state.open ? state.action : undefined}
     data-signup-open={open ? '' : undefined}
   >
     <label for="signup-email" class="label block">Work email</label>
@@ -48,7 +49,7 @@ const open = SIGNUP_ENDPOINT !== '';
     </div>
     {!open && (
       <p id="signup-note" class="mt-3 font-mono text-[11px] tracking-[0.08em] text-ink-soft">
-        {SIGNUP_CLOSED_NOTE}
+        {state.open ? '' : state.reason}
       </p>
     )}
   </form>

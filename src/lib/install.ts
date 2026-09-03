@@ -19,3 +19,20 @@ export const SIGNUP_ENDPOINT = '';
 
 /** Printed beside the disabled button, so the reason is on the page. */
 export const SIGNUP_CLOSED_NOTE = 'Sign-up opens with the alpha.';
+
+export type SignupState =
+  | { open: true; action: string }
+  | { open: false; reason: string };
+
+/**
+ * Whether the sign-up form can accept an address, and if not, what to say.
+ *
+ * The rule lives here rather than in the component so it can be tested without
+ * rendering a page: an empty endpoint closes the form and supplies the reason.
+ */
+export function signupState(endpoint: string = SIGNUP_ENDPOINT): SignupState {
+  const trimmed = endpoint.trim();
+  return trimmed === ''
+    ? { open: false, reason: SIGNUP_CLOSED_NOTE }
+    : { open: true, action: trimmed };
+}
