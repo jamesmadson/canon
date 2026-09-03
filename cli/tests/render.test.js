@@ -10,6 +10,7 @@ import {
   readTemplate,
   renderDashboard,
   excerpt,
+  describeRepo,
 } from '../src/render.js';
 import { defaultConfig } from '../src/config.js';
 
@@ -63,6 +64,84 @@ describe('encodeData', () => {
 
   it('round trips ordinary text unchanged', () => {
     expect(JSON.parse(encodeData({ a: 'plain & simple' })).a).toBe('plain & simple');
+  });
+});
+
+describe('describeRepo', () => {
+  function scratch(files) {
+    const dir = mkdtempSync(join(tmpdir(), 'canon-desc-'));
+    for (const [name, body] of Object.entries(files)) writeFileSync(join(dir, name), body);
+    return dir;
+  }
+
+  it('prefers the package description, which was written to be one', () => {
+    const dir = scratch({
+      'package.json': JSON.stringify({ description: 'A gallery of skill files.' }),
+      'README.md': '# Thing\n\nThe readme paragraph.\n',
+    });
+    expect(describeRepo(dir)).toBe('A gallery of skill files.');
+  });
+
+  it('falls back to the first real paragraph of the readme', () => {
+    const dir = scratch({ 'README.md': '# Canon\n\nA curated gallery,\nwrapped over lines.\n\nMore.\n' });
+    expect(describeRepo(dir)).toBe('A curated gallery, wrapped over lines.');
+  });
+
+  it('skips the heading, the badges and the rules', () => {
+    const dir = scratch({
+      'README.md': '# Canon\n\n[![badge](x)](y)\n\n---\n\nThe actual sentence.\n',
+    });
+    expect(describeRepo(dir)).toBe('The actual sentence.');
+  });
+
+  it('says nothing rather than inventing a sentence', () => {
+    expect(describeRepo(scratch({}))).toBe(null);
+    expect(describeRepo(scratch({ 'package.json': 'not json' }))).toBe(null);
+    expect(describeRepo(scratch({ 'package.json': JSON.stringify({ name: 'x' }) }))).toBe(null);
+  });
+});
+
+describe('the shell data', () => {
+  function shellData(extra) {
+    return buildDashboardData({
+      repo: 'demo',
+      defaultBranch: 'main',
+      branches,
+      config: { ...config, prototypes: null },
+      entries,
+      generatedAt: '2026-09-01',
+      ...extra,
+    });
+  }
+
+  it('carries the breadcrumb, the viewer and the people', () => {
+    const built = shellData({
+      remote: { owner: 'acme', repo: 'thing' },
+      viewer: { name: 'Ada Lovelace', initials: 'AL' },
+      people: [{ name: 'Ada Lovelace', commits: 4, lastCommit: '2026-09-01' }],
+      description: 'A description.',
+    });
+    expect(built.remote).toEqual({ owner: 'acme', repo: 'thing' });
+    expect(built.viewer.initials).toBe('AL');
+    expect(built.people).toHaveLength(1);
+    expect(built.description).toBe('A description.');
+    expect(built.counts.people).toBe(1);
+  });
+
+  it('counts the candidates and the stale families for the strip', () => {
+    const built = shellData({});
+    // Three branches beside main in the fixture.
+    expect(built.counts.candidates).toBe(3);
+    expect(built.counts.stale).toBeGreaterThan(0);
+    expect(built.counts.branches).toBe(3);
+  });
+
+  it('is null in each slot rather than absent when there is nothing to say', () => {
+    const built = shellData({});
+    expect(built.remote).toBe(null);
+    expect(built.viewer).toBe(null);
+    expect(built.description).toBe(null);
+    expect(built.people).toEqual([]);
   });
 });
 
@@ -200,7 +279,10 @@ describe('buildDashboardData', () => {
   });
 
   it('counts families, branches, entries and open topics', () => {
-    expect(built.counts).toEqual({ families: 2, branches: 3, entries: 2, open: 1 });
+    expect(built.counts).toMatchObject({ families: 2, branches: 3, entries: 2, open: 1 });
+    // The strip needs these two as well, and both are counted off the data.
+    expect(built.counts.candidates).toBe(3);
+    expect(typeof built.counts.stale).toBe('number');
   });
 
   it('computes staleness for the family and for every node', () => {

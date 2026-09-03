@@ -13,6 +13,12 @@ import {
   forkDate,
   forkDates,
   locateRepo,
+  parseRemote,
+  originRemote,
+  authors,
+  gitConfig,
+  userName,
+  initialsOf,
 } from '../src/git.js';
 
 const cliDir = fileURLToPath(new URL('..', import.meta.url));
@@ -79,7 +85,25 @@ describe('the tool never writes to a repo it did not create', () => {
   });
 
   it('keeps the allowlist to commands that only read', () => {
-    expect(ALLOWED_SUBCOMMANDS).toEqual(['for-each-ref', 'log', 'rev-parse', 'merge-base']);
+    expect(ALLOWED_SUBCOMMANDS).toEqual(['config', 'for-each-ref', 'log', 'merge-base', 'rev-parse']);
+  });
+
+  /**
+   * config is the one subcommand here that can write, so the allowlist is not
+   * enough on its own. Every call goes through --get, which reads, and the
+   * wrapper refuses the rest rather than trusting the caller.
+   */
+  it('only ever reads config, never sets it', () => {
+    const source = readFileSync(join(cliDir, 'src', 'git.js'), 'utf8');
+    expect(source).toContain("'--get'");
+    for (const write of ['--replace-all', '--unset', '--add', '--edit', '--rename-section']) {
+      expect(source.includes(write), `git.js names config ${write}`).toBe(false);
+    }
+    expect(() => gitConfig(['--unset', 'user.name'], repo)).toThrow();
+  });
+
+  it('refuses a config call that is not a --get', () => {
+    expect(() => gitConfig(['user.name', 'somebody'], repo)).toThrow(/only reads/);
   });
 
   it('never shells through a shell', () => {
@@ -169,6 +193,78 @@ describe('how many times git is spawned', () => {
 
   it('takes an empty list of branches without spawning anything', () => {
     expect(forkDates([], 'main', repo)).toEqual({});
+  });
+});
+
+describe('the breadcrumb, read from the remote', () => {
+  it('reads owner and repo out of an https remote', () => {
+    expect(parseRemote('https://github.com/jamesmadson/canon.git')).toEqual({
+      owner: 'jamesmadson',
+      repo: 'canon',
+    });
+    expect(parseRemote('https://github.com/acme/thing')).toEqual({ owner: 'acme', repo: 'thing' });
+  });
+
+  it('reads the ssh spelling the same way', () => {
+    expect(parseRemote('git@github.com:acme/thing.git')).toEqual({ owner: 'acme', repo: 'thing' });
+    expect(parseRemote('ssh://git@gitlab.com/group/sub.git')).toEqual({
+      owner: 'group',
+      repo: 'sub',
+    });
+  });
+
+  it('is null where there is no remote to read', () => {
+    expect(parseRemote('')).toBe(null);
+    expect(parseRemote(null)).toBe(null);
+    expect(parseRemote('not a url')).toBe(null);
+  });
+
+  it('reads this repository, which has a remote', () => {
+    const remote = originRemote(repo);
+    // Reading the configured URL is not contacting it.
+    expect(remote === null || typeof remote.owner === 'string').toBe(true);
+  });
+});
+
+describe('the account slot', () => {
+  it('reads the configured name', () => {
+    const name = userName(repo);
+    expect(name === null || typeof name === 'string').toBe(true);
+  });
+
+  it('takes initials from the first and last word', () => {
+    expect(initialsOf('James Madson')).toBe('JM');
+    expect(initialsOf('ada')).toBe('A');
+    expect(initialsOf('Ada Something Lovelace')).toBe('AL');
+    expect(initialsOf('  spaced   out  ')).toBe('SO');
+  });
+
+  it('falls back to a plain mark rather than showing nothing', () => {
+    expect(initialsOf('')).toBe('?');
+    expect(initialsOf(null)).toBe('?');
+  });
+});
+
+describe('authors, read from the commit history', () => {
+  it('counts commits per person, newest date first', () => {
+    const people = authors(repo);
+    expect(people.length).toBeGreaterThan(0);
+    for (const person of people) {
+      expect(person.name).toBeTruthy();
+      expect(person.commits).toBeGreaterThan(0);
+      expect(person.lastCommit).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+  });
+
+  it('de-duplicates a person who committed more than once', () => {
+    const people = authors(repo);
+    const names = people.map((p) => p.name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('sorts the busiest first', () => {
+    const counts = authors(repo).map((p) => p.commits);
+    expect([...counts].sort((a, b) => b - a)).toEqual(counts);
   });
 });
 

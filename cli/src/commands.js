@@ -18,6 +18,10 @@ import {
   listBranches,
   pickDefaultBranch,
   forkDates,
+  originRemote,
+  userName,
+  initialsOf,
+  authors,
 } from './git.js';
 import {
   configPath,
@@ -31,7 +35,7 @@ import {
 import { deriveFamilies, isCandidate } from './families.js';
 import { stalenessOf } from './staleness.js';
 import { readRecord, renderEntry, slugify, entryFileName, isParticipant } from './record.js';
-import { buildDashboardData, renderDashboard } from './render.js';
+import { buildDashboardData, renderDashboard, describeRepo } from './render.js';
 import { openFile } from './opener.js';
 
 const NOT_A_REPO = [
@@ -511,6 +515,14 @@ export async function open(argv, io) {
     generatedAt: today(),
     root,
     forkDates: forked,
+    // Facts about this machine, read locally and written into a local file.
+    remote: originRemote(io.cwd),
+    viewer: (() => {
+      const name = userName(io.cwd);
+      return name ? { name, initials: initialsOf(name) } : null;
+    })(),
+    people: authors(io.cwd),
+    description: describeRepo(root),
   });
 
   const target = dashboardPath(root);

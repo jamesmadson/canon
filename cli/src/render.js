@@ -12,7 +12,7 @@ import { readFileSync, existsSync, statSync } from 'node:fs';
 import { isAbsolute, join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { deriveFamilies } from './families.js';
+import { deriveFamilies, isCandidate } from './families.js';
 import { stalenessOf } from './staleness.js';
 import { openReport, STRENGTH_SCALE } from './record.js';
 
@@ -124,6 +124,47 @@ export function excerpt(said, limit = 320) {
  * Everything the page needs, and nothing it does not. Pure: takes what the
  * commands already read and returns the blob the template renders.
  */
+/**
+ * The description under the repository name.
+ *
+ * package.json first, because a description written there was written to be
+ * one. The README's opening paragraph next, because it is the closest thing a
+ * repository without a manifest has. Nothing after that: a made up sentence
+ * would be the one line on the page nobody could check.
+ */
+export function describeRepo(root) {
+  try {
+    const manifest = join(root, 'package.json');
+    if (existsSync(manifest)) {
+      const parsed = JSON.parse(readFileSync(manifest, 'utf8'));
+      if (typeof parsed.description === 'string' && parsed.description.trim()) {
+        return parsed.description.trim();
+      }
+    }
+  } catch {
+    // A manifest that will not parse is not a description.
+  }
+
+  try {
+    const readme = join(root, 'README.md');
+    if (existsSync(readme)) {
+      const paragraphs = readFileSync(readme, 'utf8')
+        .split(/\n[ \t]*\n/)
+        .map((block) => block.trim())
+        // The title, the badges and the rules are not the description.
+        .filter((block) => block && !block.startsWith('#') && !block.startsWith('---'))
+        .filter((block) => !/^[[!]/.test(block));
+      if (paragraphs.length) {
+        return paragraphs[0].replace(/\s*\n\s*/g, ' ').trim();
+      }
+    }
+  } catch {
+    // Unreadable is the same as absent.
+  }
+
+  return null;
+}
+
 export function buildDashboardData({
   repo,
   defaultBranch,
@@ -133,6 +174,10 @@ export function buildDashboardData({
   generatedAt,
   root = '.',
   forkDates = {},
+  remote = null,
+  viewer = null,
+  people = [],
+  description = null,
 }) {
   const families = deriveFamilies(branches, {
     defaultBranch,
@@ -166,16 +211,32 @@ export function buildDashboardData({
 
   const open = openReport(entries);
 
+  const branchCount = families.reduce((total, family) => total + family.size, 0);
+
   return {
     generatedAt,
     repo,
     defaultBranch,
+    // Owner and repo from the origin URL where there is one. Reading the
+    // configured URL is not contacting it, and nothing on the page links out.
+    remote,
+    description,
+    viewer,
+    // Everyone who has committed here. There is no member list in a
+    // repository, so the page says where this came from rather than
+    // presenting it as a roster somebody maintains.
+    people,
     scale: STRENGTH_SCALE,
     counts: {
       families: families.length,
-      branches: families.reduce((total, family) => total + family.size, 0),
+      branches: branchCount,
+      // Every branch beside the default, so the strip can say how many of them
+      // were chosen without the page doing arithmetic of its own.
+      candidates: branches.filter((b) => isCandidate(b, defaultBranch)).length,
+      stale: families.filter((f) => f.staleness.state === 'stale').length,
       entries: entries.length,
       open: open.length,
+      people: people.length,
     },
     families,
     record: {

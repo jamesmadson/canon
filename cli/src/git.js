@@ -14,8 +14,18 @@
 import { execFileSync } from 'node:child_process';
 import { basename } from 'node:path';
 
-/** The only git subcommands this tool is allowed to run. All of them read. */
-export const ALLOWED_SUBCOMMANDS = ['for-each-ref', 'log', 'rev-parse', 'merge-base'];
+// A unit separator, because a commit subject can contain anything a tab can.
+const FIELD = '\u001f';
+
+/**
+ * The only git subcommands this tool is allowed to run. All of them read.
+ *
+ * config is the one that could write, so the allowlist is not enough on its
+ * own: gitConfig below refuses anything that is not a --get, and a suite test
+ * pins both halves. It is here so the top bar can name the repository and the
+ * person, which are facts about this machine and never leave it.
+ */
+export const ALLOWED_SUBCOMMANDS = ['config', 'for-each-ref', 'log', 'merge-base', 'rev-parse'];
 
 function git(args, cwd) {
   if (!ALLOWED_SUBCOMMANDS.includes(args[0])) {
@@ -36,6 +46,100 @@ function tryGit(args, cwd) {
   } catch {
     return null;
   }
+}
+
+/**
+ * git config, and only ever the reading half of it.
+ *
+ * The subcommand allowlist cannot tell a read from a write here, so this is the
+ * narrower gate: the first argument has to be --get, and everything else is
+ * refused before a process is spawned.
+ */
+export function gitConfig(args, cwd) {
+  if (args[0] !== '--get') {
+    throw new Error('Refusing to run git config without --get: this tool only reads.');
+  }
+  return git(['config', ...args], cwd);
+}
+
+function tryConfig(key, cwd) {
+  try {
+    return gitConfig(['--get', key], cwd) || null;
+  } catch {
+    // An unset key exits non zero, which is an answer rather than a failure.
+    return null;
+  }
+}
+
+/**
+ * Owner and repository out of a remote URL, without going near the network.
+ *
+ * Both spellings a person is likely to have: the https one and the scp style
+ * ssh one. Anything else is null, and the caller falls back to the folder name,
+ * which is always true even when it is less specific.
+ */
+export function parseRemote(url) {
+  if (!url) return null;
+  const trimmed = String(url).trim().replace(/\.git$/, '').replace(/\/+$/, '');
+  // scp style: git@host:owner/repo
+  const scp = trimmed.match(/^[^/@]+@[^:/]+:([^/]+)\/([^/]+)$/);
+  if (scp) return { owner: scp[1], repo: scp[2] };
+  // Anything with a scheme: the last two path segments are the pair.
+  const scheme = trimmed.match(/^[a-z][a-z0-9+.-]*:\/\/[^/]+\/(.+)$/i);
+  if (scheme) {
+    const parts = scheme[1].split('/').filter(Boolean);
+    if (parts.length >= 2) return { owner: parts[parts.length - 2], repo: parts[parts.length - 1] };
+  }
+  return null;
+}
+
+/** The origin remote as owner and repo, or null where there is no remote. */
+export function originRemote(cwd) {
+  return parseRemote(tryConfig('remote.origin.url', cwd));
+}
+
+/** The name git would put on a commit made here. */
+export function userName(cwd) {
+  return tryConfig('user.name', cwd);
+}
+
+/** A short mark for the account slot: first and last initial. */
+export function initialsOf(name) {
+  const words = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (!words.length) return '?';
+  const first = words[0][0];
+  const last = words.length > 1 ? words[words.length - 1][0] : '';
+  return `${first}${last}`.toUpperCase();
+}
+
+/**
+ * Who has committed here, from the commit history and nowhere else.
+ *
+ * There is no member list to read: a repository knows who has written to it and
+ * that is all. The page says so rather than presenting these as a roster.
+ */
+export function authors(cwd) {
+  // A person name can hold anything a tab can, so the two fields are split
+  // on the unit separator rather than on a character a name might contain.
+  const out = tryGit(['log', `--format=%an${FIELD}%cd`, '--date=format-local:%Y-%m-%d'], cwd);
+  if (!out) return [];
+
+  const byName = new Map();
+  for (const line of out.split('\n').filter(Boolean)) {
+    const [name, date] = line.split(FIELD);
+    if (!name) continue;
+    if (!byName.has(name)) byName.set(name, { name, commits: 0, lastCommit: date || '' });
+    const person = byName.get(name);
+    person.commits += 1;
+    if (date && date > person.lastCommit) person.lastCommit = date;
+  }
+
+  return [...byName.values()].sort(
+    (a, b) => b.commits - a.commits || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+  );
 }
 
 export function isWorkTree(cwd) {
@@ -69,9 +173,6 @@ export function currentBranch(cwd) {
   const name = tryGit(['rev-parse', '--abbrev-ref', 'HEAD'], cwd);
   return name === 'HEAD' ? null : name;
 }
-
-// A unit separator, because a commit subject can contain anything a tab can.
-const FIELD = '\u001f';
 
 /**
  * Every local branch with the facts a card needs. Remote tracking refs are
