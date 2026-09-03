@@ -76,7 +76,7 @@ describe('the alpha sign-up', () => {
 
   it('states the reason rather than leaving the button unexplained', () => {
     expect(SIGNUP_CLOSED_NOTE.trim().length).toBeGreaterThan(0);
-    expect(SIGNUP_CLOSED_NOTE).not.toMatch(/[—–!]/);
+    expect(SIGNUP_CLOSED_NOTE).not.toMatch(/[\u2014\u2013\u0021]/);
   });
 
   it('disables the field and the button whenever it is closed', () => {

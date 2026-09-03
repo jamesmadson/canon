@@ -30,7 +30,7 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
       <div class="branches">
         {hasContents && (
           <div class="branch">
-            <p class="branch-label">Contents — {plural(contentOutline.length, 'section')}</p>
+            <p class="branch-label">Contents: {plural(contentOutline.length, 'section')}</p>
             <div class="tree">
               {contentOutline.map((section) => (
                 <div class="node">
@@ -72,8 +72,8 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
         {hasPackage && (
           <div class="branch">
             <p class="branch-label">
-              Package{rootFiles.length > 0 && ` — ${plural(rootFiles.length, 'file')}`}
-              {folders.length > 0 && `${rootFiles.length > 0 ? ', ' : ' — '}${plural(folders.length, 'folder')}`}
+              Package{rootFiles.length > 0 && `: ${plural(rootFiles.length, 'file')}`}
+              {folders.length > 0 && `${rootFiles.length > 0 ? ', ' : ': '}${plural(folders.length, 'folder')}`}
             </p>
             <div class="tree">
               {rootFiles.map((file) => (
@@ -212,7 +212,10 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
   .node {
     position: relative;
-    padding: 0.4375rem 0.25rem;
+    /* 11px of block padding puts each 22px row on a 44px pitch. The link's
+       hit area below is measured from .node-row, so this is what lets that
+       area reach the touch floor without spilling into the neighbouring row. */
+    padding: 0.6875rem 0.25rem;
     margin: 0 -0.25rem;
     border-radius: 3px;
     transition: background-color 0.18s ease;
@@ -294,8 +297,8 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
   a.node-label::before {
     content: "";
     position: absolute;
-    top: -0.4375rem;
-    bottom: -0.4375rem;
+    top: -0.6875rem;
+    bottom: -0.6875rem;
     left: -0.25rem;
     right: -0.25rem;
   }
@@ -399,6 +402,8 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
     display: flex;
     align-items: center;
     gap: 0.4375rem;
+    /* The row is the link's hit area, so it carries the touch floor itself. */
+    min-height: 44px;
     padding: 0.25rem;
     margin: 0 -0.25rem;
     border-radius: 3px;
