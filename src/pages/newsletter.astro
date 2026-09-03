@@ -14,19 +14,19 @@ const archive: ArchiveIssue[] = [];
   title="Newsletter"
   description="Sign up for occasional emails about new skills added to the gallery."
 >
-  <h1 class="mb-3 text-3xl font-bold tracking-tight">Newsletter</h1>
-  <p class="mb-10 max-w-xl font-medium text-ink-soft">
-    Occasional emails when a genuinely good skill gets added. No spam.
+  <h1 class="display-lg mb-3">Newsletter</h1>
+  <p class="mb-10 max-w-xl text-[15px] leading-relaxed text-ink-soft">
+    An email when a skill worth having gets added, and no email otherwise.
   </p>
 
-  <div class="mb-16 max-w-md border border-rule-strong px-4 py-3 text-sm font-medium text-ink-soft">
-    Signups aren't open yet — check back soon.
+  <div class="mb-16 max-w-md rounded-md bg-panel p-4 text-sm text-ink-soft">
+    Sign-up is not open yet.
   </div>
 
-  <h2 class="mb-6 text-2xl font-bold">Archive</h2>
+  <h2 class="display mb-6">Archive</h2>
   {
     archive.length === 0 ? (
-      <p class="text-sm font-medium text-ink-soft">No issues yet — check back soon.</p>
+      <p class="text-sm text-ink-soft">No issues yet.</p>
     ) : (
       <ul class="flex flex-col gap-3">
         {archive.map((issue) => (
