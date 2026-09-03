@@ -46,6 +46,20 @@ export function repoRoot(cwd) {
   return tryGit(['rev-parse', '--show-toplevel'], cwd);
 }
 
+/**
+ * Both questions every command opens with, in one spawn.
+ *
+ * Is this a work tree, and where is its root. rev-parse answers both at once,
+ * and asking twice meant two processes to learn two things about the same
+ * directory. Outside a work tree the whole call fails, which is the answer.
+ */
+export function locateRepo(cwd) {
+  const out = tryGit(['rev-parse', '--is-inside-work-tree', '--show-toplevel'], cwd);
+  if (!out) return { isWorkTree: false, root: null };
+  const [inside, root] = out.split('\n');
+  return inside === 'true' && root ? { isWorkTree: true, root } : { isWorkTree: false, root: null };
+}
+
 export function repoName(cwd) {
   const root = repoRoot(cwd);
   return root ? basename(root) : basename(cwd);
@@ -103,4 +117,46 @@ export function forkDate(branch, defaultBranch, cwd) {
   const base = tryGit(['merge-base', branch, defaultBranch], cwd);
   if (!base) return null;
   return tryGit(['log', '-1', '--format=%cd', '--date=format-local:%Y-%m-%d', base], cwd);
+}
+
+/**
+ * Where each of many branches left the default branch, as dates.
+ *
+ * The merge base still costs one call per branch, because merge-base answers
+ * about one pair. Resolving those bases to dates does not: log --no-walk takes
+ * every sha at once, so a repository with twenty prototypes reads twenty one
+ * times rather than forty. Several branches usually share a base, so the shas
+ * are de-duplicated before the one call that dates them.
+ *
+ * @returns {Record<string, string>} branch name to date, missing where unread
+ */
+export function forkDates(branches, defaultBranch, cwd) {
+  const baseOf = {};
+  for (const name of branches) {
+    const base = tryGit(['merge-base', name, defaultBranch], cwd);
+    if (base) baseOf[name] = base;
+  }
+
+  const shas = [...new Set(Object.values(baseOf))];
+  if (!shas.length) return {};
+
+  const out = tryGit(
+    ['log', '--no-walk', '--format=%H %cd', '--date=format-local:%Y-%m-%d', ...shas],
+    cwd,
+  );
+  if (!out) return {};
+
+  const dateOf = new Map();
+  for (const line of out.split('\n').filter(Boolean)) {
+    const cut = line.indexOf(' ');
+    if (cut !== -1) dateOf.set(line.slice(0, cut), line.slice(cut + 1).trim());
+  }
+
+  const dates = {};
+  for (const [name, base] of Object.entries(baseOf)) {
+    // merge-base prints a full sha and so does %H, so the two match directly.
+    const date = dateOf.get(base);
+    if (date) dates[name] = date;
+  }
+  return dates;
 }

@@ -558,15 +558,21 @@
           var H = 42;
           var order = [];
 
+          /* Children by parent, built once. Filtering the whole node list at
+             every step walked the family once per node, which is quadratic on
+             a family big enough to want a tree drawn for it. */
+          var childrenOf = new Map();
+          family.nodes.forEach(function (node) {
+            var key = node.parent === null || node.parent === undefined ? '' : node.parent;
+            if (!childrenOf.has(key)) childrenOf.set(key, []);
+            childrenOf.get(key).push(node);
+          });
+
           function walk(parent, depth) {
-            family.nodes
-              .filter(function (node) {
-                return node.parent === parent;
-              })
-              .forEach(function (node) {
-                order.push({ node: node, depth: depth });
-                walk(node.name, depth + 1);
-              });
+            (childrenOf.get(parent === null ? '' : parent) || []).forEach(function (node) {
+              order.push({ node: node, depth: depth });
+              walk(node.name, depth + 1);
+            });
           }
           walk(null, 0);
 

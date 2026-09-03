@@ -12,13 +12,12 @@ import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 
 import {
-  isWorkTree,
-  repoRoot,
+  locateRepo,
   repoName,
   currentBranch,
   listBranches,
   pickDefaultBranch,
-  forkDate,
+  forkDates,
 } from './git.js';
 import {
   configPath,
@@ -75,13 +74,17 @@ export function today(now = new Date()) {
   ].join('-');
 }
 
-/** The repository a command is about, or a message saying why there is none. */
+/**
+ * The repository a command is about, or a message saying why there is none.
+ * One rev-parse answers both halves, so this costs one process rather than two.
+ */
 function locate(io) {
-  if (!isWorkTree(io.cwd)) {
+  const found = locateRepo(io.cwd);
+  if (!found.isWorkTree) {
     io.err(NOT_A_REPO);
     return null;
   }
-  return repoRoot(io.cwd);
+  return found.root;
 }
 
 /**
@@ -493,11 +496,8 @@ export async function open(argv, io) {
     selected = candidates;
   }
 
-  const forkDates = {};
-  for (const name of selected) {
-    const date = forkDate(name, defaultBranch, io.cwd);
-    if (date) forkDates[name] = date;
-  }
+  // One log call for every fork date, rather than one per branch.
+  const forked = forkDates(selected, defaultBranch, io.cwd);
 
   const entries = readRecord(join(root, config.recordDir || '.strata'));
   const data = buildDashboardData({
@@ -510,7 +510,7 @@ export async function open(argv, io) {
     entries,
     generatedAt: today(),
     root,
-    forkDates,
+    forkDates: forked,
   });
 
   const target = dashboardPath(root);

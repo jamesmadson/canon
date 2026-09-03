@@ -11,6 +11,8 @@ import {
   listBranches,
   pickDefaultBranch,
   forkDate,
+  forkDates,
+  locateRepo,
 } from '../src/git.js';
 
 const cliDir = fileURLToPath(new URL('..', import.meta.url));
@@ -121,6 +123,52 @@ describe('reading this repo', () => {
     const base = pickDefaultBranch(names, currentBranch(repo));
     const date = forkDate(currentBranch(repo), base, repo);
     expect(date === null || /^\d{4}-\d{2}-\d{2}$/.test(date)).toBe(true);
+  });
+});
+
+describe('how many times git is spawned', () => {
+  /**
+   * Every git call is a process. open() resolved one merge base and then one
+   * date per branch, so a repository with twenty prototypes paid forty spawns
+   * to draw a page, and locate() paid two more to answer one question about the
+   * same directory. The counts below are the shape of the fix, not a
+   * micro-optimisation: they are what keeps the tool quick on a real repository.
+   */
+  it('resolves many fork dates in one log call', () => {
+    const names = listBranches(repo).map((b) => b.name);
+    const base = pickDefaultBranch(names, currentBranch(repo));
+    const others = names.filter((n) => n !== base).slice(0, 4);
+    const dates = forkDates(others, base, repo);
+    expect(Object.keys(dates).length).toBeGreaterThan(0);
+    for (const date of Object.values(dates)) {
+      expect(date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+  });
+
+  it('agrees with reading the dates one at a time', () => {
+    const names = listBranches(repo).map((b) => b.name);
+    const base = pickDefaultBranch(names, currentBranch(repo));
+    const others = names.filter((n) => n !== base).slice(0, 3);
+    const batched = forkDates(others, base, repo);
+    for (const name of others) {
+      expect(batched[name] ?? null, name).toBe(forkDate(name, base, repo));
+    }
+  });
+
+  it('answers both questions about the work tree in one call', () => {
+    const found = locateRepo(repo);
+    expect(found.isWorkTree).toBe(true);
+    expect(found.root).toBe(repoRoot(repo));
+  });
+
+  it('says plainly when a directory is not a work tree', () => {
+    const found = locateRepo('/');
+    expect(found.isWorkTree).toBe(false);
+    expect(found.root).toBe(null);
+  });
+
+  it('takes an empty list of branches without spawning anything', () => {
+    expect(forkDates([], 'main', repo)).toEqual({});
   });
 });
 
