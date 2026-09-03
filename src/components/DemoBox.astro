@@ -11,17 +11,15 @@ const activeSlugs = new Set(
 );
 ---
 
-<section class="mb-12" aria-labelledby="demo-heading">
-  <h2 id="demo-heading" class="mb-2 text-sm font-semibold uppercase tracking-wide text-ink-soft">
-    Canon in use
-  </h2>
-  <p class="mb-4 max-w-2xl text-sm font-medium text-ink-soft">
-    You install one file. Then you just describe the work — and Canon brings in
-    the right guidance for it. Here's what that looks like.
+<section class="mb-14" aria-labelledby="demo-heading">
+  <h2 id="demo-heading" class="label mb-2">Canon in use</h2>
+  <p class="mb-4 max-w-2xl text-sm text-ink-soft">
+    You install one file. Then you describe the work, and Canon brings in the
+    right guidance for it. This is what that looks like.
   </p>
 
-  <div class="overflow-hidden rounded-lg border border-rule-strong">
-    <div role="tablist" aria-label="Example use cases" class="flex flex-wrap gap-px bg-rule">
+  <div class="rounded-lg bg-panel p-[10px]">
+    <div role="tablist" aria-label="Example use cases" class="flex flex-wrap gap-[2px]">
       {DEMO_CASES.map((demoCase, i) => (
         <button
           type="button"
@@ -31,7 +29,7 @@ const activeSlugs = new Set(
           aria-selected={i === 0 ? 'true' : 'false'}
           tabindex={i === 0 ? 0 : -1}
           data-demo-tab={demoCase.id}
-          class="min-h-11 flex-1 bg-bg px-4 py-3 text-sm font-semibold text-ink-soft transition-colors hover:text-ink aria-selected:bg-surface aria-selected:text-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2"
+          class="min-h-11 flex-1 rounded-sm px-4 py-3 text-sm font-semibold text-ink-soft transition-colors duration-[120ms] hover:text-ink aria-selected:bg-recess aria-selected:text-ink focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2"
         >
           {demoCase.label}
         </button>
@@ -45,38 +43,34 @@ const activeSlugs = new Set(
         aria-labelledby={`demo-tab-${demoCase.id}`}
         data-demo-panel={demoCase.id}
         hidden={i !== 0}
-        class="border-t border-rule p-4 sm:p-6"
+        class="mt-[2px] rounded-md bg-recess p-4 sm:p-6"
       >
-        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">You type</p>
+        <p class="label mb-1">You type</p>
         <p class="mb-5 font-mono text-sm text-ink">{demoCase.prompt}</p>
 
-        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Canon brings in</p>
-        <div class="mb-5 flex flex-col gap-px bg-rule">
-          <div class="bg-bg">
-            <a
-              href={withBase(`/kits/${demoCase.route}/`)}
-              class="flex min-h-11 items-center px-1 py-2 text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink"
-            >
-              {demoCase.route}
-            </a>
-          </div>
+        <p class="label mb-1">Canon brings in</p>
+        <div class="mb-5 flex flex-col">
+          <a
+            href={withBase(`/kits/${demoCase.route}/`)}
+            class="flex min-h-11 items-center text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            {demoCase.route}
+          </a>
           {demoCase.skills.filter((slug) => activeSlugs.has(slug)).map((slug) => (
-            <div class="bg-bg">
-              <a
-                href={withBase(`/skills/${slug}/`)}
-                class="flex min-h-11 items-center px-1 py-2 text-sm font-medium text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong"
-              >
-                {slug}
-              </a>
-            </div>
+            <a
+              href={withBase(`/skills/${slug}/`)}
+              class="flex min-h-11 items-center text-sm text-ink-soft underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+            >
+              {slug}
+            </a>
           ))}
         </div>
 
-        <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-soft">What it tells the AI</p>
+        <p class="label mb-1">What it tells the AI</p>
         <ul class="flex flex-col gap-2">
           {demoCase.excerpt.map((line) => (
             <li
-              class="border-l border-rule-strong pl-3 text-sm font-medium leading-relaxed text-ink-soft"
+              class="rounded-sm bg-panel p-3 text-sm leading-relaxed text-ink-soft"
               set:html={renderInlineMarkdown(line)}
             />
           ))}
@@ -84,20 +78,19 @@ const activeSlugs = new Set(
       </div>
     ))}
 
-    <p class="border-t border-rule bg-surface px-4 py-2 text-[11px] font-medium text-ink-soft sm:px-6">
+    <p class="px-2 pt-3 pb-1 text-[11px] text-ink-soft">
       A scripted example, not a live session. Every line above is quoted from the
       kit it names.
     </p>
   </div>
 
-  <p class="mt-4 max-w-2xl text-sm font-medium text-ink-soft">
+  <p class="mt-4 max-w-2xl text-sm text-ink-soft">
     <a
       href={withBase('/use/')}
       class="font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink"
     >
       More ways to ask
-    </a>
-    — or, if you work in Figma rather than Claude Code,
+    </a>. Or, if you work in Figma rather than Claude Code,
     <a
       href={withBase('/kits/')}
       class="underline decoration-rule underline-offset-4 transition-colors hover:text-ink hover:decoration-rule-strong"
