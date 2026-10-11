@@ -90,6 +90,62 @@ const SECTIONS = [
   },
 ];
 
+// The problem, in the order a team meets it. Each one is a question somebody
+// currently answers from memory.
+const PROBLEMS = [
+  {
+    name: 'Where is the latest one?',
+    line: 'Five versions of a screen in an afternoon, each on a branch named by whoever made it. The person who knows which is current is on holiday.',
+  },
+  {
+    name: 'Which link was that?',
+    line: 'The Figma file is in a chat thread, the preview URL is in another, and the one people reacted to was replaced last Tuesday.',
+  },
+  {
+    name: 'Who said that, and when?',
+    line: 'Feedback lands in DMs and calls. By the time it reaches a roadmap, one person mentioning something has become users demanding it.',
+  },
+];
+
+// What Canon touches, stated as facts the code can be held to.
+const PROMISES = [
+  {
+    name: 'Reads, never copies',
+    line: 'It reads your branches through git. Your code stays in your repository and nowhere else.',
+  },
+  {
+    name: 'Nothing leaves your machine',
+    line: 'The package makes no network calls. No account, no telemetry, no sign-in.',
+  },
+  {
+    name: 'Three things it writes',
+    line: 'A config file under .canon/, dated notes under .strata/, and one line in .gitignore. Nothing else in the repository changes.',
+  },
+  {
+    name: 'Names stay out of the record',
+    line: 'People are filed as P-04 or "the ops lead". The key to who is who stays in one local file.',
+  },
+];
+
+const FAQ = [
+  {
+    q: 'Is this another Storybook?',
+    a: 'No. Storybook documents components. Canon keeps track of whole prototypes, the branches they live on, and what people said about them. Teams run both.',
+  },
+  {
+    q: 'Do we need to rename our branches?',
+    a: 'No. Canon lists the branches and you tick the ones that are prototypes. Keep the names you already use.',
+  },
+  {
+    q: 'Does it need Figma?',
+    a: 'No. It starts from a git repository. A Figma file can sit beside the branches as a linked reference, never a dependency.',
+  },
+  {
+    q: 'What does the alpha involve?',
+    a: 'One repository, set up with you by hand, a few teams at a time. Alpha teams get the hosted service free for a year when it exists.',
+  },
+];
+
 const TALK_TO_US = 'mailto:james@jamesmadson.me?subject=Canon%20Team';
 ---
 
@@ -99,32 +155,53 @@ const TALK_TO_US = 'mailto:james@jamesmadson.me?subject=Canon%20Team';
   description="Canon keeps your team's prototypes in one place and turns feedback into evidence. Local, no account, nothing leaves your machine."
 >
   {/* 1. The cover. The name set the way a book sets it: monumental down the
-       right, the facts small down the left. */}
+       right; down the left, the claim and the way in, so both are on the first
+       screen. */}
   <section class="mx-auto max-w-6xl px-6 pt-6 pb-20 sm:pt-10 sm:pb-28">
     <div class="flex flex-col gap-10 sm:flex-row-reverse sm:items-stretch sm:justify-between sm:gap-16">
       <div class="cover-type" aria-hidden="true">
         <span>canon</span><span>design</span>
       </div>
-      <h1 class="sr-only">Canon: prototypes in one place, feedback that becomes evidence</h1>
-      <div class="flex max-w-[24ch] flex-col justify-between gap-8 text-[15px] leading-[1.55] sm:py-2">
+      <div class="flex min-w-0 flex-col justify-end sm:py-2">
         <div>
-          <p class="text-ink">prototypes<br />in one place</p>
-          <p class="mt-4 text-ink-soft">feedback that<br />becomes evidence</p>
-        </div>
-        <div>
-          <p class="text-ink-soft">for designers<br />who build</p>
-          <p class="mt-8 text-lg font-semibold tracking-tight text-ink">Canon</p>
+          <p class="label">For designers who build</p>
+          <h1 class="display-lg mt-3 max-w-[20ch]">
+            Your prototypes, in one place, with the feedback still attached.
+          </h1>
+          <p class="mt-5 max-w-[52ch] text-[17px] leading-relaxed text-ink-soft">
+            AI made it cheap to build five versions of a screen. It did nothing about
+            what comes after. Canon lists every prototype your team has made, flags the
+            ones nobody has touched in three weeks, and files feedback as what a person
+            said, what you think they meant, and what got decided.
+          </p>
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <a href="#signup" class="btn btn-primary">Join the alpha</a>
+            <a href={withBase('/v2-preview/')} class="btn btn-secondary">Walk the preview</a>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  {/* 2. The install line. */}
+  {/* 3. The problem, as the questions a team asks out loud. */}
+  <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28" aria-labelledby="problem-heading">
+    <h2 id="problem-heading" class="label mb-4">The mess after generation</h2>
+    <div class="grid grid-cols-1 gap-[10px] sm:grid-cols-3">
+      {PROBLEMS.map((problem) => (
+        <div class="rounded-lg bg-panel p-5">
+          <h3 class="text-[17px] font-semibold text-ink">{problem.name}</h3>
+          <p class="mt-2 text-[14px] leading-relaxed text-ink-soft">{problem.line}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {/* 4. The install line. */}
   <div class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28">
     <InstallBlock />
   </div>
 
-  {/* 3. What it looks like. A still of the real screen, not a drawing of one. */}
+  {/* 5. What it looks like. A still of the real screen, not a drawing of one. */}
   <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28" aria-labelledby="preview-heading">
     <h2 id="preview-heading" class="label mb-3">What it looks like</h2>
     <div class="overflow-hidden rounded-lg bg-panel p-[10px]">
@@ -157,7 +234,7 @@ const TALK_TO_US = 'mailto:james@jamesmadson.me?subject=Canon%20Team';
     </a>
   </section>
 
-  {/* 4. The rail. Six moves, scrolled sideways. */}
+  {/* 6. The rail. Six moves, scrolled sideways. */}
   <section class="pb-20 sm:pb-28" aria-labelledby="rail-heading">
     <div class="mx-auto max-w-6xl px-6">
       <h2 id="rail-heading" class="label mb-4">What it does</h2>
@@ -176,6 +253,19 @@ const TALK_TO_US = 'mailto:james@jamesmadson.me?subject=Canon%20Team';
         ))}
       </ul>
     </div>
+  </section>
+
+  {/* Trust. What it touches, as facts the package can be held to. */}
+  <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28" aria-labelledby="trust-heading">
+    <h2 id="trust-heading" class="display mb-6 max-w-[24ch]">Your work stays where it is.</h2>
+    <dl class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
+      {PROMISES.map((promise) => (
+        <div>
+          <dt class="label">{promise.name}</dt>
+          <dd class="mt-2 text-[14px] leading-relaxed text-ink-soft">{promise.line}</dd>
+        </div>
+      ))}
+    </dl>
   </section>
 
   {/* 5. Pricing. */}
@@ -210,9 +300,25 @@ const TALK_TO_US = 'mailto:james@jamesmadson.me?subject=Canon%20Team';
   </section>
 
   {/* 6. Sign up. */}
-  <div class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28">
+  <div id="signup" class="mx-auto max-w-6xl scroll-mt-8 px-6 pb-20 sm:pb-28">
     <SignupForm />
   </div>
+
+  {/* Questions a design lead asks before connecting a repository. */}
+  <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28" aria-labelledby="faq-heading">
+    <h2 id="faq-heading" class="label mb-4">Questions</h2>
+    <div class="flex max-w-3xl flex-col gap-[10px]">
+      {FAQ.map((item) => (
+        <details class="group rounded-lg bg-panel">
+          <summary class="flex min-h-11 items-center justify-between gap-4 px-5 py-4 text-[15px] font-semibold text-ink [&::-webkit-details-marker]:hidden focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink rounded-lg">
+            {item.q}
+            <span aria-hidden="true" class="font-mono text-ink-soft transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <p class="px-5 pb-5 text-[14px] leading-relaxed text-ink-soft">{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
 
   {/* 7. The skills, a section of the site rather than the whole of it. */}
   <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-24" aria-labelledby="skills-heading">
