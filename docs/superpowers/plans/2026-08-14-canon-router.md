@@ -1,6 +1,6 @@
 # Canon Router + Homepage Demo Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Ship the `canon` router skill as an installable Claude Code plugin, a self-contained `canon-all` file for Figma, and a scripted demo box on the homepage that shows the router in use.
 
@@ -19,6 +19,10 @@
 - `canon-all` must stay **under 500 lines** (Agent Skills spec recommendation). Current projection ≈ 410.
 - Reference spec: `docs/superpowers/specs/2026-08-14-canon-router-design.md`.
 
+## Findings
+
+- **2026-08-27** — [Beyond the Handoff](https://content-creation-eosin.vercel.app/): essay arguing that design-development friction is a *modeling* problem, not a process one — teams work in isolation on separate representations of the same product (design files vs. code), and fixes like design systems, docs, and specs don't close that gap. Proposes "shared working surfaces" (closer to Storybook, but genuinely collaborative) where intent is declared and explored together in real time, rather than handed off. Notes AI intensifies the problem by being literal and unable to infer unstated assumptions. Relevant context for the router's framing of how `canon` bridges design intent and implementation.
+
 ---
 
 ### Task 1: Router skill and plugin manifests — CURATOR-EXECUTED (do not dispatch)
@@ -33,21 +37,21 @@
 **Interfaces:**
 - Produces: a router skill whose body contains a routing table naming exactly the slugs `canon-marketing-site`, `canon-product-ui`, `canon-mobile-first-review`; manifests that Task 2's tests parse.
 
-- [ ] **Step 1 (curator): author `plugin/canon/skills/canon/SKILL.md`**
+- [x] **Step 1 (curator): author `plugin/canon/skills/canon/SKILL.md`**
 
 Frontmatter: `name: canon`; `description` naming all three routes, their trigger language, AND the explicit non-auto-trigger clause; `compatibility` noting it expects sibling kit skills.
 
 Body: a routing table (task language → kit slug), an ambiguity rule (ask, never guess), and one section per route naming that kit's constituent skills plus the graceful-degradation instruction (defer to installed skills; otherwise use the sibling digest's inlined guidance).
 
-- [ ] **Step 2 (curator): author the two manifests**
+- [x] **Step 2 (curator): author the two manifests**
 
 `plugin/canon/.claude-plugin/plugin.json` — `name`, `description`, `version`, `author`.
 
 `.claude-plugin/marketplace.json` — `name`, `description`, `owner`, and a `plugins` array with one entry: `name: canon`, `description`, `author`, `category: design`, and a `source` pointing at `./plugin/canon`.
 
-- [ ] **Step 3: Verify** — `npx astro check` (0 errors), `npm run build` (success). Neither manifest affects the build; this confirms nothing was broken.
+- [x] **Step 3: Verify** — `npx astro check` (0 errors), `npm run build` (success). Neither manifest affects the build; this confirms nothing was broken.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add plugin .claude-plugin
@@ -81,7 +85,7 @@ export interface CanonAllInput {
 }
 ```
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -136,12 +140,12 @@ describe('buildCanonAll', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run tests/lib/buildCanonAll.test.ts`
 Expected: FAIL — `Cannot find module '../../src/lib/buildCanonAll'`
 
-- [ ] **Step 3: Implement `src/lib/buildCanonAll.ts`**
+- [x] **Step 3: Implement `src/lib/buildCanonAll.ts`**
 
 ```ts
 export interface CanonAllKit {
@@ -183,12 +187,12 @@ export function buildCanonAll(input: CanonAllInput): string {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run tests/lib/buildCanonAll.test.ts`
 Expected: PASS (6 tests)
 
-- [ ] **Step 5: Write the generator script `scripts/build-canon-artifacts.ts`**
+- [x] **Step 5: Write the generator script `scripts/build-canon-artifacts.ts`**
 
 ```ts
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -240,12 +244,12 @@ if (lines > 500) {
 }
 ```
 
-- [ ] **Step 6: Run the generator**
+- [x] **Step 6: Run the generator**
 
 Run: `npx tsx scripts/build-canon-artifacts.ts`
 Expected: four ✓ lines, and a `canon-all.md (N lines)` where N < 500. If N ≥ 500 the script exits non-zero — report it rather than trimming content on your own initiative.
 
-- [ ] **Step 7: Write the drift test `tests/content/canonArtifacts.test.ts`**
+- [x] **Step 7: Write the drift test `tests/content/canonArtifacts.test.ts`**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -328,13 +332,13 @@ describe('generated canon artifacts stay in sync with their sources', () => {
 });
 ```
 
-- [ ] **Step 8: Verify**
+- [x] **Step 8: Verify**
 
 Run: `npx vitest run` — all green.
 Run: `npx astro check` — 0 errors.
 Run: `npm run build` — success.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add scripts/build-canon-artifacts.ts src/lib/buildCanonAll.ts tests/lib/buildCanonAll.test.ts tests/content/canonArtifacts.test.ts plugin/canon/skills public/kits/canon-all.md
@@ -365,7 +369,7 @@ export interface DemoCase {
 
 Task 4's component consumes `DEMO_CASES`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```ts
 import { describe, it, expect } from 'vitest';
@@ -426,12 +430,12 @@ describe('demo cases', () => {
 });
 ```
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `npx vitest run tests/content/demoCases.test.ts`
 Expected: FAIL — module not found.
 
-- [ ] **Step 3: Write `src/data/demoCases.ts`**
+- [x] **Step 3: Write `src/data/demoCases.ts`**
 
 Each `excerpt` line must be drawn from that kit's digest in `public/kits/`. Read the digest before writing the excerpt; do not invent guidance. Choose lines that demonstrate judgment (a rule with a reason) rather than generic advice.
 
@@ -488,12 +492,12 @@ export const DEMO_CASES: DemoCase[] = [
 ];
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run tests/content/demoCases.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/data/demoCases.ts tests/content/demoCases.test.ts
@@ -511,7 +515,7 @@ git commit -m "Add demo case data for the homepage router demo"
 **Interfaces:**
 - Consumes: `DEMO_CASES` from `src/data/demoCases.ts` (Task 3).
 
-- [ ] **Step 1: Create `src/components/DemoBox.astro`**
+- [x] **Step 1: Create `src/components/DemoBox.astro`**
 
 ```astro
 ---
@@ -627,7 +631,7 @@ import { withBase } from '../lib/withBase';
 </script>
 ```
 
-- [ ] **Step 2: Place it on the homepage**
+- [x] **Step 2: Place it on the homepage**
 
 In `src/pages/index.astro`, add the import after the `KitCard` import:
 
@@ -637,13 +641,13 @@ import DemoBox from '../components/DemoBox.astro';
 
 Then insert `<DemoBox />` immediately after the hero `</section>` and before the `Kits` section, so the argument lands before the inventory.
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `npx astro check` — 0 errors.
 Run: `npm run build` — success.
 Run: `grep -rn "accent\|blue\|green\|red-" src/components/DemoBox.astro` — expect no matches (monochrome constraint).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/components/DemoBox.astro src/pages/index.astro
@@ -657,7 +661,7 @@ git commit -m "Add the homepage demo box showing the router in use"
 **Files:**
 - Modify: `src/pages/kits/index.astro`
 
-- [ ] **Step 1: Add the router lead above the kit grid**
+- [x] **Step 1: Add the router lead above the kit grid**
 
 In `src/pages/kits/index.astro`, after the existing intro paragraph and before the kit grid, insert:
 
@@ -689,7 +693,7 @@ In `src/pages/kits/index.astro`, after the existing intro paragraph and before t
 
 Add `import { withBase } from '../../lib/withBase';` to the frontmatter if not already present.
 
-- [ ] **Step 2: Label the routed kits vs the bundle**
+- [x] **Step 2: Label the routed kits vs the bundle**
 
 The page already has `<h1>Kits</h1>` at line 12 — do **not** add a second "Kits" heading. Instead, above the grid add a distinct eyebrow that names what the grid contains:
 
@@ -707,11 +711,11 @@ and after the grid, add a one-line note:
   </p>
 ```
 
-- [ ] **Step 3: Verify**
+- [x] **Step 3: Verify**
 
 Run: `npx astro check` — 0 errors. `npm run build` — success. Confirm `dist/kits/canon-all.md` exists (it is a `public/` file, so the build copies it).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/pages/kits/index.astro
@@ -727,7 +731,7 @@ git commit -m "Lead the kits page with the Canon router"
 
 This closes the P1 from `.claude/marketing-kit-audit.md`: social shares currently render with no preview card.
 
-- [ ] **Step 1: Add the meta tags**
+- [x] **Step 1: Add the meta tags**
 
 In `src/layouts/BaseLayout.astro`, inside `<head>` after the existing `<meta name="description" …>` line, add:
 
@@ -744,7 +748,7 @@ In `src/layouts/BaseLayout.astro`, inside `<head>` after the existing `<meta nam
 
 **On `og:image`:** the spec calls for a 1200×630 share image, but Canon has no logo asset yet (the user has said the logo and favicon are not ready). Ship without `og:image` and with `twitter:card` set to `summary` rather than `summary_large_image` — a text-only card that renders correctly is better than a large-image card with a missing image. Do not generate a placeholder image. Note this in your report so it can be revisited when brand assets exist.
 
-- [ ] **Step 2: Verify the tags render**
+- [x] **Step 2: Verify the tags render**
 
 Run: `npm run build`
 Run: `grep -o 'property="og:[^"]*"' dist/index.html`
@@ -754,7 +758,7 @@ Expected: the `og:url` resolves to a full absolute URL including the base path.
 
 Run: `npx astro check` — 0 errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/layouts/BaseLayout.astro
@@ -767,28 +771,28 @@ git commit -m "Add Open Graph and Twitter Card meta tags"
 
 **Files:** none expected — verification only; edit only if a gate fails.
 
-- [ ] **Step 1: Regenerate artifacts and confirm no drift**
+- [x] **Step 1: Regenerate artifacts and confirm no drift**
 
 Run: `npx tsx scripts/build-canon-artifacts.ts`
 Run: `git status --short`
 Expected: no modified files. If the generator changes anything, the committed artifacts were stale — commit the regenerated output and note it.
 
-- [ ] **Step 2: Full gates**
+- [x] **Step 2: Full gates**
 
 Run: `npx vitest run` — all green.
 Run: `npx astro check` — 0 errors.
 Run: `npm run build` — success.
 
-- [ ] **Step 3: Monochrome sweep on new surfaces**
+- [x] **Step 3: Monochrome sweep on new surfaces**
 
 Run: `grep -rn "accent\|amber\|blue-\|green-\|red-\|yellow-" src/components/DemoBox.astro src/data/demoCases.ts src/pages/kits/index.astro`
 Expected: no matches.
 
-- [ ] **Step 4: Confirm the shipped artifacts exist in the build**
+- [x] **Step 4: Confirm the shipped artifacts exist in the build**
 
 Run: `ls dist/kits/canon-all.md dist/kits/marketing-site-digest.md`
 Expected: both exist.
 
-- [ ] **Step 5: Commit (only if a gate required a fix)**
+- [x] **Step 5: Commit (only if a gate required a fix)**
 
 Visual verification (demo box at desktop and 390px, keyboard tab-through with arrow keys, `/kits` hierarchy) is performed by the controller in the Browser pane after this task.
