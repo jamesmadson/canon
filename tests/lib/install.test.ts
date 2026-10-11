@@ -111,9 +111,11 @@ describe('the alpha sign-up', () => {
 
   it('disables the field and the button whenever it is closed', () => {
     const form = readFileSync(join(SRC, 'components', 'SignupForm.astro'), 'utf8');
-    // Two controls, both gated on the same state, and no submit handler that
-    // could quietly accept an address behind them.
+    // Two controls, both gated on the same state.
     expect(form.match(/disabled=\{!open\}/g)?.length).toBe(2);
-    expect(form).not.toMatch(/addEventListener\(\s*['"]submit/);
+    // The only submit handler hangs off the open marker, which a closed form
+    // never renders, so nothing can accept an address behind disabled controls.
+    expect(form).toMatch(/querySelector<HTMLFormElement>\('form\[data-signup-open\]'\)/);
+    expect(form).toMatch(/data-signup-open=\{open \? '' : undefined\}/);
   });
 });

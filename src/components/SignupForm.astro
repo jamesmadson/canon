@@ -8,6 +8,10 @@ import { signupState } from '../lib/install';
  * address and dropping it. When SIGNUP_ENDPOINT is set the field and the button
  * come alive and the form posts to it; until then both are disabled and the
  * reason is printed beside them.
+ *
+ * Open, it posts with fetch and answers in place: on the list, not an
+ * address, or it did not go through and here is the email to use instead.
+ * Without JavaScript the form still posts straight to the endpoint.
  */
 const state = signupState();
 const open = state.open;
@@ -26,6 +30,12 @@ const open = state.open;
     action={state.open ? state.action : undefined}
     data-signup-open={open ? '' : undefined}
   >
+    {/* The honeypot. Hidden from people and from assistive tech; a bot that
+        fills every field fills this one, and the sign-up is dropped. */}
+    <div aria-hidden="true" class="absolute -left-[9999px] h-px w-px overflow-hidden">
+      <label for="signup-company">Company</label>
+      <input id="signup-company" type="text" name="company" tabindex="-1" autocomplete="off" />
+    </div>
     <label for="signup-email" class="label block">Work email</label>
     <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
       <input
@@ -47,6 +57,11 @@ const open = state.open;
         Join the alpha
       </button>
     </div>
+    <p
+      data-signup-status
+      role="status"
+      class="mt-3 font-mono text-[11px] tracking-[0.08em] text-ink-soft empty:hidden"
+    ></p>
     {!open && (
       <p id="signup-note" class="mt-3 font-mono text-[11px] tracking-[0.08em] text-ink-soft">
         {state.open ? '' : state.reason}
@@ -65,3 +80,41 @@ const open = state.open;
     and say what your team builds.
   </p>
 </section>
+
+<script>
+  import { submitSignup } from '../lib/signup';
+
+  const MESSAGES = {
+    ok: 'You are on the list. Expect a note from a person, not a sequence.',
+    invalid: 'That does not look like an email address.',
+    failed: 'That did not go through. Write to james@jamesmadson.me instead.',
+  };
+
+  // Only an open form gets a handler. A closed one has nothing to send to.
+  const form = document.querySelector<HTMLFormElement>('form[data-signup-open]');
+  if (form) {
+    const status = form.querySelector<HTMLElement>('[data-signup-status]');
+    const email = form.querySelector<HTMLInputElement>('input[name=email]');
+    const honeypot = form.querySelector<HTMLInputElement>('input[name=company]');
+    const button = form.querySelector<HTMLButtonElement>('button[type=submit]');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!email || !button || !status) return;
+      if (honeypot?.value) {
+        status.textContent = MESSAGES.ok;
+        return;
+      }
+      button.disabled = true;
+      status.textContent = 'Sending.';
+      const result = await submitSignup(form.action, email.value, window.location.pathname);
+      status.textContent = MESSAGES[result];
+      if (result === 'ok') {
+        email.value = '';
+        email.disabled = true;
+      } else {
+        button.disabled = false;
+      }
+    });
+  }
+</script>
