@@ -1,5 +1,5 @@
 ---
-import { INSTALL_COMMAND } from '../lib/install';
+import { INSTALL_COMMAND, installState } from '../lib/install';
 
 /**
  * The install line, and the three things the command does.
@@ -8,6 +8,10 @@ import { INSTALL_COMMAND } from '../lib/install';
  * package name has a single home, and the copy button copies exactly the string
  * the page is showing.
  */
+const state = installState();
+const copyable = state.copyable;
+const meta = state.copyable ? 'local · no account · nothing leaves your machine' : state.reason;
+
 const STEPS = [
   { name: 'init', meaning: 'Writes one config file and asks which branches are prototypes.' },
   { name: 'index', meaning: 'Reads the repository and lists every prototype with its author and its age.' },
@@ -18,7 +22,7 @@ const STEPS = [
 <section aria-labelledby="install-heading">
   <div class="titlebar">
     <strong id="install-heading" class="titlebar-name">Install</strong>
-    <span class="titlebar-meta">local · no account · nothing leaves your machine</span>
+    <span id="install-meta" class="titlebar-meta">{meta}</span>
   </div>
 
   <div class="mt-[10px] flex flex-col gap-3 rounded-md bg-recess p-3 sm:flex-row sm:items-center">
@@ -33,12 +37,15 @@ const STEPS = [
       data-install-copy
       data-label="Copy"
       data-done-label="Copied"
-      class="btn btn-utility bg-panel shrink-0 hover:bg-panel/80"
+      disabled={!copyable}
+      aria-describedby={copyable ? undefined : 'install-meta'}
+      class="btn btn-utility bg-panel shrink-0 hover:bg-panel/80 disabled:opacity-50 disabled:hover:bg-panel"
     >
       Copy
     </button>
     <p class="sr-only" role="status" data-install-status></p>
   </div>
+
 
   <dl class="mt-6 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-3">
     {STEPS.map((step) => (

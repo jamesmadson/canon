@@ -4,6 +4,9 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   INSTALL_COMMAND,
+  INSTALL_UNPUBLISHED_NOTE,
+  PACKAGE_PUBLISHED,
+  installState,
   SIGNUP_CLOSED_NOTE,
   SIGNUP_ENDPOINT,
   signupState,
@@ -49,6 +52,33 @@ describe('the install command', () => {
     ).map((file) => file.slice(ROOT.length));
 
     expect(offenders).toEqual([]);
+  });
+});
+
+describe('the install line before the package is published', () => {
+  it('cannot be copied while the package is not on npm', () => {
+    const state = installState(false);
+    expect(state.copyable).toBe(false);
+    expect(state.copyable === false && state.reason).toBe(INSTALL_UNPUBLISHED_NOTE);
+  });
+
+  it('can be copied once it is', () => {
+    expect(installState(true)).toEqual({ copyable: true });
+  });
+
+  it('ships uncopyable, because the package is not published yet', () => {
+    expect(PACKAGE_PUBLISHED).toBe(false);
+    expect(installState().copyable).toBe(false);
+  });
+
+  it('states the reason in the house voice', () => {
+    expect(INSTALL_UNPUBLISHED_NOTE.trim().length).toBeGreaterThan(0);
+    expect(INSTALL_UNPUBLISHED_NOTE).not.toMatch(/[\u2014\u2013\u0021]/);
+  });
+
+  it('gates the copy button on that state', () => {
+    const block = readFileSync(join(SRC, 'components', 'InstallBlock.astro'), 'utf8');
+    expect(block).toMatch(/disabled=\{!copyable\}/);
   });
 });
 
