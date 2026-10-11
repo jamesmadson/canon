@@ -30,6 +30,8 @@ export function defaultConfig({ repo, defaultBranch }) {
     prototypes: null,
     familyRoots: {},
     thumbnails: {},
+    // branch -> { command, outputDir }: how each prototype builds for the gallery.
+    builds: {},
     recordDir: '.strata',
     indexedAt: null,
   };
