@@ -1,0 +1,44 @@
+---
+/**
+ * The closing strip: the name giant, paper on near-black, drifting slowly as it
+ * comes into view.
+ *
+ * The drift is transform and opacity only, driven from scroll progress. The
+ * script does not run at all under prefers-reduced-motion, so what that reader
+ * gets is the authored static state rather than a stopped animation.
+ */
+---
+
+<section class="closing-strip" aria-label="Canon" data-closing-strip>
+  <p class="giant" data-closing-giant>canon</p>
+  <p class="meta">prototypes in one place · feedback that becomes evidence</p>
+</section>
+
+<script>
+  const strip = document.querySelector<HTMLElement>('[data-closing-strip]');
+  const giant = document.querySelector<HTMLElement>('[data-closing-giant]');
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (strip && giant && !still.matches) {
+    let frame = 0;
+
+    function draw() {
+      frame = 0;
+      const box = strip!.getBoundingClientRect();
+      const span = window.innerHeight + box.height;
+      // 0 as the strip enters from below, 1 as it leaves at the top.
+      const progress = Math.min(1, Math.max(0, (window.innerHeight - box.top) / span));
+      giant!.style.transform = `translateY(${(0.5 - progress) * 56}px)`;
+      giant!.style.opacity = String(0.35 + Math.min(1, progress * 2.2) * 0.65);
+    }
+
+    function schedule() {
+      if (frame) return;
+      frame = requestAnimationFrame(draw);
+    }
+
+    draw();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+  }
+</script>

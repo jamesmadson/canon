@@ -21,9 +21,9 @@ const skillsBySlug = new Map(allSkills.map((s) => [s.data.slug, s.data]));
 
 <BaseLayout title={name} description={tagline}>
   <div class="mb-12">
-    <span class="inline-block border border-rule-strong px-2.5 py-1 text-xs font-semibold text-ink">Kit</span>
-    <h1 class="mt-6 max-w-3xl text-5xl font-black leading-tight sm:text-6xl">{name}</h1>
-    <p class="mt-6 max-w-2xl text-lg font-medium text-ink-soft">{tagline}</p>
+    <span class="chip-outline">Kit</span>
+    <h1 class="display-lg mt-6 max-w-3xl">{name}</h1>
+    <p class="mt-6 max-w-2xl text-lg text-ink-soft">{tagline}</p>
   </div>
 
   <article class="prose prose-stone max-w-none prose-headings:text-ink prose-p:text-ink-soft prose-a:text-ink prose-a:hover:text-ink-soft prose-strong:text-ink">
@@ -33,21 +33,21 @@ const skillsBySlug = new Map(allSkills.map((s) => [s.data.slug, s.data]));
   <div class="mt-12 flex flex-col gap-10">
     {phases.map((phase, i) => (
       <section>
-        <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">
+        <h2 class="label mb-4">
           {String(i + 1).padStart(2, '0')} · {phase.title}
         </h2>
-        <div class="flex flex-col gap-px bg-rule">
+        <div class="flex flex-col gap-[10px]">
           {phase.entries.filter((item) => skillsBySlug.get(item.skill)?.status === 'active').map((item) => {
             const skill = skillsBySlug.get(item.skill);
             return (
-              <div class="flex flex-col gap-1 bg-bg py-3 sm:flex-row sm:items-baseline sm:gap-6">
+              <div class="flex flex-col gap-1 rounded-md bg-panel p-4 sm:flex-row sm:items-baseline sm:gap-6">
                 <a
                   href={withBase(`/skills/${item.skill}/`)}
-                  class="relative -my-3 shrink-0 py-3 text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:decoration-ink sm:w-64"
+                  class="flex min-h-11 shrink-0 items-center text-sm font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:w-64"
                 >
                   {skill ? skill.name : item.skill}
                 </a>
-                <p class="text-sm font-medium text-ink-soft">{item.why}</p>
+                <p class="text-sm text-ink-soft">{item.why}</p>
               </div>
             );
           })}
@@ -57,16 +57,16 @@ const skillsBySlug = new Map(allSkills.map((s) => [s.data.slug, s.data]));
   </div>
 
   <section class="mt-14">
-    <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-ink-soft">Artifacts</h2>
-    <div class="grid grid-cols-1 gap-px bg-rule sm:grid-cols-2">
-      <a href={withBase(`/kits/${slug}/install.sh`)} download={`${slug}-install.sh`} class="group flex flex-col gap-2 bg-bg p-4 hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2">
+    <h2 class="label mb-4">Artifacts</h2>
+    <div class="grid grid-cols-1 gap-[10px] sm:grid-cols-2">
+      <a href={withBase(`/kits/${slug}/install.sh`)} download={`${slug}-install.sh`} class="group flex flex-col gap-2 rounded-md bg-panel p-4 transition-colors duration-[120ms] hover:bg-recess focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2">
         <span class="text-base font-semibold text-ink">Install script</span>
-        <span class="text-[13px] font-medium text-ink-soft">Installs every skill in this kit into your project.</span>
-        <code class="mt-1 font-mono text-[11px] text-ink-soft">bash install.sh — run from your project root</code>
+        <span class="text-[13px] text-ink-soft">Installs every skill in this kit into your project.</span>
+        <code class="mt-1 font-mono text-[11px] text-ink-soft">bash install.sh, run from your project root</code>
       </a>
-      <a href={withBase(digestPath)} download class="group flex flex-col gap-2 bg-bg p-4 hover:bg-surface/60 focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2">
+      <a href={withBase(digestPath)} download class="group flex flex-col gap-2 rounded-md bg-panel p-4 transition-colors duration-[120ms] hover:bg-recess focus-visible:outline-2 focus-visible:outline-ink focus-visible:-outline-offset-2">
         <span class="text-base font-semibold text-ink">Digest</span>
-        <span class="text-[13px] font-medium text-ink-soft">The kit's judgment as one attachable file.</span>
+        <span class="text-[13px] text-ink-soft">The kit's judgment as one attachable file.</span>
         <code class="mt-1 font-mono text-[11px] text-ink-soft">attach in Claude Design or a claude.ai Project</code>
       </a>
     </div>

@@ -38,32 +38,31 @@ const {
 
 <BaseLayout title={name} description={tagline}>
   <div class="mb-12">
-    <span class="inline-block border border-rule-strong px-2.5 py-1 text-xs font-semibold text-ink">
-      {CATEGORY_META[categories[0]].label}
-    </span>
-    <h1 class="mt-6 max-w-3xl text-5xl font-black leading-tight sm:text-6xl">{name}</h1>
+    <span class="chip-outline">{CATEGORY_META[categories[0]].label}</span>
+    <h1 class="display-lg mt-6 max-w-3xl">{name}</h1>
     <div class="mt-10 grid max-w-md grid-cols-8 gap-1">
       {TOOL_VALUES.map((toolValue) => {
         const active = tools.includes(toolValue);
         return (
           <div
-            title={`${TOOL_META[toolValue].label}${active ? '' : ' — not supported'}`}
+            title={`${TOOL_META[toolValue].label}${active ? '' : ', not supported'}`}
             aria-label={`${TOOL_META[toolValue].label}: ${active ? 'supported' : 'not supported'}`}
             class={
               active
-                ? 'flex aspect-square items-center justify-center bg-ink'
-                : 'flex aspect-square items-center justify-center border border-rule-strong'
+                ? 'flex aspect-square items-center justify-center rounded-sm bg-ink'
+                : 'flex aspect-square items-center justify-center rounded-sm bg-recess'
             }
           >
-            <span aria-hidden="true" class={active ? 'text-[10px] font-semibold uppercase text-white' : 'text-[10px] font-semibold uppercase text-ink-soft'}>
+            <span aria-hidden="true" class={active ? 'font-mono text-[10px] font-medium uppercase text-ground' : 'font-mono text-[10px] font-medium uppercase text-ink-soft'}>
               {TOOL_META[toolValue].abbr}
             </span>
           </div>
         );
       })}
     </div>
-    <p class="mt-3 max-w-md text-xs font-medium text-ink-soft">
-      Tool coverage — filled cells are supported. Full names under “Works with” below.
+    <p class="mt-3 max-w-md text-xs text-ink-soft">
+      Tool coverage: filled cells are supported. Full names under “Works with”
+      below.
     </p>
   </div>
 
@@ -76,28 +75,28 @@ const {
     </div>
     <aside class="flex flex-col gap-6 text-sm">
       {status === 'superseded' && (
-        <p class="bg-surface px-3 py-2 font-medium text-ink">
+        <p class="rounded-md bg-recess p-3 text-ink">
           This skill has been superseded by a newer entry.
         </p>
       )}
       <div>
-        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Works with</h2>
+        <h2 class="label mb-2">Works with</h2>
         <div class="flex flex-wrap gap-2">
           {tools.map((tool) => <ToolBadge tool={tool} />)}
         </div>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Categories</h2>
+        <h2 class="label mb-2">Categories</h2>
         <div class="flex flex-wrap gap-2">
           {categories.map((category) => (
-            <span class="inline-flex items-center border border-rule-strong px-2.5 py-1 text-xs font-semibold text-ink">
+            <span class="chip-outline">
               {CATEGORY_META[category].label}
             </span>
           ))}
         </div>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Depth</h2>
+        <h2 class="label mb-2">Depth</h2>
         <p><DepthDots rating={rating} /></p>
         <p class="mt-1 text-[11px] font-medium text-ink-soft">
           How much judgment this skill carries, from a single technique (1) to a
@@ -105,11 +104,11 @@ const {
         </p>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Source</h2>
+        <h2 class="label mb-2">Source</h2>
         <p><a href={sourceUrl} class="underline">{sourceAuthor}</a></p>
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-semibold text-ink-soft">License</h2>
+        <h2 class="label mb-2">License</h2>
         <p class="text-sm font-medium text-ink">{license === 'none' ? 'None stated' : license}</p>
         {license === 'none' && (
           <p class="mt-1 text-[11px] font-medium text-ink-soft">
@@ -119,7 +118,7 @@ const {
         )}
       </div>
       <div>
-        <h2 class="mb-2 text-xs font-semibold text-ink-soft">Last verified</h2>
+        <h2 class="label mb-2">Last verified</h2>
         <p class="font-medium">{lastVerified.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</p>
       </div>
     </aside>

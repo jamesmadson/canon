@@ -1,0 +1,88 @@
+---
+import { INSTALL_COMMAND } from '../lib/install';
+
+/**
+ * The install line, and the three things the command does.
+ *
+ * The command itself is never typed here. It comes from one constant so the
+ * package name has a single home, and the copy button copies exactly the string
+ * the page is showing.
+ */
+const STEPS = [
+  { name: 'init', meaning: 'Writes one config file and asks which branches are prototypes.' },
+  { name: 'index', meaning: 'Reads the repository and lists every prototype with its author and its age.' },
+  { name: 'open', meaning: 'Serves the index on your machine, one page per prototype.' },
+];
+---
+
+<section aria-labelledby="install-heading">
+  <div class="titlebar">
+    <strong id="install-heading" class="titlebar-name">Install</strong>
+    <span class="titlebar-meta">local · no account · nothing leaves your machine</span>
+  </div>
+
+  <div class="mt-[10px] flex flex-col gap-3 rounded-md bg-recess p-3 sm:flex-row sm:items-center">
+    <code
+      data-install-command
+      class="min-w-0 flex-1 overflow-x-auto px-2 py-2 font-mono text-[15px] whitespace-nowrap text-ink"
+    >
+      {INSTALL_COMMAND}
+    </code>
+    <button
+      type="button"
+      data-install-copy
+      data-label="Copy"
+      data-done-label="Copied"
+      class="btn btn-utility bg-panel shrink-0 hover:bg-panel/80"
+    >
+      Copy
+    </button>
+    <p class="sr-only" role="status" data-install-status></p>
+  </div>
+
+  <dl class="mt-6 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-3">
+    {STEPS.map((step) => (
+      <div>
+        <dt class="label">{step.name}</dt>
+        <dd class="mt-1 text-[13px] leading-relaxed text-ink-soft">{step.meaning}</dd>
+      </div>
+    ))}
+  </dl>
+</section>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('[data-install-copy]');
+  const line = document.querySelector<HTMLElement>('[data-install-command]');
+  const status = document.querySelector<HTMLElement>('[data-install-status]');
+
+  if (button && line) {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    button.addEventListener('click', async () => {
+      const text = line.textContent?.trim() ?? '';
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        // Clipboard refused, which happens on an insecure origin. Say so rather
+        // than flashing "Copied" over a clipboard that never changed.
+        button.textContent = 'Copy failed';
+        if (status) status.textContent = 'The browser refused the clipboard. Select the line and copy it.';
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          button.textContent = button.dataset.label ?? 'Copy';
+          if (status) status.textContent = '';
+        }, 2000);
+        return;
+      }
+
+      const done = button.dataset.doneLabel ?? 'Copied';
+      button.textContent = done;
+      if (status) status.textContent = `${done}. The install line is on your clipboard.`;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        button.textContent = button.dataset.label ?? 'Copy';
+        if (status) status.textContent = '';
+      }, 2000);
+    });
+  }
+</script>
