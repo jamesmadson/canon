@@ -1,348 +1,145 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ClosingStrip from '../components/ClosingStrip.astro';
-import InstallBlock from '../components/InstallBlock.astro';
+import MeshPanel from '../components/MeshPanel.astro';
 import SignupForm from '../components/SignupForm.astro';
 import { withBase } from '../lib/withBase';
-import { spellNumber } from '../lib/spellNumber';
 
-const publishedSkills = await getCollection('skills', ({ data }) => data.status === 'active');
-const spelled = spellNumber(publishedSkills.length);
-const skillCount = `${spelled.charAt(0).toUpperCase()}${spelled.slice(1)}`;
-
-// The rail, carrying the product. Six moves, in the order a team meets them.
-// The last two are not built, and the chip says so on the card rather than in a
-// footnote nobody reads.
-const RAIL = [
+// One idea per row, each shown with the real screen. The screenshots come
+// from the sample project via scripts/capture-app-shots.mjs; every name and
+// quote in them is invented.
+const FEATURES = [
   {
-    n: '01',
-    name: 'Index',
-    line: 'Reads the repository, groups branches into families, and prints how long each one has been quiet.',
+    label: 'Library',
+    title: 'Drop it in. Find it later.',
+    body: 'HTML files, zipped builds, whole folders, or a folder on your machine that stays linked. Every prototype lands in one library you can search, sort and filter.',
+    shot: 'library',
+    alt: 'The prototype library: six prototypes from a sample project, with filters for source, multi-page, open comments and not on a board.',
   },
   {
-    n: '02',
-    name: 'Record',
-    line: 'Said, meant, decided. Three lines kept apart and dated, so a reading is never mistaken for a quote.',
+    label: 'Map',
+    title: 'See the whole site at once.',
+    body: 'A prototype with many pages opens as its map. Every page, the links between them, and the pages nothing points to anymore.',
+    shot: 'map',
+    alt: 'A six-page prototype laid out as its information architecture, with the pricing page selected and its links highlighted.',
   },
   {
-    n: '03',
-    name: 'Report',
-    line: 'Counts the people behind a question rather than the entries. One voice is a quote, three is a pattern.',
+    label: 'Comments',
+    title: 'Talk where the work is.',
+    body: 'Pin a comment on a screen, a page or the space between. Reply, resolve, move on. When someone tells you something, file it as a research note, word for word.',
+    shot: 'comments',
+    alt: 'A comment thread pinned to a prototype on the canvas, with two replies.',
   },
   {
-    n: '04',
-    name: 'Preview',
-    line: 'Every prototype rendered at four device sizes, with a thumbnail you can tell apart at a glance.',
-  },
-  {
-    n: '05',
-    name: 'Annotate',
-    line: 'Pins on the running build that file into the record as evidence rather than sitting in a thread.',
-    next: true,
-  },
-  {
-    n: '06',
-    name: 'Review',
-    line: 'Deter proposes removals, access checks the screen, and the gallery skills carry the judgment.',
-    next: true,
+    label: 'Sharing',
+    title: 'Send a link.',
+    body: 'Invite your team or open a board to anyone with the link. They look, comment, and nobody needs the tool you built it in.',
+    shot: 'share',
+    alt: 'The share dialog: two invited people and a link that lets anyone comment.',
+    note: 'Sharing arrives with the hosted version.',
   },
 ];
-
-const TIERS = [
-  {
-    name: 'Local',
-    price: 'Free',
-    unit: 'forever',
-    lines: ['Every team size', 'The whole index, record and preview', 'Runs on your machine'],
-  },
-  {
-    name: 'Team',
-    price: 'Per editor',
-    unit: 'per month',
-    lines: ['Guest links for people outside the repo', 'Hosted captures', 'Priced after beta'],
-    talk: true,
-  },
-  {
-    name: 'Org',
-    price: 'Per editor',
-    unit: 'per month',
-    lines: ['Many repositories in one index', 'SSO', 'Priced after beta'],
-    talk: true,
-  },
-];
-
-const SECTIONS = [
-  {
-    name: 'Gallery',
-    href: '/skills/',
-    line: 'Every skill with its depth, its licence, and what it is good for.',
-  },
-  {
-    name: 'Kits',
-    href: '/kits/',
-    line: 'Several skills bundled for one job, in the order you would use them.',
-  },
-  {
-    name: 'Use',
-    href: '/use/',
-    line: 'What to type once it is installed, and what comes back.',
-  },
-];
-
-// The problem, in the order a team meets it. Each one is a question somebody
-// currently answers from memory.
-const PROBLEMS = [
-  {
-    name: 'Where is the latest one?',
-    line: 'Five versions of a screen in an afternoon, each on a branch named by whoever made it. The person who knows which is current is on holiday.',
-  },
-  {
-    name: 'Which link was that?',
-    line: 'The Figma file is in a chat thread, the preview URL is in another, and the one people reacted to was replaced last Tuesday.',
-  },
-  {
-    name: 'Who said that, and when?',
-    line: 'Feedback lands in DMs and calls. By the time it reaches a roadmap, one person mentioning something has become users demanding it.',
-  },
-];
-
-// What Canon touches, stated as facts the code can be held to.
-const PROMISES = [
-  {
-    name: 'Reads, never copies',
-    line: 'It reads your branches through git. Your code stays in your repository and nowhere else.',
-  },
-  {
-    name: 'Nothing leaves your machine',
-    line: 'The package makes no network calls. No account, no telemetry, no sign-in.',
-  },
-  {
-    name: 'Three things it writes',
-    line: 'A config file under .canon/, dated notes under .strata/, and one line in .gitignore. Nothing else in the repository changes.',
-  },
-  {
-    name: 'Names stay out of the record',
-    line: 'People are filed as P-04 or "the ops lead". The key to who is who stays in one local file.',
-  },
-];
-
-const FAQ = [
-  {
-    q: 'Is this another Storybook?',
-    a: 'No. Storybook documents components. Canon keeps track of whole prototypes, the branches they live on, and what people said about them. Teams run both.',
-  },
-  {
-    q: 'Do we need to rename our branches?',
-    a: 'No. Canon lists the branches and you tick the ones that are prototypes. Keep the names you already use.',
-  },
-  {
-    q: 'Does it need Figma?',
-    a: 'No. It starts from a git repository. A Figma file can sit beside the branches as a linked reference, never a dependency.',
-  },
-  {
-    q: 'What does the alpha involve?',
-    a: 'One repository, set up with you by hand, a few teams at a time. Alpha teams get the hosted service free for a year when it exists.',
-  },
-];
-
-const TALK_TO_US = 'mailto:james@jamesmadson.me?subject=Canon%20Team';
 ---
 
 <BaseLayout
   wide
   title="Canon"
-  description="Canon keeps your team's prototypes in one place and turns feedback into evidence. Local, no account, nothing leaves your machine."
+  description="Every prototype in one place. Drop them in, see how the pages connect, and talk about them where the work is."
 >
-  {/* 1. The cover. The name set the way a book sets it: monumental down the
-       right; down the left, the claim and the way in, so both are on the first
-       screen. */}
-  <section class="mx-auto max-w-6xl px-6 pt-6 pb-20 sm:pt-10 sm:pb-28">
+  {/* 1. The cover. The name set the way a book sets it, the claim beside it. */}
+  <section class="mx-auto max-w-6xl px-6 pt-6 pb-16 sm:pt-10 sm:pb-20">
     <div class="flex flex-col gap-10 sm:flex-row-reverse sm:items-stretch sm:justify-between sm:gap-16">
       <div class="cover-type" aria-hidden="true">
         <span>canon</span><span>design</span>
       </div>
       <div class="flex min-w-0 flex-col justify-end sm:py-2">
-        <div>
-          <p class="label">For designers who build</p>
-          <h1 class="display-lg mt-3 max-w-[20ch]">
-            Your prototypes, in one place, with the feedback still attached.
-          </h1>
-          <p class="mt-5 max-w-[52ch] text-[17px] leading-relaxed text-ink-soft">
-            AI made it cheap to build five versions of a screen. It did nothing about
-            what comes after. Canon lists every prototype your team has made, flags the
-            ones nobody has touched in three weeks, and files feedback as what a person
-            said, what you think they meant, and what got decided.
-          </p>
-          <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <a href="#signup" class="btn btn-primary">Join the alpha</a>
-            <a href={withBase('/v2-preview/')} class="btn btn-secondary">Walk the preview</a>
-          </div>
+        <p class="label">For people who prototype</p>
+        <h1 class="display-lg mt-3 max-w-[16ch]">Every prototype, in one place.</h1>
+        <p class="mt-5 max-w-[46ch] text-[18px] leading-relaxed text-ink-soft">
+          You made five versions this week. Put them somewhere you can see them,
+          open them, and talk about them.
+        </p>
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <a href={withBase('/app/')} class="btn btn-primary">Try it now</a>
+          <a href="#signup" class="btn btn-secondary">Join the alpha</a>
         </div>
+        <p class="mt-4 font-mono text-[11px] tracking-[0.08em] text-ink-soft">
+          Runs in your browser. Nothing is uploaded. No account.
+        </p>
       </div>
     </div>
   </section>
 
-  {/* 3. The problem, as the questions a team asks out loud. */}
-  <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28" aria-labelledby="problem-heading">
-    <h2 id="problem-heading" class="label mb-4">The mess after generation</h2>
-    <div class="grid grid-cols-1 gap-[10px] sm:grid-cols-3">
-      {PROBLEMS.map((problem) => (
-        <div class="rounded-lg bg-panel p-5">
-          <h3 class="text-[17px] font-semibold text-ink">{problem.name}</h3>
-          <p class="mt-2 text-[14px] leading-relaxed text-ink-soft">{problem.line}</p>
-        </div>
-      ))}
-    </div>
-  </section>
-
-  {/* 4. The install line. */}
-  <div class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28">
-    <InstallBlock />
-  </div>
-
-  {/* 5. What it looks like. A still of the real screen, not a drawing of one. */}
-  <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28" aria-labelledby="preview-heading">
-    <h2 id="preview-heading" class="label mb-3">What it looks like</h2>
-    <div class="overflow-hidden rounded-lg bg-panel p-[10px]">
+  {/* 2. The product, big, on warm paper. */}
+  <section class="mx-auto max-w-6xl px-6 pb-24 sm:pb-32" aria-label="Canon, a board of prototypes">
+    <MeshPanel class="p-3 sm:p-6">
       <img
-        src={withBase('/previews/dashboard-light.png')}
-        alt="The Canon dashboard: one project, five prototypes indexed from a repository and a Figma file, with counts for what is stale and what has been reviewed."
-        width="2208"
-        height="1520"
-        loading="lazy"
-        decoding="async"
-        class="shot-light block w-full rounded-md"
+        src={withBase('/shots/board.jpg')}
+        alt="A board of prototypes: four phone and desktop screens, and a six-page site with its other pages fanning out from behind it."
+        width="2880"
+        height="1800"
+        fetchpriority="high"
+        class="shot block w-full"
       />
-      <img
-        src={withBase('/previews/dashboard-dark.png')}
-        alt=""
-        width="2208"
-        height="1520"
-        loading="lazy"
-        decoding="async"
-        aria-hidden="true"
-        class="shot-dark w-full rounded-md"
-      />
-    </div>
-    <p class="mt-3 font-mono text-[11px] tracking-[0.08em] text-ink-soft">
-      Your repo, read by Canon. The preview is scripted; the package is real.
-    </p>
-    <a href={withBase('/v2-preview/')} class="tick-link mt-2 max-w-md text-[15px]">
-      <span class="tick" aria-hidden="true"></span>
-      <span>Walk the preview</span>
-    </a>
+    </MeshPanel>
   </section>
 
-  {/* 6. The rail. Six moves, scrolled sideways. */}
-  <section class="pb-20 sm:pb-28" aria-labelledby="rail-heading">
-    <div class="mx-auto max-w-6xl px-6">
-      <h2 id="rail-heading" class="label mb-4">What it does</h2>
-    </div>
-    <div class="mx-auto max-w-6xl overflow-x-auto px-6 pb-3">
-      <ul class="flex min-w-min gap-[10px]">
-        {RAIL.map((item) => (
-          <li class="flex w-[248px] shrink-0 flex-col gap-2 rounded-lg bg-panel p-5">
-            <span class="rail-num">{item.n}</span>
-            <div class="flex items-center gap-2">
-              <h3 class="text-[15px] font-semibold text-ink">{item.name}</h3>
-              {item.next && <span class="chip-outline chip-soft">next</span>}
-            </div>
-            <p class="text-[13px] leading-relaxed text-ink-soft">{item.line}</p>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
-
-  {/* Trust. What it touches, as facts the package can be held to. */}
-  <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28" aria-labelledby="trust-heading">
-    <h2 id="trust-heading" class="display mb-6 max-w-[24ch]">Your work stays where it is.</h2>
-    <dl class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-4">
-      {PROMISES.map((promise) => (
-        <div>
-          <dt class="label">{promise.name}</dt>
-          <dd class="mt-2 text-[14px] leading-relaxed text-ink-soft">{promise.line}</dd>
-        </div>
-      ))}
-    </dl>
-  </section>
-
-  {/* 5. Pricing. */}
-  <section id="pricing" class="mx-auto max-w-6xl scroll-mt-8 px-6 pb-20 sm:pb-28" aria-labelledby="pricing-heading">
-    <h2 id="pricing-heading" class="label mb-3">Pricing</h2>
-    <p class="mb-6 max-w-2xl text-[15px] leading-relaxed text-ink">
-      The package is free and stays free. The hosted service, when it exists, will
-      be paid. Alpha teams get it free for a year.
-    </p>
-    <div class="grid grid-cols-1 gap-[10px] sm:grid-cols-3">
-      {TIERS.map((tier) => (
-        <div class="flex flex-col gap-4 rounded-lg bg-recess p-5">
-          <div>
-            <h3 class="label">{tier.name}</h3>
-            <p class="price">{tier.price}</p>
-            <p class="mt-1 font-mono text-[11px] tracking-[0.08em] text-ink-soft">{tier.unit}</p>
+  {/* 3. Four ideas, one screen each. */}
+  {
+    FEATURES.map((f, i) => (
+      <section class="mx-auto max-w-6xl px-6 pb-24 sm:pb-32" aria-labelledby={`feature-${f.shot}`}>
+        <div class={`grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-12`}>
+          <div class={`lg:col-span-4 ${i % 2 ? 'lg:order-2' : ''}`}>
+            <p class="label">{f.label}</p>
+            <h2 id={`feature-${f.shot}`} class="display mt-3">{f.title}</h2>
+            <p class="mt-4 text-[16px] leading-relaxed text-ink-soft">{f.body}</p>
+            {f.note && <p class="mt-4 font-mono text-[11px] tracking-[0.08em] text-ink-soft">{f.note}</p>}
           </div>
-          <ul class="flex flex-col gap-1.5 text-[13px] leading-relaxed text-ink-soft">
-            {tier.lines.map((line) => <li>{line}</li>)}
-          </ul>
-          {tier.talk && (
-            <a
-              href={TALK_TO_US}
-              class="mt-auto flex min-h-11 items-center text-[13px] font-semibold text-ink underline decoration-rule-strong underline-offset-4 transition-colors hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-            >
-              Talk to us
-            </a>
-          )}
+          <div class={`lg:col-span-8 ${i % 2 ? 'lg:order-1' : ''}`}>
+            <MeshPanel class="p-2 sm:p-4">
+              <img
+                src={withBase(`/shots/${f.shot}.jpg`)}
+                alt={f.alt}
+                width="2880"
+                height="1800"
+                loading="lazy"
+                decoding="async"
+                class="shot block w-full"
+              />
+            </MeshPanel>
+          </div>
         </div>
-      ))}
+      </section>
+    ))
+  }
+
+  {/* 4. The promise, plainly. */}
+  <section class="mx-auto max-w-6xl px-6 pb-24 sm:pb-32">
+    <div class="max-w-3xl">
+      <h2 class="display-lg">Your prototypes deserve better than a chat thread.</h2>
+      <p class="mt-5 max-w-[52ch] text-[18px] leading-relaxed text-ink-soft">
+        Canon keeps what you made, and what people said about it, together.
+        Your files stay on your machine until you choose to share.
+      </p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <a href={withBase('/app/')} class="btn btn-primary">Try it now</a>
+      </div>
     </div>
   </section>
 
-  {/* 6. Sign up. */}
-  <div id="signup" class="mx-auto max-w-6xl scroll-mt-8 px-6 pb-20 sm:pb-28">
+  {/* 5. Sign up. */}
+  <div id="signup" class="mx-auto max-w-6xl scroll-mt-8 px-6 pb-24 sm:pb-32">
     <SignupForm />
   </div>
 
-  {/* Questions a design lead asks before connecting a repository. */}
-  <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28" aria-labelledby="faq-heading">
-    <h2 id="faq-heading" class="label mb-4">Questions</h2>
-    <div class="flex max-w-3xl flex-col gap-[10px]">
-      {FAQ.map((item) => (
-        <details class="group rounded-lg bg-panel">
-          <summary class="flex min-h-11 items-center justify-between gap-4 px-5 py-4 text-[15px] font-semibold text-ink [&::-webkit-details-marker]:hidden focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink rounded-lg">
-            {item.q}
-            <span aria-hidden="true" class="font-mono text-ink-soft transition-transform group-open:rotate-45">+</span>
-          </summary>
-          <p class="px-5 pb-5 text-[14px] leading-relaxed text-ink-soft">{item.a}</p>
-        </details>
-      ))}
-    </div>
-  </section>
-
-  {/* 7. The skills, a section of the site rather than the whole of it. */}
-  <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-24" aria-labelledby="skills-heading">
-    <div class="rounded-lg bg-panel p-5 sm:p-8">
-      <h2 id="skills-heading" class="display">{skillCount} skills, read in full</h2>
-      <p class="mt-3 max-w-2xl text-[15px] leading-relaxed text-ink-soft">
-        A skill is a plain text file that tells an AI tool how to think about a
-        piece of work. Canon keeps the ones worth having, each read end to end
-        and license-checked by hand.
-      </p>
-      <div class="mt-6 grid grid-cols-1 gap-[10px] sm:grid-cols-3">
-        {SECTIONS.map((section) => (
-          <a
-            href={withBase(section.href)}
-            class="flex flex-col gap-2 rounded-md bg-recess p-4 transition-colors duration-[120ms] hover:bg-recess/70 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
-          >
-            <h3 class="text-[15px] font-semibold text-ink">{section.name}</h3>
-            <p class="text-[13px] leading-relaxed text-ink-soft">{section.line}</p>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  {/* 9. After the footer, the name once more. */}
   <ClosingStrip slot="after-footer" />
 </BaseLayout>
+
+<style>
+  .shot {
+    border-radius: 10px;
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.08),
+      0 24px 60px -20px rgb(0 0 0 / 0.35);
+  }
+</style>

@@ -29,10 +29,9 @@ const publishedSkills = await getCollection('skills', ({ data }) => data.status 
 const skillCount = spellNumber(publishedSkills.length);
 
 const NAV = [
-  { label: 'Preview', href: '/v2-preview/' },
+  { label: 'Try it', href: '/app/' },
   { label: 'Skills', href: '/skills/' },
-  { label: 'Pricing', href: '/#pricing' },
-  { label: 'Alpha', href: '/alpha/' },
+  { label: 'Alpha', href: '/#signup' },
 ];
 
 const path = Astro.url.pathname;
