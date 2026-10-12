@@ -1,6 +1,6 @@
 # Canon Canvas: a look-and-feel experiment
 
-Branch: `canvas-explore`. Status: planned, not built. Owner: James.
+Branch: `canvas-explore`. Status: first cut built 2026-10-12 at `/canon/app/`. Owner: James.
 
 ## The question
 
@@ -8,6 +8,26 @@ Does Canon feel better as a canvas, Paper and Lunagraph style, than as a
 list and a CLI? This branch exists to answer that by touch, not argument.
 It is an experiment: nothing here changes `main`, the CLI, or the plan of
 record until James decides it should.
+
+## Scope, revised 2026-10-12
+
+James: the whole Canon interface should look like Paper and Lunagraph, not
+one canvas page. So this branch builds the product app in that shape. The
+marketing site and gallery are untouched.
+
+The app, as surfaces:
+- **Home.** Dark shell, left sidebar (workspace, search, boards, record,
+  trash), a grid of boards with live thumbnails, and a first-run "Add your
+  prototypes" panel with the ways in as cards.
+- **Board.** The canvas below: frames you drop, drag, group and open.
+- **Inspector.** Right panel, only when something is selected: name,
+  source, device sizes, notes on that prototype.
+- **Record.** The Strata view as a panel: every note across boards, with
+  Said, Meant and Decided, filterable, exportable.
+- **Focus.** One prototype full size, device widths, notes pinned on it.
+
+These replace the scripted `v2-preview` screens as the picture of the
+product if James likes them.
 
 ## What it is, in one sentence
 
@@ -100,3 +120,31 @@ prototypes on a board and judge it. 4 to 8 follow only if that feels right.
 - **Positioning drift.** A canvas pulls toward "design tool", the category
   Canon says it is not. The test is whether the canvas makes prototypes
   and feedback easier to find, not whether it makes them easier to draw.
+
+## Built, first cut (2026-10-12)
+
+At `/canon/app/`, `src/app/`, `public/app-sw.js`:
+- Home: sidebar (search, Boards, Record, recent boards), the "add" panel
+  with four ways in, a grid of boards with layout thumbnails. Dropping
+  anywhere on home starts a new board.
+- Board: pan (drag the canvas, two-finger scroll), zoom at the pointer
+  (pinch or Cmd/Ctrl + scroll, + and -), fit (Shift+1), drag frames, live
+  mode on double-click (Esc leaves), Free and Tidy arrangements, drop files
+  at the pointer, Add menu (files, folder, linked folder, URL).
+- Inspector: rename, source, size (Phone, Tablet, Desktop), Open, Refresh
+  for linked folders, New tab, notes on that prototype, remove.
+- Notes: N or the pin tool, click where it happened; Said word for word,
+  a P code, an optional Meant. Exported as `.strata/*.md` in a zip.
+- Focus: one prototype full screen at four widths.
+- Record: every note, grouped by prototype, with a voice count.
+- Verified in Chromium: sample board renders through the service worker,
+  a zipped build's CSS and images resolve, state survives a reload.
+
+Not yet: sections, multi-select, undo, board export/import, thumbnails
+instead of live frames at low zoom, light theme, touch gestures.
+
+**Security note:** frames run with `allow-same-origin` so the service
+worker can serve them, which means a dropped prototype's scripts can read
+this app's storage. Fine for your own prototypes, the same trust as opening
+them locally. Anything shared or hosted later needs frames on a separate
+origin.
