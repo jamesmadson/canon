@@ -18,7 +18,15 @@ function openDb() {
   });
 }
 
-async function serve(frameId, path) {
+/** Top-level tabs get the comment layer; frames inside the app never do. */
+async function withComments(blob, frameId, path) {
+  const text = await blob.text();
+  const src = new URL('../app-comments.js', self.registration.scope).pathname;
+  const tag = `<script src="${src}" data-frame="${frameId}" data-page="${path.replace(/"/g, '&quot;')}" defer></script>`;
+  return /<\/body>/i.test(text) ? text.replace(/<\/body>/i, `${tag}</body>`) : text + tag;
+}
+
+async function serve(frameId, path, request) {
   const db = await openDb();
   const record = await new Promise((resolve) => {
     if (!db.objectStoreNames.contains('files')) return resolve(undefined);
@@ -29,7 +37,11 @@ async function serve(frameId, path) {
   if (!record) {
     return new Response(`Not in this prototype: ${path}`, { status: 404, headers: { 'content-type': 'text/plain' } });
   }
-  return new Response(record.blob, { headers: { 'content-type': record.type, 'cache-control': 'no-store' } });
+  const headers = { 'content-type': record.type, 'cache-control': 'no-store' };
+  if (record.type === 'text/html' && request.destination === 'document') {
+    return new Response(await withComments(record.blob, frameId, path), { headers });
+  }
+  return new Response(record.blob, { headers });
 }
 
 self.addEventListener('fetch', (event) => {
@@ -42,5 +54,5 @@ self.addEventListener('fetch', (event) => {
   const frameId = rest.slice(0, slash);
   let path = decodeURIComponent(rest.slice(slash + 1));
   if (path === '' || path.endsWith('/')) path += 'index.html';
-  event.respondWith(serve(frameId, path));
+  event.respondWith(serve(frameId, path, event.request));
 });

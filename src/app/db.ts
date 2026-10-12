@@ -12,10 +12,19 @@ export type FrameKind = 'files' | 'linked' | 'url';
 export interface Frame {
   id: string; boardId: string; name: string; kind: FrameKind;
   entry?: string; url?: string; fileCount?: number; handleId?: string;
+  /** Every HTML page in a multi-page prototype, entry first, and the links between them. */
+  pages?: string[]; links?: [string, string][];
   x: number; y: number; w: number; h: number; rev: number; createdAt: number; updatedAt: number;
 }
+/**
+ * A note sits on a page of a prototype (frameId, page, fx across, py down in
+ * CSS px from the top of the page), or on the open canvas (wx, wy). Older
+ * notes carry fy, a fraction of the frame height, instead of py.
+ */
 export interface Note {
-  id: string; boardId: string; frameId: string; fx: number; fy: number;
+  id: string; boardId: string; frameId?: string; page?: string;
+  fx?: number; fy?: number; py?: number; wx?: number; wy?: number;
+  source?: 'canvas' | 'preview';
   said: string; meant?: string; participant?: string; createdAt: number;
 }
 export interface StoredFile { key: string; frameId: string; blob: Blob; type: string }

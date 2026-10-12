@@ -76,3 +76,28 @@ export const SAMPLES: { name: string; w: number; h: number; html: string }[] = [
     ),
   },
 ];
+
+/** A multi-page sample: a small site with real links and one orphaned page. */
+const sitePage = (title: string, current: string, body: string) => page(
+  title,
+  `<nav class="nav"><a href="index.html"><b>Fernwell</b></a><span>${[
+    ['about.html', 'About'],
+    ['pricing.html', 'Pricing'],
+    ['download.html', 'Download'],
+  ].map(([href, label]) => `<a href="${href}"${href === current ? ' class="on"' : ''}>${label}</a>`).join('')}</span></nav>${body}`,
+  `.nav{display:flex;justify-content:space-between;align-items:center;padding:24px 48px}.nav span{display:flex;gap:28px}.nav a{color:#6d6a62;text-decoration:none}.nav a.on,.nav b{color:#1d1c19}
+section{padding:72px 48px}h1{font-size:60px;padding:0;line-height:1.05;max-width:16ch}.lede{font-size:19px;color:#6d6a62;margin-top:20px;max-width:40ch}
+.tiers{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px}.tiers .card{margin:0;padding:28px}.cta{display:inline-block;margin-top:28px;padding:14px 22px;border-radius:999px;background:#1d1c19;color:#f4f2ec;text-decoration:none}`
+);
+
+export const SAMPLE_SITE: { name: string; files: Record<string, string> } = {
+  name: 'Fernwell site',
+  files: {
+    'index.html': sitePage('Fernwell site', 'index.html', `<section><h1>A daily dose of the outdoors, measured.</h1><p class="lede">A target ring, a streak, and a quiet map of the green space near you.</p><a class="cta" href="download.html">Get the app</a></section>`),
+    'about.html': sitePage('About', 'about.html', `<section><h1>Why we built a ring for time outside.</h1><p class="lede">Twenty minutes in a park changes a day. We wanted a way to count it that did not feel like a workout.</p><a class="cta" href="index.html">Back home</a></section>`),
+    'pricing.html': sitePage('Pricing', 'pricing.html', `<section><h1>Free, with a plus.</h1><div class="tiers"><div class="card"><b>Free</b><p class="muted">Ring, streak, map.</p></div><div class="card"><b>Plus · $3/mo</b><p class="muted">Family rings and trail notes.</p><a class="cta" href="checkout.html">Choose Plus</a></div></div></section>`),
+    'download.html': sitePage('Download', 'download.html', `<section><h1>On your phone in a minute.</h1><p class="lede">iPhone and Android. No account needed to start.</p></section>`),
+    'checkout.html': sitePage('Checkout', 'pricing.html', `<section><h1>Fernwell Plus</h1><p class="lede">$3 a month, cancel any time.</p><a class="cta" href="index.html">Pay and start</a></section>`),
+    'old-home.html': sitePage('Old home', '', `<section><h1>Get outside more.</h1><p class="lede">The first homepage, kept for comparison. Nothing links here any more.</p></section>`),
+  },
+};

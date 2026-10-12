@@ -1,7 +1,7 @@
 import { render, h } from 'preact';
 import './app.css';
 import { App, BASE } from './ui';
-import { load } from './store';
+import { load, reloadNotes } from './store';
 
 async function boot() {
   // The worker serves dropped prototypes out of IndexedDB. Frames need it
@@ -15,6 +15,8 @@ async function boot() {
     }
   }
   await load();
+  // A preview tab files comments straight into IndexedDB and says so here.
+  if ('BroadcastChannel' in window) new BroadcastChannel('canon-app').onmessage = () => reloadNotes();
   render(h(App, {}), document.getElementById('app')!);
 }
 

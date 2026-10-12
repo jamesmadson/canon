@@ -148,3 +148,28 @@ worker can serve them, which means a dropped prototype's scripts can read
 this app's storage. Fine for your own prototypes, the same trust as opening
 them locally. Anything shared or hosted later needs frames on a separate
 origin.
+
+## Multi-page prototypes and comments (2026-10-12)
+
+- **Bundles.** A zip or folder with several HTML pages is one frame showing
+  its entry page, an "N pages" chip, and one sheet visible behind it.
+- **Hover tease.** Up to four other pages fan out from behind it, right
+  first, then left, alternating, small and rotated a touch. Clicking one
+  opens the bundle on that page.
+- **Click goes in.** A click (not a drag) on a bundle opens it as its own
+  canvas: the IA. Entry in the first column, each page one column right of
+  the shallowest page linking to it, pages nothing links to in a "Not linked
+  from anywhere" column. Links drawn as arrows; back links dashed.
+- **Nav links are not flow.** A target most pages link to (a top nav) would
+  turn the IA into a mesh, so those links are hidden by default behind a
+  "+ Nav links" toggle. The sample site goes from 21 links to 4 flow links.
+- **Page inspector.** Links to, linked from (orphans called out), notes on
+  that page, open full size, preview link.
+- **Comments on the canvas.** The comment tool pins to a page, or to open
+  canvas on a board or inside a bundle (each keeps its own space).
+- **Comments on the preview link.** Opening a prototype page in its own tab
+  adds a Canon comment layer (the service worker injects it into top-level
+  pages only, never into frames in the app). Pins land on the page and file
+  into the same record, and the app updates live over a BroadcastChannel.
+  External previews (Vercel, Amplify) cannot be injected this way; that
+  needs a script tag in the prototype or a hosted Canon.

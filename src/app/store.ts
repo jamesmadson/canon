@@ -4,7 +4,7 @@ import type { Board, Frame, Note } from './db';
 import type { Prepared } from './intake';
 import { walkHandle, prepare } from './intake';
 import { entryFileName, noteToEntry } from './lib/strata';
-import { SAMPLES } from './samples';
+import { SAMPLES, SAMPLE_SITE } from './samples';
 
 export interface State {
   boards: Board[];
@@ -49,8 +49,25 @@ export async function load() {
 
 export const framesOf = (boardId: string) =>
   state.frames.filter((f) => f.boardId === boardId).sort((a, b) => a.createdAt - b.createdAt);
-export const notesOf = (frameId: string) =>
-  state.notes.filter((n) => n.frameId === frameId).sort((a, b) => a.createdAt - b.createdAt);
+/** Notes on one page of a prototype. With no page, the notes on its entry page. */
+export function notesOf(frameId: string, page?: string) {
+  const frame = state.frames.find((f) => f.id === frameId);
+  const target = page ?? frame?.entry;
+  return state.notes
+    .filter((n) => n.frameId === frameId && n.wx === undefined && (n.page ?? frame?.entry) === target)
+    .sort((a, b) => a.createdAt - b.createdAt);
+}
+export const allNotesOf = (frameId: string) => state.notes.filter((n) => n.frameId === frameId);
+export const canvasNotesOf = (boardId: string) => state.notes.filter((n) => n.boardId === boardId && !n.frameId);
+/** Notes dropped on the open canvas inside a bundle, in that bundle's own space. */
+export const bundleCanvasNotesOf = (frameId: string) => state.notes.filter((n) => n.frameId === frameId && n.wx !== undefined);
+/** Where a note sits down a page, in CSS px, whichever way it was stored. */
+export const noteY = (n: Note, frameH: number) => n.py ?? (n.fy ?? 0) * frameH;
+
+/** Notes filed from a preview tab land in IndexedDB directly; pick them up. */
+export async function reloadNotes() {
+  set({ notes: await db.getAll<Note>('notes') });
+}
 
 async function touchBoard(boardId: string) {
   const board = state.boards.find((b) => b.id === boardId);
@@ -116,6 +133,7 @@ export async function addPrepared(boardId: string, p: Prepared, at?: { x: number
   const pos = nextSlot(boardId, at);
   const frame: Frame = {
     id, boardId, name: p.name, kind: p.handle ? 'linked' : 'files', entry: p.entry, fileCount: p.files.length,
+    pages: p.pages ?? [p.entry], links: p.links ?? [],
     handleId, x: pos.x, y: pos.y, w: size.w, h: size.h, rev: 0, createdAt: now(), updatedAt: now(),
   };
   await insertFrame(frame);
@@ -141,7 +159,7 @@ export async function updateFrame(id: string, patch: Partial<Frame>, persist = t
 }
 
 export async function deleteFrame(id: string) {
-  const noteIds = notesOf(id).map((n) => n.id);
+  const noteIds = allNotesOf(id).map((n) => n.id);
   await db.removeFrameDeep(id, noteIds);
   set({ frames: state.frames.filter((f) => f.id !== id), notes: state.notes.filter((n) => n.frameId !== id) });
 }
@@ -158,7 +176,7 @@ export async function refreshLinked(id: string) {
   const prepared = await prepare({ name: frame.name, files: await walkHandle(rec.handle) });
   if (!prepared) return toast('That folder has no HTML file any more.');
   await db.replaceFiles(id, prepared.files);
-  await updateFrame(id, { rev: frame.rev + 1, fileCount: prepared.files.length, entry: prepared.entry });
+  await updateFrame(id, { rev: frame.rev + 1, fileCount: prepared.files.length, entry: prepared.entry, pages: prepared.pages, links: prepared.links });
   toast(`Refreshed from disk: ${prepared.files.length} files.`);
 }
 
@@ -181,7 +199,9 @@ export function exportStrata(notes: Note[]) {
   const counts: Record<string, number> = {};
   for (const n of notes) {
     const frame = state.frames.find((f) => f.id === n.frameId);
-    const about = frame?.name ?? 'prototype';
+    const board = state.boards.find((b) => b.id === n.boardId);
+    const page = frame && n.page && n.page !== frame.entry ? ` ${n.page.replace(/\.html?$/i, '')}` : '';
+    const about = frame ? `${frame.name}${page}` : (board?.name ?? 'board');
     const date = new Date(n.createdAt).toISOString().slice(0, 10);
     const key = `${date}-${about}`;
     const name = entryFileName(date, about, counts[key] ?? 0);
@@ -204,6 +224,11 @@ export async function createSampleBoard() {
     await addPrepared(board.id, p, { x, y: 0 }, { w: s.w, h: s.h });
     x += s.w + 120;
   }
+  const site = await prepare({
+    name: SAMPLE_SITE.name,
+    files: Object.entries(SAMPLE_SITE.files).map(([path, html]) => ({ path, blob: new Blob([html], { type: 'text/html' }) })),
+  });
+  if (site) await addPrepared(board.id, site, { x: 0, y: 1000 });
   const first = framesOf(board.id)[2];
   if (first) {
     await addNote({ boardId: board.id, frameId: first.id, fx: 0.5, fy: 0.42, said: 'I couldn’t tell if the lane was booked or just held for me.', meant: 'Held and booked read as the same state.', participant: 'P-04' });

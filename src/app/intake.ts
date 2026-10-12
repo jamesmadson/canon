@@ -1,9 +1,10 @@
 import { unzip } from 'fflate';
 import { isZipName, mimeFor, nameFromFile, pickEntry, stripCommonRoot, titleFromHtml } from './lib/ingest';
+import { linkGraph, orderPages } from './lib/bundle';
 
 export interface RawFile { path: string; blob: Blob }
 export interface Group { name: string; files: RawFile[]; handle?: FileSystemDirectoryHandle }
-export interface Prepared { name: string; entry: string; files: { path: string; blob: Blob; type: string }[]; handle?: FileSystemDirectoryHandle }
+export interface Prepared { name: string; entry: string; files: { path: string; blob: Blob; type: string }[]; handle?: FileSystemDirectoryHandle; pages?: string[]; links?: [string, string][] }
 
 function unzipBlob(blob: Blob): Promise<RawFile[]> {
   return blob.arrayBuffer().then(
@@ -120,5 +121,12 @@ export async function prepare(group: Group): Promise<Prepared | null> {
   const entry = pickEntry(files.map((f) => f.path));
   if (!entry) return null;
   const html = await files.find((f) => f.path === entry)!.blob.text();
-  return { name: titleFromHtml(html) ?? group.name, entry, files, handle: group.handle };
+  // Every page, read once for its links, so a multi-page build can show its IA.
+  const htmlFiles = files.filter((f) => /\.html?$/i.test(f.path) && !/(^|\/)\._/.test(f.path)).slice(0, 120);
+  const texts: Record<string, string> = {};
+  for (const f of htmlFiles) texts[f.path] = f.path === entry ? html : await f.blob.text();
+  const pagePaths = htmlFiles.map((f) => f.path);
+  const links = linkGraph(pagePaths, texts);
+  const pages = orderPages(pagePaths, entry, links);
+  return { name: titleFromHtml(html) ?? group.name, entry, files, handle: group.handle, pages, links };
 }
