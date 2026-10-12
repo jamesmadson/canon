@@ -173,3 +173,29 @@ origin.
   into the same record, and the app updates live over a BroadcastChannel.
   External previews (Vercel, Amplify) cannot be injected this way; that
   needs a script tag in the prototype or a hosted Canon.
+
+## Projects, library, comments, sharing (2026-10-12)
+
+- **Projects hold everything.** A project has a prototype library and the
+  boards that arrange it. A prototype is added once and can sit on many
+  boards, or none ("Not on a board"). Removing it from a board leaves it in
+  the library; deleting it from the library removes it everywhere.
+- **Library.** Grid (live thumbnails) or table; search; filter by source,
+  multi-page, open comments, not on a board; sort newest, name, most
+  comments, last changed; select several and add to a board or a new one.
+- **Boards.** Add from the library, or drop files (they join the library
+  and the board). Tidy view gets sort and a find box that dims the rest.
+- **Comments, Figma style.** Press C, click a prototype, a page or the
+  canvas. Comments carry your name and initials, take replies, and resolve.
+  A comments panel lists open and resolved threads and jumps to each. The
+  composer's other mode is a research note (Said, P code, Meant), which is
+  what exports to `.strata`; discussion stays out of the record. The
+  preview-tab layer works the same way.
+- **Sharing (concept).** Share opens a Figma-style dialog: invite by email
+  with a role, a link setting with a role, copy link, preview as viewer.
+  The viewer is the board without the rail, a banner, and tools trimmed to
+  the role. Invites are not sent and links open only in this browser until
+  Canon is hosted.
+- **Migration.** Version 1 data moves into a "My prototypes" project with
+  every board and prototype kept, verified against a seeded v1 database.
+- **Held:** the research section (evidence library, taxonomy).

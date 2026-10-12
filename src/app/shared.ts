@@ -32,6 +32,11 @@ const P: Record<string, string> = {
   pages: 'M5 2.5h7.5v9H5zM3.5 4.5v9H11',
   comment: 'M2.5 3h11v7.5H7l-3 2.5v-2.5H2.5z',
   play: 'M5 3l8 5-8 5z',
+  check: 'M3 8.5l3.2 3L13 4.5',
+  share: 'M8 2.5v8M5 5.5l3-3 3 3M3.5 9v4.5h9V9',
+  grid: 'M2.5 2.5h4.5v4.5H2.5zM9 2.5h4.5v4.5H9zM2.5 9h4.5v4.5H2.5zM9 9h4.5v4.5H9z',
+  table: 'M2.5 3h11v10h-11zM2.5 6.5h11M2.5 10h11M6.5 3v10',
+  project: 'M2 4.5h4.5l1.5 1.5H14v7.5H2z',
 };
 export const Icon = ({ name, size = 16 }: { name: string; size?: number }) =>
   html`<svg width=${size} height=${size} viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d=${P[name]} /></svg>`;
@@ -70,17 +75,17 @@ export const SIZES = [
   { name: 'Desktop', w: 1280, h: 800 },
 ];
 
-/* ── Intake: picks and drops into frames on a board ─────────────────────── */
-export async function addGroups(boardId: string, groups: Group[], at?: { x: number; y: number }) {
+/* ── Intake: picks and drops into a project, optionally onto a board ───── */
+export async function addGroups(projectId: string, groups: Group[], opts: { boardId?: string; at?: { x: number; y: number } } = {}) {
   let added = 0;
-  let x = at?.x;
+  let x = opts.at?.x;
   for (const g of groups) {
     const p = await prepare(g);
     if (!p) {
       store.toast(`${g.name} has no HTML file, so there is nothing to show.`);
       continue;
     }
-    const f = await store.addPrepared(boardId, p, x !== undefined && at ? { x, y: at.y } : undefined);
+    const f = await store.addPrepared(projectId, p, { boardId: opts.boardId, at: x !== undefined && opts.at ? { x, y: opts.at.y } : undefined });
     if (x !== undefined) x += f.w + 120;
     added++;
   }
@@ -102,32 +107,29 @@ function pickFiles(opts: { folder?: boolean }): Promise<FileList | null> {
   });
 }
 
-export type Way = 'files' | 'folder' | 'link' | 'url' | 'sample';
-export async function runWay(way: Way, boardId: string | null, askUrl: () => Promise<string | null>): Promise<string | null> {
-  if (way === 'sample') return (await store.createSampleBoard()).id;
+export type Way = 'files' | 'folder' | 'link' | 'url';
+/** Runs one way in. Returns how many prototypes were added. */
+export async function runWay(way: Way, projectId: string, boardId: string | undefined, askUrl: () => Promise<string | null>): Promise<number> {
   if (way === 'url') {
     const url = await askUrl();
-    if (!url) return null;
-    const id = boardId ?? (await store.createBoard('Untitled board')).id;
-    await store.addUrl(id, url);
-    return id;
+    if (!url) return 0;
+    await store.addUrl(projectId, url, { boardId });
+    return 1;
   }
   let groups: Group[] = [];
   if (way === 'files' || way === 'folder') {
     const list = await pickFiles({ folder: way === 'folder' });
-    if (!list?.length) return null;
+    if (!list?.length) return 0;
     const res = await groupsFromFiles(list);
     groups = res.groups;
     if (res.skipped) store.toast(`Skipped ${res.skipped} file${res.skipped > 1 ? 's' : ''} that were not HTML or zip.`);
   } else if (way === 'link') {
     const g = await linkFolder();
-    if (!g) return null;
+    if (!g) return 0;
     groups = [g];
   }
-  if (!groups.length) return null;
-  const id = boardId ?? (await store.createBoard(groups[0].name)).id;
-  await addGroups(id, groups);
-  return id;
+  if (!groups.length) return 0;
+  return addGroups(projectId, groups, { boardId });
 }
 
 /* ── A note, wherever it is listed ──────────────────────────────────────── */

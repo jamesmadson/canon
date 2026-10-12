@@ -13,7 +13,10 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 function openDb() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME);
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      req.result.onversionchange = () => req.result.close();
+      resolve(req.result);
+    };
     req.onerror = () => reject(req.error);
   });
 }
@@ -34,6 +37,7 @@ async function serve(frameId, path, request) {
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => resolve(undefined);
   });
+  db.close();
   if (!record) {
     return new Response(`Not in this prototype: ${path}`, { status: 404, headers: { 'content-type': 'text/plain' } });
   }
