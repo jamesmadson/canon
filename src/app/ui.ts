@@ -152,7 +152,7 @@ function Home() {
         <div class="connect-head"><h2>Start a project</h2><span class="faint">A project holds every prototype for one product, and the boards you arrange them on.</span></div>
         <div class="ways" style="grid-template-columns:repeat(2,minmax(0,1fr))">
           <button class="way" onClick=${newProject}><span class="way-icon"><${Icon} name="plus" /></span><b>New project</b><span>Then drop in HTML, zips or folders, or link a folder on your machine.</span></button>
-          <button class="way" onClick=${sample}><span class="way-icon"><${Icon} name="spark" /></span><b>Try the sample project</b><span>Fernwell: six prototypes including a six-page site, two boards, a comment thread and a research note.</span></button>
+          <button class="way" onClick=${sample}><span class="way-icon"><${Icon} name="spark" /></span><b>Try the sample project</b><span>Fernwell: six prototypes including a six-page site, two boards, and a comment thread.</span></button>
         </div>
       </section>`}
       ${projects.length > 0 && html`<div class="grid">
@@ -330,9 +330,9 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
 
 function ProjectComments({ projectId }: { projectId: string }) {
   const s = useStore();
-  const [show, setShow] = useState<'open' | 'resolved' | 'research'>('open');
+  const [show, setShow] = useState<'open' | 'resolved'>('open');
   const notes = store.notesInProject(projectId)
-    .filter((n) => (show === 'research' ? !isComment(n) : isComment(n) && (show === 'open' ? !n.resolved : n.resolved)))
+    .filter((n) => (show === 'open' ? !n.resolved : n.resolved))
     .sort((a, b) => b.createdAt - a.createdAt);
   const where = (n: Note) => {
     const f = s.frames.find((x) => x.id === n.frameId);
@@ -342,11 +342,10 @@ function ProjectComments({ projectId }: { projectId: string }) {
   };
   return html`<div class="page"><div class="record">
     <div class="row" style="margin-bottom:6px">
-      <div class="seg"><button aria-pressed=${show === 'open'} onClick=${() => setShow('open')}>Open</button><button aria-pressed=${show === 'resolved'} onClick=${() => setShow('resolved')}>Resolved</button><button aria-pressed=${show === 'research'} onClick=${() => setShow('research')}>Research notes</button></div>
+      <div class="seg"><button aria-pressed=${show === 'open'} onClick=${() => setShow('open')}>Open</button><button aria-pressed=${show === 'resolved'} onClick=${() => setShow('resolved')}>Resolved</button></div>
       <span class="spacer"></span>
-      ${show === 'research' && html`<button class="btn" onClick=${() => store.exportStrata(store.notesInProject(projectId))}><${Icon} name="download" />Export .strata</button>`}
     </div>
-    ${notes.length === 0 && html`<div class="empty">${show === 'research' ? 'No research notes yet. In the comment box, switch to Research note.' : 'Nothing here yet. Press C on a board and click anywhere.'}</div>`}
+    ${notes.length === 0 && html`<div class="empty">${show === 'open' ? 'Nothing open. Press C on a board and click anywhere.' : 'Nothing resolved yet.'}</div>`}
     ${notes.map((n) => {
       const w = where(n);
       return html`<a class="comment-row" href=${w.href}>

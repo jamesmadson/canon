@@ -373,7 +373,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
           setDraft(null);
           setTool('select');
           setOpenThread(isComment(made) ? null : null);
-          store.toast(isComment(made) ? 'Comment posted.' : 'Filed as a research note. Said is kept word for word.');
+          store.toast('Comment posted.');
         }} />`}
         ${thread && threadAt && html`<${Thread} note=${thread} sx=${threadAt.x} sy=${threadAt.y} onClose=${() => setOpenThread(null)} />`}
 
@@ -557,7 +557,6 @@ export function BundleView({ frameId, fromBoard, startPage }: { frameId: string;
 
   const { w, h } = frame;
   const col = (p: string) => Math.round(layout.positions[p].x / (w + colGap));
-  const all = store.allNotesOf(frameId);
   const unlinkedTop = layout.unlinked.length ? layout.positions[layout.unlinked[0]] : null;
   const thread = s.notes.find((n) => n.id === openThread) ?? null;
   const threadAt = (() => {
@@ -583,7 +582,6 @@ export function BundleView({ frameId, fromBoard, startPage }: { frameId: string;
         <button aria-pressed=${showNav} onClick=${() => setShowNav(true)} title=${`${navigation.length} links that most pages share, like a top nav`}>+ Nav links · ${navigation.length}</button>
       </div>`}
       <a class="btn ghost" href=${previewUrl(frame, selected ?? entry)} target="_blank" rel="noopener" title="Opens in its own tab, with comments"><${Icon} name="comment" />Preview link</a>
-      <button class="btn ghost" disabled=${!all.length} onClick=${() => store.exportStrata(all)} title="Research notes as .strata entries"><${Icon} name="download" />Notes</button>
     </div>
     <div class="board">
       <div ref=${canvasRef}
@@ -639,7 +637,7 @@ export function BundleView({ frameId, fromBoard, startPage }: { frameId: string;
           const made = await store.addNote({ boardId: board?.id ?? '', frameId: draft.frameId, page: draft.page, fx: draft.fx, py: draft.py, wx: draft.wx, wy: draft.wy, source: 'canvas', said: '', ...n });
           setDraft(null);
           setTool('select');
-          store.toast(isComment(made) ? 'Comment posted.' : 'Filed as a research note. Said is kept word for word.');
+          store.toast('Comment posted.');
         }} />`}
         ${thread && threadAt && html`<${Thread} note=${thread} sx=${threadAt.x} sy=${threadAt.y} onClose=${() => setOpenThread(null)} />`}
 

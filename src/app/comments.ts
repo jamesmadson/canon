@@ -36,7 +36,8 @@ function NameField({ onDone }: { onDone: () => void }) {
 
 /** New thread. A comment by default; a research note keeps Strata's fields. */
 export function Composer({ at, onCancel, onSave }: { at: Draft; onCancel: () => void; onSave: (n: Pick<Note, 'said' | 'meant' | 'participant' | 'kind' | 'author'>) => void }) {
-  const [mode, setMode] = useState<'comment' | 'note'>('comment');
+  // Research notes are out of scope (D-36); older notes still display.
+  const mode = 'comment' as 'comment' | 'note';
   const [body, setBody] = useState('');
   const [meant, setMeant] = useState('');
   const [who, setWho] = useState('');
@@ -49,10 +50,6 @@ export function Composer({ at, onCancel, onSave }: { at: Draft; onCancel: () => 
     else onSave({ kind: 'note', said: body.trim(), meant: meant.trim() || undefined, participant: who.trim() || undefined });
   };
   return html`<form class="composer" style=${{ left: Math.max(12, at.sx + 16), top: Math.max(12, at.sy - 20) }} onSubmit=${submit} onPointerDown=${(e: Event) => e.stopPropagation()}>
-    <div class="seg composer-mode">
-      <button type="button" aria-pressed=${mode === 'comment'} onClick=${() => setMode('comment')}>Comment</button>
-      <button type="button" aria-pressed=${mode === 'note'} onClick=${() => setMode('note')}>Research note</button>
-    </div>
     ${mode === 'comment' && !me && html`<${NameField} onDone=${() => bump((n) => n + 1)} />`}
     ${mode === 'comment'
       ? html`<div class="row" style="flex-wrap:nowrap;align-items:flex-start">

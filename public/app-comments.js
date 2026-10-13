@@ -144,8 +144,7 @@
     pop.style.top = `${Math.max(8, y - 10)}px`;
     let mode = 'comment';
     const draw = () => {
-      pop.innerHTML = `<div class="seg"><button type="button" data-m="comment" aria-pressed="${mode === 'comment'}">Comment</button><button type="button" data-m="note" aria-pressed="${mode === 'note'}">Research note</button></div>`
-        + (mode === 'comment'
+      pop.innerHTML = (mode === 'comment'
           ? `${myName() ? '' : '<input name="me" placeholder="Your name, how teammates see you">'}<textarea rows="3" name="said" placeholder="Add a comment"></textarea>`
           : `<div class="label">Said · word for word</div><textarea rows="3" name="said" placeholder="What they said, in their words"></textarea><input name="who" placeholder="Who, as a code: P-04 (never a name)"><textarea rows="2" name="meant" placeholder="What you think they meant (optional)"></textarea>`)
         + `<div class="row"><button type="button" class="cancel">Cancel</button><button class="primary" disabled>${mode === 'comment' ? 'Post' : 'File note'}</button></div>`;
