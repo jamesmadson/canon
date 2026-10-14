@@ -2,29 +2,29 @@ import { describe, it, expect } from 'vitest';
 import { skillSchema } from '../../src/content/skillSchema';
 
 const validSkill = {
-  slug: 'frontend-design',
-  name: 'Frontend Design',
+  slug: 'deter',
+  name: 'Deter',
   tagline: 'A tagline.',
-  sourceUrl: 'https://github.com/anthropics/skills',
-  sourceAuthor: 'Anthropic',
-  license: 'Apache-2.0',
+  sourceUrl: 'https://github.com/jamesmadson/canon/tree/main/plugin/deter/skills/deter',
+  sourceAuthor: 'James Madson',
+  license: 'MIT',
   tools: ['claude'],
   categories: ['ui-aesthetics'],
   previewType: 'image',
-  previewAssets: ['/previews/frontend-design.svg'],
+  previewAssets: ['/previews/deter.svg'],
   rating: 5,
   addedDate: '2026-07-01',
   lastVerified: '2026-07-29',
   status: 'active',
   featured: true,
-  fileTree: [{ path: 'SKILL.md', type: 'file', url: 'https://github.com/anthropics/skills/blob/main/SKILL.md' }],
+  fileTree: [{ path: 'SKILL.md', type: 'file', url: 'https://github.com/jamesmadson/canon/blob/main/plugin/deter/skills/deter/SKILL.md' }],
   contentOutline: [{ title: 'A section', subsections: [] }],
 };
 
 describe('skillSchema', () => {
   it('parses a valid skill entry', () => {
     const result = skillSchema.parse(validSkill);
-    expect(result.name).toBe('Frontend Design');
+    expect(result.name).toBe('Deter');
     expect(result.featured).toBe(true);
   });
 

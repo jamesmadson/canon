@@ -49,7 +49,7 @@ function fetchFileContent(owner: string, repo: string, repoPath: string): string
   return Buffer.from(base64, 'base64').toString('utf-8');
 }
 
-// Some monorepos (anthropics/skills) carry no repo-level license but ship a
+// Some monorepos carry no repo-level license but ship a
 // LICENSE.txt inside each skill folder. Prefer the skill's own license over
 // the repo's, and report 'none' rather than guessing when neither exists.
 function detectLicense(

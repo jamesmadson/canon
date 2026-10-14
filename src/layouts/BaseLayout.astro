@@ -102,12 +102,11 @@ const isCurrent = (href: string) =>
     <footer class="mx-auto max-w-6xl px-6">
       <div class="flex flex-col gap-6 py-12 text-sm text-ink-soft sm:flex-row sm:items-end sm:justify-between">
         <p class="max-w-md">
-          Every skill here was read in full, license-checked, and written up by hand.
-          {` ${skillCount.charAt(0).toUpperCase()}${skillCount.slice(1)} of them, chosen from many more.`}
+          Every skill here is Canon's own, written by James Madson.
+          {` ${skillCount.charAt(0).toUpperCase()}${skillCount.slice(1)} of them, MIT licensed.`}
         </p>
         <nav aria-label="More" class="-mx-2 flex flex-wrap items-center text-sm">
           <a href={withBase('/newsletter/')} class="tick-bar rounded-sm">Newsletter</a>
-          <a href={withBase('/submit/')} class="tick-bar rounded-sm">Submit</a>
           <a
             href="https://github.com/jamesmadson/canon"
             target="_blank"

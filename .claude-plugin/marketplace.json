@@ -1,21 +1,11 @@
 {
   "name": "canon",
-  "description": "Canon \u2014 a curated catalog of design skills for AI agents, packaged as installable kits.",
+  "description": "James Madson's design skills for AI agents: graft, strata, deter.",
   "owner": {
     "name": "James Madson",
     "url": "https://jamesmadson.github.io/canon/"
   },
   "plugins": [
-    {
-      "name": "canon",
-      "description": "A router skill plus three design kits: marketing and landing sites, product UI and dashboards, and mobile-first review. Install once, invoke deliberately.",
-      "author": {
-        "name": "James Madson",
-        "url": "https://jamesmadson.github.io/canon/"
-      },
-      "category": "design",
-      "source": "./plugin/canon"
-    },
     {
       "name": "graft",
       "description": "Session cartography: render any Claude Code session as a branch map. Trunk, forks, compactions, one HTML file out.",

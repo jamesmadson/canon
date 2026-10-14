@@ -3,23 +3,23 @@ import { parseSourceUrl } from '../../src/lib/parseSourceUrl';
 
 describe('parseSourceUrl', () => {
   it('parses a subtree URL into owner, repo, and path', () => {
-    const result = parseSourceUrl('https://github.com/anthropics/skills/tree/main/skills/frontend-design');
-    expect(result).toEqual({ owner: 'anthropics', repo: 'skills', path: 'skills/frontend-design' });
+    const result = parseSourceUrl('https://github.com/jamesmadson/canon/tree/main/plugin/deter');
+    expect(result).toEqual({ owner: 'jamesmadson', repo: 'canon', path: 'plugin/deter' });
   });
 
   it('parses a repo-root URL with an empty path', () => {
-    const result = parseSourceUrl('https://github.com/dominikmartn/nothing-design-skill');
-    expect(result).toEqual({ owner: 'dominikmartn', repo: 'nothing-design-skill', path: '' });
+    const result = parseSourceUrl('https://github.com/example-owner/example-design-skill');
+    expect(result).toEqual({ owner: 'example-owner', repo: 'example-design-skill', path: '' });
   });
 
   it('parses a repo-root URL whose repo name has no special characters', () => {
-    const result = parseSourceUrl('https://github.com/jakubkrehel/make-interfaces-feel-better');
-    expect(result).toEqual({ owner: 'jakubkrehel', repo: 'make-interfaces-feel-better', path: '' });
+    const result = parseSourceUrl('https://github.com/jamesmadson/canon');
+    expect(result).toEqual({ owner: 'jamesmadson', repo: 'canon', path: '' });
   });
 
   it('parses a subtree URL with a nested path', () => {
-    const result = parseSourceUrl('https://github.com/emilkowalski/skills/tree/main/skills/emil-design-eng');
-    expect(result).toEqual({ owner: 'emilkowalski', repo: 'skills', path: 'skills/emil-design-eng' });
+    const result = parseSourceUrl('https://github.com/jamesmadson/canon/tree/main/plugin/graft/skills/graft');
+    expect(result).toEqual({ owner: 'jamesmadson', repo: 'canon', path: 'plugin/graft/skills/graft' });
   });
 
   it('throws on a non-GitHub URL', () => {

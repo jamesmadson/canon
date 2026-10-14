@@ -1,29 +1,19 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import DemoBox from '../../components/DemoBox.astro';
 import DepthLegend from '../../components/DepthLegend.astro';
 import FilterBar from '../../components/FilterBar.astro';
-import { withBase } from '../../lib/withBase';
 import { spellNumber } from '../../lib/spellNumber';
 
 const allSkills = await getCollection('skills', ({ data }) => data.status === 'active');
 const sorted = [...allSkills].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
 const spelled = spellNumber(allSkills.length);
 const skillCount = `${spelled.charAt(0).toUpperCase()}${spelled.slice(1)}`;
-
-// The gallery is one section of the site now, so its own landing carries the
-// rest of the section rather than the header having to list four more links.
-const ELSEWHERE = [
-  { name: 'Kits', href: '/kits/', line: 'Several skills bundled for one job, in the order you would use them.' },
-  { name: 'Use', href: '/use/', line: 'What to type once it is installed, and what comes back.' },
-  { name: 'Submit', href: '/submit/', line: 'Propose a skill. Every one is read in full before it lands.' },
-];
 ---
 
 <BaseLayout
   title="Skills"
-  description="The gallery of design and design-engineering skills for AI agents, each read in full and license-checked by hand."
+  description="Canon's own design skills for AI agents: graft, strata and deter, written by James Madson."
 >
   <section class="mb-12">
     <h1 class="display-lg max-w-2xl">
@@ -32,28 +22,13 @@ const ELSEWHERE = [
     <p class="mt-5 max-w-xl text-[15px] leading-relaxed text-ink-soft">
       A <strong class="font-semibold text-ink">skill</strong> is a plain text file
       that tells an AI tool how to think about a piece of work, the same way a
-      good brief does. Drop one in, and Claude, Cursor, or Figma stops guessing.
+      good brief does. Drop one in, and your agent stops guessing.
     </p>
     <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-ink-soft">
-      {skillCount} of them here, each read in full rather than scraped.
+      {skillCount} of them, all written for Canon by James Madson. Install them in
+      Claude Code with
+      <code class="rounded-sm bg-recess px-2 py-1 font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>.
     </p>
-  </section>
-
-  <DemoBox />
-
-  <section class="mb-14">
-    <h2 class="label mb-3">Elsewhere in the gallery</h2>
-    <div class="grid grid-cols-1 gap-[10px] sm:grid-cols-3">
-      {ELSEWHERE.map((item) => (
-        <a
-          href={withBase(item.href)}
-          class="flex flex-col gap-2 rounded-md bg-panel p-4 transition-colors duration-[120ms] hover:bg-recess focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink"
-        >
-          <h3 class="text-[15px] font-semibold text-ink">{item.name}</h3>
-          <p class="text-[13px] leading-relaxed text-ink-soft">{item.line}</p>
-        </a>
-      ))}
-    </div>
   </section>
 
   <section>

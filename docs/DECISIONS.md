@@ -297,3 +297,9 @@ Sans 600, the o drawn as a solid International orange dot (#FF4F00). It
 replaces the lined disc in the site header. The app icon and favicon are
 the dot alone on a dark tile. The site drops its Light/Dark/System
 switcher and follows the OS preference only.
+
+### D-38 · Only Canon's own skills — 2026-10-14
+The gallery and the plugin marketplace now carry only James's own skills:
+graft, strata and deter. The twenty curated third-party entries are gone,
+along with the canon router plugin and the kits it drew from them. The kit
+digests, the install scripts, and the Use and Submit pages went too.
