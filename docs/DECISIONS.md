@@ -309,3 +309,16 @@ The marketing site says one thing: Canon lists your prototypes. Drag them
 in, or point it at one repo or every repo you work in. The old alpha page
 and the v2 preview, both built around research and evidence, are removed.
 Adding colleagues by email belongs to sharing, which waits for hosting.
+
+### D-40 · No usage tracking yet; opt-in counts later — 2026-10-14
+Canon collects nothing for now. Usage is learned by talking to alpha
+teams. Prototype content is never collected, viewed or uploaded for
+analysis, and a terms-of-service clause is not consent for it.
+
+For later, when there is a reason: opt-in usage counts only, asked once
+on first run in plain words. Counts like how many prototypes, which
+source (zip, folder, URL, repo), page counts, and which features get
+used. No content, no file names. A small Cloudflare Worker that counts
+events fits the free tier; Plausible is about $9 a month. Separately, a
+per-prototype "send this to Canon" button for bug reports, one prototype
+at a time, only when the person clicks it.
