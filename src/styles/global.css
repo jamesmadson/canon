@@ -39,7 +39,7 @@
 
    No hue anywhere. The neutrals carry a faint warm bias, which is the one
    opinion in the palette: it is why the grey reads as chosen rather than
-   defaulted. Colour lives only inside RamsMark, CanonMark and MeshPanel. */
+   defaulted. Colour lives only inside RamsMark, the wordmark dot and MeshPanel. */
 @theme {
   --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -77,6 +77,8 @@
   --mark-ink: #1a1815;
   --mark-orange: #ff4b12;
   --mark-yellow: #e9b824;
+  /* International orange, the dot in the wordmark. The same in both themes. */
+  --brand-orange: #ff4f00;
 }
 
 /* Unlayered, so these win over the @theme block Tailwind emits into a layer.
@@ -475,35 +477,21 @@ summary,
 /* ── The mark ─────────────────────────────────────────────────────────────
    A lined circle that swaps to its dotted sibling on hover and focus. Opacity
    only, both forms stacked, so nothing reflows during the swap. */
-.canon-mark {
-  position: relative;
-  display: block;
-  flex: 0 0 auto;
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--color-ink);
 }
-.canon-mark svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transition: opacity 300ms cubic-bezier(0.2, 0, 0, 1);
-}
-.canon-mark .form-alt {
-  opacity: 0;
-}
-a:hover .canon-mark .form-base,
-a:focus-visible .canon-mark .form-base,
-.canon-mark:hover .form-base {
-  opacity: 0;
-}
-a:hover .canon-mark .form-alt,
-a:focus-visible .canon-mark .form-alt,
-.canon-mark:hover .form-alt {
-  opacity: 1;
-}
-@media (prefers-reduced-motion: reduce) {
-  .canon-mark svg {
-    transition-duration: 0s;
-  }
+.wordmark-dot {
+  display: inline-block;
+  width: 0.52em;
+  height: 0.52em;
+  border-radius: 50%;
+  background: var(--brand-orange);
+  margin: 0 -0.015em 0 0.03em;
 }
 
 /* ── The book-cover hero ──────────────────────────────────────────────────
