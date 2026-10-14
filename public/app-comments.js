@@ -35,10 +35,10 @@
     :host { all: initial; }
     * { box-sizing: border-box; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
     .bar { position: fixed; right: 18px; bottom: 18px; display: flex; align-items: center; gap: 4px; padding: 4px; border-radius: 12px;
-      background: rgba(28,28,28,.94); color: #ececea; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 12px 32px rgba(0,0,0,.45); font-size: 13px; }
+      background: rgba(28,28,28,.94); color: #ecebe4; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 12px 32px rgba(0,0,0,.45); font-size: 13px; }
     .bar b { font-weight: 600; padding: 0 8px 0 10px; }
     button { font: inherit; cursor: pointer; border: 0; }
-    .toggle { height: 32px; padding: 0 12px; border-radius: 8px; background: #2a2a2a; color: #ececea; }
+    .toggle { height: 32px; padding: 0 12px; border-radius: 8px; background: #30312a; color: #ecebe4; }
     .toggle[aria-pressed="true"] { background: #4d8dff; color: #fff; }
     .shield { position: fixed; inset: 0; cursor: crosshair; display: none; background: rgba(77,141,255,.04); }
     .shield.on { display: block; }
@@ -46,22 +46,22 @@
       font-size: 11px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
     .pin.canvas { background: #ffd34d; }
     .pin.comment { border-radius: 50% 50% 50% 4px; color: #fff; box-shadow: 0 0 0 2px #fff, 0 3px 10px rgba(0,0,0,.35); }
-    .seg { display: inline-flex; background: #1b1b1b; border-radius: 6px; padding: 2px; gap: 2px; align-self: flex-start; }
-    .seg button { height: 24px; padding: 0 9px; border-radius: 5px; background: none; color: #a3a29d; font-size: 12px; }
-    .seg button[aria-pressed="true"] { background: #2a2a2a; color: #ececea; }
+    .seg { display: inline-flex; background: #22231e; border-radius: 6px; padding: 2px; gap: 2px; align-self: flex-start; }
+    .seg button { height: 24px; padding: 0 9px; border-radius: 5px; background: none; color: #a7a597; font-size: 12px; }
+    .seg button[aria-pressed="true"] { background: #30312a; color: #ecebe4; }
     .msg { display: flex; gap: 8px; } .msg b { font-size: 12.5px; } .msg p { margin: 2px 0 0; }
     .av { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 9.5px; font-weight: 700; flex: none; }
     .reply { display: flex; gap: 6px; border-top: 1px solid rgba(255,255,255,.08); padding-top: 8px; }
     .reply input { flex: 1; }
     .pin.draft { background: #4d8dff; color: #fff; }
-    .pop { position: absolute; width: 300px; padding: 12px; border-radius: 12px; background: #222; color: #ececea;
+    .pop { position: absolute; width: 300px; padding: 12px; border-radius: 12px; background: #282923; color: #ecebe4;
       box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 18px 48px rgba(0,0,0,.5); display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
     .label { font: 500 10.5px ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: #8a8985; }
-    textarea, input { width: 100%; font: inherit; color: #ececea; background: #1b1b1b; border: 0; border-radius: 6px; padding: 8px 10px; resize: none; outline: none; }
+    textarea, input { width: 100%; font: inherit; color: #ecebe4; background: #22231e; border: 0; border-radius: 6px; padding: 8px 10px; resize: none; outline: none; }
     textarea:focus, input:focus { box-shadow: 0 0 0 1px #4d8dff; }
     .row { display: flex; justify-content: flex-end; gap: 6px; }
-    .row button { height: 30px; padding: 0 12px; border-radius: 6px; background: none; color: #a3a29d; }
-    .row button.primary { background: #ececea; color: #141414; }
+    .row button { height: 30px; padding: 0 12px; border-radius: 6px; background: none; color: #a7a597; }
+    .row button.primary { background: #ecebe4; color: #171814; }
     .row button[disabled] { opacity: .45; cursor: default; }
     .meta { color: #8a8985; font: 500 10.5px ui-monospace, monospace; }
     q { quotes: none; }
@@ -117,7 +117,7 @@
     const first = n.kind === 'comment' ? esc(n.said) : `<q>${esc(n.said)}</q>${n.meant ? `<div class="meta">Meant, a reading: ${esc(n.meant)}</div>` : ''}`;
     pop.innerHTML = `<div class="msg"><span class="av" style="background:${n.kind === 'comment' ? color(who) : '#ffd34d'};${n.kind === 'comment' ? '' : 'color:#111'}">${n.kind === 'comment' ? initials(who) : 'R'}</span><div><b>${esc(who)}</b> <span class="meta">${new Date(n.createdAt).toLocaleDateString()}</span><p>${first}</p></div></div>`
       + (n.replies || []).map((r) => `<div class="msg"><span class="av" style="background:${color(r.author)}">${initials(r.author)}</span><div><b>${esc(r.author)}</b><p>${esc(r.body)}</p></div></div>`).join('')
-      + `<form class="reply"><input placeholder="Reply"><button class="primary" style="height:30px;padding:0 12px;border-radius:6px;background:#ececea;color:#141414">Reply</button></form>`;
+      + `<form class="reply"><input placeholder="Reply"><button class="primary" style="height:30px;padding:0 12px;border-radius:6px;background:#ecebe4;color:#171814">Reply</button></form>`;
     pop.querySelector('form').onsubmit = async (e) => {
       e.preventDefault();
       const input = pop.querySelector('input');
