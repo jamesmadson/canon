@@ -27,6 +27,23 @@ that practice.
 Prototype hosting is a table-stakes shell; the skills that run against the
 prototypes are the reason to pick Canon.
 
+**The alpha aperture (D-35):** the horizon below is wide on purpose; the
+build is not. Alpha is two jobs — **a prototype manager** (index,
+select, staleness, device previews) and **a feedback facilitator** (the
+annotation layer, the Strata record, its reports) — plus the single
+`deter` run that tests assumption 3. In one sentence: *prototypes in one
+place, feedback that becomes evidence.* Everything else in this document
+is sequenced or held, and stays unbuilt until the ladder clears it.
+
+**The SDLC frame (D-34):** Canon is the design lane of the AI-native
+SDLC (Anthropic's playbook, filed `2026-08-28-ai-native-sdlc-playbook`).
+Its operating principle, adopted explicitly: *every stage commits an
+artifact the next stage can read.* Stage by stage — Strata evidence and
+the decision log feed **Plan**; prototypes are **Build** artifacts;
+review runs are **Test**; PR graduation is **Deploy**; staleness flags
+are **Maintain**, feeding back to Plan. Canon's own development already
+runs this cycle, so the claim is demonstrable, not aspirational.
+
 ## Who it is for
 
 Design-led product teams of 2–15 who prototype in code and Figma
@@ -35,9 +52,12 @@ currently answers "where's the latest version?" from memory.
 
 ## The riskiest assumptions (test these, in order)
 
-1. **Teams will name branches `prototype-*`** (or map an existing
-   convention) to get their work indexed. If they won't adopt the
-   convention, nothing downstream matters.
+1. **Teams will select which branches are prototypes.** Connecting a
+   repo lists its branches; the person picks what's visible — no rename
+   required to be indexed (D-22, superseding the `prototype-*`
+   requirement). Prototypes *created in Canon* get the prefix, where it
+   costs nothing. The assumption is now curation-on-connect, not
+   convention adoption.
 2. **Feedback filed at the prototype beats feedback in Slack** — people
    will actually comment where the work lives.
 3. **Skill runs on real prototypes produce findings a lead acts on** —
@@ -71,8 +91,9 @@ security story honest.
 
 | In (alpha) | Out (explicitly) |
 | --- | --- |
-| GitHub App, read-only: list branches matching `prototype-*`, last commit, author, staleness | Hosting/deploying prototypes (link to the team's existing preview URLs) |
+| GitHub App, read-only: list all branches; the person selects which appear as prototypes; last commit, author, staleness. Canon-created prototypes get the `prototype-` prefix | Hosting/deploying prototypes (link to the team's existing preview URLs) |
 | Figma attach-by-URL with live embed | Figma API import, component sync |
+| Prototype cards carry screen thumbnails; the detail page previews the live URL at user-selected device sizes and orientations (phone, phone landscape, tablet, desktop) | Real-device farms, pixel-diffing |
 | Prototype page: description, links, activity, feedback thread | Realtime multiplayer anything |
 | Feedback: the annotation layer (below) plus a plain comment box, both filing Strata entries; reports (themes/open) per project | Public commenting, reactions, notifications beyond email |
 | Access: GitHub org membership = project access; share links for viewers | Roles/permissions matrix, SSO — alpha rides on GitHub auth |
@@ -134,6 +155,46 @@ instead of pretending to replace it:
   workflow engine; just making the relationship the field study says
   matters visible.
 
+## Survey — the zoomed-out view
+
+The field named the gap in one sentence: *"Nobody's built a good 'canvas
+of your running app' yet."* Preview links answer "try this flow" and
+nothing answers "step back and see everything" — which is exactly why the
+demoted Figma file survives, kept alive for flows and key states. Four
+voices now circle this (snapshot walls, a storyboard canvas, a deleted
+UI-map tool, and the entry above); James has taken it as a problem to
+solve. **Survey** is the answer: Graft draws the time maps, Survey draws
+the space maps.
+
+The one property every workaround lacks, and Survey's core commitment:
+**the canvas is captured from the running prototype, so it cannot
+drift.** A Figma mirror decays the day it's drawn; a generated map is
+re-capturable on demand.
+
+- **Capture:** an agent walks the prototype's routes and key states and
+  snapshots each screen — the field's own `/prototype-exploder` pattern,
+  productized. Human-triggered like every run; re-run replaces the layer.
+- **Layout:** screens arranged by route into a zoomable map — flows as
+  paths, key states stacked under their screen. Project level zooms out
+  to every prototype's map side by side.
+- **Alive, not decorative:** annotation-layer comments pin to the canvas
+  where they were made; Strata entries about a screen surface on it;
+  a branch's map can sit beside main's to show what changed, spatially.
+- **Arrangement (D-32):** keep Figma's spatial freedom — pan, zoom, drag
+  screens by hand — and add what a free canvas can never have: computed
+  arrangements that cost nothing, because capture already knows the
+  structure. Three modes: **by IA** (route hierarchy), **by journey**
+  (flow order), **freeform** (hand placement, persisted). Switching to a
+  computed mode never destroys a freeform layout — it is a view, not an
+  edit. And no screen is ever "Frame 604252871": names come from routes
+  at capture, which is the whole difference between a canvas and a junk
+  drawer.
+- **Rings:** (1) agent-assisted capture via the CLI/skill and a manual
+  arrange; (2) capture on demand from the app with route detection;
+  (3) flow-graph edges and state variants. Ring 1 is post-alpha unless
+  NatureQuant's week screams otherwise — the dashboard and annotation
+  layer stay first.
+
 ## Contextual skills — the v2 architecture
 
 Strata accidentally defined the pattern every v2 skill follows: **the skill
@@ -151,6 +212,7 @@ Generalized:
 | `interface` | the project's own interaction conventions, learned from its prototypes |
 | `ux` | flows, decision forks taken, patterns rejected and why |
 | `copy` | voice rules, banned words, approved strings with their contexts |
+| `cairn` (candidate) | product decisions with their reasoning — the trail markers; sourced from `docs/DECISIONS.md`'s meta-pattern |
 
 Each follows the Strata disciplines: append-only layers, verbatim kept
 apart from interpretation, an evidence bar before anything is called a
@@ -162,6 +224,24 @@ skill can say.
 Alpha ships `strata` + `deter` + `access`; `system` is next once
 assumption 3 proves review runs get acted on. `interface`, `ux`, and
 `copy` follow the same mold and are cheap once the mold is proven.
+
+### Promotion — prototypes feed the system (held, not committed)
+
+Held idea (D-31): connect a project's Storybook / design-system repo, and
+a component proven in a prototype can be **promoted into the system with
+a click**. The click's honest shape, consistent with D-15's no-storage
+rule: it scaffolds a **PR against the team's own system repo** — the
+extracted component, a story file, and a `system` record entry carrying
+the why (promoted from which prototype, on what evidence). Canon never
+hosts the component; the engineering buddy finishes the PR.
+
+This gives the contextual-skills architecture its missing write path:
+prototypes graduate as PRs, components graduate into the system — and
+the `system` record becomes the design system's changelog of reasons.
+Rings when taken up: (1) link Storybook, reference components; (2) the
+promote-scaffold; (3) drift flags — a prototype using a variant the
+system doesn't have. Held behind `system` itself, which is held behind
+assumption 3.
 
 ## The skills lineup at launch
 
@@ -328,12 +408,29 @@ build and why") and the repo ("the code"): the prototypes, the evidence,
 the reviews. Read the neighbors accordingly:
 
 - **Linear** — worldview-aligned, complementary; their Customer Requests
-  is Strata's cousin inside an issue tracker. A Linear integration
-  (prototype ↔ project, feedback ↔ Customer Request) is the first
-  post-alpha integration candidate.
+  is Strata's cousin inside an issue tracker. The first post-alpha
+  integration candidate, and per D-33 it runs both ways:
+  **Linear → Canon**: issues, comments, and Customer Requests become a
+  Strata intake source — synthesized into the record under the same
+  discipline as every ring (pseudonymized, drafts confirmed by a person,
+  quarantine for anything that can't be cleaned; teammates as T-,
+  customers as P-). **Canon → Linear**: Canon's commands run where the
+  team already works — mention or assign Canon on an issue linked to a
+  prototype, and a review runs, filing its result back as a comment and
+  a record entry. The mention *is* the person triggering, so the D-20
+  contract holds without ceremony.
 - **Figma** — fighting for design-in-code centripetally (Make, Dev Mode);
   will build its version *inside* the canvas, which is the version the
   field entries show people leaving. Coexist via embed; never depend.
+- **Frame.io** — the best *analogy*, offered unprompted by the field
+  (entry `2026-08-28-frameio-comparison`): comments anchored to the
+  artifact, share links for people without the authoring tool. Use it as
+  the door-opener — "Frame.io for coded prototypes" — then correct on the
+  second sentence: Canon references live branches instead of hosting
+  uploaded versions, and feedback becomes an evidence record with
+  decided-states instead of an approve/reject queue. Also the
+  willingness-to-pay reference: review tooling in this shape sold to
+  Adobe for $1.275B.
 - **Chromatic / Pastel / Markup.io / BugHerd / Vercel previews** — the
   honest near-competitors. Annotation-on-a-URL is a commodity; the moat
   is annotations landing in an evidence record with a decided-state, and
