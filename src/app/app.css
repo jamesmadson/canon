@@ -543,3 +543,7 @@ button.install:hover { background: var(--raised); }
 .store-tools button:hover { color: var(--text); background: var(--hover); }
 button.link { background: none; border: 0; padding: 0; color: var(--soft); text-decoration: underline; text-underline-offset: 2px; font: inherit; }
 button.link:hover { color: var(--text); }
+
+/* A link shown as its screenshot. */
+.frame-cover { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; background: #fff; }
+.insp-hint { margin: 10px 0 0; line-height: 1.5; }

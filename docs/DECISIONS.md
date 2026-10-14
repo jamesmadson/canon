@@ -348,3 +348,16 @@ prototype's files, rewritten a moment after each change. Everywhere, a
 one-file .canon backup can be saved and restored by hand. Restoring merges
 by id and never deletes. The same format will be the desktop app's storage
 if there ever is one.
+
+### D-44 · Moved folders relocate; signed-in links show a screenshot — 2026-10-14
+Canon points at work where it lives, so it has to survive that work moving.
+A linked prototype whose folder was moved or renamed says so, and Relocate
+points it at the folder's new spot, keeping its notes and board places. A
+dropped-in copy can be linked to its folder the same way, so it can refresh.
+
+A link behind a work sign-in can't draw inside Canon, even on your own
+machine: browsers don't send the login cookie to a page framed inside
+another site, and sign-in pages refuse to be framed. Rather than a blank
+frame, such a link opens in its own tab and can show a screenshot on the
+board. Live previews of signed-in pages wait for a desktop app, where each
+page is its own window.

@@ -6,7 +6,7 @@ import { canLinkFolders, groupsFromDrop } from './intake';
 import { BoardView, BundleView, Focus } from './canvas';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
 import { Avatar, isComment } from './comments';
-import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, KIND, addGroups, runWay, type Way } from './shared';
+import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, KIND, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
 export { BASE } from './shared';
 
@@ -350,7 +350,9 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
               <button class="lib-thumb" onClick=${() => open(i.id)} title="Open">
                 ${pageCount(f) > 1 && html`<span class="lib-sheet"></span>`}
                 <span class="lib-frame" style=${{ width: f.w * s, height: f.h * s }}>
-                  <iframe src=${frameSrc(f)} tabindex="-1" loading="lazy" sandbox=${SANDBOX} style=${{ width: f.w, height: f.h, transform: `scale(${s})` }}></iframe>
+                  ${showsCover(f)
+                    ? html`<img class="frame-cover" src=${coverSrc(f)} alt="" />`
+                    : html`<iframe src=${frameSrc(f)} tabindex="-1" loading="lazy" sandbox=${SANDBOX} style=${{ width: f.w, height: f.h, transform: `scale(${s})` }}></iframe>`}
                 </span>
               </button>
               <label class="lib-check"><input type="checkbox" checked=${picked.has(i.id)} onChange=${() => toggle(i.id)} /></label>

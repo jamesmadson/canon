@@ -63,6 +63,9 @@ export const pageName = (path: string) => path.replace(/\.html?$/i, '').replace(
 /** Where a prototype page is served from, inside the app. */
 export const frameSrc = (f: Frame, page?: string) =>
   f.kind === 'url' ? f.url! : `${BASE}app/p/${f.id}/${encodeURI(page ?? f.entry ?? 'index.html')}?v=${f.rev}`;
+/** A link shown as its screenshot rather than live. */
+export const showsCover = (f: Frame) => f.kind === 'url' && f.display === 'cover' && !!f.cover;
+export const coverSrc = (f: Frame) => `${BASE}app/p/${f.id}/${encodeURIComponent(f.cover ?? '')}?v=${f.rev}`;
 /** The same page opened in its own tab, where the comment layer appears. */
 export const previewUrl = (f: Frame, page?: string) =>
   f.kind === 'url' ? f.url! : `${BASE}app/p/${f.id}/${encodeURI(page ?? f.entry ?? 'index.html')}`;

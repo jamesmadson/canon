@@ -304,16 +304,64 @@ export async function refreshLinked(id: string) {
   const frame = state.frames.find((f) => f.id === id);
   if (!frame?.handleId) return;
   const rec = await db.get<{ id: string; handle: FileSystemDirectoryHandle }>('handles', frame.handleId);
-  if (!rec) return toast('The link to that folder is gone. Link it again.');
+  if (!rec) return toast('Canon lost track of that folder. Use Relocate to find it again.');
   // @ts-expect-error: Chromium only
   const perm = await rec.handle.requestPermission?.({ mode: 'read' });
   if (perm && perm !== 'granted') return toast('Canon needs read access to refresh that folder.');
-  const prepared = await prepare({ name: frame.name, files: await walkHandle(rec.handle) });
-  if (!prepared) return toast('That folder has no HTML file any more.');
-  await db.replaceFiles(id, prepared.files);
-  await updateFrame(id, { rev: frame.rev + 1, fileCount: prepared.files.length, entry: prepared.entry, pages: prepared.pages, links: prepared.links });
-  toast(`Refreshed from disk: ${prepared.files.length} files.`);
+  let files;
+  try {
+    files = await walkHandle(rec.handle);
+  } catch (err) {
+    if ((err as DOMException)?.name === 'NotFoundError') return toast('That folder moved or was renamed. Use Relocate to find it.');
+    throw err;
+  }
+  await takeFolder(frame, rec.handle, files, `Refreshed from disk`);
 }
+
+async function takeFolder(frame: Frame, handle: FileSystemDirectoryHandle, files: Awaited<ReturnType<typeof walkHandle>>, said: string) {
+  const prepared = await prepare({ name: frame.name, files });
+  if (!prepared) return toast('That folder has no HTML file in it.');
+  const handleId = frame.handleId ?? uid();
+  await db.put('handles', { id: handleId, handle });
+  // Keep a screenshot the person added; the rest is the folder's.
+  const cover = frame.cover ? (await db.filesOf(frame.id)).find((f) => f.key === `${frame.id}/${frame.cover}`) : undefined;
+  await db.replaceFiles(frame.id, [...prepared.files, ...(cover ? [{ path: frame.cover!, blob: cover.blob, type: cover.type }] : [])]);
+  await updateFrame(frame.id, {
+    kind: 'linked', handleId, rev: frame.rev + 1, fileCount: prepared.files.length,
+    entry: prepared.entry, pages: prepared.pages, links: prepared.links,
+  });
+  toast(`${said}: ${prepared.files.length} files.`);
+}
+
+/**
+ * Point a prototype at its folder again after it was moved or renamed, or link
+ * a dropped-in prototype to its folder so it can refresh. Notes and board
+ * spots stay; only the files are re-read.
+ */
+export async function relocate(id: string) {
+  const frame = state.frames.find((f) => f.id === id);
+  if (!frame || frame.kind === 'url') return;
+  let handle: FileSystemDirectoryHandle;
+  try {
+    handle = await (window as unknown as { showDirectoryPicker: (o: object) => Promise<FileSystemDirectoryHandle> }).showDirectoryPicker({ id: 'canon-relocate', mode: 'read' });
+  } catch {
+    return; // Cancelled.
+  }
+  await takeFolder(frame, handle, await walkHandle(handle), frame.kind === 'linked' ? `Relocated to “${handle.name}”` : `Linked to “${handle.name}”`);
+}
+
+/* ── Links that need a screenshot ──────────────────────────────────────── */
+export async function setCover(id: string, file: File) {
+  const frame = state.frames.find((f) => f.id === id);
+  if (!frame) return;
+  if (!file.type.startsWith('image/')) return toast('That is not an image. Use a PNG, JPG or WebP screenshot.');
+  const ext = (file.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g, '') || 'png';
+  const name = `cover.${ext}`;
+  if (frame.cover && frame.cover !== name) await db.remove('files', `${id}/${frame.cover}`);
+  await db.put('files', { key: `${id}/${name}`, frameId: id, blob: file, type: file.type });
+  await updateFrame(id, { cover: name, display: 'cover', rev: frame.rev + 1 });
+}
+export const setDisplay = (id: string, display: 'live' | 'cover') => updateFrame(id, { display });
 
 /* ── Comments and notes ────────────────────────────────────────────────── */
 async function putNote(note: Note) {

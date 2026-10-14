@@ -9,7 +9,7 @@ import { sortPrototypes, type LibrarySort } from './lib/library';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
 import { ShareButton } from './share';
 import {
-  html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES,
+  html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES, showsCover, coverSrc,
   addGroups, runWay, NoteItem, type Way,
 } from './shared';
 
@@ -104,13 +104,15 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
 
   const tidy = board?.arrangement === 'tidy';
   // Tidy is a view: it sorts and lays out, and never writes over the hand layout.
-  const frames = useMemo(() => {
-    if (!tidy) return allFrames;
+  // The memo only keys the sort; frames themselves always come fresh, so a
+  // refreshed or relocated prototype redraws even when its name and size did not change.
+  const order = useMemo(() => {
+    if (!tidy) return null;
     const counts = (f: BoardFrame) => store.allNotesOf(f.id).filter((n) => !n.resolved).length;
     const items = allFrames.map((f) => ({ ...f, kind: f.kind, pages: pageCount(f), boards: 1, comments: counts(f) }));
-    const order = sortPrototypes(items, sort).map((i) => i.id);
-    return order.map((oid) => allFrames.find((f) => f.id === oid)!);
+    return sortPrototypes(items, sort).map((i) => i.id);
   }, [tidy, sort, allFrames.map((f) => `${f.id}:${f.name}:${f.w}x${f.h}`).join(), s.notes.length]);
+  const frames = order ? order.map((oid) => allFrames.find((f) => f.id === oid)!).filter(Boolean) : allFrames;
   const tidyPos = useMemo(
     () => (tidy ? tidyPositions(frames, { maxRow: Math.max(3200, ...frames.map((f) => f.w)), gap: 120 }) : {}),
     [tidy, frames.map((f) => `${f.id}:${f.w}x${f.h}`).join()]
@@ -345,7 +347,9 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
               </div>
               ${teasing && html`<${Teases} frame=${f} onEnter=${(page: string) => enter(f, page)} />`}
               <div class="frame-body">
-                <iframe src=${frameSrc(f)} title=${f.name} loading="lazy" sandbox=${f.kind === 'url' ? 'allow-scripts allow-same-origin allow-forms allow-popups' : SANDBOX}></iframe>
+                ${showsCover(f)
+                  ? html`<img class="frame-cover" src=${coverSrc(f)} alt=${`Screenshot of ${f.name}`} draggable=${false} />`
+                  : html`<iframe src=${frameSrc(f)} title=${f.name} loading="lazy" sandbox=${f.kind === 'url' ? 'allow-scripts allow-same-origin allow-forms allow-popups' : SANDBOX}></iframe>`}
                 <div class="frame-shield"></div>
               </div>
               ${notes.map((n, i) => html`<${Pin} key=${n.id} n=${i + 1} note=${n} left=${(n.fx ?? 0) * f.w} top=${Math.min(store.noteY(n, f.h), f.h)} active=${openThread === n.id} onOpen=${() => setOpenThread(n.id)} />`)}
@@ -408,6 +412,29 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
   </div>`;
 }
 
+/** A link behind a work sign-in won't draw inside Canon; a screenshot stands in. */
+function LinkDisplay({ frame }: { frame: Frame }) {
+  const pick = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = () => input.files?.[0] && store.setCover(frame.id, input.files[0]);
+    input.click();
+  };
+  const onPaste = (e: ClipboardEvent) => {
+    const file = [...(e.clipboardData?.files ?? [])].find((f) => f.type.startsWith('image/'));
+    if (file) store.setCover(frame.id, file);
+  };
+  return html`<div class="insp-sec" tabindex="0" onPaste=${onPaste}>
+    <div class="label">Shows as</div>
+    <div class="seg">
+      <button aria-pressed=${frame.display !== 'cover' || !frame.cover} onClick=${() => store.setDisplay(frame.id, 'live')}>Live page</button>
+      <button aria-pressed=${frame.display === 'cover' && !!frame.cover} onClick=${() => (frame.cover ? store.setDisplay(frame.id, 'cover') : pick())}>Screenshot</button>
+    </div>
+    <p class="hint insp-hint">Blank, or asking you to sign in? Work sign-in pages won't show inside another site, even on your own machine. Open it in its own tab, and <button class="link" onClick=${pick}>${frame.cover ? 'replace the screenshot' : 'add a screenshot'}</button> (or paste one here) so the board still shows it.</p>
+  </div>`;
+}
+
 function Inspector({ frame, onFocus, onEnter, onRemove, onComment, onOpenThread }: { frame: BoardFrame; onFocus: () => void; onEnter: () => void; onRemove: () => void; onComment: () => void; onOpenThread: (n: Note) => void }) {
   const notes = store.notesOf(frame.id);
   const all = store.allNotesOf(frame.id);
@@ -425,11 +452,18 @@ function Inspector({ frame, onFocus, onEnter, onRemove, onComment, onOpenThread 
         <dt>Added</dt><dd>${ago(frame.createdAt)}</dd>
       </dl>
       <div class="row">
-        ${multi ? html`<button class="btn primary" onClick=${onEnter}><${Icon} name="pages" />Open pages</button>` : html`<button class="btn primary" onClick=${onFocus}><${Icon} name="open" />Open</button>`}
+        ${multi
+          ? html`<button class="btn primary" onClick=${onEnter}><${Icon} name="pages" />Open pages</button>`
+          : frame.kind === 'url'
+            ? html`<a class="btn primary" href=${frame.url} target="_blank" rel="noopener"><${Icon} name="open" />Open</a>`
+            : html`<button class="btn primary" onClick=${onFocus}><${Icon} name="open" />Open</button>`}
         ${frame.kind === 'linked' && html`<button class="btn" onClick=${() => store.refreshLinked(frame.id)}><${Icon} name="refresh" />Refresh</button>`}
-        <a class="btn ghost" href=${previewUrl(frame)} target="_blank" rel="noopener" title="Opens in its own tab, with notes"><${Icon} name="comment" />Preview link</a>
+        ${frame.kind !== 'url' && html`<a class="btn ghost" href=${previewUrl(frame)} target="_blank" rel="noopener" title="Opens in its own tab, with notes"><${Icon} name="comment" />Preview link</a>`}
       </div>
+      ${frame.kind === 'linked' && canLinkFolders() && html`<p class="hint insp-hint">Moved or renamed the folder? <button class="link" onClick=${() => store.relocate(frame.id)}>Relocate it</button></p>`}
+      ${frame.kind === 'files' && canLinkFolders() && html`<p class="hint insp-hint">A copy, so it won't change. <button class="link" onClick=${() => store.relocate(frame.id)}>Link it to its folder</button> to refresh from disk.</p>`}
     </div>
+    ${frame.kind === 'url' && html`<${LinkDisplay} frame=${frame} />`}
     <div class="insp-sec">
       <div class="label">Size</div>
       <div class="seg">

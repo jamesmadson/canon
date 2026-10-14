@@ -22,6 +22,12 @@ export interface Frame {
   entry?: string; url?: string; fileCount?: number; handleId?: string;
   /** Every HTML page in a multi-page prototype, entry first, and the links between them. */
   pages?: string[]; links?: [string, string][];
+  /**
+   * A link that can't show inside Canon (a work sign-in, a site that refuses
+   * framing) can show a screenshot instead. cover is its file name in this
+   * prototype's stored files.
+   */
+  cover?: string; display?: 'live' | 'cover';
   x: number; y: number; w: number; h: number; rev: number; createdAt: number; updatedAt: number;
 }
 /**
