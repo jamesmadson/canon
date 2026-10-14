@@ -41,6 +41,24 @@ export function toast(message: string) {
   toastTimer = setTimeout(() => set({ toast: null }), 3200);
 }
 
+/* ── Installing as an app ──────────────────────────────────────────────── */
+export interface InstallPromptEvent extends Event { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
+let installPrompt: InstallPromptEvent | null = null;
+export const canInstall = () => !!installPrompt;
+export const isInstalled = () =>
+  typeof matchMedia !== 'undefined' && matchMedia('(display-mode: standalone)').matches;
+export function setInstallPrompt(e: InstallPromptEvent | null) {
+  installPrompt = e;
+  set({});
+}
+export async function install() {
+  if (!installPrompt) return;
+  await installPrompt.prompt();
+  const { outcome } = await installPrompt.userChoice;
+  if (outcome === 'accepted') toast('Installed. Canon is in your Dock or Start menu now.');
+  setInstallPrompt(null);
+}
+
 /* ── Who you are, for comments. Kept in this browser. ──────────────────── */
 const NAME_KEY = 'canon-name';
 export function myName(): string {

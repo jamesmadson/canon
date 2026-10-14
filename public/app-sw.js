@@ -6,9 +6,33 @@
  * Path shape: <scope>p/<frameId>/<path inside the prototype>
  */
 const DB_NAME = 'canon-app';
+// The installed app's own files, kept so it opens without a connection.
+const SHELL = 'canon-shell-v1';
 
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(SHELL).then((c) => c.addAll([new URL('./', self.registration.scope).pathname])).catch(() => {}));
+  self.skipWaiting();
+});
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('canon-shell-') && k !== SHELL).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+});
+
+/** Network first, so updates land straight away; the cache only answers offline. */
+async function networkFirst(request) {
+  const cache = await caches.open(SHELL);
+  try {
+    const response = await fetch(request);
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
+    const hit = await cache.match(request, { ignoreSearch: request.mode === 'navigate' });
+    return hit || Response.error();
+  }
+}
 
 function openDb() {
   return new Promise((resolve, reject) => {
@@ -51,7 +75,15 @@ async function serve(frameId, path, request) {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   const prefix = new URL('p/', self.registration.scope).pathname;
-  if (url.origin !== self.location.origin || !url.pathname.startsWith(prefix)) return;
+  if (url.origin !== self.location.origin || event.request.method !== 'GET') return;
+  if (!url.pathname.startsWith(prefix)) {
+    // The app itself and the files it loads: pages in scope, built assets, fonts, icons.
+    const base = new URL('../', self.registration.scope).pathname;
+    const appFile = url.pathname.startsWith(self.registration.scope.replace(self.location.origin, ''))
+      || ['_astro/', 'fonts/', 'icons/', 'app.webmanifest', 'app-comments.js'].some((p) => url.pathname.startsWith(base + p));
+    if (appFile) event.respondWith(networkFirst(event.request));
+    return;
+  }
   const rest = url.pathname.slice(prefix.length);
   const slash = rest.indexOf('/');
   if (slash < 0) return;

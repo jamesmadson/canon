@@ -111,6 +111,14 @@ function Sidebar({ route }: { route: Route }) {
         </div>`;
       })}
     </div>
+    ${!store.isInstalled() && store.canInstall() && html`<button class="install" onClick=${() => store.install()}>
+      <img src="/canon/icons/canon-192.png" alt="" width="28" height="28" />
+      <span><b>Install Canon</b><small>Its own window, in your Dock or taskbar</small></span>
+    </button>`}
+    ${!store.isInstalled() && !store.canInstall() && /Safari/.test(navigator.userAgent) && !/Chrome|Chromium|Edg/.test(navigator.userAgent) && html`<div class="install hint">
+      <img src="/canon/icons/canon-192.png" alt="" width="28" height="28" />
+      <span><b>Install Canon</b><small>In Safari: File, then Add to Dock</small></span>
+    </div>`}
     <div class="rail-foot">
       ${me ? html`<div class="row" style="align-items:center;margin-bottom:8px;flex-wrap:nowrap"><${Avatar} name=${me} /><span style="color:var(--soft)">${me}</span></div>` : null}
       <span class="dot"></span>Stored in this browser. Nothing is uploaded.

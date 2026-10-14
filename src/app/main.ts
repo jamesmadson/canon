@@ -1,7 +1,14 @@
 import { render, h } from 'preact';
 import './app.css';
 import { App, BASE } from './ui';
-import { load, reloadNotes } from './store';
+import { load, reloadNotes, setInstallPrompt, type InstallPromptEvent } from './store';
+
+// Chromium offers installing as an app through this event; keep it for the Install button.
+addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  setInstallPrompt(e as InstallPromptEvent);
+});
+addEventListener('appinstalled', () => setInstallPrompt(null));
 
 async function boot() {
   // The worker serves dropped prototypes out of IndexedDB. Frames need it
