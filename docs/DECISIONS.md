@@ -303,3 +303,9 @@ The gallery and the plugin marketplace now carry only James's own skills:
 graft, strata and deter. The twenty curated third-party entries are gone,
 along with the canon router plugin and the kits it drew from them. The kit
 digests, the install scripts, and the Use and Submit pages went too.
+
+### D-39 · The site lists prototypes, nothing about research — 2026-10-14
+The marketing site says one thing: Canon lists your prototypes. Drag them
+in, or point it at one repo or every repo you work in. The old alpha page
+and the v2 preview, both built around research and evidence, are removed.
+Adding colleagues by email belongs to sharing, which waits for hosting.

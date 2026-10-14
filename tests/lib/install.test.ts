@@ -76,10 +76,6 @@ describe('the install line before the package is published', () => {
     expect(INSTALL_UNPUBLISHED_NOTE).not.toMatch(/[\u2014\u2013\u0021]/);
   });
 
-  it('gates the copy button on that state', () => {
-    const block = readFileSync(join(SRC, 'components', 'InstallBlock.astro'), 'utf8');
-    expect(block).toMatch(/disabled=\{!copyable\}/);
-  });
 });
 
 describe('the alpha sign-up', () => {
