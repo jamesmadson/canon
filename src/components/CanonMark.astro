@@ -2,11 +2,10 @@
 /**
  * The mark: a lined circle drawn from the Braun speaker vocabulary, with a
  * dotted sibling underneath it. Hover or focus the link it sits in and the two
- * cross-fade. Decision D-39.
+ * cross-fade.
  *
- * Both forms are ink only. The mark is an illustration, so it is allowed a hue
- * by the colour rule, and it declines: at 24px in a header a hue would read as
- * a status light rather than a name.
+ * Both forms are drawn in the brand orange. The mark is an illustration, so it
+ * is allowed a hue by the colour rule, and it is the one place the site uses it.
  */
 import { uid } from '../lib/uid';
 
@@ -63,7 +62,7 @@ for (let y = CY - SPAN; y <= CY + SPAN; y += STEP) {
     <g
       clip-path={`url(#${markId}-c)`}
       mask={`url(#${markId}-gap)`}
-      stroke="var(--mark-ink)"
+      stroke="var(--mark-orange)"
       stroke-width="4.5"
       stroke-linecap="round"
     >
@@ -72,7 +71,7 @@ for (let y = CY - SPAN; y <= CY + SPAN; y += STEP) {
   </svg>
 
   <svg viewBox="0 0 104 104" class="form-alt" fill="none">
-    <g fill="var(--mark-ink)">
+    <g fill="var(--mark-orange)">
       {dots.map((dot) => <circle cx={dot.x} cy={dot.y} r={DR} />)}
     </g>
   </svg>

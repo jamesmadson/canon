@@ -2,7 +2,6 @@
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
 import CanonMark from '../components/CanonMark.astro';
-import ThemeToggle from '../components/ThemeToggle.astro';
 import { withBase } from '../lib/withBase';
 import { spellNumber } from '../lib/spellNumber';
 
@@ -40,7 +39,7 @@ const isCurrent = (href: string) =>
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-app-theme="system">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -54,21 +53,12 @@ const isCurrent = (href: string) =>
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={`${title} · Canon`} />
     <meta name="twitter:description" content={description} />
+    <link rel="icon" href={withBase('/icons/canon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={withBase('/icons/favicon-32.png')} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={withBase('/icons/apple-touch-icon.png')} />
     <meta name="theme-color" content="#eeede9" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#191817" media="(prefers-color-scheme: dark)" />
     <link rel="preload" href={withBase('/fonts/public-sans/PublicSans-Variable.woff2')} as="font" type="font/woff2" crossorigin />
-    {/* The theme choice, applied before the first paint so no page is drawn
-        light and then repainted dark. It sets one attribute on the root; the
-        dark tokens hang off that attribute, so this is the whole mechanism. */}
-    <script is:inline>
-      try {
-        const stored = localStorage.getItem('canon-app-theme');
-        document.documentElement.dataset.appTheme =
-          stored === 'light' || stored === 'dark' ? stored : 'system';
-      } catch {
-        document.documentElement.dataset.appTheme = 'system';
-      }
-    </script>
   </head>
   <body class="bg-ground font-sans text-ink antialiased">
     <a
@@ -98,7 +88,6 @@ const isCurrent = (href: string) =>
               </a>
             ))}
           </nav>
-          <ThemeToggle />
         </div>
       </div>
     </header>

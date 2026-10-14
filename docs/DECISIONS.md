@@ -285,3 +285,13 @@ public release before it clears.
 Kill criterion: NatureQuant gets the local app with real prototypes. If
 they do not open it again within two weeks unprompted, stop investing and
 open source it as a portfolio piece.
+
+### D-37 · Release gate cleared, orange mark, system theme — 2026-10-14
+The D-27 independent-release confirmation is in: Canon is cleared and has
+nothing to do with the employer. The clean room rules stay as practice,
+but the gate on public release is lifted. Release timing is now James's
+call; for now everything stays local.
+
+The mark is drawn in the brand orange everywhere it appears (site header,
+favicon, app icon), reversing the earlier ink-only call. The site drops its
+Light/Dark/System switcher and follows the OS preference only.
