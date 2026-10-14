@@ -328,3 +328,13 @@ The marketing site renders dark for everyone, whatever the OS setting.
 The app is dark, the screenshots are dark, and a light page around dark
 shots read as two products. Supersedes the "follows the OS preference"
 line in D-37.
+
+### D-42 · Comments become notes; one warm black — 2026-10-14
+Canon is a singular tool for organizing prototypes, local to one person,
+so there is no one to comment to. Comments are renamed notes: pinned
+reminders to yourself about what changed, what to try next, and which
+version is current. The data model is unchanged, so real comments can
+return with sharing if a team ever asks.
+
+The site and the app share one warm black, #171814, with warm greys
+around it.

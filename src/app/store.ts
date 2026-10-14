@@ -375,11 +375,11 @@ export async function createSampleProject() {
     await placeOnBoard(review.id, made[3].id, { x: 1400, y: 0 });
   }
   const lane = made[2];
-  await addNote({ boardId: board.id, frameId: lane.id, page: lane.entry, kind: 'comment', author: 'Theo K.', fx: 0.5, py: 356, said: 'Held and booked look the same to me. Dashed outline for held?' });
-  const c = await addNote({ boardId: board.id, frameId: made[0].id, page: made[0].entry, kind: 'comment', author: 'Maya R.', fx: 0.5, py: 300, said: 'Should the ring start empty in the morning, or show yesterday?' });
+  await addNote({ boardId: board.id, frameId: lane.id, page: lane.entry, kind: 'comment', author: myName() || 'You', fx: 0.5, py: 356, said: 'Held and booked look the same. Try a dashed outline for held.' });
+  const c = await addNote({ boardId: board.id, frameId: made[0].id, page: made[0].entry, kind: 'comment', author: myName() || 'You', fx: 0.5, py: 300, said: 'Should the ring start empty in the morning, or show yesterday?' });
   await setResolved(c.id, false);
   const withReply = state.notes.find((n) => n.id === c.id)!;
-  await putNote({ ...withReply, replies: [{ id: uid(), author: 'Theo K.', body: 'Empty. Yesterday belongs on the streak screen.', createdAt: now() }] });
+  await putNote({ ...withReply, replies: [{ id: uid(), author: myName() || 'You', body: 'Empty. Yesterday goes on the streak screen. This one is current.', createdAt: now() }] });
   // Not on any board yet: shows up in the library under "Not on a board".
   await addPrepared(project.id, {
     name: 'Onboarding, short',

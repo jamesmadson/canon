@@ -54,7 +54,7 @@ export function Composer({ at, onCancel, onSave }: { at: Draft; onCancel: () => 
     ${mode === 'comment'
       ? html`<div class="row" style="flex-wrap:nowrap;align-items:flex-start">
           <${Avatar} name=${me || 'You'} />
-          <textarea class="field" rows="3" autofocus placeholder="Add a comment" value=${body}
+          <textarea class="field" rows="3" autofocus placeholder="Add a note" value=${body}
             onInput=${(e: Event) => setBody((e.target as HTMLTextAreaElement).value)}
             onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), submit())}></textarea>
         </div>`
@@ -79,7 +79,7 @@ export function Thread({ note, sx, sy, onClose }: { note: Note; sx: number; sy: 
   const comment = isComment(note);
   return html`<div class="thread" style=${{ left: Math.max(12, sx + 18), top: Math.max(12, sy - 24) }} onPointerDown=${(e: Event) => e.stopPropagation()}>
     <div class="thread-head">
-      <span class="label">${comment ? 'Comment' : 'Research note'}</span>
+      <span class="label">${comment ? 'Note' : 'Research note'}</span>
       <span class="spacer"></span>
       <button class="btn ghost icon" title=${note.resolved ? 'Reopen' : 'Resolve'} onClick=${() => store.setResolved(note.id, !note.resolved)}>${note.resolved ? html`<${Icon} name="refresh" />` : html`<${Icon} name="check" />`}</button>
       <button class="btn ghost icon" title="Delete thread" onClick=${() => confirm('Delete this thread?') && (store.deleteNote(note.id), onClose())}><${Icon} name="trash" /></button>
@@ -93,7 +93,7 @@ export function Thread({ note, sx, sy, onClose }: { note: Note; sx: number; sy: 
       </div>
     </div>
     ${(note.replies ?? []).map((r) => html`<div class="msg"><${Avatar} name=${r.author} /><div><div class="msg-meta"><b>${r.author}</b><span>${ago(r.createdAt)}</span></div><p>${r.body}</p></div></div>`)}
-    ${note.resolved && html`<div class="hint" style="padding:0 2px">Resolved. Reopen to keep talking.</div>`}
+    ${note.resolved && html`<div class="hint" style="padding:0 2px">Resolved. Reopen to pick it back up.</div>`}
     <form class="reply" onSubmit=${send}>
       <${Avatar} name=${store.myName() || 'You'} />
       <input class="field" placeholder="Reply" value=${text} onInput=${(e: Event) => setText((e.target as HTMLInputElement).value)} />
@@ -109,7 +109,7 @@ export function CommentsPanel({ notes, onPick, onClose }: { notes: Note[]; onPic
   const frames = store.getState().frames;
   return html`<aside class="inspector" onPointerDown=${(e: Event) => e.stopPropagation()}>
     <div class="insp-sec" style="flex-direction:row;align-items:center">
-      <div class="label" style="flex:1">Comments</div>
+      <div class="label" style="flex:1">Notes</div>
       <div class="seg"><button aria-pressed=${show === 'open'} onClick=${() => setShow('open')}>Open</button><button aria-pressed=${show === 'resolved'} onClick=${() => setShow('resolved')}>Resolved</button></div>
       <button class="btn ghost icon" onClick=${onClose} title="Close"><${Icon} name="x" /></button>
     </div>

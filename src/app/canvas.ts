@@ -303,13 +303,13 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
       <span class="spacer"></span>
       ${tidy && html`<label class="search small"><${Icon} name="search" /><input placeholder="Find on board" value=${query} onInput=${(e: Event) => setQuery((e.target as HTMLInputElement).value)} /></label>
         <select class="select" value=${sort} onChange=${(e: Event) => setSort((e.target as HTMLSelectElement).value as LibrarySort)} aria-label="Sort">
-          <option value="added">Newest</option><option value="name">Name</option><option value="comments">Most comments</option><option value="updated">Last changed</option>
+          <option value="added">Newest</option><option value="name">Name</option><option value="comments">Most notes</option><option value="updated">Last changed</option>
         </select>`}
       <div class="seg" role="group" aria-label="Arrangement">
         <button aria-pressed=${!tidy} onClick=${() => canEdit && store.setArrangement(id, 'free')}>Free</button>
         <button aria-pressed=${tidy} onClick=${() => canEdit && store.setArrangement(id, 'tidy')}>Tidy</button>
       </div>
-      <button class=${`btn ghost${panel ? ' on' : ''}`} onClick=${() => setPanel(!panel)} title="Comments"><${Icon} name="comment" />${openCount}</button>
+      <button class=${`btn ghost${panel ? ' on' : ''}`} onClick=${() => setPanel(!panel)} title="Notes"><${Icon} name="comment" />${openCount}</button>
       ${!viewer && html`<${ShareButton} board=${board} />`}
     </div>
     <div class="board">
@@ -373,7 +373,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
           setDraft(null);
           setTool('select');
           setOpenThread(isComment(made) ? null : null);
-          store.toast('Comment posted.');
+          store.toast('Note added.');
         }} />`}
         ${thread && threadAt && html`<${Thread} note=${thread} sx=${threadAt.x} sy=${threadAt.y} onClose=${() => setOpenThread(null)} />`}
 
@@ -390,7 +390,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
           </div>
           <span class="sep"></span>`}
           <button class="btn icon" aria-pressed=${tool === 'select'} onClick=${() => setTool('select')} title="Select (V)"><${Icon} name="cursor" /></button>
-          ${canComment && html`<button class="btn icon" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Comment (C): click a prototype or the canvas"><${Icon} name="comment" /></button>`}
+          ${canComment && html`<button class="btn icon" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Note (N): click a prototype or the canvas"><${Icon} name="comment" /></button>`}
           <span class="sep"></span>
           <button class="btn icon" onClick=${() => zoomBy(0.8)} title="Zoom out (-)"><${Icon} name="minus" /></button>
           <button class="btn zoom" onClick=${() => setCam((c) => zoomAt(c, { x: canvasRef.current!.clientWidth / 2, y: canvasRef.current!.clientHeight / 2 }, 1))} title="Zoom to 100%">${Math.round(cam.zoom * 100)}%</button>
@@ -427,7 +427,7 @@ function Inspector({ frame, onFocus, onEnter, onRemove, onComment, onOpenThread 
       <div class="row">
         ${multi ? html`<button class="btn primary" onClick=${onEnter}><${Icon} name="pages" />Open pages</button>` : html`<button class="btn primary" onClick=${onFocus}><${Icon} name="open" />Open</button>`}
         ${frame.kind === 'linked' && html`<button class="btn" onClick=${() => store.refreshLinked(frame.id)}><${Icon} name="refresh" />Refresh</button>`}
-        <a class="btn ghost" href=${previewUrl(frame)} target="_blank" rel="noopener" title="Opens in its own tab, with comments"><${Icon} name="comment" />Preview link</a>
+        <a class="btn ghost" href=${previewUrl(frame)} target="_blank" rel="noopener" title="Opens in its own tab, with notes"><${Icon} name="comment" />Preview link</a>
       </div>
     </div>
     <div class="insp-sec">
@@ -438,9 +438,9 @@ function Inspector({ frame, onFocus, onEnter, onRemove, onComment, onOpenThread 
     </div>
     <div class="insp-sec">
       <div class="label">Threads · ${multi ? `${notes.length} here, ${all.length} in all` : notes.length}</div>
-      ${notes.length === 0 && html`<p class="hint" style="margin:0">Press <kbd>C</kbd>, then click the prototype. Or comment from its preview link.</p>`}
+      ${notes.length === 0 && html`<p class="hint" style="margin:0">Press <kbd>N</kbd>, then click the prototype. Or add one from its preview link.</p>`}
       ${notes.map((n) => html`<button class="thread-row" onClick=${() => onOpenThread(n)}><${NoteItem} note=${n} /></button>`)}
-      ${notes.length > 0 && html`<button class="btn ghost" onClick=${onComment}><${Icon} name="comment" />Add a comment</button>`}
+      ${notes.length > 0 && html`<button class="btn ghost" onClick=${onComment}><${Icon} name="comment" />Add a note</button>`}
     </div>
     <div class="insp-sec" style="border:0">
       <button class="btn ghost danger" onClick=${onRemove}><${Icon} name="x" />Take off this board</button>
@@ -581,7 +581,7 @@ export function BundleView({ frameId, fromBoard, startPage }: { frameId: string;
         <button aria-pressed=${!showNav} onClick=${() => setShowNav(false)} title="Links that move someone through the prototype">Flow</button>
         <button aria-pressed=${showNav} onClick=${() => setShowNav(true)} title=${`${navigation.length} links that most pages share, like a top nav`}>+ Nav links · ${navigation.length}</button>
       </div>`}
-      <a class="btn ghost" href=${previewUrl(frame, selected ?? entry)} target="_blank" rel="noopener" title="Opens in its own tab, with comments"><${Icon} name="comment" />Preview link</a>
+      <a class="btn ghost" href=${previewUrl(frame, selected ?? entry)} target="_blank" rel="noopener" title="Opens in its own tab, with notes"><${Icon} name="comment" />Preview link</a>
     </div>
     <div class="board">
       <div ref=${canvasRef}
@@ -637,7 +637,7 @@ export function BundleView({ frameId, fromBoard, startPage }: { frameId: string;
           const made = await store.addNote({ boardId: board?.id ?? '', frameId: draft.frameId, page: draft.page, fx: draft.fx, py: draft.py, wx: draft.wx, wy: draft.wy, source: 'canvas', said: '', ...n });
           setDraft(null);
           setTool('select');
-          store.toast('Comment posted.');
+          store.toast('Note added.');
         }} />`}
         ${thread && threadAt && html`<${Thread} note=${thread} sx=${threadAt.x} sy=${threadAt.y} onClose=${() => setOpenThread(null)} />`}
 
@@ -645,7 +645,7 @@ export function BundleView({ frameId, fromBoard, startPage }: { frameId: string;
           <a class="btn" href=${back} title="Back (Esc)"><${Icon} name="back" />${board ? board.name : 'Library'}</a>
           <span class="sep"></span>
           <button class="btn icon" aria-pressed=${tool === 'select'} onClick=${() => setTool('select')} title="Select (V)"><${Icon} name="cursor" /></button>
-          <button class="btn icon" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Comment (C): click a page"><${Icon} name="comment" /></button>
+          <button class="btn icon" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Note (N): click a page"><${Icon} name="comment" /></button>
           <span class="sep"></span>
           <button class="btn zoom" onClick=${() => fit()} title="Fit (Shift+1)">${Math.round(cam.zoom * 100)}%</button>
           <button class="btn icon" onClick=${() => fit()} title="Fit everything (Shift+1)"><${Icon} name="fit" /></button>
@@ -680,9 +680,9 @@ function PageInspector({ frame, page, onFocus, onPick, onComment, onOpenThread }
     <div class="insp-sec"><div class="label">Linked from · ${into.length}</div>${list(into, page === frame.entry ? 'The entry page.' : 'Nothing links here. It may be orphaned.')}</div>
     <div class="insp-sec" style="border:0">
       <div class="label">Threads · ${notes.length}</div>
-      ${notes.length === 0 && html`<p class="hint" style="margin:0">Press <kbd>C</kbd> and click this page, or comment from its preview link.</p>`}
+      ${notes.length === 0 && html`<p class="hint" style="margin:0">Press <kbd>N</kbd> and click this page, or add one from its preview link.</p>`}
       ${notes.map((n) => html`<button class="thread-row" onClick=${() => onOpenThread(n)}><${NoteItem} note=${n} /></button>`)}
-      ${notes.length > 0 && html`<button class="btn ghost" onClick=${onComment}><${Icon} name="comment" />Add a comment</button>`}
+      ${notes.length > 0 && html`<button class="btn ghost" onClick=${onComment}><${Icon} name="comment" />Add a note</button>`}
     </div>
   </aside>`;
 }

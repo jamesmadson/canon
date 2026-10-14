@@ -68,7 +68,7 @@
   </style>
   <div class="shield"></div>
   <div class="layer"></div>
-  <div class="bar"><b>Canon</b><button class="toggle" aria-pressed="false">Comment</button></div>`;
+  <div class="bar"><b>Canon</b><button class="toggle" aria-pressed="false">Note</button></div>`;
 
   const shield = root.querySelector('.shield');
   const layer = root.querySelector('.layer');
@@ -79,7 +79,7 @@
     commenting = on;
     shield.classList.toggle('on', on);
     toggle.setAttribute('aria-pressed', String(on));
-    toggle.textContent = on ? 'Click where it happened · Esc' : `Comment${notes.length ? ` · ${notes.length}` : ''}`;
+    toggle.textContent = on ? 'Click where it happened · Esc' : `Note${notes.length ? ` · ${notes.length}` : ''}`;
   };
 
   const render = () => {
@@ -147,7 +147,7 @@
       pop.innerHTML = (mode === 'comment'
           ? `${myName() ? '' : '<input name="me" placeholder="Your name, how teammates see you">'}<textarea rows="3" name="said" placeholder="Add a comment"></textarea>`
           : `<div class="label">Said · word for word</div><textarea rows="3" name="said" placeholder="What they said, in their words"></textarea><input name="who" placeholder="Who, as a code: P-04 (never a name)"><textarea rows="2" name="meant" placeholder="What you think they meant (optional)"></textarea>`)
-        + `<div class="row"><button type="button" class="cancel">Cancel</button><button class="primary" disabled>${mode === 'comment' ? 'Post' : 'File note'}</button></div>`;
+        + `<div class="row"><button type="button" class="cancel">Cancel</button><button class="primary" disabled>${mode === 'comment' ? 'Add' : 'File note'}</button></div>`;
       pop.querySelectorAll('[data-m]').forEach((b) => (b.onclick = () => { mode = b.dataset.m; draw(); }));
       const said = pop.querySelector('[name=said]');
       const post = pop.querySelector('.primary');

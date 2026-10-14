@@ -99,15 +99,15 @@
    because an explicit Light has to win over a dark OS. */
 :root[data-app-theme="dark"] {
   color-scheme: dark;
-  --color-ground: #191817;
-  --color-panel: #232120;
-  --color-recess: #2e2b29;
-  --color-bg: #191817;
-  --color-surface: #2e2b29;
-  --color-rule: #35322f;
-  --color-ink-soft: #9a968d;
-  --color-ink: #edebe6;
-  --mark-ink: #edebe6;
+  --color-ground: #171814;
+  --color-panel: #22231e;
+  --color-recess: #2a2b25;
+  --color-bg: #171814;
+  --color-surface: #2a2b25;
+  --color-rule: #33342d;
+  --color-ink-soft: #a7a597;
+  --color-ink: #ecebe4;
+  --mark-ink: #ecebe4;
   --mark-orange: #ff5c28;
   --mark-yellow: #f0c441;
 }
@@ -115,15 +115,15 @@
 @media (prefers-color-scheme: dark) {
   :root[data-app-theme="system"] {
     color-scheme: dark;
-    --color-ground: #191817;
-    --color-panel: #232120;
-    --color-recess: #2e2b29;
-    --color-bg: #191817;
-    --color-surface: #2e2b29;
-    --color-rule: #35322f;
-    --color-ink-soft: #9a968d;
-    --color-ink: #edebe6;
-    --mark-ink: #edebe6;
+    --color-ground: #171814;
+    --color-panel: #22231e;
+    --color-recess: #2a2b25;
+    --color-bg: #171814;
+    --color-surface: #2a2b25;
+    --color-rule: #33342d;
+    --color-ink-soft: #a7a597;
+    --color-ink: #ecebe4;
+    --mark-ink: #ecebe4;
     --mark-orange: #ff5c28;
     --mark-yellow: #f0c441;
   }
@@ -585,7 +585,7 @@ summary,
   line-height: 0.9;
   letter-spacing: -0.045em;
   text-align: center;
-  color: #edebe6;
+  color: #ecebe4;
   will-change: transform;
 }
 .closing-strip .meta {
@@ -595,5 +595,5 @@ summary,
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #9a968d;
+  color: #a7a597;
 }

@@ -106,7 +106,7 @@ function Sidebar({ route }: { route: Route }) {
           ${open && html`<div class="rail-sub">
             <a class="nav-item" href=${`#/p/${p.id}`} aria-current=${route.name === 'project' && route.tab === 'prototypes' ? 'page' : undefined}><${Icon} name="grid" />Prototypes</a>
             ${store.boardsOf(p.id).map((b) => html`<a class="nav-item" href=${`#/b/${b.id}`} aria-current=${(route.name === 'board' || route.name === 'share') && route.id === b.id ? 'page' : undefined}><${Icon} name="boards" /><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</span><span class="count">${store.placementsOf(b.id).length}</span></a>`)}
-            <a class="nav-item" href=${`#/p/${p.id}/comments`} aria-current=${route.name === 'project' && route.tab === 'comments' ? 'page' : undefined}><${Icon} name="comment" />Comments<span class="count">${store.notesInProject(p.id).filter((n) => !n.resolved).length}</span></a>
+            <a class="nav-item" href=${`#/p/${p.id}/comments`} aria-current=${route.name === 'project' && route.tab === 'comments' ? 'page' : undefined}><${Icon} name="comment" />Notes<span class="count">${store.notesInProject(p.id).filter((n) => !n.resolved).length}</span></a>
           </div>`}
         </div>`;
       })}
@@ -160,7 +160,7 @@ function Home() {
         <div class="connect-head"><h2>Start a project</h2><span class="faint">A project holds every prototype for one product, and the boards you arrange them on.</span></div>
         <div class="ways" style="grid-template-columns:repeat(2,minmax(0,1fr))">
           <button class="way" onClick=${newProject}><span class="way-icon"><${Icon} name="plus" /></span><b>New project</b><span>Then drop in HTML, zips or folders, or link a folder on your machine.</span></button>
-          <button class="way" onClick=${sample}><span class="way-icon"><${Icon} name="spark" /></span><b>Try the sample project</b><span>Fernwell: six prototypes including a six-page site, two boards, and a comment thread.</span></button>
+          <button class="way" onClick=${sample}><span class="way-icon"><${Icon} name="spark" /></span><b>Try the sample project</b><span>Fernwell: six prototypes including a six-page site, two boards, and a few notes.</span></button>
         </div>
       </section>`}
       ${projects.length > 0 && html`<div class="grid">
@@ -201,7 +201,7 @@ function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boa
       <div class="tabs">
         <a href=${`#/p/${id}`} aria-current=${tab === 'prototypes' ? 'page' : undefined}>Prototypes <span>${store.prototypesOf(id).length}</span></a>
         <a href=${`#/p/${id}/boards`} aria-current=${tab === 'boards' ? 'page' : undefined}>Boards <span>${store.boardsOf(id).length}</span></a>
-        <a href=${`#/p/${id}/comments`} aria-current=${tab === 'comments' ? 'page' : undefined}>Comments <span>${store.notesInProject(id).filter((n) => !n.resolved).length}</span></a>
+        <a href=${`#/p/${id}/comments`} aria-current=${tab === 'comments' ? 'page' : undefined}>Notes <span>${store.notesInProject(id).filter((n) => !n.resolved).length}</span></a>
       </div>
       <span class="spacer"></span>
       ${tab === 'boards' && html`<button class="btn primary" onClick=${newBoard}><${Icon} name="plus" />New board</button>`}
@@ -249,7 +249,7 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
     if (boardId === 'new') go(`/b/${bid}`);
   };
   const remove = async () => {
-    if (!confirm(`Delete ${picked.size} prototype${picked.size > 1 ? 's' : ''} from the project, every board, and their comments?`)) return;
+    if (!confirm(`Delete ${picked.size} prototype${picked.size > 1 ? 's' : ''} from the project, every board, and their notes?`)) return;
     for (const fid of picked) await store.deleteFrame(fid);
     setPicked(new Set());
   };
@@ -267,10 +267,10 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
       <select class="select" value=${filter.source} onChange=${(e: Event) => setFilter({ ...filter, source: (e.target as HTMLSelectElement).value as LibraryFilter['source'] })} aria-label="Source">
         <option value="all">All sources</option><option value="files">Files</option><option value="linked">Linked folders</option><option value="url">URLs</option>
       </select>
-      ${chip('multiPage', 'Multi-page')}${chip('hasComments', 'Open comments')}${chip('unplaced', 'Not on a board')}
+      ${chip('multiPage', 'Multi-page')}${chip('hasComments', 'Open notes')}${chip('unplaced', 'Not on a board')}
       <span class="spacer"></span>
       <select class="select" value=${sort} onChange=${(e: Event) => setSort((e.target as HTMLSelectElement).value as LibrarySort)} aria-label="Sort">
-        <option value="added">Newest</option><option value="name">Name</option><option value="comments">Most comments</option><option value="updated">Last changed</option>
+        <option value="added">Newest</option><option value="name">Name</option><option value="comments">Most notes</option><option value="updated">Last changed</option>
       </select>
       <div class="seg"><button aria-pressed=${view === 'grid'} onClick=${() => setView('grid')} title="Grid"><${Icon} name="grid" /></button><button aria-pressed=${view === 'table'} onClick=${() => setView('table')} title="Table"><${Icon} name="table" /></button></div>
       <div style="position:relative">
@@ -320,7 +320,7 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
           })}
         </div>`
       : html`<table class="lib-table">
-          <thead><tr><th style="width:32px"></th><th>Name</th><th>Pages</th><th>Source</th><th>Boards</th><th>Open comments</th><th>Added</th><th>Changed</th></tr></thead>
+          <thead><tr><th style="width:32px"></th><th>Name</th><th>Pages</th><th>Source</th><th>Boards</th><th>Open notes</th><th>Added</th><th>Changed</th></tr></thead>
           <tbody>${items.map((i) => html`<tr class=${picked.has(i.id) ? 'picked' : ''}>
             <td><input type="checkbox" checked=${picked.has(i.id)} onChange=${() => toggle(i.id)} /></td>
             <td><button class="link-btn" onClick=${() => open(i.id)}>${i.name}</button></td>
@@ -353,7 +353,7 @@ function ProjectComments({ projectId }: { projectId: string }) {
       <div class="seg"><button aria-pressed=${show === 'open'} onClick=${() => setShow('open')}>Open</button><button aria-pressed=${show === 'resolved'} onClick=${() => setShow('resolved')}>Resolved</button></div>
       <span class="spacer"></span>
     </div>
-    ${notes.length === 0 && html`<div class="empty">${show === 'open' ? 'Nothing open. Press C on a board and click anywhere.' : 'Nothing resolved yet.'}</div>`}
+    ${notes.length === 0 && html`<div class="empty">${show === 'open' ? 'Nothing open. Press N on a board and click anywhere.' : 'Nothing resolved yet.'}</div>`}
     ${notes.map((n) => {
       const w = where(n);
       return html`<a class="comment-row" href=${w.href}>
