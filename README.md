@@ -38,10 +38,19 @@ in your browser or installs as an app, and nothing is uploaded.
 Canon is the index, not the source of truth. Your work stays where it was
 made; Canon points at it and shows it.
 
-Everything lives in your browser, in IndexedDB. A service worker serves
-dropped-in prototypes from local storage, so a zip from v0 and a folder from
-Claude Code open the same way. Nothing leaves your machine, and Canon collects
-no usage data (see D-40 in the decision log).
+Canon works from your browser's storage (IndexedDB), and a service worker
+serves dropped-in prototypes from it, so a zip from v0 and a folder from Claude
+Code open the same way. Nothing leaves your machine, and Canon collects no
+usage data (see D-40 in the decision log).
+
+Browser storage can be cleared, so Canon keeps a durable copy as plain files:
+
+- **A Canon folder** (Chrome, Edge, Arc). Choose a folder once and Canon
+  writes `canon.json` plus every prototype's files there a moment after each
+  change. If the browser is ever cleared, choose "Open your Canon folder" and
+  everything comes back. Back the folder up like any other.
+- **A backup file** (every browser). "Back up" saves one `.canon` file;
+  "Restore" brings it back. Restoring merges; it never deletes.
 
 Sharing with colleagues by email is designed but not built. It needs a small
 hosted layer and waits until a team asks for it.

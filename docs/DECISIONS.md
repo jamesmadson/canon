@@ -338,3 +338,13 @@ return with sharing if a team ever asks.
 
 The site and the app share one warm black, #171814, with warm greys
 around it.
+
+### D-43 · The library lives in plain files too — 2026-10-14
+Browser storage alone is too fragile for someone's whole prototype history:
+clearing site data wipes it, and Safari can drop it after a week away. Canon
+now asks the browser to keep its storage, and keeps a durable copy as plain
+files. In Chrome, Edge and Arc that is a Canon folder: canon.json plus every
+prototype's files, rewritten a moment after each change. Everywhere, a
+one-file .canon backup can be saved and restored by hand. Restoring merges
+by id and never deletes. The same format will be the desktop app's storage
+if there ever is one.

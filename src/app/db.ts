@@ -164,3 +164,23 @@ export async function removeFrameDeep(frameId: string, noteIds: string[]) {
   for (const id of noteIds) await remove('notes', id);
   await remove('frames', frameId);
 }
+
+/** Write many records into one store in a single transaction. */
+export async function putMany(store: string, values: unknown[]) {
+  if (!values.length) return;
+  const db = await openDb();
+  const tx = db.transaction(store, 'readwrite');
+  const os = tx.objectStore(store);
+  for (const v of values) os.put(v);
+  await done(tx);
+}
+
+/** Every stored file one prototype owns. */
+export async function filesOf(frameId: string): Promise<StoredFile[]> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction('files').objectStore('files').index('frameId').getAll(IDBKeyRange.only(frameId));
+    req.onsuccess = () => resolve(req.result as StoredFile[]);
+    req.onerror = () => reject(req.error);
+  });
+}

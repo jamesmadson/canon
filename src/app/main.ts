@@ -2,6 +2,7 @@ import { render, h } from 'preact';
 import './app.css';
 import { App, BASE } from './ui';
 import { load, reloadNotes, setInstallPrompt, type InstallPromptEvent } from './store';
+import { askPersistence, initVault } from './vault';
 
 // Chromium offers installing as an app through this event; keep it for the Install button.
 addEventListener('beforeinstallprompt', (e) => {
@@ -22,6 +23,9 @@ async function boot() {
     }
   }
   await load();
+  // Ask the browser not to evict the library, then pick up the Canon folder if there is one.
+  void askPersistence();
+  await initVault();
   // A preview tab files comments straight into IndexedDB and says so here.
   if ('BroadcastChannel' in window) new BroadcastChannel('canon-app').onmessage = () => reloadNotes();
   render(h(App, {}), document.getElementById('app')!);

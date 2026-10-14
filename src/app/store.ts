@@ -15,9 +15,20 @@ export interface State {
   notes: Note[];
   ready: boolean;
   toast: string | null;
+  vault: Vault;
 }
 
-let state: State = { projects: [], boards: [], frames: [], placements: [], notes: [], ready: false, toast: null };
+/**
+ * Where the library is kept beyond this browser. A Canon folder on disk is the
+ * durable copy; the browser's storage is the fast one.
+ */
+export type Vault =
+  | { status: 'unsupported' }
+  | { status: 'none' }
+  | { status: 'needs-permission'; name: string }
+  | { status: 'connected'; name: string; savedAt: number | null; saving: boolean; error?: string };
+
+let state: State = { projects: [], boards: [], frames: [], placements: [], notes: [], ready: false, toast: null, vault: { status: 'none' } };
 const listeners = new Set<() => void>();
 
 export const getState = () => state;
@@ -25,6 +36,7 @@ export function subscribe(fn: () => void) {
   listeners.add(fn);
   return () => listeners.delete(fn);
 }
+export const setVault = (vault: Vault) => set({ vault });
 function set(patch: Partial<State>) {
   state = { ...state, ...patch };
   listeners.forEach((fn) => fn());

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import * as store from './store';
+import * as vault from './vault';
 import type { Note, Role } from './db';
 import { canLinkFolders, groupsFromDrop } from './intake';
 import { BoardView, BundleView, Focus } from './canvas';
@@ -82,6 +83,46 @@ function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) {
   </div>`;
 }
 
+/* ── Where the library is kept ─────────────────────────────────────────── */
+function pickBackup() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.canon,.zip';
+  input.onchange = () => input.files?.[0] && vault.restoreFromFile(input.files[0]);
+  input.click();
+}
+
+function Storage() {
+  const { vault: v } = useStore();
+  const tools = html`<div class="store-tools">
+    <button onClick=${() => vault.downloadBackup()}>Back up</button><button onClick=${pickBackup}>Restore</button>
+    ${v.status === 'connected' && html`<button onClick=${() => vault.forgetFolder()}>Stop saving</button>`}
+  </div>`;
+  if (v.status === 'connected') {
+    const when = v.saving ? 'Saving…' : v.savedAt ? `Saved ${ago(v.savedAt)}` : 'Connected';
+    return html`<div class="store">
+      <div class=${`store-line${v.error ? ' warn' : ''}`}><span class="dot"></span><span><b>${v.name}</b> folder · ${v.error ?? when}</span></div>
+      ${tools}
+    </div>`;
+  }
+  if (v.status === 'needs-permission') {
+    return html`<div class="store">
+      <button class="store-cta" onClick=${() => vault.reconnect()}><b>Reconnect “${v.name}”</b><small>The browser needs your OK to keep saving there.</small></button>
+      ${tools}
+    </div>`;
+  }
+  if (v.status === 'none') {
+    return html`<div class="store">
+      <button class="store-cta" onClick=${() => vault.chooseFolder()}><b>Save to a folder</b><small>Only in this browser right now. A folder keeps it safe if the browser is cleared.</small></button>
+      ${tools}
+    </div>`;
+  }
+  return html`<div class="store">
+    <div class="store-line warn"><span class="dot"></span><span>Only in this browser. Back up now and then.</span></div>
+    ${tools}
+  </div>`;
+}
+
 /* ── Sidebar ───────────────────────────────────────────────────────────── */
 function Sidebar({ route }: { route: Route }) {
   const s = useStore();
@@ -91,7 +132,7 @@ function Sidebar({ route }: { route: Route }) {
   return html`<aside class="rail">
     <a class="workspace" href="#/" style="text-decoration:none">
       <div class="mark"></div>
-      <div><b>Canon</b><small>Local · this browser</small></div>
+      <div><b>Canon</b><small>${s.vault.status === 'connected' ? `Saving to ${s.vault.name}` : 'Local · this browser'}</small></div>
     </a>
     <a class="nav-item" href="#/" aria-current=${route.name === 'home' ? 'page' : undefined}><${Icon} name="project" />All projects<span class="count">${s.projects.length}</span></a>
     <div class="rail-section label">Projects</div>
@@ -121,7 +162,7 @@ function Sidebar({ route }: { route: Route }) {
     </div>`}
     <div class="rail-foot">
       ${me ? html`<div class="row" style="align-items:center;margin-bottom:8px;flex-wrap:nowrap"><${Avatar} name=${me} /><span style="color:var(--soft)">${me}</span></div>` : null}
-      <span class="dot"></span>Stored in this browser. Nothing is uploaded.
+      <${Storage} />
     </div>
   </aside>`;
 }
@@ -162,6 +203,7 @@ function Home() {
           <button class="way" onClick=${newProject}><span class="way-icon"><${Icon} name="plus" /></span><b>New project</b><span>Then drop in HTML, zips or folders, or link a folder on your machine.</span></button>
           <button class="way" onClick=${sample}><span class="way-icon"><${Icon} name="spark" /></span><b>Try the sample project</b><span>Fernwell: six prototypes including a six-page site, two boards, and a few notes.</span></button>
         </div>
+        <p class="hint" style="margin:14px 2px 0">Had Canon before? ${vault.folderSupported() && html`<button class="link" onClick=${() => vault.chooseFolder()}>Open your Canon folder</button> or `}<button class="link" onClick=${pickBackup}>restore a backup</button>.</p>
       </section>`}
       ${projects.length > 0 && html`<div class="grid">
         ${projects.map((p) => {
