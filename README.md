@@ -1,32 +1,67 @@
-# Canon
+# can●n
 
-James Madson's design skills for AI agents: graft, strata and deter. The site
-also hosts the Canon app, which keeps your prototypes in one place.
+**Every prototype, from every tool, in one place.**
 
-**Live at [jamesmadson.github.io/canon](https://jamesmadson.github.io/canon)**
+Claude Code, v0, Lovable, Figma Make, a branch, a zip. Your prototypes live
+everywhere. Canon puts them on one shelf you can see, open and share. It runs
+in your browser or installs as an app, and nothing is uploaded.
 
-Named Canon as in an accepted body of principles and work, echoing the Vignelli
-Canon that helped shape its visual system.
+**[Try it](https://jamesmadson.github.io/canon/app/)** ·
+[Site](https://jamesmadson.github.io/canon/) ·
+[Decisions](docs/DECISIONS.md)
+
+![A Canon board: phone and desktop prototypes on a dark canvas, with a multi-page site fanning its other pages out from behind it](public/shots/board.jpg)
 
 ---
 
-## The skills
+## What it does
+
+- **One library.** Drag in HTML files, zipped builds and whole folders. Or
+  link a repo folder on your machine, or several, and they stay current.
+  Search, sort and filter across all of it.
+- **Boards.** Lay prototypes out on a canvas. One prototype can sit on as
+  many boards as it needs.
+- **A map for anything with more than one page.** Hover a multi-page
+  prototype and its other pages tease out from behind it. Open it and Canon
+  reads its HTML: every page, the links between them, and the pages nothing
+  points to anymore.
+- **Comments where the work is.** Pin a comment on a screen, a page or the
+  canvas. Reply, resolve, move on. Comments ride along into preview links.
+- **Install it.** In Chrome, Edge or Arc, use the Install button in the
+  sidebar for its own window and a Dock or taskbar icon. In Safari, File, then
+  Add to Dock. It works offline.
+
+![A six-page prototype laid out as its map, with the pricing page selected and its links highlighted](public/shots/map.jpg)
+
+## How it works
+
+Canon is the index, not the source of truth. Your work stays where it was
+made; Canon points at it and shows it.
+
+Everything lives in your browser, in IndexedDB. A service worker serves
+dropped-in prototypes from local storage, so a zip from v0 and a folder from
+Claude Code open the same way. Nothing leaves your machine, and Canon collects
+no usage data (see D-40 in the decision log).
+
+Sharing with colleagues by email is designed but not built. It needs a small
+hosted layer and waits until a team asks for it.
+
+## Skills
+
+Canon also ships three Claude Code plugins of its own:
 
 - **graft** maps a Claude Code session as a branch diagram: your turns as the
   trunk, subagents as forks, compactions as diamonds.
-- **strata** keeps a record of what users actually said, in dated layers, under
-  pseudonyms, with verbatim kept apart from interpretation.
+- **strata** keeps a record of what users actually said, in dated layers,
+  under pseudonyms, with verbatim kept apart from interpretation.
 - **deter** is a review that removes: every finding priced against the
   surface's job, one thing kept, at most one thing missing.
-
-Each one ships as a Claude Code plugin from this repo's marketplace:
 
 ```
 /plugin marketplace add jamesmadson/canon
 ```
 
-Then install `graft`, `strata` or `deter` from that marketplace. The sources
-live in `plugin/graft`, `plugin/strata` and `plugin/deter`.
+Then install `graft`, `strata` or `deter`. Sources are in `plugin/`.
 
 ---
 
@@ -37,49 +72,34 @@ npm install
 npm run dev
 ```
 
-The dev server runs at `http://localhost:4321`. Note the `/canon` base path:
-the site serves at `http://localhost:4321/canon/`, and the bare root 404s.
-
-## Other commands
+The site runs at `http://localhost:4321/canon/` and the app at
+`http://localhost:4321/canon/app/`. The bare root 404s because of the `/canon`
+base path.
 
 - `npm run build`: production build to `dist/`
-- `npm run preview`: preview the production build locally
-- `npm run test`: run the Vitest suite (schema, taxonomy, filter engine,
-  marketplace, app)
+- `npm run preview`: serve the build locally (the app's service worker and
+  install flow behave like production here)
+- `npm test`: the Vitest suite (app, content, marketplace, CLI)
 - `npm run check`: Astro type-check
-- `npx tsx scripts/fetch-skill-trees.ts`: re-verify every gallery entry against
-  its source, refreshing file trees, content outlines and licenses
+
+The app lives in `src/app/` (Preact and htm, no build-time JSX) with its
+service worker at `public/app-sw.js`. Homepage screenshots come from the
+sample project via `scripts/capture-app-shots.mjs`; every name in them is
+invented.
+
+The CLI in `cli/` indexes prototype branches in a repo. It isn't published to
+npm yet; the package name is still open.
 
 ## Deploying
 
-Canon deploys to GitHub Pages at **https://jamesmadson.github.io/canon**, via
-`.github/workflows/deploy.yml` on every push to `main` (or manually with
-`workflow_dispatch`).
+GitHub Pages, via `.github/workflows/deploy.yml`, on every push to `main`.
 
-One-time manual step: in the repo's Settings, Pages, set **Source** to
-"GitHub Actions". Nothing deploys until that's set.
-
-The `/canon` base path is coupled in two places. If the deploy domain or path
-ever changes, update both together:
+The `/canon` base path is set in two places. Change both together:
 
 - `astro.config.mjs` (`site` and `base`)
-- `src/styles/global.css` (`@font-face` `url("/canon/fonts/...")`: plain CSS
-  can't read Astro's `BASE_URL`, so it's hardcoded)
+- `src/styles/global.css` (`@font-face` URLs, which plain CSS can't read from
+  Astro)
 
-The newsletter form is intentionally not wired up yet (see
-`src/pages/newsletter.astro`): the page is live with a "not open yet" notice in
-place of the form.
+## License
 
-## Content
-
-Skills live as MDX files in `src/content/skills/`, validated at build time
-against the schema in `src/content/skillSchema.ts`. The gallery carries only
-Canon's own skills.
-
-`license` is **derived, never hand-typed**: `scripts/fetch-skill-trees.ts`
-reads it from the GitHub API so it can't drift from the source. A skill whose
-source states no license is marked `status: pending-license`, which hides it
-everywhere it would be published, with no detail page and no listing.
-
-See `docs/superpowers/specs/` for design specs, `docs/ROADMAP.md` for what's
-next, and `docs/GO-TO-MARKET.md` for the launch plan.
+MIT. See [LICENSE](LICENSE).
