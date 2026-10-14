@@ -19,6 +19,13 @@ in your browser or installs as an app, and nothing is uploaded.
 - **One library.** Drag in HTML files, zipped builds and whole folders. Or
   link a repo folder on your machine, or several, and they stay current.
   Search, sort and filter across all of it.
+- **Versions stack.** Rounds of the same prototype stack together, newest on
+  top, one marked current: `onboarding`, `onboarding v2` and
+  `Onboarding-final` land in one stack, and so do every Vercel or Netlify
+  preview of one project. Add a version from a prototype's panel and it takes
+  the old one's spot on the board.
+- **⌘K.** Open any prototype, in any project, from anywhere. Enter opens the
+  current version.
 - **Boards.** Lay prototypes out on a canvas. One prototype can sit on as
   many boards as it needs.
 - **A map for anything with more than one page.** Hover a multi-page

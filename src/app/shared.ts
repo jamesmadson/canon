@@ -81,6 +81,7 @@ export const SIZES = [
 /* ── Intake: picks and drops into a project, optionally onto a board ───── */
 export async function addGroups(projectId: string, groups: Group[], opts: { boardId?: string; at?: { x: number; y: number } } = {}) {
   let added = 0;
+  let stacked = 0;
   let x = opts.at?.x;
   for (const g of groups) {
     const p = await prepare(g);
@@ -91,8 +92,10 @@ export async function addGroups(projectId: string, groups: Group[], opts: { boar
     const f = await store.addPrepared(projectId, p, { boardId: opts.boardId, at: x !== undefined && opts.at ? { x, y: opts.at.y } : undefined });
     if (x !== undefined) x += f.w + 120;
     added++;
+    if (store.getState().frames.find((fr) => fr.id === f.id)?.stackId) stacked++;
   }
-  if (added) store.toast(added === 1 ? 'Added one prototype.' : `Added ${added} prototypes.`);
+  // A single prototype that stacked already said so.
+  if (added && !(added === 1 && stacked === 1)) store.toast(added === 1 ? 'Added one prototype.' : `Added ${added} prototypes${stacked ? `, ${stacked} as new versions` : ''}.`);
   return added;
 }
 

@@ -6,6 +6,7 @@ import { canLinkFolders, groupsFromDrop } from './intake';
 import { type Camera, type Point, fitCamera, screenToWorld, tidyPositions, zoomAt } from './lib/layout';
 import { iaLayout, splitNav, teaseSlots } from './lib/bundle';
 import { sortPrototypes, type LibrarySort } from './lib/library';
+import { currentOf, versionOf } from './lib/versions';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
 import { ShareButton } from './share';
 import {
@@ -85,6 +86,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
   const canvasRef = useRef<HTMLDivElement>(null);
   const [cam, setCam] = useState<Camera>({ x: 80, y: 120, zoom: 0.5 });
   const [selected, setSelected] = useState<string | null>(null);
+  const selectedSpot = useRef<string | null>(null);
   const [live, setLive] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
   const [tool, setTool] = useState<'select' | 'comment'>('select');
@@ -264,7 +266,11 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
   if (!s.ready) return html`<div class="main"></div>`;
   if (!board) return html`<div class="main"><div class="empty">That board is not in this browser. <a href="#/">Back home</a></div></div>`;
 
-  const sel = frames.find((f) => f.id === selected) ?? null;
+  // Selection follows the board spot, so swapping in another version keeps its panel open.
+  let sel = frames.find((f) => f.id === selected) ?? null;
+  if (!sel && selected && selectedSpot.current) sel = frames.find((f) => f.placementId === selectedSpot.current) ?? null;
+  selectedSpot.current = sel?.placementId ?? null;
+  if (sel && sel.id !== selected) queueMicrotask(() => setSelected(sel!.id));
   const threads = store.threadsOnBoard(id);
   const openCount = threads.filter((n) => !n.resolved).length;
   const visible = (n: Note) => showResolved || !n.resolved || n.id === openThread;
@@ -343,6 +349,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
               <div class="frame-label" style=${{ maxWidth: f.w * cam.zoom }}>
                 <span class="frame-name">${f.name}</span>
                 ${multi ? html`<span class="pages-chip"><${Icon} name="pages" size=${12} />${pageCount(f)} pages</span>` : null}
+                ${versionChip(f)}
                 ${(live === f.id || f.w * cam.zoom > 260) && html`<span class="kind">${live === f.id ? 'Live · Esc to leave' : `${f.w}×${f.h}`}</span>`}
               </div>
               ${teasing && html`<${Teases} frame=${f} onEnter=${(page: string) => enter(f, page)} />`}
@@ -405,10 +412,69 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
 
       ${panel
         ? html`<${CommentsPanel} notes=${threads} onPick=${jumpTo} onClose=${() => setPanel(false)} />`
-        : sel && !viewer && html`<${Inspector} frame=${sel} onFocus=${() => setFocus(sel.id)} onEnter=${() => enter(sel)} onRemove=${removeSelected} onComment=${() => setTool('comment')} onOpenThread=${jumpTo} />`}
+        : sel && !viewer && html`<${Inspector} frame=${sel} askUrl=${askUrl} onFocus=${() => setFocus(sel.id)} onEnter=${() => enter(sel)} onRemove=${removeSelected} onComment=${() => setTool('comment')} onOpenThread=${jumpTo} />`}
     </div>
     ${picker && html`<${LibraryPicker} projectId=${board.projectId} boardId=${id} onClose=${() => setPicker(false)} />`}
     ${focused && html`<${Focus} frame=${focused} onClose=${() => setFocus(null)} />`}
+  </div>`;
+}
+
+/** v2 of 3 on a board label; dimmed when it is not the current version. */
+function versionChip(f: Frame) {
+  const stack = store.stackOf(f.id);
+  if (stack.length < 2) return null;
+  const cur = currentOf(stack).id === f.id;
+  return html`<span class=${`ver-chip${cur ? '' : ' old'}`} title=${cur ? 'The current version' : 'An older version. Select it to show the current one here.'}>v${versionOf(stack, f.id)}/${stack.length}${cur ? '' : ' · not current'}</span>`;
+}
+
+/**
+ * Every version of this prototype, newest first. The board spot shows one of
+ * them; Show here swaps it, Make current marks the one to use everywhere.
+ */
+function Versions({ frame, askUrl }: { frame: BoardFrame; askUrl: () => Promise<string | null> }) {
+  const [menu, setMenu] = useState(false);
+  const stack = store.stackOf(frame.id);
+  const current = stack.length ? currentOf(stack) : frame;
+  const add = async (w: Way) => {
+    setMenu(false);
+    const before = new Set(store.getState().frames.map((f) => f.id));
+    await runWay(w, frame.projectId, undefined, askUrl);
+    const added = store.getState().frames.filter((f) => !before.has(f.id));
+    const next = added[added.length - 1];
+    if (!next) return;
+    await store.joinStack(next.id, frame.id);
+    // A new round of the same thing takes the same space on the board.
+    await store.updateFrame(next.id, { w: frame.w, h: frame.h });
+    await store.swapOnBoard(frame.placementId, next.id);
+    store.toast(`Version ${versionOf(store.stackOf(next.id), next.id)} added and shown here.`);
+  };
+  return html`<div class="insp-sec">
+    <div class="label">Versions${stack.length > 1 ? ` · ${stack.length}` : ''}</div>
+    ${stack.length > 1 && html`<ol class="versions">
+      ${[...stack].reverse().map((v) => {
+        const n = versionOf(stack, v.id);
+        const here = v.id === frame.id;
+        return html`<li class=${here ? 'here' : ''}>
+          <span class="v-num">v${n}</span>
+          <span class="v-name" title=${v.name}>${v.name}<small>${ago(v.createdAt)}${v.id === current.id ? ' · current' : ''}</small></span>
+          <span class="v-acts">
+            ${!here && html`<button class="link" onClick=${() => store.swapOnBoard(frame.placementId, v.id)}>Show here</button>`}
+            ${v.id !== current.id && html`<button class="link" onClick=${() => store.makeCurrent(v.id)}>Make current</button>`}
+          </span>
+        </li>`;
+      })}
+    </ol>`}
+    ${stack.length <= 1 && html`<p class="hint insp-hint" style="margin-top:0">Made a new round of this one? Add it as a version and it stacks here instead of becoming another tab.</p>`}
+    <div class="row" style="margin-top:10px;position:relative">
+      <button class="btn" onClick=${() => setMenu(!menu)}><${Icon} name="plus" />Add a version</button>
+      ${stack.length > 1 && html`<button class="btn ghost" onClick=${() => store.unstack(frame.id)} title="Take this one out of the stack">Unstack</button>`}
+      ${menu && html`<div class="menu" style="top:40px;left:0">
+        <button onClick=${() => add('files')}><${Icon} name="file" />HTML or zip files…</button>
+        <button onClick=${() => add('folder')}><${Icon} name="folder" />A folder…</button>
+        ${canLinkFolders() && html`<button onClick=${() => add('link')}><${Icon} name="link" />Link a folder on your machine…</button>`}
+        <button onClick=${() => add('url')}><${Icon} name="globe" />A running URL…</button>
+      </div>`}
+    </div>
   </div>`;
 }
 
@@ -435,7 +501,7 @@ function LinkDisplay({ frame }: { frame: Frame }) {
   </div>`;
 }
 
-function Inspector({ frame, onFocus, onEnter, onRemove, onComment, onOpenThread }: { frame: BoardFrame; onFocus: () => void; onEnter: () => void; onRemove: () => void; onComment: () => void; onOpenThread: (n: Note) => void }) {
+function Inspector({ frame, askUrl, onFocus, onEnter, onRemove, onComment, onOpenThread }: { frame: BoardFrame; askUrl: () => Promise<string | null>; onFocus: () => void; onEnter: () => void; onRemove: () => void; onComment: () => void; onOpenThread: (n: Note) => void }) {
   const notes = store.notesOf(frame.id);
   const all = store.allNotesOf(frame.id);
   const multi = pageCount(frame) > 1;
@@ -463,6 +529,7 @@ function Inspector({ frame, onFocus, onEnter, onRemove, onComment, onOpenThread 
       ${frame.kind === 'linked' && canLinkFolders() && html`<p class="hint insp-hint">Moved or renamed the folder? <button class="link" onClick=${() => store.relocate(frame.id)}>Relocate it</button></p>`}
       ${frame.kind === 'files' && canLinkFolders() && html`<p class="hint insp-hint">A copy, so it won't change. <button class="link" onClick=${() => store.relocate(frame.id)}>Link it to its folder</button> to refresh from disk.</p>`}
     </div>
+    <${Versions} frame=${frame} askUrl=${askUrl} />
     ${frame.kind === 'url' && html`<${LinkDisplay} frame=${frame} />`}
     <div class="insp-sec">
       <div class="label">Size</div>

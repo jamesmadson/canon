@@ -361,3 +361,12 @@ another site, and sign-in pages refuse to be framed. Rather than a blank
 frame, such a link opens in its own tab and can show a screenshot on the
 board. Live previews of signed-in pages wait for a desktop app, where each
 page is its own window.
+
+### D-45 · Versions stack, and ⌘K opens anything — 2026-10-14
+The problem Canon solves is forty tabs of one prototype. So rounds of one
+prototype stack: newest on top, one marked current, older ones a click away.
+A new prototype joins a stack on its own when its name is the same apart
+from version markers (v2, final, copy, a date), or when it is another Vercel
+or Netlify preview of the same project. Unstack undoes a wrong guess. Adding
+a version from a board takes the old one's spot and size. ⌘K opens any
+prototype in any project, current version first.

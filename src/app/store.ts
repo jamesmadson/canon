@@ -6,6 +6,7 @@ import { walkHandle, prepare } from './intake';
 import { entryFileName, noteToEntry } from './lib/strata';
 import type { LibraryItem } from './lib/library';
 import { SAMPLES, SAMPLE_SITE } from './samples';
+import { stackFor, stackKey, versionOf } from './lib/versions';
 
 export interface State {
   projects: Project[];
@@ -251,7 +252,7 @@ async function insertFrame(frame: Frame, boardId?: string, at?: { x: number; y: 
 }
 
 export async function addPrepared(
-  projectId: string, p: Prepared, opts: { boardId?: string; at?: { x: number; y: number }; size?: { w: number; h: number } } = {}
+  projectId: string, p: Prepared, opts: { boardId?: string; at?: { x: number; y: number }; size?: { w: number; h: number }; stack?: boolean } = {}
 ) {
   const id = uid();
   await db.replaceFiles(id, p.files);
@@ -267,6 +268,7 @@ export async function addPrepared(
     createdAt: now(), updatedAt: now(),
   };
   await insertFrame(frame, opts.boardId, opts.at);
+  if (opts.stack !== false) await autoStack(frame);
   return frame;
 }
 
@@ -276,13 +278,68 @@ export async function addUrl(projectId: string, url: string, opts: { boardId?: s
     rev: 0, createdAt: now(), updatedAt: now(),
   };
   await insertFrame(frame, opts.boardId, opts.at);
+  await autoStack(frame);
   return frame;
 }
 
-export async function updateFrame(id: string, patch: Partial<Frame>, persist = true) {
+/* ── Versions ──────────────────────────────────────────────────────────── */
+export const stackOf = (frameId: string) => {
+  const f = state.frames.find((x) => x.id === frameId);
+  if (!f) return [];
+  const key = stackKey(f);
+  return state.frames.filter((x) => stackKey(x) === key).sort((a, b) => a.createdAt - b.createdAt);
+};
+
+/** Put a prototype into another's stack. By default it becomes the current version. */
+export async function joinStack(frameId: string, targetId: string, makeItCurrent = true) {
+  const target = state.frames.find((f) => f.id === targetId);
+  const frame = state.frames.find((f) => f.id === frameId);
+  if (!target || !frame || frameId === targetId) return;
+  const key = stackKey(target);
+  if (!target.stackId) await updateFrame(target.id, { stackId: key }, true, false);
+  await updateFrame(frame.id, { stackId: key }, true, false);
+  if (makeItCurrent) await makeCurrent(frame.id);
+}
+
+export async function makeCurrent(frameId: string) {
+  for (const f of stackOf(frameId)) {
+    const want = f.id === frameId;
+    if (!!f.current !== want) await updateFrame(f.id, { current: want }, true, false);
+  }
+}
+
+/** Take a prototype out of its stack; it stands alone again. */
+export async function unstack(frameId: string) {
+  const f = state.frames.find((x) => x.id === frameId);
+  if (!f) return;
+  await updateFrame(frameId, { stackId: undefined, current: undefined }, true, false);
+  toast(`${f.name} stands on its own now.`);
+}
+
+/** Show a different version in the same spot on a board. */
+export async function swapOnBoard(placementId: string, frameId: string) {
+  const pl = state.placements.find((p) => p.id === placementId);
+  if (!pl) return;
+  const next = { ...pl, frameId };
+  set({ placements: state.placements.map((p) => (p.id === placementId ? next : p)) });
+  await db.put('placements', next);
+}
+
+/** A new prototype that looks like a version of one already here joins its stack. */
+async function autoStack(frame: Frame) {
+  const peers = state.frames.filter((f) => f.projectId === frame.projectId);
+  const match = stackFor(peers, frame);
+  if (!match) return;
+  await joinStack(frame.id, match.id);
+  const stack = stackOf(frame.id);
+  const first = stack[0];
+  toast(`Stacked as version ${versionOf(stack, frame.id)} of ${first.name}. Unstack it from its panel if it is something else.`);
+}
+
+export async function updateFrame(id: string, patch: Partial<Frame>, persist = true, touch = true) {
   const frame = state.frames.find((f) => f.id === id);
   if (!frame) return;
-  const next = { ...frame, ...patch, updatedAt: now() };
+  const next = { ...frame, ...patch, updatedAt: touch ? now() : frame.updatedAt };
   set({ frames: state.frames.map((f) => (f.id === id ? next : f)) });
   if (persist) await db.put('frames', next);
 }
@@ -440,6 +497,18 @@ export async function createSampleProject() {
   await setResolved(c.id, false);
   const withReply = state.notes.find((n) => n.id === c.id)!;
   await putNote({ ...withReply, replies: [{ id: uid(), author: myName() || 'You', body: 'Empty. Yesterday goes on the streak screen. This one is current.', createdAt: now() }] });
+  // Two earlier rounds of the ring, stacked under the one on the board.
+  const ring = SAMPLES[0];
+  const rounds = [
+    { name: 'Today ring v1', html: ring.html.replace('#3f6b4f', '#8a8577').replace('of 60 minutes', 'minutes outside') },
+    { name: 'Today ring v2', html: ring.html.replace('stroke-linecap="round"', 'stroke-linecap="butt"') },
+  ];
+  for (const [i, r] of rounds.entries()) {
+    const old = await addPrepared(project.id, { name: r.name, entry: 'index.html', files: [{ path: 'index.html', blob: new Blob([r.html], { type: 'text/html' }), type: 'text/html' }] }, { size: { w: ring.w, h: ring.h }, stack: false });
+    await updateFrame(old.id, { createdAt: made[0].createdAt - (rounds.length - i) * 86_400_000 }, true, false);
+    await joinStack(old.id, made[0].id, false);
+  }
+  await makeCurrent(made[0].id);
   // Not on any board yet: shows up in the library under "Not on a board".
   await addPrepared(project.id, {
     name: 'Onboarding, short',

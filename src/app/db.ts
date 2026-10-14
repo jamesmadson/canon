@@ -28,6 +28,8 @@ export interface Frame {
    * prototype's stored files.
    */
   cover?: string; display?: 'live' | 'cover';
+  /** Versions of one prototype share a stackId. current marks the one to show; else the newest shows. */
+  stackId?: string; current?: boolean;
   x: number; y: number; w: number; h: number; rev: number; createdAt: number; updatedAt: number;
 }
 /**

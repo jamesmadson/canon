@@ -547,3 +547,38 @@ button.link:hover { color: var(--text); }
 /* A link shown as its screenshot. */
 .frame-cover { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; background: #fff; }
 .insp-hint { margin: 10px 0 0; line-height: 1.5; }
+
+/* Versions: a stack of rounds of one prototype. */
+.ver-chip { font: 500 10.5px var(--mono); color: var(--soft); background: var(--raised); border-radius: 5px; padding: 1px 6px; white-space: nowrap; }
+.ver-chip.old { color: #f5b041; background: rgba(245, 176, 65, .12); }
+.versions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.versions li { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 2px 8px; padding: 7px 8px; border-radius: var(--r-sm); }
+.versions li.here { background: var(--raised); }
+.versions .v-num { font: 500 11px var(--mono); color: var(--faint); padding-top: 1px; }
+.versions li.here .v-num { color: var(--text); }
+.versions .v-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; flex-direction: column; }
+.versions .v-name small { color: var(--faint); font-size: 11px; }
+.versions .v-acts { grid-column: 2; display: flex; gap: 12px; font-size: 11.5px; }
+.versions .v-acts:empty { display: none; }
+.lib-ver { display: flex; gap: 10px; align-items: center; margin-top: 6px; font-size: 11.5px; }
+button.ver-chip { border: 0; cursor: pointer; }
+button.ver-chip:hover { color: var(--text); }
+.lib-card.older { opacity: .82; }
+.lib-card.older .lib-thumb { outline: 1px dashed var(--line-strong); outline-offset: -1px; }
+
+/* ⌘K: open any prototype. */
+.nav-item.find { width: 100%; background: none; border: 0; text-align: left; font: inherit; color: var(--soft); }
+.nav-item.find kbd { margin-left: auto; font: 500 10.5px var(--mono); color: var(--faint); }
+.switcher { position: absolute; top: 14vh; left: 50%; transform: translateX(-50%); width: min(560px, calc(100vw - 32px)); background: var(--panel); border-radius: var(--r-lg); box-shadow: 0 0 0 1px var(--line-strong), 0 24px 60px rgba(0,0,0,.6); overflow: hidden; }
+.switcher .search { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); color: var(--faint); }
+.switcher .search input { flex: 1; background: none; border: 0; outline: 0; font-size: 15px; color: var(--text); }
+.switcher ul { list-style: none; margin: 0; padding: 6px; max-height: 52vh; overflow: auto; }
+.switcher li { display: flex; align-items: center; gap: 8px; border-radius: var(--r-md); padding-right: 8px; }
+.switcher li.on { background: var(--raised); }
+.switcher .sw-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; background: none; border: 0; padding: 9px 10px; color: var(--text); }
+.switcher .sw-main b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.switcher .sw-main small { color: var(--faint); font-size: 11.5px; }
+.switcher .sw-vers { display: flex; gap: 4px; }
+.switcher .sw-empty { padding: 18px 12px; color: var(--faint); }
+.switcher .sw-foot { display: flex; gap: 16px; padding: 9px 14px; border-top: 1px solid var(--line); color: var(--faint); font-size: 11px; }
+.switcher kbd { font: 500 10px var(--mono); background: var(--raised); border-radius: 4px; padding: 1px 5px; margin-right: 3px; }

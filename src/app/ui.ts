@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import * as store from './store';
 import * as vault from './vault';
-import type { Note, Role } from './db';
+import type { Frame, Note, Role } from './db';
 import { canLinkFolders, groupsFromDrop } from './intake';
 import { BoardView, BundleView, Focus } from './canvas';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
+import { currentOf, stackKey, stacks as stacksOf, versionOf } from './lib/versions';
 import { Avatar, isComment } from './comments';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, KIND, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
@@ -134,6 +135,7 @@ function Sidebar({ route }: { route: Route }) {
       <div class="mark"></div>
       <div><b>Canon</b><small>${s.vault.status === 'connected' ? `Saving to ${s.vault.name}` : 'Local · this browser'}</small></div>
     </a>
+    <button class="nav-item find" onClick=${openSwitcher}><${Icon} name="search" />Open a prototype<kbd>${isMac ? '⌘' : 'Ctrl '}K</kbd></button>
     <a class="nav-item" href="#/" aria-current=${route.name === 'home' ? 'page' : undefined}><${Icon} name="project" />All projects<span class="count">${s.projects.length}</span></a>
     <div class="rail-section label">Projects</div>
     <div class="rail-boards">
@@ -271,7 +273,28 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
   const [focus, setFocus] = useState<string | null>(null);
   const [menu, setMenu] = useState(false);
   const all = store.libraryItems(projectId);
-  const items = sortPrototypes(filterPrototypes(all, filter), sort);
+  const matched = sortPrototypes(filterPrototypes(all, filter), sort);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  // One card per stack, showing its current version; expand a stack to see the rest.
+  const items: ((typeof matched)[number] & { versions: number; v: number; isCurrent: boolean; stack: string; extra?: boolean })[] = [];
+  const seen = new Set<string>();
+  for (const i of matched) {
+    const key = stackKey(i.frame);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const stack = store.stackOf(i.id);
+    const cur = stack.length ? currentOf(stack) : i.frame;
+    const members = matched.filter((m) => stackKey(m.frame) === key);
+    const lead = members.find((m) => m.id === cur.id) ?? members[0];
+    const info = (m: typeof lead, extra?: boolean) => ({ ...m, versions: stack.length, v: versionOf(stack, m.id), isCurrent: m.id === cur.id, stack: key, extra });
+    items.push(info(lead));
+    if (expanded.has(key)) for (const m of [...members].reverse()) if (m.id !== lead.id) items.push(info(m, true));
+  }
+  const toggleStack = (key: string) => {
+    const next = new Set(expanded);
+    next.has(key) ? next.delete(key) : next.add(key);
+    setExpanded(next);
+  };
   const boards = store.boardsOf(projectId);
   const toggle = (fid: string) => {
     const next = new Set(picked);
@@ -346,9 +369,9 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
           ${items.map((i) => {
             const f = i.frame;
             const s = Math.min(240 / f.w, 160 / f.h);
-            return html`<div class=${`lib-card${picked.has(i.id) ? ' picked' : ''}`}>
+            return html`<div class=${`lib-card${picked.has(i.id) ? ' picked' : ''}${i.extra ? ' older' : ''}`}>
               <button class="lib-thumb" onClick=${() => open(i.id)} title="Open">
-                ${pageCount(f) > 1 && html`<span class="lib-sheet"></span>`}
+                ${(pageCount(f) > 1 || (i.versions > 1 && !i.extra)) && html`<span class="lib-sheet"></span>`}
                 <span class="lib-frame" style=${{ width: f.w * s, height: f.h * s }}>
                   ${showsCover(f)
                     ? html`<img class="frame-cover" src=${coverSrc(f)} alt="" />`
@@ -359,6 +382,11 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
               <div class="meta">
                 <b>${f.name}</b>
                 <small>${i.pages > 1 ? `${i.pages} pages · ` : ''}${i.boards ? `${i.boards} board${i.boards > 1 ? 's' : ''}` : 'Not on a board'}${i.comments ? ` · ${i.comments} open` : ''}</small>
+                ${i.versions > 1 && html`<div class="lib-ver">
+                  ${i.extra
+                    ? html`<span class="ver-chip old">v${i.v}</span>${!i.isCurrent && html`<button class="link" onClick=${() => store.makeCurrent(i.id)}>Make current</button>`}`
+                    : html`<button class="ver-chip" onClick=${() => toggleStack(i.stack)} aria-expanded=${expanded.has(i.stack)}>v${i.v} · ${i.versions} versions ${expanded.has(i.stack) ? '▴' : '▾'}</button>`}
+                </div>`}
               </div>
             </div>`;
           })}
@@ -367,7 +395,7 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
           <thead><tr><th style="width:32px"></th><th>Name</th><th>Pages</th><th>Source</th><th>Boards</th><th>Open notes</th><th>Added</th><th>Changed</th></tr></thead>
           <tbody>${items.map((i) => html`<tr class=${picked.has(i.id) ? 'picked' : ''}>
             <td><input type="checkbox" checked=${picked.has(i.id)} onChange=${() => toggle(i.id)} /></td>
-            <td><button class="link-btn" onClick=${() => open(i.id)}>${i.name}</button></td>
+            <td><button class="link-btn" onClick=${() => open(i.id)}>${i.extra ? html`<span class="faint">↳ </span>` : ''}${i.name}</button>${i.versions > 1 && html` <button class="ver-chip${i.extra ? ' old' : ''}" onClick=${() => !i.extra && toggleStack(i.stack)}>v${i.v}${i.extra ? '' : ` · ${i.versions}`}</button>`}</td>
             <td class="mono">${i.pages}</td>
             <td>${KIND[i.kind]}</td>
             <td>${store.boardsHolding(i.id).map((b) => b.name).join(', ') || html`<span class="faint">None</span>`}</td>
@@ -412,10 +440,85 @@ function ProjectComments({ projectId }: { projectId: string }) {
 }
 
 /* ── App ───────────────────────────────────────────────────────────────── */
+/* ── ⌘K: jump to any prototype ─────────────────────────────────────────── */
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+export const openSwitcher = () => dispatchEvent(new Event('canon:switcher'));
+
+function openPrototype(f: Frame, focus: (id: string) => void) {
+  if (f.kind === 'url') window.open(f.url, '_blank', 'noopener');
+  else if (pageCount(f) > 1) go(`/f/${f.id}`);
+  else focus(f.id);
+}
+
+function Switcher({ onClose, onFocus }: { onClose: () => void; onFocus: (id: string) => void }) {
+  const s = useStore();
+  const [q, setQ] = useState('');
+  const [at, setAt] = useState(0);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => input.current?.focus(), []);
+  const query = q.trim().toLowerCase();
+  const projectName = (id: string) => s.projects.find((p) => p.id === id)?.name ?? '';
+  const rows = stacksOf(s.frames)
+    .map((stack) => ({ stack, cur: currentOf(stack), last: Math.max(...stack.map((f) => f.updatedAt)) }))
+    .filter(({ stack, cur }) =>
+      !query ||
+      projectName(cur.projectId).toLowerCase().includes(query) ||
+      stack.some((f) => f.name.toLowerCase().includes(query) || (f.url ?? '').toLowerCase().includes(query)))
+    .sort((a, b) => b.last - a.last)
+    .slice(0, 12);
+  const pick = (f: Frame) => {
+    onClose();
+    openPrototype(f, onFocus);
+  };
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') onClose();
+    else if (e.key === 'ArrowDown') { e.preventDefault(); setAt(Math.min(at + 1, rows.length - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setAt(Math.max(at - 1, 0)); }
+    else if (e.key === 'Enter' && rows[at]) { e.preventDefault(); pick(rows[at].cur); }
+  };
+  return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose()}>
+    <div class="switcher" role="dialog" aria-label="Open a prototype">
+      <label class="search"><${Icon} name="search" /><input ref=${input} placeholder="Open a prototype" value=${q} onInput=${(e: Event) => { setQ((e.target as HTMLInputElement).value); setAt(0); }} onKeyDown=${onKey} /></label>
+      <ul>
+        ${rows.length === 0 && html`<li class="sw-empty">${s.frames.length ? 'Nothing by that name.' : 'No prototypes yet.'}</li>`}
+        ${rows.map(({ stack, cur }, n) => html`<li class=${n === at ? 'on' : ''} onMouseEnter=${() => setAt(n)}>
+          <button class="sw-main" onClick=${() => pick(cur)}>
+            <b>${cur.name}</b>
+            <small>${projectName(cur.projectId)} · ${KIND[cur.kind]}${stack.length > 1 ? ` · v${versionOf(stack, cur.id)} of ${stack.length}` : ''}</small>
+          </button>
+          ${stack.length > 1 && html`<span class="sw-vers">${[...stack].reverse().filter((f) => f.id !== cur.id).slice(0, 4).map((f) => html`<button class="ver-chip old" onClick=${() => pick(f)} title=${f.name}>v${versionOf(stack, f.id)}</button>`)}</span>`}
+        </li>`)}
+      </ul>
+      <div class="sw-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> opens the current version</span><span><kbd>esc</kbd> to close</span></div>
+    </div>
+  </div>`;
+}
+
 export function App() {
   const s = useStore();
   const route = useRoute();
   const url = useUrlDialog();
+  const [switcher, setSwitcher] = useState(false);
+  const [focusId, setFocusId] = useState<string | null>(null);
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSwitcher((v) => !v);
+      }
+    };
+    const open = () => setSwitcher(true);
+    addEventListener('keydown', key);
+    addEventListener('canon:switcher', open);
+    return () => {
+      removeEventListener('keydown', key);
+      removeEventListener('canon:switcher', open);
+    };
+  }, []);
+  const focused = focusId ? s.frames.find((f) => f.id === focusId) : undefined;
+  const overlays = html`
+    ${switcher && html`<${Switcher} onClose=${() => setSwitcher(false)} onFocus=${setFocusId} />`}
+    ${focused && html`<${Focus} frame=${focused} onClose=${() => setFocusId(null)} />`}`;
 
   // A viewer arriving from a share link sees the board alone, without the rail.
   if (route.name === 'share') {
@@ -437,6 +540,7 @@ export function App() {
             ? html`<${ProjectView} id=${route.id} tab=${route.tab} askUrl=${url.ask} />`
             : html`<${Home} />`}
     ${url.view}
+    ${overlays}
     ${s.toast && html`<div class="toast" role="status">${s.toast}</div>`}
   </div>`;
 }
