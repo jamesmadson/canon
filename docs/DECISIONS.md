@@ -322,3 +322,9 @@ used. No content, no file names. A small Cloudflare Worker that counts
 events fits the free tier; Plausible is about $9 a month. Separately, a
 per-prototype "send this to Canon" button for bug reports, one prototype
 at a time, only when the person clicks it.
+
+### D-41 · The site is dark — 2026-10-14
+The marketing site renders dark for everyone, whatever the OS setting.
+The app is dark, the screenshots are dark, and a light page around dark
+shots read as two products. Supersedes the "follows the OS preference"
+line in D-37.
