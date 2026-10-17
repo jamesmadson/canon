@@ -13,7 +13,7 @@ const authorOf = (n: Note) => n.author || 'You';
 export const Avatar = ({ name, size = 22 }: { name: string; size?: number }) =>
   html`<span class="avatar" style=${{ width: size, height: size, background: personColor(name), fontSize: size * 0.42 }}>${initials(name)}</span>`;
 
-/** Comments are round with the author's initials, Figma style; research notes are numbered and yellow. */
+/** Comments are round with the author's initials, Figma style; older notes without an author are numbered. */
 export function Pin({ n, note, left, top, active, onOpen }: { n: number; note: Note; left: number; top: number; active?: boolean; onOpen: () => void }) {
   const comment = isComment(note);
   const cls = `pin${comment ? ' comment' : ''}${note.source === 'preview' && !comment ? ' from-preview' : ''}${note.resolved ? ' resolved' : ''}${active ? ' active' : ''}`;
@@ -34,35 +34,25 @@ function NameField({ onDone }: { onDone: () => void }) {
   </div>`;
 }
 
-/** New thread. A comment by default; a research note keeps Strata's fields. */
-export function Composer({ at, onCancel, onSave }: { at: Draft; onCancel: () => void; onSave: (n: Pick<Note, 'said' | 'meant' | 'participant' | 'kind' | 'author'>) => void }) {
-  // Research notes are out of scope (D-36); older notes still display.
-  const mode = 'comment' as 'comment' | 'note';
+/** New note. */
+export function Composer({ at, onCancel, onSave }: { at: Draft; onCancel: () => void; onSave: (n: Pick<Note, 'said' | 'kind' | 'author'>) => void }) {
   const [body, setBody] = useState('');
-  const [meant, setMeant] = useState('');
-  const [who, setWho] = useState('');
   const [, bump] = useState(0);
   const me = store.myName();
   const submit = (e?: Event) => {
     e?.preventDefault();
     if (!body.trim()) return;
-    if (mode === 'comment') onSave({ kind: 'comment', author: me || 'You', said: body.trim() });
-    else onSave({ kind: 'note', said: body.trim(), meant: meant.trim() || undefined, participant: who.trim() || undefined });
+    onSave({ kind: 'comment', author: me || 'You', said: body.trim() });
   };
   return html`<form class="composer" style=${{ left: Math.max(12, at.sx + 16), top: Math.max(12, at.sy - 20) }} onSubmit=${submit} onPointerDown=${(e: Event) => e.stopPropagation()}>
-    ${mode === 'comment' && !me && html`<${NameField} onDone=${() => bump((n) => n + 1)} />`}
-    ${mode === 'comment'
-      ? html`<div class="row" style="flex-wrap:nowrap;align-items:flex-start">
-          <${Avatar} name=${me || 'You'} />
-          <textarea class="field" rows="3" autofocus placeholder="Add a note" value=${body}
-            onInput=${(e: Event) => setBody((e.target as HTMLTextAreaElement).value)}
-            onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), submit())}></textarea>
-        </div>`
-      : html`<div class="label">Said · word for word</div>
-        <textarea class="field" rows="3" autofocus placeholder="What they said, in their words" value=${body} onInput=${(e: Event) => setBody((e.target as HTMLTextAreaElement).value)}></textarea>
-        <input class="field" placeholder="Who, as a code: P-04 (never a name)" value=${who} onInput=${(e: Event) => setWho((e.target as HTMLInputElement).value)} />
-        <textarea class="field" rows="2" placeholder="What you think they meant (optional, marked as yours)" value=${meant} onInput=${(e: Event) => setMeant((e.target as HTMLTextAreaElement).value)}></textarea>`}
-    <div class="row"><span class="hint" style="margin-right:auto">${mode === 'comment' ? 'Enter to post' : 'Files into the record'}</span><button type="button" class="btn ghost" onClick=${onCancel}>Cancel</button><button class="btn primary" disabled=${!body.trim()}>${mode === 'comment' ? 'Post' : 'File note'}</button></div>
+    ${!me && html`<${NameField} onDone=${() => bump((n) => n + 1)} />`}
+    <div class="row" style="flex-wrap:nowrap;align-items:flex-start">
+      <${Avatar} name=${me || 'You'} />
+      <textarea class="field" rows="3" autofocus placeholder="Add a note" value=${body}
+        onInput=${(e: Event) => setBody((e.target as HTMLTextAreaElement).value)}
+        onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), submit())}></textarea>
+    </div>
+    <div class="row"><span class="hint" style="margin-right:auto">Enter to post</span><button type="button" class="btn ghost" onClick=${onCancel}>Cancel</button><button class="btn primary" disabled=${!body.trim()}>Post</button></div>
   </form>`;
 }
 
@@ -76,20 +66,19 @@ export function Thread({ note, sx, sy, onClose }: { note: Note; sx: number; sy: 
     await store.reply(note.id, text);
     setText('');
   };
-  const comment = isComment(note);
   return html`<div class="thread" style=${{ left: Math.max(12, sx + 18), top: Math.max(12, sy - 24) }} onPointerDown=${(e: Event) => e.stopPropagation()}>
     <div class="thread-head">
-      <span class="label">${comment ? 'Note' : 'Research note'}</span>
+      <span class="label">Note</span>
       <span class="spacer"></span>
       <button class="btn ghost icon" title=${note.resolved ? 'Reopen' : 'Resolve'} onClick=${() => store.setResolved(note.id, !note.resolved)}>${note.resolved ? html`<${Icon} name="refresh" />` : html`<${Icon} name="check" />`}</button>
       <button class="btn ghost icon" title="Delete thread" onClick=${() => confirm('Delete this thread?') && (store.deleteNote(note.id), onClose())}><${Icon} name="trash" /></button>
       <button class="btn ghost icon" title="Close (Esc)" onClick=${onClose}><${Icon} name="x" /></button>
     </div>
     <div class="msg">
-      ${comment ? html`<${Avatar} name=${authorOf(note)} />` : html`<span class="avatar note">${note.participant && /^P-\d+$/.test(note.participant) ? note.participant.replace('P-', 'P') : '?'}</span>`}
+      <${Avatar} name=${authorOf(note)} />
       <div>
-        <div class="msg-meta"><b>${comment ? authorOf(note) : note.participant && /^P-\d+$/.test(note.participant) ? note.participant : 'No participant'}</b><span>${ago(note.createdAt)}</span>${note.page && html`<span>${pageName(note.page)}</span>`}</div>
-        ${comment ? html`<p>${note.said}</p>` : html`<p><q>${note.said}</q></p>${note.meant && html`<p class="meant">Meant, a reading: ${note.meant}</p>`}`}
+        <div class="msg-meta"><b>${authorOf(note)}</b><span>${ago(note.createdAt)}</span>${note.page && html`<span>${pageName(note.page)}</span>`}</div>
+        <p>${note.said}</p>
       </div>
     </div>
     ${(note.replies ?? []).map((r) => html`<div class="msg"><${Avatar} name=${r.author} /><div><div class="msg-meta"><b>${r.author}</b><span>${ago(r.createdAt)}</span></div><p>${r.body}</p></div></div>`)}
@@ -118,9 +107,9 @@ export function CommentsPanel({ notes, onPick, onClose }: { notes: Note[]; onPic
       ${list.map((n) => {
         const f = frames.find((x) => x.id === n.frameId);
         return html`<button class="thread-row" onClick=${() => onPick(n)}>
-          ${isComment(n) ? html`<${Avatar} name=${authorOf(n)} />` : html`<span class="avatar note">R</span>`}
+          <${Avatar} name=${authorOf(n)} />
           <span class="thread-row-body">
-            <span class="msg-meta"><b>${isComment(n) ? authorOf(n) : 'Research note'}</b><span>${ago(n.createdAt)}</span></span>
+            <span class="msg-meta"><b>${authorOf(n)}</b><span>${ago(n.createdAt)}</span></span>
             <span class="thread-row-text">${n.said}</span>
             <span class="faint" style="font-size:11.5px">${f ? f.name : 'On the canvas'}${(n.replies?.length ?? 0) > 0 ? ` · ${n.replies!.length} ${n.replies!.length === 1 ? 'reply' : 'replies'}` : ''}</span>
           </span>

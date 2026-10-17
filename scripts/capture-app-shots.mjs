@@ -42,14 +42,6 @@ await p.waitForSelector('.thread');
 await shot('comments');
 await p.keyboard.press('Escape');
 
-await p.click('.topbar button:has-text("Share")');
-await p.fill('.dialog.share input.field', 'maya@fernwell.example, theo@fernwell.example');
-await p.click('.dialog.share button:has-text("Invite")');
-await p.selectOption('.share-link select', 'comment');
-await shot('share');
-await p.keyboard.press('Escape');
-await p.click('.dialog.share button[title="Close"]');
-
 await p.locator('.frame.multi .frame-body').click({ position: { x: 200, y: 150 } });
 await p.waitForSelector('.links');
 await p.waitForTimeout(1500);

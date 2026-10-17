@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import * as store from './store';
 import * as vault from './vault';
-import type { Frame, Note, Role } from './db';
+import type { Frame, Note } from './db';
 import { canLinkFolders, groupsFromDrop } from './intake';
 import { BoardView, BundleView, Focus } from './canvas';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
 import { currentOf, stackKey, stacks as stacksOf, versionOf } from './lib/versions';
-import { Avatar, isComment } from './comments';
+import { Avatar } from './comments';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, KIND, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
 export { BASE } from './shared';
@@ -15,8 +15,7 @@ type Route =
   | { name: 'home' }
   | { name: 'project'; id: string; tab: 'prototypes' | 'boards' | 'comments' }
   | { name: 'board'; id: string }
-  | { name: 'frame'; id: string; from?: string; page?: string }
-  | { name: 'share'; id: string; role: Role };
+  | { name: 'frame'; id: string; from?: string; page?: string };
 
 function parseRoute(): Route {
   const [path, query] = location.hash.replace(/^#\/?/, '').split('?');
@@ -25,8 +24,6 @@ function parseRoute(): Route {
   if (m) return { name: 'project', id: m[1], tab: (m[2] as 'boards' | 'comments') ?? 'prototypes' };
   m = path.match(/^f\/([^/]+)$/);
   if (m) return { name: 'frame', id: m[1], from: q.get('from') ?? undefined, page: q.get('page') ?? undefined };
-  m = path.match(/^share\/([^/]+)$/);
-  if (m) return { name: 'share', id: m[1], role: (['view', 'comment', 'edit'].includes(q.get('role') ?? '') ? q.get('role') : 'view') as Role };
   m = path.match(/^b\/([^/]+)$/);
   if (m) return { name: 'board', id: m[1] };
   return { name: 'home' };
@@ -45,7 +42,7 @@ function useRoute() {
 const projectOf = (route: Route): string | null => {
   const s = store.getState();
   if (route.name === 'project') return route.id;
-  if (route.name === 'board' || route.name === 'share') return s.boards.find((b) => b.id === route.id)?.projectId ?? null;
+  if (route.name === 'board') return s.boards.find((b) => b.id === route.id)?.projectId ?? null;
   if (route.name === 'frame') return s.frames.find((f) => f.id === route.id)?.projectId ?? null;
   return null;
 };
@@ -148,7 +145,7 @@ function Sidebar({ route }: { route: Route }) {
           </a>
           ${open && html`<div class="rail-sub">
             <a class="nav-item" href=${`#/p/${p.id}`} aria-current=${route.name === 'project' && route.tab === 'prototypes' ? 'page' : undefined}><${Icon} name="grid" />Prototypes</a>
-            ${store.boardsOf(p.id).map((b) => html`<a class="nav-item" href=${`#/b/${b.id}`} aria-current=${(route.name === 'board' || route.name === 'share') && route.id === b.id ? 'page' : undefined}><${Icon} name="boards" /><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</span><span class="count">${store.placementsOf(b.id).length}</span></a>`)}
+            ${store.boardsOf(p.id).map((b) => html`<a class="nav-item" href=${`#/b/${b.id}`} aria-current=${route.name === 'board' && route.id === b.id ? 'page' : undefined}><${Icon} name="boards" /><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</span><span class="count">${store.placementsOf(b.id).length}</span></a>`)}
             <a class="nav-item" href=${`#/p/${p.id}/comments`} aria-current=${route.name === 'project' && route.tab === 'comments' ? 'page' : undefined}><${Icon} name="comment" />Notes<span class="count">${store.notesInProject(p.id).filter((n) => !n.resolved).length}</span></a>
           </div>`}
         </div>`;
@@ -254,7 +251,7 @@ function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boa
     ${tab === 'boards' && html`<div class="page"><div class="grid">
       ${store.boardsOf(id).map((b) => html`<a class="card" href=${`#/b/${b.id}`}>
         <${Thumb} rects=${boardRects(b.id)} />
-        <div class="meta"><b>${b.name}</b><small>${store.placementsOf(b.id).length} prototypes · edited ${ago(b.updatedAt)}${b.share && b.share.link !== 'off' ? ' · shared' : ''}</small></div>
+        <div class="meta"><b>${b.name}</b><small>${store.placementsOf(b.id).length} prototypes · edited ${ago(b.updatedAt)}</small></div>
       </a>`)}
       <button class="card new" onClick=${newBoard}><span><${Icon} name="plus" /> New board</span></button>
     </div></div>`}
@@ -429,10 +426,10 @@ function ProjectComments({ projectId }: { projectId: string }) {
     ${notes.map((n) => {
       const w = where(n);
       return html`<a class="comment-row" href=${w.href}>
-        ${isComment(n) ? html`<${Avatar} name=${n.author || 'You'} size=${28} />` : html`<span class="avatar note" style="width:28px;height:28px">R</span>`}
+        <${Avatar} name=${n.author || 'You'} size=${28} />
         <div style="flex:1;min-width:0">
-          <div class="msg-meta"><b>${isComment(n) ? n.author || 'You' : n.participant ?? 'Research note'}</b><span>${ago(n.createdAt)}</span><span>${w.label}</span>${(n.replies?.length ?? 0) > 0 && html`<span>${n.replies!.length} ${n.replies!.length === 1 ? 'reply' : 'replies'}</span>`}</div>
-          <div class="${isComment(n) ? '' : 'q'}">${n.said}</div>
+          <div class="msg-meta"><b>${n.author || 'You'}</b><span>${ago(n.createdAt)}</span><span>${w.label}</span>${(n.replies?.length ?? 0) > 0 && html`<span>${n.replies!.length} ${n.replies!.length === 1 ? 'reply' : 'replies'}</span>`}</div>
+          <div>${n.said}</div>
         </div>
       </a>`;
     })}
@@ -519,14 +516,6 @@ export function App() {
   const overlays = html`
     ${switcher && html`<${Switcher} onClose=${() => setSwitcher(false)} onFocus=${setFocusId} />`}
     ${focused && html`<${Focus} frame=${focused} onClose=${() => setFocusId(null)} />`}`;
-
-  // A viewer arriving from a share link sees the board alone, without the rail.
-  if (route.name === 'share') {
-    return html`<div class="shell solo">
-      ${s.ready ? html`<${BoardView} id=${route.id} askUrl=${url.ask} viewer=${route.role} />` : html`<div class="main"></div>`}
-      ${s.toast && html`<div class="toast" role="status">${s.toast}</div>`}
-    </div>`;
-  }
 
   return html`<div class="shell">
     <${Sidebar} route=${route} />

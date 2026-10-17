@@ -1,9 +1,7 @@
-import { zipSync, strToU8 } from 'fflate';
 import * as db from './db';
-import type { Board, Frame, Note, Placement, Project, Reply, Share } from './db';
+import type { Board, Frame, Note, Placement, Project, Reply } from './db';
 import type { Prepared } from './intake';
 import { walkHandle, prepare } from './intake';
-import { entryFileName, noteToEntry } from './lib/strata';
 import type { LibraryItem } from './lib/library';
 import { SAMPLES, SAMPLE_SITE } from './samples';
 import { stackFor, stackKey, versionOf } from './lib/versions';
@@ -45,7 +43,6 @@ function set(patch: Partial<State>) {
 
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 const now = () => Date.now();
-const today = () => new Date().toISOString().slice(0, 10);
 
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
 export function toast(message: string) {
@@ -208,7 +205,6 @@ async function patchBoard(id: string, patch: Partial<Board>) {
 }
 export const renameBoard = (id: string, name: string) => name.trim() && patchBoard(id, { name: name.trim(), updatedAt: now() });
 export const setArrangement = (id: string, arrangement: Board['arrangement']) => patchBoard(id, { arrangement });
-export const setShare = (id: string, share: Share) => patchBoard(id, { share });
 
 export async function deleteBoard(id: string) {
   for (const pl of placementsOf(id)) await db.remove('placements', pl.id);
@@ -444,30 +440,6 @@ export async function setResolved(noteId: string, resolved: boolean) {
 export async function deleteNote(id: string) {
   await db.remove('notes', id);
   set({ notes: state.notes.filter((n) => n.id !== id) });
-}
-
-/** Research notes as .strata entries, zipped, for the repo. Team comments stay out of the record. */
-export function exportStrata(notes: Note[]) {
-  const files: Record<string, Uint8Array> = {};
-  const counts: Record<string, number> = {};
-  for (const n of notes.filter((x) => x.kind !== 'comment')) {
-    const frame = state.frames.find((f) => f.id === n.frameId);
-    const board = state.boards.find((b) => b.id === n.boardId);
-    const page = frame && n.page && n.page !== frame.entry ? ` ${n.page.replace(/\.html?$/i, '')}` : '';
-    const about = frame ? `${frame.name}${page}` : (board?.name ?? 'board');
-    const date = new Date(n.createdAt).toISOString().slice(0, 10);
-    const key = `${date}-${about}`;
-    const name = entryFileName(date, about, counts[key] ?? 0);
-    counts[key] = (counts[key] ?? 0) + 1;
-    files[`.strata/${name}`] = strToU8(noteToEntry(n, { date, about }));
-  }
-  if (!Object.keys(files).length) return toast('No research notes to export. Comments are discussion, so they stay out of the record.');
-  const blob = new Blob([zipSync(files)], { type: 'application/zip' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `canon-strata-${today()}.zip`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
 /* ── The sample project ────────────────────────────────────────────────── */

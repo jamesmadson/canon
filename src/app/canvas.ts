@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import * as store from './store';
 import type { BoardFrame } from './store';
-import type { Frame, Note, Role } from './db';
+import type { Frame, Note } from './db';
 import { canLinkFolders, groupsFromDrop } from './intake';
 import { type Camera, type Point, fitCamera, screenToWorld, tidyPositions, zoomAt } from './lib/layout';
 import { iaLayout, splitNav, teaseSlots } from './lib/bundle';
@@ -75,12 +75,10 @@ function LibraryPicker({ projectId, boardId, onClose }: { projectId: string; boa
 }
 
 /* ── Board ─────────────────────────────────────────────────────────────── */
-export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Promise<string | null>; viewer?: Role }) {
+export function BoardView({ id, askUrl }: { id: string; askUrl: () => Promise<string | null> }) {
   const s = useStore();
   const board = s.boards.find((b) => b.id === id);
   const project = s.projects.find((p) => p.id === board?.projectId);
-  const canEdit = !viewer || viewer === 'edit';
-  const canComment = !viewer || viewer !== 'view';
   const allFrames = store.framesOf(id);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [cam, setCam] = useState<Camera>({ x: 80, y: 120, zoom: 0.5 });
@@ -149,7 +147,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
   };
   const removeSelected = async () => {
     const f = frames.find((x) => x.id === selected);
-    if (!f || !canEdit) return;
+    if (!f) return;
     setSelected(null);
     await store.removeFromBoard(f.placementId);
     store.toast(`Took ${f.name} off this board. It is still in the library.`);
@@ -168,7 +166,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
         return;
       }
       if (typing || focus) return;
-      if ((e.key === 'c' || e.key === 'n') && canComment) setTool('comment');
+      if (e.key === 'c' || e.key === 'n') setTool('comment');
       else if (e.key === 'v') setTool('select');
       else if (e.key === '!' || (e.shiftKey && e.key === '1')) fit();
       else if (e.key === '=' || e.key === '+') zoomBy(1.25);
@@ -227,7 +225,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
       d.moved = true;
     }
     if (d.kind === 'pan') setCam((c) => ({ ...c, x: d.ox + dx, y: d.oy + dy }));
-    else if (d.moved && !tidy && canEdit) store.movePlacement(d.pl!, Math.round(d.ox + dx / cam.zoom), Math.round(d.oy + dy / cam.zoom), false);
+    else if (d.moved && !tidy) store.movePlacement(d.pl!, Math.round(d.ox + dx / cam.zoom), Math.round(d.oy + dy / cam.zoom), false);
   };
   const onPointerUp = () => {
     const d = drag.current;
@@ -237,7 +235,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
     const pl = store.getState().placements.find((p) => p.id === d.pl);
     const f = store.getState().frames.find((x) => x.id === d.id);
     if (!pl || !f) return;
-    if (d.moved && !tidy && canEdit) store.movePlacement(pl.id, pl.x, pl.y);
+    if (d.moved && !tidy) store.movePlacement(pl.id, pl.x, pl.y);
     // A click, not a drag, on a multi-page prototype goes into it.
     if (!d.moved && pageCount(f) > 1) enter(f);
   };
@@ -245,7 +243,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
   const onDrop = async (e: DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    if (!e.dataTransfer || !board || !canEdit) return;
+    if (!e.dataTransfer || !board) return;
     const rect = canvasRef.current!.getBoundingClientRect();
     const at = screenToWorld({ x: e.clientX - rect.left, y: e.clientY - rect.top }, cam);
     const { groups, skipped } = await groupsFromDrop(e.dataTransfer);
@@ -298,14 +296,11 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
   };
   const threadAt = thread ? pinScreen(thread) : null;
 
-  return html`<div class=${`main${viewer ? ' viewer' : ''}`}>
-    ${viewer && html`<div class="viewer-bar"><${Icon} name="share" />You're looking at <b>${board.name}</b> from a share link · ${viewer === 'view' ? 'Can view' : viewer === 'comment' ? 'Can comment' : 'Can edit'}<span class="spacer"></span><span class="faint">Concept: share links open in this browser until Canon is hosted.</span><a class="btn ghost" href=${`#/b/${id}`}>Leave</a></div>`}
+  return html`<div class="main">
     <div class="topbar">
       <div class="crumb">
-        ${!viewer && html`<a href="#/">Projects</a><span class="faint">/</span><a href=${`#/p/${board.projectId}`}>${project?.name ?? 'Project'}</a><span class="faint">/</span>`}
-        ${canEdit && !viewer
-          ? html`<input value=${board.name} onChange=${(e: Event) => store.renameBoard(id, (e.target as HTMLInputElement).value)} onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} aria-label="Board name" />`
-          : html`<b style="font-weight:500;color:var(--text)">${board.name}</b>`}
+        <a href="#/">Projects</a><span class="faint">/</span><a href=${`#/p/${board.projectId}`}>${project?.name ?? 'Project'}</a><span class="faint">/</span>
+        <input value=${board.name} onChange=${(e: Event) => store.renameBoard(id, (e.target as HTMLInputElement).value)} onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} aria-label="Board name" />
       </div>
       <span class="spacer"></span>
       ${tidy && html`<label class="search small"><${Icon} name="search" /><input placeholder="Find on board" value=${query} onInput=${(e: Event) => setQuery((e.target as HTMLInputElement).value)} /></label>
@@ -313,8 +308,8 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
           <option value="added">Newest</option><option value="name">Name</option><option value="comments">Most notes</option><option value="updated">Last changed</option>
         </select>`}
       <div class="seg" role="group" aria-label="Arrangement">
-        <button aria-pressed=${!tidy} onClick=${() => canEdit && store.setArrangement(id, 'free')}>Free</button>
-        <button aria-pressed=${tidy} onClick=${() => canEdit && store.setArrangement(id, 'tidy')}>Tidy</button>
+        <button aria-pressed=${!tidy} onClick=${() => store.setArrangement(id, 'free')}>Free</button>
+        <button aria-pressed=${tidy} onClick=${() => store.setArrangement(id, 'tidy')}>Tidy</button>
       </div>
       <button class=${`btn ghost${panel ? ' on' : ''}`} onClick=${() => setPanel(!panel)} title="Notes"><${Icon} name="comment" />${openCount}</button>
     </div>
@@ -330,7 +325,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
           const el = (e.target as HTMLElement).closest('[data-frame]') as HTMLElement | null;
           if (el && tool === 'select') setLive(el.dataset.frame!);
         }}
-        onDragOver=${(e: DragEvent) => { if (canEdit) { e.preventDefault(); setDragOver(true); } }}
+        onDragOver=${(e: DragEvent) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave=${(e: DragEvent) => e.target === e.currentTarget && setDragOver(false)}
         onDrop=${onDrop}
       >
@@ -387,7 +382,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
         ${thread && threadAt && html`<${Thread} note=${thread} sx=${threadAt.x} sy=${threadAt.y} onClose=${() => setOpenThread(null)} />`}
 
         <div class="toolbar" onPointerDown=${(e: Event) => e.stopPropagation()}>
-          ${canEdit && html`<div style="position:relative">
+          ${html`<div style="position:relative">
             <button class="btn" onClick=${() => setMenu(!menu)} title="Add prototypes"><${Icon} name="plus" />Add</button>
             ${menu && html`<div class="menu">
               <button onClick=${() => { setMenu(false); setPicker(true); }}><${Icon} name="grid" />From the library…</button>
@@ -399,7 +394,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
           </div>
           <span class="sep"></span>`}
           <button class="btn icon" aria-pressed=${tool === 'select'} onClick=${() => setTool('select')} title="Select (V)"><${Icon} name="cursor" /></button>
-          ${canComment && html`<button class="btn icon" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Note (N): click a prototype or the canvas"><${Icon} name="comment" /></button>`}
+          ${html`<button class="btn icon" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Note (N): click a prototype or the canvas"><${Icon} name="comment" /></button>`}
           <span class="sep"></span>
           <button class="btn icon" onClick=${() => zoomBy(0.8)} title="Zoom out (-)"><${Icon} name="minus" /></button>
           <button class="btn zoom" onClick=${() => setCam((c) => zoomAt(c, { x: canvasRef.current!.clientWidth / 2, y: canvasRef.current!.clientHeight / 2 }, 1))} title="Zoom to 100%">${Math.round(cam.zoom * 100)}%</button>
@@ -410,7 +405,7 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
 
       ${panel
         ? html`<${CommentsPanel} notes=${threads} onPick=${jumpTo} onClose=${() => setPanel(false)} />`
-        : sel && !viewer && html`<${Inspector} frame=${sel} askUrl=${askUrl} onFocus=${() => setFocus(sel.id)} onEnter=${() => enter(sel)} onRemove=${removeSelected} onComment=${() => setTool('comment')} onOpenThread=${jumpTo} />`}
+        : sel && html`<${Inspector} frame=${sel} askUrl=${askUrl} onFocus=${() => setFocus(sel.id)} onEnter=${() => enter(sel)} onRemove=${removeSelected} onComment=${() => setTool('comment')} onOpenThread=${jumpTo} />`}
     </div>
     ${picker && html`<${LibraryPicker} projectId=${board.projectId} boardId=${id} onClose=${() => setPicker(false)} />`}
     ${focused && html`<${Focus} frame=${focused} onClose=${() => setFocus(null)} />`}

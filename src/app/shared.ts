@@ -33,7 +33,6 @@ const P: Record<string, string> = {
   comment: 'M2.5 3h11v7.5H7l-3 2.5v-2.5H2.5z',
   play: 'M5 3l8 5-8 5z',
   check: 'M3 8.5l3.2 3L13 4.5',
-  share: 'M8 2.5v8M5 5.5l3-3 3 3M3.5 9v4.5h9V9',
   grid: 'M2.5 2.5h4.5v4.5H2.5zM9 2.5h4.5v4.5H9zM2.5 9h4.5v4.5H2.5zM9 9h4.5v4.5H9z',
   table: 'M2.5 3h11v10h-11zM2.5 6.5h11M2.5 10h11M6.5 3v10',
   project: 'M2 4.5h4.5l1.5 1.5H14v7.5H2z',
@@ -144,10 +143,8 @@ export function NoteItem({ note, n, about }: { note: Note; n?: number; about?: s
   const onPage = frame && note.page && note.page !== frame.entry ? pageName(note.page) : null;
   return html`<div class="note-item">
     <q>${note.said}</q>
-    ${note.meant && html`<div class="meant">Meant, your reading: ${note.meant}</div>`}
     <div class="foot">
       ${n !== undefined && html`<span>#${n}</span>`}
-      <span>${note.participant && /^P-\d+$/.test(note.participant) ? note.participant : 'No participant'}</span>
       ${about && html`<span>${about}</span>`}
       ${onPage && html`<span>${onPage}</span>`}
       ${note.source === 'preview' && html`<span>from preview</span>`}

@@ -8,11 +8,11 @@ export const DB_VERSION = 2;
 
 export type Arrangement = 'free' | 'tidy';
 export type Role = 'view' | 'comment' | 'edit';
-/** Sharing is a concept here: settings are kept, but links only open in this browser until Canon is hosted. */
+/** Legacy: sharing was removed. Only the shape is kept so old stored boards still type-check. */
 export interface Share { link: 'off' | Role; invites: { email: string; role: Role }[] }
 /** A project holds the prototype library and the boards that arrange it. */
 export interface Project { id: string; name: string; createdAt: number; updatedAt: number }
-export interface Board { id: string; projectId: string; name: string; createdAt: number; updatedAt: number; arrangement: Arrangement; share?: Share }
+export interface Board { id: string; projectId: string; name: string; createdAt: number; updatedAt: number; arrangement: Arrangement; /** Legacy, no longer read or written. */ share?: Share }
 /** Where a prototype sits on one board. A prototype can sit on many boards, or none. */
 export interface Placement { id: string; boardId: string; frameId: string; x: number; y: number }
 export type FrameKind = 'files' | 'linked' | 'url';
@@ -40,7 +40,7 @@ export interface Frame {
 export interface Reply { id: string; author: string; body: string; createdAt: number }
 export interface Note {
   id: string; boardId: string; frameId?: string; page?: string;
-  /** A comment is team discussion, Figma style. A note is research: Said, Meant, a P code. */
+  /** Notes are saved with kind 'comment'. 'note' and meant/participant come from older research-note data and are kept only so it still loads; they display as a plain note. */
   kind?: 'comment' | 'note'; author?: string; replies?: Reply[]; resolved?: boolean;
   fx?: number; fy?: number; py?: number; wx?: number; wy?: number;
   source?: 'canvas' | 'preview';

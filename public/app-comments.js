@@ -1,8 +1,7 @@
 /*
  * Canon's comment layer for a prototype opened from its preview link.
  * The app's service worker adds this script to top-level pages only. Notes
- * keep Strata's rules (Said word for word, a P code never a name, Meant as an
- * optional reading) and land in the same IndexedDB record the app reads.
+ * land in the same IndexedDB record the app reads.
  */
 (() => {
   const me = document.currentScript;
@@ -64,7 +63,6 @@
     .row button.primary { background: #ecebe4; color: #171814; }
     .row button[disabled] { opacity: .45; cursor: default; }
     .meta { color: #8a8985; font: 500 10.5px ui-monospace, monospace; }
-    q { quotes: none; }
   </style>
   <div class="shield"></div>
   <div class="layer"></div>
@@ -113,9 +111,8 @@
     pop.className = 'pop';
     pop.style.left = `${parseFloat(pin.style.left) + 16}px`;
     pop.style.top = `${parseFloat(pin.style.top) - 10}px`;
-    const who = n.kind === 'comment' ? (n.author || 'You') : (/^P-\d+$/.test(n.participant || '') ? n.participant : 'Research note');
-    const first = n.kind === 'comment' ? esc(n.said) : `<q>${esc(n.said)}</q>${n.meant ? `<div class="meta">Meant, a reading: ${esc(n.meant)}</div>` : ''}`;
-    pop.innerHTML = `<div class="msg"><span class="av" style="background:${n.kind === 'comment' ? color(who) : '#ffd34d'};${n.kind === 'comment' ? '' : 'color:#111'}">${n.kind === 'comment' ? initials(who) : 'R'}</span><div><b>${esc(who)}</b> <span class="meta">${new Date(n.createdAt).toLocaleDateString()}</span><p>${first}</p></div></div>`
+    const who = n.author || 'You';
+    pop.innerHTML = `<div class="msg"><span class="av" style="background:${color(who)}">${initials(who)}</span><div><b>${esc(who)}</b> <span class="meta">${new Date(n.createdAt).toLocaleDateString()}</span><p>${esc(n.said)}</p></div></div>`
       + (n.replies || []).map((r) => `<div class="msg"><span class="av" style="background:${color(r.author)}">${initials(r.author)}</span><div><b>${esc(r.author)}</b><p>${esc(r.body)}</p></div></div>`).join('')
       + `<form class="reply"><input placeholder="Reply"><button class="primary" style="height:30px;padding:0 12px;border-radius:6px;background:#ecebe4;color:#171814">Reply</button></form>`;
     pop.querySelector('form').onsubmit = async (e) => {
@@ -142,17 +139,13 @@
     pop.className = 'pop';
     pop.style.left = `${Math.min(x + 16, width() - 316)}px`;
     pop.style.top = `${Math.max(8, y - 10)}px`;
-    let mode = 'comment';
     const draw = () => {
-      pop.innerHTML = (mode === 'comment'
-          ? `${myName() ? '' : '<input name="me" placeholder="Your name, how teammates see you">'}<textarea rows="3" name="said" placeholder="Add a comment"></textarea>`
-          : `<div class="label">Said · word for word</div><textarea rows="3" name="said" placeholder="What they said, in their words"></textarea><input name="who" placeholder="Who, as a code: P-04 (never a name)"><textarea rows="2" name="meant" placeholder="What you think they meant (optional)"></textarea>`)
-        + `<div class="row"><button type="button" class="cancel">Cancel</button><button class="primary" disabled>${mode === 'comment' ? 'Add' : 'File note'}</button></div>`;
-      pop.querySelectorAll('[data-m]').forEach((b) => (b.onclick = () => { mode = b.dataset.m; draw(); }));
+      pop.innerHTML = `${myName() ? '' : '<input name="me" placeholder="Your name, how teammates see you">'}<textarea rows="3" name="said" placeholder="Add a note"></textarea>`
+        + `<div class="row"><button type="button" class="cancel">Cancel</button><button class="primary" disabled>Add</button></div>`;
       const said = pop.querySelector('[name=said]');
       const post = pop.querySelector('.primary');
       said.oninput = () => (post.disabled = !said.value.trim());
-      said.onkeydown = (e) => { if (mode === 'comment' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); pop.requestSubmit(); } };
+      said.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); pop.requestSubmit(); } };
       pop.querySelector('.cancel').onclick = () => closePop();
       said.focus();
     };
@@ -163,9 +156,7 @@
       const me = pop.querySelector('[name=me]');
       if (me && me.value.trim()) { try { localStorage.setItem('canon-name', me.value.trim()); } catch {} }
       const base = { id: uid(), boardId, frameId, page, fx, py: Math.round(y), source: 'preview', said: said.value.trim(), createdAt: Date.now() };
-      const note = mode === 'comment'
-        ? { ...base, kind: 'comment', author: myName() || 'You' }
-        : { ...base, kind: 'note', meant: pop.querySelector('[name=meant]').value.trim() || undefined, participant: pop.querySelector('[name=who]').value.trim() || undefined };
+      const note = { ...base, kind: 'comment', author: myName() || 'You' };
       await save(note);
       notes.push(note);
       closePop();
