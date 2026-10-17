@@ -8,7 +8,6 @@ import { iaLayout, splitNav, teaseSlots } from './lib/bundle';
 import { sortPrototypes, type LibrarySort } from './lib/library';
 import { currentOf, versionOf } from './lib/versions';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
-import { ShareButton } from './share';
 import {
   html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES, showsCover, coverSrc,
   addGroups, runWay, NoteItem, type Way,
@@ -318,7 +317,6 @@ export function BoardView({ id, askUrl, viewer }: { id: string; askUrl: () => Pr
         <button aria-pressed=${tidy} onClick=${() => canEdit && store.setArrangement(id, 'tidy')}>Tidy</button>
       </div>
       <button class=${`btn ghost${panel ? ' on' : ''}`} onClick=${() => setPanel(!panel)} title="Notes"><${Icon} name="comment" />${openCount}</button>
-      ${!viewer && html`<${ShareButton} board=${board} />`}
     </div>
     <div class="board">
       <div

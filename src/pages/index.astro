@@ -30,14 +30,6 @@ const FEATURES = [
     shot: 'comments',
     alt: 'A note pinned to a prototype on the canvas.',
   },
-  {
-    label: 'Sharing',
-    title: 'Send a link.',
-    body: 'Add colleagues by email, or open a board to anyone with the link. They look, comment, and nobody needs the tool you built it in.',
-    shot: 'share',
-    alt: 'The share dialog: two invited people and a link that lets anyone comment.',
-    note: 'Sharing arrives with the hosted version.',
-  },
 ];
 ---
 
@@ -57,7 +49,7 @@ const FEATURES = [
         <h1 class="display-lg mt-3 max-w-[18ch]">Every prototype, from every tool, in one place.</h1>
         <p class="mt-5 max-w-[46ch] text-[18px] leading-relaxed text-ink-soft">
           Claude Code, v0, Lovable, Figma Make, a branch, a zip. Your prototypes
-          live everywhere. Canon puts them on one shelf you can see, open and share.
+          live everywhere. Canon puts them on one shelf you can see, open and keep in order.
         </p>
         <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
           <a href={withBase('/app/')} class="btn btn-primary">Try it now</a>
@@ -93,7 +85,6 @@ const FEATURES = [
             <p class="label">{f.label}</p>
             <h2 id={`feature-${f.shot}`} class="display mt-3">{f.title}</h2>
             <p class="mt-4 text-[16px] leading-relaxed text-ink-soft">{f.body}</p>
-            {f.note && <p class="mt-4 font-mono text-[11px] tracking-[0.08em] text-ink-soft">{f.note}</p>}
           </div>
           <div class={`lg:col-span-8 ${i % 2 ? 'lg:order-1' : ''}`}>
             <MeshPanel class="p-2 sm:p-4">
@@ -119,7 +110,7 @@ const FEATURES = [
       <h2 class="display-lg">Your prototypes deserve better than a chat thread.</h2>
       <p class="mt-5 max-w-[52ch] text-[18px] leading-relaxed text-ink-soft">
         Canon points at your prototypes wherever they live, and keeps them in
-        one place. Your files stay on your machine until you choose to share.
+        one place. Your files stay on your machine.
       </p>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
         <a href={withBase('/app/')} class="btn btn-primary">Try it now</a>

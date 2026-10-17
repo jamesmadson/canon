@@ -32,8 +32,8 @@ in your browser or installs as an app, and nothing is uploaded.
   prototype and its other pages tease out from behind it. Open it and Canon
   reads its HTML: every page, the links between them, and the pages nothing
   points to anymore.
-- **Comments where the work is.** Pin a comment on a screen, a page or the
-  canvas. Reply, resolve, move on. Comments ride along into preview links.
+- **Notes.** Pin a note to yourself on a screen, a page or the canvas: what
+  changed, what to try next, which version is current.
 - **Install it.** In Chrome, Edge or Arc, use the Install button in the
   sidebar for its own window and a Dock or taskbar icon. In Safari, File, then
   Add to Dock. It works offline.
