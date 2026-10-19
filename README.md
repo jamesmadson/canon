@@ -2,7 +2,7 @@
 
 **Every prototype, from every tool, in one place.**
 
-Claude Code, v0, Lovable, Figma Make, a branch, a zip. Your prototypes live
+Cursor, v0, Lovable, Figma Make, a branch, a zip. Your prototypes live
 everywhere. Canon puts them on one shelf you can see, open and share. It runs
 in your browser or installs as an app, and nothing is uploaded.
 
@@ -46,8 +46,8 @@ Canon is the index, not the source of truth. Your work stays where it was
 made; Canon points at it and shows it.
 
 Canon works from your browser's storage (IndexedDB), and a service worker
-serves dropped-in prototypes from it, so a zip from v0 and a folder from Claude
-Code open the same way. Nothing leaves your machine, and Canon collects no
+serves dropped-in prototypes from it, so a zip from v0 and a folder from Cursor
+open the same way. Nothing leaves your machine, and Canon collects no
 usage data (see D-40 in the decision log).
 
 Browser storage can be cleared, so Canon keeps a durable copy as plain files:

@@ -18,7 +18,8 @@ Pick-up notes for the next working session, on a local machine.
 
 1. **Scrub AI authorship from history.** Run `scrub-history.sh` (sent in chat)
    on `canon` (main, canvas-explore) and `jamesmadson.me` (master). Then
-   delete the stale branch: `git push origin --delete claude/canon-in-cloud-in2djc`.
+   delete the stale cloud working branch (the one not named main or
+   canvas-explore).
 2. **Repo About box** on GitHub: description "Every prototype, from every
    tool, in one place. A local-first prototype manager for designers. Open
    source, MIT." Website https://jamesmadson.github.io/canon/.
