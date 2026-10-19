@@ -262,7 +262,7 @@ becomes evidence.
 James, after building the canvas app on `canvas-explore`: Canon does not
 claim to be the source of truth. It is the index. It points at prototypes
 wherever they live (a repo branch, a Vercel or Amplify preview, Figma
-Make, Cursor, v0, Lovable, localhost, a zip) and never asks to own
+Make, Claude Code, v0, Lovable, localhost, a zip) and never asks to own
 them, which is principle 7 applied to the whole product. The line:
 *every prototype, from every tool, in one place.*
 
