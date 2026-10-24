@@ -350,7 +350,8 @@ async function reloadFromRemote() {
 }
 function startReload() {
   staleTimer = undefined;
-  const run = (reloading ?? Promise.resolve()).then(reloadFromRemote);
+  // A failed reload must not cancel the one queued behind it.
+  const run = (reloading ?? Promise.resolve()).catch(() => {}).then(reloadFromRemote);
   const mine = run.finally(() => { if (reloading === mine) reloading = null; });
   reloading = mine;
   return mine;
