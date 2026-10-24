@@ -6,7 +6,7 @@ import { canLinkFolders, groupsFromDrop } from './intake';
 import { BoardView, BundleView, Focus } from './canvas';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
 import { currentOf, stackKey, stacks as stacksOf, versionOf } from './lib/versions';
-import { checkPrototypeUrl } from './lib/resolve';
+import { checkPrototypeUrl, safeFrameUrl } from './lib/resolve';
 import { Avatar } from './comments';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, KIND, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
@@ -441,7 +441,7 @@ const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigat
 export const openSwitcher = () => dispatchEvent(new Event('canon:switcher'));
 
 function openPrototype(f: Frame, focus: (id: string) => void) {
-  if (f.kind === 'url') window.open(f.url, '_blank', 'noopener');
+  if (f.kind === 'url') window.open(safeFrameUrl(f.url), '_blank', 'noopener');
   else if (pageCount(f) > 1) go(`/f/${f.id}`);
   else focus(f.id);
 }
