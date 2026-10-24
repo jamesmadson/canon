@@ -3,6 +3,8 @@ import { useEffect, useState } from 'preact/hooks';
 import htm from 'htm';
 import * as store from './store';
 import type { Frame, Note } from './db';
+import { SIZES } from './lib/sizes';
+import { safeFrameUrl } from './lib/resolve';
 import { groupsFromFiles, linkFolder, prepare, type Group } from './intake';
 
 export const html = htm.bind(h);
@@ -61,21 +63,17 @@ export const pageName = (path: string) => path.replace(/\.html?$/i, '').replace(
 
 /** Where a prototype page is served from, inside the app. */
 export const frameSrc = (f: Frame, page?: string) =>
-  f.kind === 'url' ? f.url! : `${BASE}app/p/${f.id}/${encodeURI(page ?? f.entry ?? 'index.html')}?v=${f.rev}`;
+  f.kind === 'url' ? safeFrameUrl(f.url) : `${BASE}app/p/${f.id}/${encodeURI(page ?? f.entry ?? 'index.html')}?v=${f.rev}`;
 /** A link shown as its screenshot rather than live. */
 export const showsCover = (f: Frame) => f.kind === 'url' && f.display === 'cover' && !!f.cover;
 export const coverSrc = (f: Frame) => `${BASE}app/p/${f.id}/${encodeURIComponent(f.cover ?? '')}?v=${f.rev}`;
 /** The same page opened in its own tab, where the comment layer appears. */
 export const previewUrl = (f: Frame, page?: string) =>
-  f.kind === 'url' ? f.url! : `${BASE}app/p/${f.id}/${encodeURI(page ?? f.entry ?? 'index.html')}`;
+  f.kind === 'url' ? safeFrameUrl(f.url) : `${BASE}app/p/${f.id}/${encodeURI(page ?? f.entry ?? 'index.html')}`;
 
 export const SANDBOX = 'allow-scripts allow-same-origin allow-forms allow-popups allow-modals';
 export const KIND: Record<Frame['kind'], string> = { files: 'Files', linked: 'Linked folder', url: 'URL' };
-export const SIZES = [
-  { name: 'Phone', w: 390, h: 844 },
-  { name: 'Tablet', w: 834, h: 1112 },
-  { name: 'Desktop', w: 1280, h: 800 },
-];
+export { SIZES };
 
 /* ── Intake: picks and drops into a project, optionally onto a board ───── */
 export async function addGroups(projectId: string, groups: Group[], opts: { boardId?: string; at?: { x: number; y: number } } = {}) {

@@ -6,6 +6,7 @@ import { canLinkFolders, groupsFromDrop } from './intake';
 import { BoardView, BundleView, Focus } from './canvas';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
 import { currentOf, stackKey, stacks as stacksOf, versionOf } from './lib/versions';
+import { checkPrototypeUrl } from './lib/resolve';
 import { Avatar } from './comments';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, KIND, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
@@ -62,11 +63,9 @@ function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) {
   const [value, setValue] = useState('http://localhost:5173/');
   const submit = (e: Event) => {
     e.preventDefault();
-    try {
-      onClose(new URL(value).href);
-    } catch {
-      store.toast('That is not a full URL. Start it with http:// or https://');
-    }
+    const checked = checkPrototypeUrl(value);
+    if (checked.ok) onClose(checked.url);
+    else store.toast(checked.message);
   };
   return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose(null)}>
     <form class="dialog" onSubmit=${submit}>

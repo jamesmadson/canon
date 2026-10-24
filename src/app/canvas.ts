@@ -7,6 +7,7 @@ import { type Camera, type Point, fitCamera, screenToWorld, tidyPositions, zoomA
 import { iaLayout, splitNav, teaseSlots } from './lib/bundle';
 import { sortPrototypes, type LibrarySort } from './lib/library';
 import { currentOf, versionOf } from './lib/versions';
+import { safeFrameUrl } from './lib/resolve';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
 import {
   html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES, showsCover, coverSrc,
@@ -514,7 +515,7 @@ function Inspector({ frame, askUrl, onFocus, onEnter, onRemove, onComment, onOpe
         ${multi
           ? html`<button class="btn primary" onClick=${onEnter}><${Icon} name="pages" />Open pages</button>`
           : frame.kind === 'url'
-            ? html`<a class="btn primary" href=${frame.url} target="_blank" rel="noopener"><${Icon} name="open" />Open</a>`
+            ? html`<a class="btn primary" href=${safeFrameUrl(frame.url)} target="_blank" rel="noopener"><${Icon} name="open" />Open</a>`
             : html`<button class="btn primary" onClick=${onFocus}><${Icon} name="open" />Open</button>`}
         ${frame.kind === 'linked' && html`<button class="btn" onClick=${() => store.refreshLinked(frame.id)}><${Icon} name="refresh" />Refresh</button>`}
         ${frame.kind !== 'url' && html`<a class="btn ghost" href=${previewUrl(frame)} target="_blank" rel="noopener" title="Opens in its own tab, with notes"><${Icon} name="comment" />Preview link</a>`}
