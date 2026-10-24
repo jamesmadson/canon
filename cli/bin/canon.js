@@ -7,8 +7,9 @@ import { readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { init, index, note, open, USAGE } from '../src/commands.js';
+import { mcp } from '../src/mcp/index.js';
 
-const COMMANDS = { init, index, note, open };
+const COMMANDS = { init, index, note, open, mcp };
 
 /** The flags that take a value, and the key each one lands under. */
 const VALUE_FLAGS = { '--about': 'about', '--said': 'said', '--as': 'as' };
@@ -30,6 +31,7 @@ export function parseArgv(argv) {
     all: false,
     choose: false,
     noOpen: false,
+    dev: false,
     help: false,
     version: false,
   };
@@ -41,6 +43,7 @@ export function parseArgv(argv) {
     else if (token === '--all') parsed.all = true;
     else if (token === '--choose') parsed.choose = true;
     else if (token === '--no-open') parsed.noOpen = true;
+    else if (token === '--dev') parsed.dev = true;
     else if (VALUE_FLAGS[token]) {
       const value = argv[i + 1];
       if (value === undefined || value.startsWith('--')) {

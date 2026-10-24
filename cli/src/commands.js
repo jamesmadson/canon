@@ -558,6 +558,7 @@ export const USAGE = [
   '    --said <quote>     the words, verbatim',
   '    --as <P-nn>        the participant code, if there is one',
   '  open [--no-open]     draw the dashboard and show it',
+  '  mcp [--dev]          serve Canon to an agent over stdio (MCP)',
   '',
   '  --help               this text',
   '  --version            the version',
