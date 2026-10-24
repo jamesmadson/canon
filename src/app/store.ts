@@ -51,6 +51,8 @@ export function toast(message: string) {
   toastTimer = setTimeout(() => set({ toast: null }), 3200);
 }
 
+db.onStaleConnection(() => toast('Canon was updated in another tab. Reload this one.'));
+
 /* ── Installing as an app ──────────────────────────────────────────────── */
 export interface InstallPromptEvent extends Event { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
 let installPrompt: InstallPromptEvent | null = null;

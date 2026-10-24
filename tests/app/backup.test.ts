@@ -80,3 +80,14 @@ describe('naming and counting', () => {
     expect(summarize(toLibrary(data, [], 1))).toBe('1 project, 1 prototype, 0 notes');
   });
 });
+
+describe('agents never travel', () => {
+  it('a backup carrying agents restores none', () => {
+    const lib = { ...toLibrary(data, [], 1), agents: [{ id: 'x', name: 'n', secret: 's', tabId: 't', pairedAt: 1 }] };
+    const parsed = parseLibrary(JSON.stringify(lib));
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) expect('agents' in parsed.library).toBe(false);
+    expect(JSON.stringify(toLibrary(data, [], 1))).not.toContain('agents');
+  });
+});
+

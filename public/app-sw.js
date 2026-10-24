@@ -34,15 +34,21 @@ async function networkFirst(request) {
   }
 }
 
+// One shared connection, dropped when another tab upgrades the database so
+// the upgrade is never blocked by this worker.
+let dbPromise = null;
 function openDb() {
-  return new Promise((resolve, reject) => {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME);
     req.onsuccess = () => {
-      req.result.onversionchange = () => req.result.close();
-      resolve(req.result);
+      const db = req.result;
+      db.onversionchange = () => { db.close(); dbPromise = null; };
+      resolve(db);
     };
-    req.onerror = () => reject(req.error);
+    req.onerror = () => { dbPromise = null; reject(req.error); };
   });
+  return dbPromise;
 }
 
 /** Top-level tabs get the comment layer; frames inside the app never do. */
@@ -57,11 +63,12 @@ async function serve(frameId, path, request) {
   const db = await openDb();
   const record = await new Promise((resolve) => {
     if (!db.objectStoreNames.contains('files')) return resolve(undefined);
-    const req = db.transaction('files').objectStore('files').get(`${frameId}/${path}`);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => resolve(undefined);
+    try {
+      const req = db.transaction('files').objectStore('files').get(`${frameId}/${path}`);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(undefined);
+    } catch { resolve(undefined); }
   });
-  db.close();
   if (!record) {
     return new Response(`Not in this prototype: ${path}`, { status: 404, headers: { 'content-type': 'text/plain' } });
   }

@@ -4,7 +4,7 @@
  */
 
 export const DB_NAME = 'canon-app';
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 export type Arrangement = 'free' | 'tidy';
 export type Role = 'view' | 'comment' | 'edit';
@@ -46,36 +46,74 @@ export interface Note {
   source?: 'canvas' | 'preview';
   said: string; meant?: string; participant?: string; createdAt: number;
 }
+/** A paired agent. The secret signs its requests and never leaves this store: not in backups, not in the Canon folder. */
+export interface Agent { id: string; name: string; secret: string; tabId: string; pairedAt: number }
 export interface StoredFile { key: string; frameId: string; blob: Blob; type: string }
 
+export const STORES: Record<string, { keyPath: string; index?: string }> = {
+  boards: { keyPath: 'id' },
+  frames: { keyPath: 'id', index: 'boardId' },
+  notes: { keyPath: 'id', index: 'frameId' },
+  files: { keyPath: 'key', index: 'frameId' },
+  handles: { keyPath: 'id' },
+  projects: { keyPath: 'id' },
+  placements: { keyPath: 'id', index: 'boardId' },
+  agents: { keyPath: 'id' },
+};
+
+/**
+ * What an upgrade must do, from the stores that exist. Not from oldVersion:
+ * the service worker can create an empty database first, and a canon-mcp dev
+ * database is already at version 2 with no projects.
+ */
+export function upgradePlan(existing: string[]): { create: string[]; migrateToProjects: boolean } {
+  const has = new Set(existing);
+  return {
+    create: Object.keys(STORES).filter((n) => !has.has(n)),
+    migrateToProjects: has.has('frames') && !has.has('projects'),
+  };
+}
+
 let dbPromise: Promise<IDBDatabase> | null = null;
+let onStale: () => void = () => {};
+/** The app registers what to show when another tab upgrades the database; db does not import store. */
+export function onStaleConnection(fn: () => void) { onStale = fn; }
+let writeListener: (store: string) => void = () => {};
+export function onWrite(fn: (store: string) => void) { writeListener = fn; }
 
 export function openDb(): Promise<IDBDatabase> {
   if (dbPromise) return dbPromise;
   dbPromise = new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = (event) => {
+    req.onupgradeneeded = () => {
       const db = req.result;
       const tx = req.transaction!;
-      // Created if missing rather than by version: the service worker can open
-      // the database first, which makes an empty version 1 with no stores.
-      const had = (name: string) => db.objectStoreNames.contains(name);
-      const hadFrames = had('frames');
-      if (!had('boards')) db.createObjectStore('boards', { keyPath: 'id' });
-      if (!hadFrames) db.createObjectStore('frames', { keyPath: 'id' }).createIndex('boardId', 'boardId');
-      if (!had('notes')) db.createObjectStore('notes', { keyPath: 'id' }).createIndex('frameId', 'frameId');
-      if (!had('files')) db.createObjectStore('files', { keyPath: 'key' }).createIndex('frameId', 'frameId');
-      if (!had('handles')) db.createObjectStore('handles', { keyPath: 'id' });
-      if (!had('projects')) db.createObjectStore('projects', { keyPath: 'id' });
-      if (!had('placements')) db.createObjectStore('placements', { keyPath: 'id' }).createIndex('boardId', 'boardId');
-      if (hadFrames && event.oldVersion < 2) migrateToProjects(tx);
+      const plan = upgradePlan(Array.from(db.objectStoreNames));
+      for (const name of plan.create) {
+        const { keyPath, index } = STORES[name];
+        const store = db.createObjectStore(name, { keyPath });
+        if (index) store.createIndex(index, index);
+      }
+      if (plan.migrateToProjects) migrateToProjects(tx);
+    };
+    req.onblocked = () => {
+      console.warn('Canon: another tab is holding the old database open.');
+      const root = typeof document !== 'undefined' ? document.getElementById('app') : null;
+      if (root && !root.hasChildNodes()) root.textContent = 'Close other Canon tabs to finish updating.';
     };
     req.onsuccess = () => {
       const db = req.result;
-      db.onversionchange = () => db.close();
+      db.onversionchange = () => {
+        db.close();
+        dbPromise = null;
+        onStale();
+      };
       resolve(db);
     };
-    req.onerror = () => reject(req.error);
+    req.onerror = () => {
+      dbPromise = null;
+      reject(req.error);
+    };
   });
   return dbPromise;
 }
@@ -139,6 +177,7 @@ export async function put(store: string, value: unknown) {
   const tx = db.transaction(store, 'readwrite');
   tx.objectStore(store).put(value);
   await done(tx);
+  writeListener(store);
 }
 
 export async function remove(store: string, key: string) {
@@ -146,6 +185,7 @@ export async function remove(store: string, key: string) {
   const tx = db.transaction(store, 'readwrite');
   tx.objectStore(store).delete(key);
   await done(tx);
+  writeListener(store);
 }
 
 /** Replace every file a frame owns in one transaction. */
@@ -181,6 +221,7 @@ export async function putMany(store: string, values: unknown[]) {
   const os = tx.objectStore(store);
   for (const v of values) os.put(v);
   await done(tx);
+  writeListener(store);
 }
 
 /** Every stored file one prototype owns. */
