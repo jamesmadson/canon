@@ -131,16 +131,29 @@ export function activeHash(reports: Map<string, Report>, own: { tab: string; has
 
 /** Whether a hash another tab asks this one to show is one of the app's own routes. Pair links and anything else are refused. */
 export function acceptNavigate(hash: string): boolean {
-  if (typeof hash !== 'string' || !hash.startsWith('#/') || parsePairLink(hash) !== null) return false;
+  if (typeof hash !== 'string' || hash.length > MAX_HASH || !hash.startsWith('#/') || hash.indexOf('#', 1) >= 0) return false;
+  if (parsePairLink(hash) !== null) return false;
   // parseAddress falls back to home on anything it can't read, so home counts only when it was asked for.
   return parseAddress(hash).name !== 'home' || hash === '#/';
+}
+
+const MAX_HASH = 2048;
+const MAX_AHEAD = 5_000; // how far into the future another tab's `at` may claim
+
+/** The hash a tab may tell the others: one of the app's routes, else home. A pairing link (its secret) never leaves the tab. */
+export const reportHash = (hash: string) => (acceptNavigate(hash) ? hash : '#/');
+
+/** Store another tab's 'here' report, sanitised: its hash as reportHash, its `at` no later than a moment from now. */
+export function takeReport(reports: Map<string, Report>, m: { tab?: unknown; hash?: unknown; at?: unknown }, self: string, now: number) {
+  if (typeof m.tab !== 'string' || m.tab === self || typeof m.hash !== 'string' || typeof m.at !== 'number' || !Number.isFinite(m.at)) return;
+  reports.set(m.tab, { hash: reportHash(m.hash), at: Math.min(m.at, now + MAX_AHEAD) });
 }
 
 /** This page, as the other tabs know it. Not an agent's tabId, which stays the same for the whole browser. */
 const pageId = newTabId();
 let lookedAt = 0; // when the person last focused or revealed this tab
 const reports = new Map<string, Report>(); // the other Canon tabs
-const ownHash = () => (typeof location === 'undefined' ? '#/' : location.hash);
+const ownHash = () => (typeof location === 'undefined' ? '#/' : reportHash(location.hash));
 const here = () => activeHash(reports, { tab: pageId, hash: ownHash(), at: lookedAt });
 const postHere = () => post({ type: 'here', tab: pageId, hash: ownHash(), at: lookedAt });
 
@@ -400,7 +413,7 @@ export function startBridgeClient(opts: { appBase: string; ports?: number[] }): 
         if (holding) postStatus();
         postHere();
       } else if (m?.type === 'here') {
-        if (typeof m.tab === 'string' && m.tab !== pageId && typeof m.hash === 'string' && Number.isFinite(m.at)) reports.set(m.tab, { hash: m.hash, at: m.at });
+        takeReport(reports, m, pageId, Date.now());
       } else if (m?.type === 'gone') {
         if (typeof m.tab === 'string') reports.delete(m.tab);
       } else if (m?.type === 'navigate') {
@@ -467,6 +480,7 @@ export function startBridgeClient(opts: { appBase: string; ports?: number[] }): 
   return () => {
     ctx.stopped = true;
     abort.abort();
+    reports.clear();
     if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVisible);
     if (typeof window !== 'undefined') {
       window.removeEventListener('focus', onFocus);

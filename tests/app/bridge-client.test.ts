@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { acceptNavigate, activeHash, checkResponse, fitReplies, pairNotice, parsePairLink, probeDelay, stalePolls } from '../../src/app/bridge/client';
+import { acceptNavigate, activeHash, checkResponse, reportHash, takeReport, fitReplies, pairNotice, parsePairLink, probeDelay, stalePolls } from '../../src/app/bridge/client';
 import * as cli from '../../cli/src/mcp/auth.js';
 
 const secret = cli.newSecret() as string;
@@ -128,5 +128,38 @@ describe('acceptNavigate', () => {
       expect(acceptNavigate(h)).toBe(false);
     }
     for (const h of ['#/b/b1', '#/', '#/p/p1/boards', '#/b/b1/f/f1/full?w=390', '#/f/f1?from=b1']) expect(acceptNavigate(h)).toBe(true);
+  });
+});
+
+describe('reports between tabs', () => {
+  const pair = `#pair=claude-code.47801.${'ab'.repeat(32)}&name=Claude`;
+  it('a pair hash is never reported, outgoing or stored', () => {
+    expect(reportHash(pair)).toBe('#/');
+    expect(reportHash('#/b/b1')).toBe('#/b/b1');
+    const reports = new Map();
+    takeReport(reports, { tab: 't1', hash: pair, at: 5 }, 'me', 10);
+    expect(reports.get('t1')).toEqual({ hash: '#/', at: 5 });
+    expect(JSON.stringify([...reports])).not.toContain('ab'.repeat(32));
+  });
+  it('a report from the far future is clamped, so it cannot win forever', () => {
+    const reports = new Map();
+    takeReport(reports, { tab: 't1', hash: '#/b/b1', at: 1e300 }, 'me', 1_000);
+    expect(reports.get('t1').at).toBe(6_000);
+    expect(activeHash(reports, { tab: 'me', hash: '#/p/p1', at: 7_000 }).tab).toBe('me');
+  });
+  it('ignores malformed reports and its own', () => {
+    const reports = new Map();
+    takeReport(reports, { tab: 'me', hash: '#/b/b1', at: 1 }, 'me', 10);
+    takeReport(reports, { tab: 't1', hash: 3, at: 1 }, 'me', 10);
+    takeReport(reports, { tab: 't2', hash: '#/', at: NaN }, 'me', 10);
+    expect(reports.size).toBe(0);
+  });
+});
+
+describe('acceptNavigate limits', () => {
+  it('refuses hashes over 2048 characters and any with a second #', () => {
+    expect(acceptNavigate('#/b/' + 'x'.repeat(2045))).toBe(false);
+    expect(acceptNavigate('#/b/' + 'x'.repeat(2044))).toBe(true);
+    expect(acceptNavigate('#/b/b1#pair=x')).toBe(false);
   });
 });
