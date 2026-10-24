@@ -4,7 +4,7 @@ import type { Prepared } from './intake';
 import { walkHandle, prepare } from './intake';
 import type { LibraryItem } from './lib/library';
 import { SAMPLES, SAMPLE_SITE } from './samples';
-import { stackFor, stackKey, versionOf } from './lib/versions';
+import { stackFor, stackKey, swapsFor, versionOf, currentOf } from './lib/versions';
 
 export interface State {
   projects: Project[];
@@ -270,14 +270,77 @@ export async function addPrepared(
   return frame;
 }
 
-export async function addUrl(projectId: string, url: string, opts: { boardId?: string; at?: { x: number; y: number } } = {}) {
+export async function addUrl(
+  projectId: string, url: string,
+  opts: { boardId?: string; at?: { x: number; y: number }; name?: string; size?: { w: number; h: number }; stack?: boolean } = {}
+) {
   const frame: Frame = {
-    id: uid(), projectId, name: new URL(url).host || url, kind: 'url', url, x: 0, y: 0, w: 1280, h: 800,
-    rev: 0, createdAt: now(), updatedAt: now(),
+    id: uid(), projectId, name: opts.name || new URL(url).host || url, kind: 'url', url, x: 0, y: 0,
+    w: opts.size?.w ?? 1280, h: opts.size?.h ?? 800, rev: 0, createdAt: now(), updatedAt: now(),
   };
   await insertFrame(frame, opts.boardId, opts.at);
-  await autoStack(frame);
+  if (opts.stack !== false) await autoStack(frame);
   return frame;
+}
+
+/**
+ * Add a URL as the next version of a prototype's stack. It takes the stack's
+ * current name and size, becomes current, and every board spot showing the
+ * previous current version moves to it. Spots showing an older version stay.
+ */
+export async function addUrlVersion(frameId: string, url: string): Promise<{ frame: Frame; added: boolean }> {
+  const base = state.frames.find((f) => f.id === frameId);
+  if (!base) throw new Error('That prototype is not in the library.');
+  const current = currentOf(stackOf(frameId));
+  if (current.kind === 'url' && current.url === url) return { frame: current, added: false };
+  const frame = await addUrl(current.projectId, url, { name: current.name, size: { w: current.w, h: current.h }, stack: false });
+  const spots = swapsFor(state.placements, current.id);
+  await joinStack(frame.id, current.id);
+  for (const pl of spots) await swapOnBoard(pl.id, frame.id);
+  return { frame: state.frames.find((f) => f.id === frame.id) ?? frame, added: true };
+}
+
+/** Move a prototype's spot to another board of the same project. */
+export async function moveToBoard(placementId: string, boardId: string) {
+  const pl = state.placements.find((p) => p.id === placementId);
+  if (!pl || pl.boardId === boardId) return;
+  const from = state.boards.find((b) => b.id === pl.boardId);
+  const to = state.boards.find((b) => b.id === boardId);
+  if (!from || !to || from.projectId !== to.projectId) return;
+  const key = (() => {
+    const f = state.frames.find((x) => x.id === pl.frameId);
+    return f ? stackKey(f) : pl.frameId;
+  })();
+  const shows = placementsOf(boardId).some((p) => {
+    const f = state.frames.find((x) => x.id === p.frameId);
+    return f && stackKey(f) === key;
+  });
+  await removeFromBoard(placementId);
+  if (!shows) await placeOnBoard(boardId, pl.frameId, nextSlot(boardId));
+  await touchBoard(from.id);
+  if (shows) await touchBoard(to.id);
+}
+
+/* ── Other tabs ────────────────────────────────────────────────────────── */
+let staleTimer: ReturnType<typeof setTimeout> | undefined;
+let watching = false;
+/** Reload from the database shortly after another tab writes to it. */
+export function watchOtherTabs() {
+  if (watching) return;
+  const ch = db.appChannel();
+  if (!ch) return;
+  watching = true;
+  ch.onmessage = () => {
+    clearTimeout(staleTimer);
+    staleTimer = setTimeout(() => { staleTimer = undefined; void load(); }, 150);
+  };
+}
+/** Run a pending reload now, so a view that is about to act sees what other tabs wrote. */
+export async function refreshIfStale() {
+  if (staleTimer === undefined) return;
+  clearTimeout(staleTimer);
+  staleTimer = undefined;
+  await load();
 }
 
 /* ── Versions ──────────────────────────────────────────────────────────── */

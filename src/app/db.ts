@@ -81,6 +81,19 @@ export function onStaleConnection(fn: () => void) { onStale = fn; }
 let writeListener: (store: string) => void = () => {};
 export function onWrite(fn: (store: string) => void) { writeListener = fn; }
 
+let channel: BroadcastChannel | null = null;
+/** One 'canon-app' channel per tab, made when first needed, for posting and receiving. A channel never delivers to its own instance. */
+export function appChannel(): BroadcastChannel | null {
+  if (!channel && typeof BroadcastChannel !== 'undefined') channel = new BroadcastChannel('canon-app');
+  return channel;
+}
+/** After a committed write: tell other tabs, and the registered listener. Never throws, so a committed write never rejects. Paired agents stay private. */
+function wrote(store: string) {
+  if (store === 'agents') return;
+  try { appChannel()?.postMessage('changed'); } catch { /* no channel: other tabs refresh on focus */ }
+  try { writeListener(store); } catch { /* a listener must not undo a committed write */ }
+}
+
 export function openDb(): Promise<IDBDatabase> {
   if (dbPromise) return dbPromise;
   dbPromise = new Promise((resolve, reject) => {
@@ -103,6 +116,7 @@ export function openDb(): Promise<IDBDatabase> {
     };
     req.onsuccess = () => {
       const db = req.result;
+      db.onclose = () => { dbPromise = null; };
       db.onversionchange = () => {
         db.close();
         dbPromise = null;
@@ -177,7 +191,7 @@ export async function put(store: string, value: unknown) {
   const tx = db.transaction(store, 'readwrite');
   tx.objectStore(store).put(value);
   await done(tx);
-  writeListener(store);
+  wrote(store);
 }
 
 export async function remove(store: string, key: string) {
@@ -185,7 +199,7 @@ export async function remove(store: string, key: string) {
   const tx = db.transaction(store, 'readwrite');
   tx.objectStore(store).delete(key);
   await done(tx);
-  writeListener(store);
+  wrote(store);
 }
 
 /** Replace every file a frame owns in one transaction. */
@@ -205,6 +219,7 @@ export async function replaceFiles(frameId: string, files: { path: string; blob:
     }
   };
   await done(tx);
+  wrote('files');
 }
 
 export async function removeFrameDeep(frameId: string, noteIds: string[]) {
@@ -221,7 +236,7 @@ export async function putMany(store: string, values: unknown[]) {
   const os = tx.objectStore(store);
   for (const v of values) os.put(v);
   await done(tx);
-  writeListener(store);
+  wrote(store);
 }
 
 /** Every stored file one prototype owns. */

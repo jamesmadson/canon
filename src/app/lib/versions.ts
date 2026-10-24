@@ -83,3 +83,18 @@ export function stackFor<T extends Stackable>(items: T[], incoming: Pick<Stackab
   if (!matches.length) return undefined;
   return matches.reduce((a, b) => (b.createdAt >= a.createdAt ? b : a));
 }
+
+/** Whether a URL points at this machine: localhost, 127.0.0.1, [::1], or *.localhost. */
+export function isLocal(url: string): boolean {
+  try {
+    const h = new URL(url).hostname.toLowerCase();
+    return h === 'localhost' || h.endsWith('.localhost') || h === '127.0.0.1' || h === '[::1]' || h === '::1';
+  } catch {
+    return false;
+  }
+}
+
+/** The board spots that show a given version. */
+export function swapsFor<P extends { id: string; frameId: string }>(placements: P[], fromId: string): P[] {
+  return placements.filter((p) => p.frameId === fromId);
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { currentOf, nameStem, stackFor, stacks, urlStem, versionOf, type Stackable } from '../../src/app/lib/versions';
+import { currentOf, isLocal, swapsFor, nameStem, stackFor, stacks, urlStem, versionOf, type Stackable } from '../../src/app/lib/versions';
 
 const p = (id: string, name: string, createdAt: number, extra: Partial<Stackable> = {}): Stackable => ({
   id, name, kind: 'files', createdAt, ...extra,
@@ -64,5 +64,20 @@ describe('stacks', () => {
     const live = p('l', 'fernwell.vercel.app', 1, { kind: 'url', url: 'https://fernwell.vercel.app/' });
     const incoming = { id: 'n', name: 'x', kind: 'url' as const, url: 'https://fernwell-git-new-nav-jm.vercel.app/' };
     expect(stackFor([live], incoming)?.id).toBe('l');
+  });
+});
+
+describe('local hosts and swaps', () => {
+  it('isLocal knows local hosts', () => {
+    expect(isLocal('http://localhost:5173')).toBe(true);
+    expect(isLocal('http://app.localhost')).toBe(true);
+    expect(isLocal('http://[::1]:3000')).toBe(true);
+    expect(isLocal('http://127.0.0.1:8080/x')).toBe(true);
+    expect(isLocal('https://x.vercel.app')).toBe(false);
+    expect(isLocal('not a url')).toBe(false);
+  });
+  it('swapsFor finds only the spots showing that version', () => {
+    const spots = [{ id: 'p1', frameId: 'v2' }, { id: 'p2', frameId: 'v1' }, { id: 'p3', frameId: 'v2' }];
+    expect(swapsFor(spots, 'v2').map((s) => s.id)).toEqual(['p1', 'p3']);
   });
 });

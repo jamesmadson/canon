@@ -1,7 +1,7 @@
 import { render, h } from 'preact';
 import './app.css';
 import { App, BASE } from './ui';
-import { load, reloadNotes, setInstallPrompt, type InstallPromptEvent } from './store';
+import { load, watchOtherTabs, setInstallPrompt, type InstallPromptEvent } from './store';
 import { askPersistence, initVault } from './vault';
 
 // Chromium offers installing as an app through this event; keep it for the Install button.
@@ -27,7 +27,7 @@ async function boot() {
   void askPersistence();
   await initVault();
   // A preview tab files comments straight into IndexedDB and says so here.
-  if ('BroadcastChannel' in window) new BroadcastChannel('canon-app').onmessage = () => reloadNotes();
+  watchOtherTabs();
   render(h(App, {}), document.getElementById('app')!);
 }
 

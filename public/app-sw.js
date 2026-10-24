@@ -43,6 +43,7 @@ function openDb() {
     const req = indexedDB.open(DB_NAME);
     req.onsuccess = () => {
       const db = req.result;
+      db.onclose = () => { dbPromise = null; };
       db.onversionchange = () => { db.close(); dbPromise = null; };
       resolve(db);
     };
