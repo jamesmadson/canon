@@ -283,6 +283,10 @@ export async function addUrl(
   return frame;
 }
 
+function sameUrl(a: string, b: string) {
+  try { return new URL(a).href === new URL(b).href; } catch { return a === b; }
+}
+
 /**
  * Add a URL as the next version of a prototype's stack. It takes the stack's
  * current name and size, becomes current, and every board spot showing the
@@ -292,7 +296,7 @@ export async function addUrlVersion(frameId: string, url: string): Promise<{ fra
   const base = state.frames.find((f) => f.id === frameId);
   if (!base) throw new Error('That prototype is not in the library.');
   const current = currentOf(stackOf(frameId));
-  if (current.kind === 'url' && current.url === url) return { frame: current, added: false };
+  if (current.kind === 'url' && current.url && sameUrl(current.url, url)) return { frame: current, added: false };
   const frame = await addUrl(current.projectId, url, { name: current.name, size: { w: current.w, h: current.h }, stack: false });
   const spots = swapsFor(state.placements, current.id);
   await joinStack(frame.id, current.id);
@@ -315,15 +319,42 @@ export async function moveToBoard(placementId: string, boardId: string) {
     const f = state.frames.find((x) => x.id === p.frameId);
     return f && stackKey(f) === key;
   });
-  await removeFromBoard(placementId);
   if (!shows) await placeOnBoard(boardId, pl.frameId, nextSlot(boardId));
+  await removeFromBoard(placementId);
   await touchBoard(from.id);
   if (shows) await touchBoard(to.id);
 }
 
 /* ── Other tabs ────────────────────────────────────────────────────────── */
 let staleTimer: ReturnType<typeof setTimeout> | undefined;
+let reloading: Promise<void> | null = null;
 let watching = false;
+
+/**
+ * Re-read the database for a change another tab made, without ever applying a
+ * snapshot that raced a local write: wait for local writes to settle, read,
+ * and read again if any started or finished meanwhile.
+ */
+async function reloadFromRemote() {
+  for (;;) {
+    await db.whenIdle();
+    const before = db.writeState().seq;
+    const [projects, boards, frames, placements, notes] = await Promise.all([
+      db.getAll<Project>('projects'), db.getAll<Board>('boards'), db.getAll<Frame>('frames'),
+      db.getAll<Placement>('placements'), db.getAll<Note>('notes'),
+    ]);
+    if (db.writeState().seq !== before) continue;
+    set({ projects, boards, frames, placements, notes, ready: true });
+    return;
+  }
+}
+function startReload() {
+  staleTimer = undefined;
+  const run = (reloading ?? Promise.resolve()).then(reloadFromRemote);
+  const mine = run.finally(() => { if (reloading === mine) reloading = null; });
+  reloading = mine;
+  return mine;
+}
 /** Reload from the database shortly after another tab writes to it. */
 export function watchOtherTabs() {
   if (watching) return;
@@ -332,15 +363,17 @@ export function watchOtherTabs() {
   watching = true;
   ch.onmessage = () => {
     clearTimeout(staleTimer);
-    staleTimer = setTimeout(() => { staleTimer = undefined; void load(); }, 150);
+    staleTimer = setTimeout(() => { void startReload().catch(() => {}); }, 150);
   };
 }
-/** Run a pending reload now, so a view that is about to act sees what other tabs wrote. */
+/** Finish any pending or in-flight reload now, so a caller about to act sees what other tabs wrote. */
 export async function refreshIfStale() {
-  if (staleTimer === undefined) return;
-  clearTimeout(staleTimer);
-  staleTimer = undefined;
-  await load();
+  if (staleTimer !== undefined) {
+    clearTimeout(staleTimer);
+    await startReload();
+  } else if (reloading) {
+    await reloading;
+  }
 }
 
 /* ── Versions ──────────────────────────────────────────────────────────── */

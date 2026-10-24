@@ -88,6 +88,22 @@ export function appChannel(): BroadcastChannel | null {
   return channel;
 }
 /** After a committed write: tell other tabs, and the registered listener. Never throws, so a committed write never rejects. Paired agents stay private. */
+/** Local writes in flight, and a counter that moves whenever one starts or ends, so a reader can tell its snapshot raced a write. */
+let inflight = 0;
+let writeSeq = 0;
+let idleWaiters: (() => void)[] = [];
+export const writeState = () => ({ inflight, seq: writeSeq });
+/** Resolves once no local write is in flight. */
+export function whenIdle(): Promise<void> {
+  return inflight ? new Promise((r) => idleWaiters.push(r)) : Promise.resolve();
+}
+function tracked<T>(run: () => Promise<T>): Promise<T> {
+  inflight++; writeSeq++;
+  return run().finally(() => {
+    inflight--; writeSeq++;
+    if (!inflight) { const w = idleWaiters; idleWaiters = []; w.forEach((r) => r()); }
+  });
+}
 function wrote(store: string) {
   if (store === 'agents') return;
   try { appChannel()?.postMessage('changed'); } catch { /* no channel: other tabs refresh on focus */ }
@@ -186,7 +202,8 @@ export async function get<T>(store: string, key: string): Promise<T | undefined>
   });
 }
 
-export async function put(store: string, value: unknown) {
+export const put = (store: string, value: unknown) => tracked(() => putRaw(store, value));
+async function putRaw(store: string, value: unknown) {
   const db = await openDb();
   const tx = db.transaction(store, 'readwrite');
   tx.objectStore(store).put(value);
@@ -194,7 +211,8 @@ export async function put(store: string, value: unknown) {
   wrote(store);
 }
 
-export async function remove(store: string, key: string) {
+export const remove = (store: string, key: string) => tracked(() => removeRaw(store, key));
+async function removeRaw(store: string, key: string) {
   const db = await openDb();
   const tx = db.transaction(store, 'readwrite');
   tx.objectStore(store).delete(key);
@@ -203,7 +221,8 @@ export async function remove(store: string, key: string) {
 }
 
 /** Replace every file a frame owns in one transaction. */
-export async function replaceFiles(frameId: string, files: { path: string; blob: Blob; type: string }[]) {
+export const replaceFiles = (frameId: string, files: { path: string; blob: Blob; type: string }[]) => tracked(() => replaceFilesRaw(frameId, files));
+async function replaceFilesRaw(frameId: string, files: { path: string; blob: Blob; type: string }[]) {
   const db = await openDb();
   const tx = db.transaction('files', 'readwrite');
   const store = tx.objectStore('files');
@@ -229,7 +248,8 @@ export async function removeFrameDeep(frameId: string, noteIds: string[]) {
 }
 
 /** Write many records into one store in a single transaction. */
-export async function putMany(store: string, values: unknown[]) {
+export const putMany = (store: string, values: unknown[]) => tracked(() => putManyRaw(store, values));
+async function putManyRaw(store: string, values: unknown[]) {
   if (!values.length) return;
   const db = await openDb();
   const tx = db.transaction(store, 'readwrite');
