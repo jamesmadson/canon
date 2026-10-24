@@ -56,7 +56,7 @@ export const TOOL_DEFS = [
     inputSchema: schema(
       {
         project: PROJECT,
-        frame: str('Frame name or id.'),
+        frame: str('Prototype name or id.'),
         board: str('Board name or id, to narrow the search.'),
         url: str('A new http or https URL.'),
         name: str('A new name.'),
@@ -131,7 +131,7 @@ function doneText(op, res) {
     line = board ? `Added ${res.frame} to board ${board} in project ${res.project}.` : `Added ${res.frame} to project ${res.project}. It isn't on a board.`;
   } else {
     line = board ? `Updated ${res.frame} on board ${board} in project ${res.project}.` : `Updated ${res.frame} in project ${res.project}.`;
-    if (res.newVersion === true) line += ` It is version ${res.version} now.`;
+    if (res.newVersion === true && Number.isInteger(res.version)) line += ` It is version ${res.version} now.`;
   }
   return line;
 }
