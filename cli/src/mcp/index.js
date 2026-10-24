@@ -6,11 +6,19 @@ import { startBridge } from './bridge.js';
 import { pairingPath, ensurePairing, agentIdFor } from './pairing.js';
 
 const PROD = 'https://jamesmadson.github.io/canon/app/';
-const DEV = 'http://localhost:4321/canon/app/';
 
 export async function mcp(parsed, io) {
   const dev = Boolean(parsed.dev);
-  const appBase = dev ? DEV : PROD;
+  let devPort = 4321;
+  if (parsed.devPort !== undefined) {
+    const n = Number(parsed.devPort);
+    if (!dev || !/^\d+$/.test(String(parsed.devPort)) || n < 1024 || n > 65535) {
+      io.err('--dev-port needs --dev and a port number.');
+      return 2;
+    }
+    devPort = n;
+  }
+  const appBase = dev ? `http://localhost:${devPort}/canon/app/` : PROD;
   const log = (line) => io.err(line);
   const output = io.stdout ?? process.stdout;
   const file = io.pairingFile ?? pairingPath();
@@ -23,7 +31,7 @@ export async function mcp(parsed, io) {
     const agentId = agentIdFor(name);
     try {
       ensurePairing(file, agentId, name);
-      bridge = await startBridge({ agentId, name, pairingFile: file, dev });
+      bridge = await startBridge({ agentId, name, pairingFile: file, dev, devPort });
       log(`canon mcp: bridge on port ${bridge.port}`);
     } catch (error) {
       failure = error.message;

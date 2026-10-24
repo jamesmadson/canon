@@ -14,6 +14,7 @@ import { join } from 'node:path';
 import { PassThrough, Writable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 
+import { mcp } from '../src/mcp/index.js';
 import { main, parseArgv } from '../bin/canon.js';
 import { sharedSegments, parseSelection, orderCandidates, today } from '../src/commands.js';
 import { openerFor } from '../src/opener.js';
@@ -80,6 +81,16 @@ function capture(cwd, { answers = null } = {}) {
 }
 
 describe('parseArgv', () => {
+  it('reads --dev-port as text', () => {
+    expect(parseArgv(['mcp', '--dev', '--dev-port', '4322'])).toMatchObject({ dev: true, devPort: '4322' });
+  });
+  it('mcp refuses a dev port without dev or out of range', async () => {
+    const err = [];
+    expect(await mcp({ devPort: '4322' }, { err: (l) => err.push(l) })).toBe(2);
+    expect(err.join('')).toContain('--dev-port needs --dev and a port number.');
+    expect(await mcp({ dev: true, devPort: '80' }, { err: () => {} })).toBe(2);
+    expect(await mcp({ dev: true, devPort: 'abc' }, { err: () => {} })).toBe(2);
+  });
   it('reads the command and its flags', () => {
     expect(parseArgv(['index', '--all'])).toMatchObject({ command: 'index', all: true });
     expect(parseArgv(['open', '--no-open'])).toMatchObject({ command: 'open', noOpen: true });

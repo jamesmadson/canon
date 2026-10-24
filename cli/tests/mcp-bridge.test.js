@@ -113,6 +113,15 @@ describe('bridge: origin and host', () => {
   });
 });
 
+describe('bridge: dev port', () => {
+  it('dev origins follow devPort', async () => {
+    const { b } = await bridge({ dev: true, devPort: 4322 });
+    expect((await request(b.port, { origin: 'http://localhost:4321' })).status).toBe(403);
+    expect((await request(b.port, { origin: 'http://localhost:4322' })).status).toBe(200);
+    expect((await request(b.port, { origin: 'http://127.0.0.1:4322' })).status).toBe(200);
+  });
+});
+
 describe('bridge: poll authentication', () => {
   it('refuses an unsigned or mis-signed poll', async () => {
     const { b, secret } = await bridge();

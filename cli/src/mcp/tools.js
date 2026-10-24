@@ -22,17 +22,19 @@ export function checkPrototypeUrl(input) {
 
 const str = (description) => ({ type: 'string', description });
 const schema = (properties, required = []) => ({ type: 'object', properties, required });
+const PROJECT = str('Project name or id. Add uses the project open in Canon when this is left out; other tools search every project.');
 const OPEN_PROPS = {
+  project: PROJECT,
   board: str('Board name or id.'),
-  frame: str('Frame name or id.'),
+  frame: str('Prototype name or id.'),
   full: { type: 'boolean', description: 'Open the frame full screen.' },
   width: { type: ['number', 'string'], description: 'phone, tablet, desktop, fill, or a width in pixels.' },
   path: str('Path inside the prototype.'),
-  version: { type: 'integer', minimum: 1, description: 'Version to open. 1 is the oldest.' },
+  version: { type: 'integer', minimum: 1, description: 'Version to open. 1 is the oldest in its stack.' },
 };
 
 export const TOOL_DEFS = [
-  { name: 'canon_status', description: 'Say whether Canon is connected and which board is open.', inputSchema: schema({}) },
+  { name: 'canon_status', description: 'Say whether Canon is connected, and which project and board are open.', inputSchema: schema({}) },
   { name: 'canon_pair', description: 'Make a new pairing link to approve this agent in Canon.', inputSchema: schema({}) },
   {
     name: 'canon_add',
@@ -41,6 +43,7 @@ export const TOOL_DEFS = [
       {
         url: str('An http or https URL.'),
         name: str('Frame name.'),
+        project: PROJECT,
         board: str('Board name or id. A new board is made if none matches.'),
         width: OPEN_PROPS.width,
       },
@@ -52,6 +55,7 @@ export const TOOL_DEFS = [
     description: 'Change a frame: its URL, name or place.',
     inputSchema: schema(
       {
+        project: PROJECT,
         frame: str('Frame name or id.'),
         board: str('Board name or id, to narrow the search.'),
         url: str('A new http or https URL.'),
@@ -61,7 +65,7 @@ export const TOOL_DEFS = [
       ['frame'],
     ),
   },
-  { name: 'canon_find', description: 'List boards and frames, or search them.', inputSchema: schema({ query: str('Text to look for.') }) },
+  { name: 'canon_find', description: 'List boards and frames, or search them.', inputSchema: schema({ project: PROJECT, query: str('Text to look for.') }) },
   { name: 'canon_open', description: 'Show a board or frame in Canon.', inputSchema: schema(OPEN_PROPS) },
   { name: 'canon_link', description: 'Get a link to a board or frame.', inputSchema: schema(OPEN_PROPS) },
 ];
@@ -99,7 +103,7 @@ function checkArgs(name, args) {
 const text = (t, isError = false) => ({ content: [{ type: 'text', text: t }], ...(isError ? { isError: true } : {}) });
 const show = (v) => (typeof v === 'string' ? v : JSON.stringify(v, null, 2));
 
-const LOOKUPS = { frame: 'frame', board: 'board', moveTo: 'moveTo board' };
+const LOOKUPS = { project: 'project', frame: 'frame', board: 'board', moveTo: 'moveTo board' };
 
 /** "Which one?" in words, naming the lookup (frame, board or moveTo board) and the query when Canon says them. */
 function candidateText(kind, names, what, query) {
@@ -116,8 +120,20 @@ const FAILURES = {
 
 /** The first line of an add or update result: what was done, and on which board. */
 function doneText(op, res) {
-  if (!res || typeof res !== 'object' || typeof res.frame !== 'string' || typeof res.board !== 'string') return null;
-  return op === 'add' ? `Added ${res.frame} to board ${res.board}.` : `Updated ${res.frame} on board ${res.board}.`;
+  if (!res || typeof res !== 'object' || typeof res.frame !== 'string') return null;
+  const board = typeof res.board === 'string' ? res.board : null;
+  if (typeof res.project !== 'string') {
+    if (board === null) return null;
+    return op === 'add' ? `Added ${res.frame} to board ${board}.` : `Updated ${res.frame} on board ${board}.`;
+  }
+  let line;
+  if (op === 'add') {
+    line = board ? `Added ${res.frame} to board ${board} in project ${res.project}.` : `Added ${res.frame} to project ${res.project}. It isn't on a board.`;
+  } else {
+    line = board ? `Updated ${res.frame} on board ${board} in project ${res.project}.` : `Updated ${res.frame} in project ${res.project}.`;
+    if (res.newVersion === true) line += ` It is version ${res.version} now.`;
+  }
+  return line;
 }
 
 export function makeTools({ bridge, appBase, pairing }) {

@@ -17,7 +17,6 @@ import { readPairings, claimPairing } from './pairing.js';
 
 const DEFAULT_PORTS = [47800, 47801, 47802, 47803, 47804, 47805, 47806, 47807, 47808, 47809];
 const PROD_ORIGINS = ['https://jamesmadson.github.io'];
-const DEV_ORIGINS = ['http://localhost:4321', 'http://127.0.0.1:4321'];
 const TAB_ID = /^[0-9a-f]{16,64}$/;
 const MAX_BODY = 64 * 1024;
 const MAX_ARGS = 64 * 1024;
@@ -27,12 +26,14 @@ export function startBridge({
   name,
   pairingFile,
   dev = false,
+  devPort = 4321,
   ports = DEFAULT_PORTS,
   holdMs = 25_000, // longest a poll is held waiting for a command
   graceMs = 2_000, // connected() stays true this long after a poll ends; keep it under connectWaitMs so the one check at connectWaitMs sees a gone tab
   connectWaitMs = 2_500, // send() gives up this soon when no tab is connected
 } = {}) {
-  const origins = new Set(dev ? [...PROD_ORIGINS, ...DEV_ORIGINS] : PROD_ORIGINS);
+  const devOrigins = [`http://localhost:${devPort}`, `http://127.0.0.1:${devPort}`];
+  const origins = new Set(dev ? [...PROD_ORIGINS, ...devOrigins] : PROD_ORIGINS);
   const replay = createReplayGuard();
   const queue = []; // commands not yet handed to the tab
   const pending = new Map(); // id -> { resolve, timers }

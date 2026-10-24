@@ -67,6 +67,39 @@ describe('canon tools', () => {
     const updated = await setup({ ok: true, result: { frameId: 'f1', frame: 'Cart', boardId: 'b2', board: 'Archive', link: 'L' } }).tools.call('canon_update', { frame: 'Cart' });
     expect(updated.content[0].text.split('\n')[0]).toBe('Updated Cart on board Archive.');
   });
+  it('accepts project on add, update, find, open and link', async () => {
+    for (const [tool, args, op] of [
+      ['canon_add', { url: 'http://a.b', project: 'Acme' }, 'add'],
+      ['canon_update', { frame: 'x', project: 'Acme' }, 'update'],
+      ['canon_find', { project: 'Acme' }, 'find'],
+      ['canon_open', { project: 'Acme' }, 'open'],
+      ['canon_link', { project: 'Acme' }, 'link'],
+    ]) {
+      const { tools, calls } = setup();
+      await tools.call(tool, args);
+      expect(calls[0][0]).toBe(op);
+      expect(calls[0][1].project).toBe('Acme');
+    }
+  });
+  it('refuses project on canon_status', async () => {
+    const r = await setup().tools.call('canon_status', { project: 'Acme' });
+    expect(r.isError).toBe(true);
+    expect(r.content[0].text).toBe('project is not an option for canon_status.');
+  });
+  it('says which project matched nothing', async () => {
+    const { tools } = setup({ ok: true, result: { status: 'none', candidates: [], what: 'project', query: 'Zed' } });
+    const r = await tools.call('canon_find', { project: 'Zed' });
+    expect(r.content[0].text).toBe('Nothing matched project "Zed".');
+  });
+  it('names the project an add or update landed on', async () => {
+    const first = async (tool, args, result) => (await setup({ ok: true, result }).tools.call(tool, args)).content[0].text.split('\n')[0];
+    const base = { frameId: 'f1', frame: 'Cart', project: 'Shop' };
+    expect(await first('canon_add', { url: 'http://a.b' }, { ...base, board: 'Main' })).toBe('Added Cart to board Main in project Shop.');
+    expect(await first('canon_add', { url: 'http://a.b' }, { ...base, board: null })).toBe("Added Cart to project Shop. It isn't on a board.");
+    expect(await first('canon_update', { frame: 'Cart' }, { ...base, board: 'Main' })).toBe('Updated Cart on board Main in project Shop.');
+    expect(await first('canon_update', { frame: 'Cart' }, { ...base, board: null })).toBe('Updated Cart in project Shop.');
+    expect(await first('canon_update', { frame: 'Cart' }, { ...base, board: 'Main', newVersion: true, version: 3 })).toBe('Updated Cart on board Main in project Shop. It is version 3 now.');
+  });
   it('canon_pair returns a link with a new secret', async () => {
     const { tools, secret } = setup();
     const r = await tools.call('canon_pair', {});

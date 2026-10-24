@@ -12,7 +12,7 @@ import { mcp } from '../src/mcp/index.js';
 const COMMANDS = { init, index, note, open, mcp };
 
 /** The flags that take a value, and the key each one lands under. */
-const VALUE_FLAGS = { '--about': 'about', '--said': 'said', '--as': 'as' };
+const VALUE_FLAGS = { '--about': 'about', '--said': 'said', '--as': 'as', '--dev-port': 'devPort' };
 
 /**
  * A tiny flag reader. A CLI framework would be a dependency, and there are none.
