@@ -1,8 +1,20 @@
 import { render, h } from 'preact';
 import './app.css';
 import { App, BASE } from './ui';
-import { load, watchOtherTabs, setInstallPrompt, type InstallPromptEvent } from './store';
+import { load, watchOtherTabs, setInstallPrompt, toast, type InstallPromptEvent } from './store';
 import { askPersistence, initVault } from './vault';
+import { type PairLink, parsePairLink, startBridgeClient } from './bridge/client';
+
+/**
+ * Read a pairing link out of the address and clear it at once, before anything
+ * awaits, so the secret never sits in history while the app boots.
+ */
+function takePairLink(): PairLink | 'bad' | null {
+  const p = parsePairLink(location.hash);
+  if (p !== null) history.replaceState(null, '', location.pathname + location.search);
+  return p;
+}
+const pairAtLoad = takePairLink();
 
 // Chromium offers installing as an app through this event; keep it for the Install button.
 addEventListener('beforeinstallprompt', (e) => {
@@ -28,7 +40,11 @@ async function boot() {
   await initVault();
   // A preview tab files comments straight into IndexedDB and says so here.
   watchOtherTabs();
-  render(h(App, {}), document.getElementById('app')!);
+  // Before render, so the first paint already shows it.
+  if (pairAtLoad === 'bad') toast('That pairing link is incomplete, so nothing was connected. Ask the agent for a new one.');
+  render(h(App, { pairAtLoad: pairAtLoad === 'bad' ? null : pairAtLoad }), document.getElementById('app')!);
+  // Links handed to agents point at this page, wherever it is served from.
+  startBridgeClient({ appBase: location.origin + location.pathname });
 }
 
 boot();

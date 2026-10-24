@@ -6,8 +6,9 @@ import { canLinkFolders, groupsFromDrop } from './intake';
 import { type Camera, type Point, fitCamera, screenToWorld, tidyPositions, zoomAt } from './lib/layout';
 import { iaLayout, splitNav, teaseSlots } from './lib/bundle';
 import { sortPrototypes, type LibrarySort } from './lib/library';
-import { currentOf, versionOf } from './lib/versions';
+import { currentOf, isLocal, versionOf } from './lib/versions';
 import { safeFrameUrl } from './lib/resolve';
+import { type Address, buildAddress, joinPath } from './lib/address';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
 import {
   html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES, showsCover, coverSrc,
@@ -76,7 +77,15 @@ function LibraryPicker({ projectId, boardId, onClose }: { projectId: string; boa
 }
 
 /* ── Board ─────────────────────────────────────────────────────────────── */
-export function BoardView({ id, askUrl }: { id: string; askUrl: () => Promise<string | null> }) {
+export type FullAddress = Extract<Address, { name: 'full' }>;
+
+/** Change the address without a history entry. replaceState fires no hashchange, so tell the router ourselves. */
+const replaceAddress = (a: Address) => {
+  history.replaceState(null, '', buildAddress(a));
+  dispatchEvent(new HashChangeEvent('hashchange'));
+};
+
+export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: string | null; full: FullAddress | null; askUrl: () => Promise<string | null> }) {
   const s = useStore();
   const board = s.boards.find((b) => b.id === id);
   const project = s.projects.find((p) => p.id === board?.projectId);
@@ -94,12 +103,15 @@ export function BoardView({ id, askUrl }: { id: string; askUrl: () => Promise<st
   const [openThread, setOpenThread] = useState<string | null>(null);
   const [panel, setPanel] = useState(false);
   const [showResolved, setShowResolved] = useState(false);
-  const [focus, setFocus] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [panning, setPanning] = useState(false);
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<LibrarySort>('added');
   const fitted = useRef<string | null>(null);
+  const centred = useRef<string | null>(null);
+  const focus = full?.frame ?? null;
+  const openFocus = (fid: string) => go(buildAddress({ name: 'full', board: id, frame: fid, width: null, path: null }));
+  const closeFocus = () => go(buildAddress({ name: 'board', board: id, frame: null }));
   const hoverTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const tidy = board?.arrangement === 'tidy';
@@ -125,21 +137,41 @@ export function BoardView({ id, askUrl }: { id: string; askUrl: () => Promise<st
     if (!el) return;
     setCam(fitCamera(frames.map((f) => ({ ...posOf(f), w: f.w, h: f.h })), { w: el.clientWidth, h: el.clientHeight }));
   };
+  // A layout effect, so it runs before a frame link selects its frame below rather than clearing it after.
+  useLayoutEffect(() => {
+    setSelected(null);
+    setLive(null);
+    setDraft(null);
+    setOpenThread(null);
+  }, [id]);
   useLayoutEffect(() => {
     if (fitted.current !== id && frames.length && canvasRef.current) {
       fitted.current = id;
       fit();
     }
   });
+  // Turning tidy on, or re-sorting, on a board already on screen refits. A board that opens (or loads) tidy has
+  // just been fitted above, and a frame link has just been centred, so refitting then would undo the centring.
+  const tidyWas = useRef({ id, tidy, sort, shown: false });
   useEffect(() => {
-    setSelected(null);
-    setLive(null);
-    setDraft(null);
-    setOpenThread(null);
-  }, [id]);
-  useEffect(() => {
-    if (tidy) fit();
-  }, [tidy, sort]);
+    const was = tidyWas.current;
+    tidyWas.current = { id, tidy, sort, shown: fitted.current === id };
+    if (tidy && was.id === id && was.shown && (!was.tidy || was.sort !== sort)) fit();
+  });
+  // A link to a frame selects the spot showing any version of it and centres that spot once.
+  // A frame that is not here leaves the board as it is.
+  useLayoutEffect(() => {
+    const el = canvasRef.current;
+    if (!frameId || !el) return;
+    const stack = store.stackOf(frameId);
+    const f = frames.find((x) => x.id === frameId) ?? frames.find((x) => stack.some((m) => m.id === x.id));
+    if (!f || centred.current === `${id}/${frameId}/${f.placementId}`) return;
+    // Select first and centre on the next pass, once the inspector has taken its share of the width.
+    if (selected !== f.id) return setSelected(f.id);
+    centred.current = `${id}/${frameId}/${f.placementId}`;
+    const p = posOf(f);
+    setCam((c) => ({ ...c, x: el.clientWidth / 2 - (p.x + f.w / 2) * c.zoom, y: el.clientHeight / 2 - (p.y + f.h / 2) * c.zoom }));
+  });
   useWheel(canvasRef, setCam, live);
 
   const zoomBy = (k: number) => {
@@ -176,7 +208,7 @@ export function BoardView({ id, askUrl }: { id: string; askUrl: () => Promise<st
       else if (e.key === 'Enter' && selected) {
         const f = frames.find((x) => x.id === selected);
         if (f && pageCount(f) > 1) enter(f);
-        else setFocus(selected);
+        else openFocus(selected);
       }
     };
     addEventListener('keydown', onKey);
@@ -273,7 +305,8 @@ export function BoardView({ id, askUrl }: { id: string; askUrl: () => Promise<st
   const openCount = threads.filter((n) => !n.resolved).length;
   const visible = (n: Note) => showResolved || !n.resolved || n.id === openThread;
   const canvasNotes = store.canvasNotesOf(id).filter(visible);
-  const focused = frames.find((f) => f.id === focus) ?? null;
+  // Focus shows the version the address names, even when the spot shows another.
+  const focused = (focus && s.frames.find((f) => f.id === focus)) || null;
   const thread = s.notes.find((n) => n.id === openThread) ?? null;
 
   // Where a thread's pin sits on screen, for its popover and for jumping to it.
@@ -406,10 +439,10 @@ export function BoardView({ id, askUrl }: { id: string; askUrl: () => Promise<st
 
       ${panel
         ? html`<${CommentsPanel} notes=${threads} onPick=${jumpTo} onClose=${() => setPanel(false)} />`
-        : sel && html`<${Inspector} frame=${sel} askUrl=${askUrl} onFocus=${() => setFocus(sel.id)} onEnter=${() => enter(sel)} onRemove=${removeSelected} onComment=${() => setTool('comment')} onOpenThread=${jumpTo} />`}
+        : sel && html`<${Inspector} frame=${sel} askUrl=${askUrl} onFocus=${() => openFocus(sel.id)} onEnter=${() => enter(sel)} onRemove=${removeSelected} onComment=${() => setTool('comment')} onOpenThread=${jumpTo} />`}
     </div>
     ${picker && html`<${LibraryPicker} projectId=${board.projectId} boardId=${id} onClose=${() => setPicker(false)} />`}
-    ${focused && html`<${Focus} frame=${focused} onClose=${() => setFocus(null)} />`}
+    ${focused && full && html`<${Focus} frame=${focused} address=${full} onClose=${closeFocus} />`}
   </div>`;
 }
 
@@ -783,26 +816,51 @@ function PageInspector({ frame, page, onFocus, onPick, onComment, onOpenThread }
 }
 
 /* ── Focus: one page, full size ─────────────────────────────────────────── */
-export function Focus({ frame, page, onClose }: { frame: Frame; page?: string; onClose: () => void }) {
-  const [width, setWidth] = useState<number | null>(frame.w);
+/**
+ * With an address, Focus is a link: its width, path and version live in the
+ * hash and change it in place, so Back leaves Focus rather than stepping
+ * through widths. Without one (Library, ⌘K, a bundle page) it keeps its own state.
+ */
+export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: string; onClose: () => void; address?: FullAddress }) {
+  const [localWidth, setLocalWidth] = useState<number | null>(frame.w);
+  const width = address ? (address.width === 'fill' ? null : address.width ?? frame.w) : localWidth;
+  const setWidth = (w: number | null) => (address ? replaceAddress({ ...address, width: w ?? 'fill' }) : setLocalWidth(w));
+  const stack = address ? store.stackOf(frame.id) : [];
+  const v = versionOf(stack, frame.id);
+  const isCurrent = stack.length < 2 || currentOf(stack).id === frame.id;
+  const src = address && frame.kind === 'url' ? joinPath(safeFrameUrl(frame.url), address.path) : frameSrc(frame, page);
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     addEventListener('keydown', k);
     return () => removeEventListener('keydown', k);
   }, []);
+  const copy = async () => {
+    if (!address) return;
+    try {
+      await navigator.clipboard.writeText(location.origin + location.pathname + buildAddress(address));
+      store.toast('Link copied.');
+    } catch {
+      store.toast('Could not copy the link. Copy it from the address bar.');
+    }
+  };
   return html`<div class="focus">
     <div class="topbar">
       <button class="btn ghost icon" onClick=${onClose} title="Back (Esc)"><${Icon} name="back" /></button>
       <h1>${frame.name}${page && page !== frame.entry ? html`<span class="faint"> · ${pageName(page)}</span>` : ''}</h1>
       <span class="spacer"></span>
+      ${address && stack.length > 1 && html`<select class="select" aria-label="Version" value=${frame.id} onChange=${(e: Event) => replaceAddress({ ...address, frame: (e.target as HTMLSelectElement).value })}>
+        ${[...stack].reverse().map((m) => html`<option value=${m.id} selected=${m.id === frame.id}>v${versionOf(stack, m.id)}${m.id === currentOf(stack).id ? ' · current' : ''}</option>`)}
+      </select>`}
       <div class="seg">
         ${SIZES.map((sz) => html`<button aria-pressed=${width === sz.w} onClick=${() => setWidth(sz.w)}>${sz.name} ${sz.w}</button>`)}
         <button aria-pressed=${width === null} onClick=${() => setWidth(null)}>Fill</button>
       </div>
+      ${address && html`<button class="btn ghost" onClick=${copy}><${Icon} name="link" />Copy link</button>`}
       <a class="btn ghost" href=${previewUrl(frame, page)} target="_blank" rel="noopener"><${Icon} name="comment" />Preview link</a>
     </div>
+    ${address && frame.kind === 'url' && !isCurrent && isLocal(frame.url ?? '') && html`<p class="hint" role="status" style="margin:8px 16px 0">This is localhost, so it shows what's running now, not v${v}.</p>`}
     <div class="focus-stage">
-      <iframe src=${frameSrc(frame, page)} title=${frame.name} style=${{ width: width ? `${width}px` : '100%' }} sandbox=${SANDBOX}></iframe>
+      <iframe src=${src} title=${frame.name} style=${{ width: width ? `${width}px` : '100%' }} sandbox=${SANDBOX}></iframe>
     </div>
   </div>`;
 }

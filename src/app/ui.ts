@@ -7,28 +7,15 @@ import { BoardView, BundleView, Focus } from './canvas';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
 import { currentOf, stackKey, stacks as stacksOf, versionOf } from './lib/versions';
 import { checkPrototypeUrl, safeFrameUrl } from './lib/resolve';
+import { type Address, buildAddress, parseAddress } from './lib/address';
+import { type PairLink, bridgeView, pairNotice, parsePairLink, removeAgent, saveAgent, subscribeBridge } from './bridge/client';
 import { Avatar } from './comments';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, KIND, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
 export { BASE } from './shared';
 
-type Route =
-  | { name: 'home' }
-  | { name: 'project'; id: string; tab: 'prototypes' | 'boards' | 'comments' }
-  | { name: 'board'; id: string }
-  | { name: 'frame'; id: string; from?: string; page?: string };
-
-function parseRoute(): Route {
-  const [path, query] = location.hash.replace(/^#\/?/, '').split('?');
-  const q = new URLSearchParams(query ?? '');
-  let m = path.match(/^p\/([^/]+)(?:\/(boards|comments))?$/);
-  if (m) return { name: 'project', id: m[1], tab: (m[2] as 'boards' | 'comments') ?? 'prototypes' };
-  m = path.match(/^f\/([^/]+)$/);
-  if (m) return { name: 'frame', id: m[1], from: q.get('from') ?? undefined, page: q.get('page') ?? undefined };
-  m = path.match(/^b\/([^/]+)$/);
-  if (m) return { name: 'board', id: m[1] };
-  return { name: 'home' };
-}
+type Route = Address;
+const parseRoute = (): Route => parseAddress(location.hash);
 
 function useRoute() {
   const [route, setRoute] = useState(parseRoute);
@@ -40,11 +27,13 @@ function useRoute() {
   return route;
 }
 
+const boardOf = (route: Route): string | null => (route.name === 'board' || route.name === 'full' ? route.board : null);
 const projectOf = (route: Route): string | null => {
   const s = store.getState();
-  if (route.name === 'project') return route.id;
-  if (route.name === 'board') return s.boards.find((b) => b.id === route.id)?.projectId ?? null;
-  if (route.name === 'frame') return s.frames.find((f) => f.id === route.id)?.projectId ?? null;
+  if (route.name === 'project') return route.project;
+  const board = boardOf(route);
+  if (board) return s.boards.find((b) => b.id === board)?.projectId ?? null;
+  if (route.name === 'bundle' || route.name === 'full') return s.frames.find((f) => f.id === route.frame)?.projectId ?? null;
   return null;
 };
 
@@ -120,6 +109,55 @@ function Storage() {
   </div>`;
 }
 
+/* ── Agents: pairing and the sidebar list ───────────────────────────────── */
+function useBridge() {
+  const [, force] = useState(0);
+  useEffect(() => subscribeBridge(() => force((n) => n + 1)), []);
+  return bridgeView();
+}
+
+function PairDialog({ pair, onClose }: { pair: PairLink; onClose: () => void }) {
+  const notice = pairNotice(useBridge().agents.find((a) => a.id === pair.agentId), pair);
+  const connect = async () => {
+    try {
+      await saveAgent(pair);
+      store.toast(`Connected ${pair.name}.`);
+    } catch {
+      store.toast(`Could not save ${pair.name}. Try the link again.`);
+    }
+    onClose();
+  };
+  return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose()}>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="pair-title">
+      <h3 id="pair-title">Connect ${pair.name} to Canon?</h3>
+      <p class="soft" style="margin:0">It will be able to add prototypes to your projects, add versions, move them between boards and open views. It can't delete anything or read your files.</p>
+      ${notice && html`<p role="alert" style="margin:0;color:var(--text)">${notice}</p>`}
+      <div class="row" style="justify-content:flex-end">
+        <button type="button" class="btn ghost" autofocus onClick=${onClose}>Cancel</button>
+        <button type="button" class="btn primary" onClick=${connect}>Connect</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function Agents() {
+  const { agents, connected, connecting } = useBridge();
+  if (!agents.length) return null;
+  const disconnect = (id: string, name: string) => {
+    if (confirm(`Disconnect ${name}? It will need a new pairing link to reach Canon again.`)) removeAgent(id).catch(() => store.toast(`Could not disconnect ${name}.`));
+  };
+  return html`<div class="rail-section label">Agents</div>
+    ${[...agents].sort((a, b) => a.name.localeCompare(b.name)).map((a) => {
+      const state = connected.has(a.id) ? 'on' : connecting.has(a.id) ? 'wait' : 'off';
+      const label = { on: 'Connected', wait: 'Connecting', off: 'Not connected' }[state];
+      return html`<div class="nav-item agent">
+        <span class="dot" data-state=${state} role="img" aria-label=${label} title=${label}></span>
+        <span class="agent-name">${a.name}</span>
+        <button class="btn ghost" onClick=${() => disconnect(a.id, a.name)}>Disconnect</button>
+      </div>`;
+    })}`;
+}
+
 /* ── Sidebar ───────────────────────────────────────────────────────────── */
 function Sidebar({ route }: { route: Route }) {
   const s = useStore();
@@ -138,13 +176,13 @@ function Sidebar({ route }: { route: Route }) {
       ${projects.map((p) => {
         const open = p.id === active;
         return html`<div>
-          <a class="nav-item" href=${`#/p/${p.id}`} aria-current=${route.name === 'project' && route.id === p.id && route.tab === 'prototypes' ? 'page' : undefined}>
+          <a class="nav-item" href=${`#/p/${p.id}`} aria-current=${route.name === 'project' && route.project === p.id && route.tab === 'prototypes' ? 'page' : undefined}>
             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${open ? 'color:var(--text)' : ''}">${p.name}</span>
             <span class="count">${store.prototypesOf(p.id).length}</span>
           </a>
           ${open && html`<div class="rail-sub">
             <a class="nav-item" href=${`#/p/${p.id}`} aria-current=${route.name === 'project' && route.tab === 'prototypes' ? 'page' : undefined}><${Icon} name="grid" />Prototypes</a>
-            ${store.boardsOf(p.id).map((b) => html`<a class="nav-item" href=${`#/b/${b.id}`} aria-current=${route.name === 'board' && route.id === b.id ? 'page' : undefined}><${Icon} name="boards" /><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</span><span class="count">${store.placementsOf(b.id).length}</span></a>`)}
+            ${store.boardsOf(p.id).map((b) => html`<a class="nav-item" href=${`#/b/${b.id}`} aria-current=${boardOf(route) === b.id ? 'page' : undefined}><${Icon} name="boards" /><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</span><span class="count">${store.placementsOf(b.id).length}</span></a>`)}
             <a class="nav-item" href=${`#/p/${p.id}/comments`} aria-current=${route.name === 'project' && route.tab === 'comments' ? 'page' : undefined}><${Icon} name="comment" />Notes<span class="count">${store.notesInProject(p.id).filter((n) => !n.resolved).length}</span></a>
           </div>`}
         </div>`;
@@ -158,6 +196,7 @@ function Sidebar({ route }: { route: Route }) {
       <img src="/canon/icons/canon-192.png" alt="" width="28" height="28" />
       <span><b>Install Canon</b><small>In Safari: File, then Add to Dock</small></span>
     </div>`}
+    <${Agents} />
     <div class="rail-foot">
       ${me ? html`<div class="row" style="align-items:center;margin-bottom:8px;flex-wrap:nowrap"><${Avatar} name=${me} /><span style="color:var(--soft)">${me}</span></div>` : null}
       <${Storage} />
@@ -435,6 +474,16 @@ function ProjectComments({ projectId }: { projectId: string }) {
   </div></div>`;
 }
 
+/* ── A full-screen link with no board: the prototype's project, with Focus over it ── */
+function FullOverProject({ address, askUrl }: { address: Extract<Address, { name: 'full' }>; askUrl: () => Promise<string | null> }) {
+  const s = useStore();
+  const frame = s.frames.find((f) => f.id === address.frame);
+  if (!frame) return html`<div class="main"><div class="empty">That prototype is not in this browser. <a href="#/">All projects</a></div></div>`;
+  const project = frame.projectId;
+  return html`<${ProjectView} id=${project} tab="prototypes" askUrl=${askUrl} />
+    <${Focus} frame=${frame} address=${address} onClose=${() => go(buildAddress({ name: 'project', project, tab: 'prototypes' }))} />`;
+}
+
 /* ── App ───────────────────────────────────────────────────────────────── */
 /* ── ⌘K: jump to any prototype ─────────────────────────────────────────── */
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
@@ -490,12 +539,25 @@ function Switcher({ onClose, onFocus }: { onClose: () => void; onFocus: (id: str
   </div>`;
 }
 
-export function App() {
+export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
   const s = useStore();
   const route = useRoute();
   const url = useUrlDialog();
   const [switcher, setSwitcher] = useState(false);
   const [focusId, setFocusId] = useState<string | null>(null);
+  const [pair, setPair] = useState<PairLink | null>(pairAtLoad);
+  // A pairing link counts only when it opened this page (main.ts reads it). Anything
+  // holding a reference to this tab can rewrite its hash, so a later #pair is cleared.
+  useEffect(() => {
+    const later = () => {
+      if (parsePairLink(location.hash) === null) return;
+      history.replaceState(null, '', location.pathname + location.search);
+      dispatchEvent(new HashChangeEvent('hashchange'));
+      store.toast('Open the pairing link in a new tab to connect an agent.');
+    };
+    addEventListener('hashchange', later);
+    return () => removeEventListener('hashchange', later);
+  }, []);
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -520,15 +582,18 @@ export function App() {
     <${Sidebar} route=${route} />
     ${!s.ready
       ? html`<div class="main"></div>`
-      : route.name === 'frame'
-        ? html`<${BundleView} key=${route.id} frameId=${route.id} fromBoard=${route.from} startPage=${route.page} />`
-        : route.name === 'board'
-          ? html`<${BoardView} id=${route.id} askUrl=${url.ask} />`
-          : route.name === 'project'
-            ? html`<${ProjectView} id=${route.id} tab=${route.tab} askUrl=${url.ask} />`
-            : html`<${Home} />`}
+      : route.name === 'bundle'
+        ? html`<${BundleView} key=${route.frame} frameId=${route.frame} fromBoard=${route.from ?? undefined} startPage=${route.page ?? undefined} />`
+        : route.name === 'board' || (route.name === 'full' && route.board)
+          ? html`<${BoardView} id=${route.board} frameId=${route.frame} full=${route.name === 'full' ? route : null} askUrl=${url.ask} />`
+          : route.name === 'full'
+            ? html`<${FullOverProject} address=${route} askUrl=${url.ask} />`
+            : route.name === 'project'
+              ? html`<${ProjectView} id=${route.project} tab=${route.tab} askUrl=${url.ask} />`
+              : html`<${Home} />`}
     ${url.view}
     ${overlays}
+    ${pair && html`<${PairDialog} pair=${pair} onClose=${() => setPair(null)} />`}
     ${s.toast && html`<div class="toast" role="status">${s.toast}</div>`}
   </div>`;
 }
