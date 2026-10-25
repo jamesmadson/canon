@@ -197,6 +197,14 @@ describe('runOp add', () => {
     expect(t.writes).toEqual([]);
   });
 
+  it("refuses a URL on Canon's own origin, which would run with Canon's storage", async () => {
+    const t = twoProjects({ name: 'board', board: 'b1', frame: null });
+    const r = await runOp('add', { url: 'https://example.test/canon/app/' }, t.deps);
+    expect(r).toEqual({ ok: false, error: "That address is Canon itself. Add the prototype's own address." });
+    expect(t.writes).toEqual([]);
+    expect(t.addUrlCalls).toEqual([]);
+  });
+
   it('caps names at 200 and widths at 3840', async () => {
     const t = twoProjects({ name: 'board', board: 'b1', frame: null });
     const r = await runOp('add', { url: 'https://proto.test/', name: 'x'.repeat(5000), width: 100_000 }, t.deps);
@@ -311,6 +319,13 @@ describe('runOp update', () => {
     const r = await runOp('update', { frame: 'Cart', url: 'https://cart.test/9', moveTo: 'Nowhere' }, t.deps);
     expect(r).toMatchObject({ ok: true, result: { status: 'none', what: 'moveTo' } });
     expect(t.versionCalls).toEqual([]);
+    expect(t.writes).toEqual([]);
+  });
+
+  it("refuses a new URL on Canon's own origin", async () => {
+    const t = twoProjects();
+    const r = await runOp('update', { frame: 'Cart', url: 'https://example.test/canon/app/#/' }, t.deps);
+    expect(r).toEqual({ ok: false, error: "That address is Canon itself. Add the prototype's own address." });
     expect(t.writes).toEqual([]);
   });
 

@@ -62,8 +62,14 @@ function widthOf(v: unknown): number | 'fill' | null {
   return typeof w === 'number' ? Math.min(w, MAX_WIDTH) : w;
 }
 
-function checkedUrl(v: unknown): string {
-  const c = checkPrototypeUrl(typeof v === 'string' ? v : '');
+function checkedUrl(v: unknown, appBase: string): string {
+  let own: string | undefined;
+  try {
+    own = new URL(appBase).origin;
+  } catch {
+    own = undefined;
+  }
+  const c = checkPrototypeUrl(typeof v === 'string' ? v : '', own);
   if (!c.ok) throw new Refused(c.message);
   return c.url;
 }
@@ -173,7 +179,7 @@ function summary(deps: OpsDeps, frameId: string, board: Board | null) {
 /* ── add ───────────────────────────────────────────────────────────────── */
 
 async function add(args: Args, deps: OpsDeps) {
-  const url = checkedUrl(args.url);
+  const url = checkedUrl(args.url, deps.appBase);
   const width = widthOf(args.width);
   const name = nameText(args.name);
   const s = deps.state();
@@ -229,7 +235,7 @@ async function add(args: Args, deps: OpsDeps) {
 
 async function update(args: Args, deps: OpsDeps) {
   const s = deps.state();
-  const url = args.url === undefined ? null : checkedUrl(args.url);
+  const url = args.url === undefined ? null : checkedUrl(args.url, deps.appBase);
   const { stack, project, board } = pickStack(s, args);
   const name = nameText(args.name);
 

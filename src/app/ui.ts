@@ -52,7 +52,7 @@ function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) {
   const [value, setValue] = useState('http://localhost:5173/');
   const submit = (e: Event) => {
     e.preventDefault();
-    const checked = checkPrototypeUrl(value);
+    const checked = checkPrototypeUrl(value, location.origin);
     if (checked.ok) onClose(checked.url);
     else store.toast(checked.message);
   };

@@ -56,6 +56,15 @@ describe('checkPrototypeUrl', () => {
     for (const u of ['javascript:alert(1)', 'data:text/html,x', 'file:///etc/passwd', 'blob:https://x/y'])
       expect(checkPrototypeUrl(u)).toEqual(refused);
   });
+  it("refuses Canon's own origin, and only that origin", () => {
+    const own = 'https://example.test';
+    const itself = { ok: false, message: "That address is Canon itself. Add the prototype's own address." };
+    expect(checkPrototypeUrl('https://example.test/canon/app/#/', own)).toEqual(itself);
+    expect(checkPrototypeUrl('https://example.test/other', own)).toEqual(itself);
+    expect(checkPrototypeUrl('https://example.test:8443/', own)).toEqual({ ok: true, url: 'https://example.test:8443/' });
+    expect(checkPrototypeUrl('http://example.test/', own)).toEqual({ ok: true, url: 'http://example.test/' });
+    expect(checkPrototypeUrl('https://example.test/')).toEqual({ ok: true, url: 'https://example.test/' });
+  });
 });
 
 describe('safeFrameUrl', () => {
