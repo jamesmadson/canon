@@ -39,7 +39,7 @@
 
    No hue anywhere. The neutrals carry a faint warm bias, which is the one
    opinion in the palette: it is why the grey reads as chosen rather than
-   defaulted. Colour lives only inside RamsMark, the wordmark dot and MeshPanel. */
+   defaulted. Colour lives only inside RamsMark and the orange dot. */
 @theme {
   --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -309,12 +309,22 @@ summary,
     font-weight: 200;
     line-height: 1.05;
     letter-spacing: -0.03em;
+    text-wrap: balance;
   }
   .display-lg {
     font-size: 34px;
     font-weight: 200;
     line-height: 1.05;
     letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  /* The homepage claim: 40px at phone width, about 72px at 1440. */
+  .display-xl {
+    font-size: clamp(2.5rem, 2.1rem + 3.3vw, 4.5rem);
+    font-weight: 200;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
   }
   @media (min-width: 640px) {
     .display {
@@ -475,58 +485,11 @@ summary,
 }
 
 /* ── The mark ─────────────────────────────────────────────────────────────
-   A lined circle that swaps to its dotted sibling on hover and focus. Opacity
-   only, both forms stacked, so nothing reflows during the swap. */
-.wordmark {
-  display: inline-flex;
-  align-items: baseline;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  color: var(--color-ink);
-}
+   One orange circle. Wordmark.astro sets its diameter. */
 .wordmark-dot {
   display: inline-block;
-  width: 0.52em;
-  height: 0.52em;
   border-radius: 50%;
   background: var(--brand-orange);
-  margin: 0 -0.015em 0 0.03em;
-}
-
-/* ── The book-cover hero ──────────────────────────────────────────────────
-   Two columns of the name set bottom to top, monumental, ink on ground. At
-   phone width they un-rotate into a two-line display headline above the same
-   facts, because a rotated column that has to scroll sideways is a defect. */
-.cover-type {
-  display: flex;
-  gap: 0;
-  align-items: flex-start;
-  justify-content: flex-end;
-}
-.cover-type span {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-weight: 200;
-  font-size: clamp(4rem, 13vw, 10rem);
-  line-height: 0.92;
-  letter-spacing: -0.045em;
-  color: var(--color-ink);
-  user-select: none;
-}
-@media (max-width: 639px) {
-  .cover-type {
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-  }
-  .cover-type span {
-    writing-mode: horizontal-tb;
-    transform: none;
-    display: block;
-    font-size: clamp(2.75rem, 15vw, 4.5rem);
-    line-height: 0.98;
-  }
 }
 
 /* ── The rail ─────────────────────────────────────────────────────────────

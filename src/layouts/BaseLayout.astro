@@ -70,9 +70,10 @@ const isCurrent = (href: string) =>
       <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 py-5">
         <a
           href={withBase('/')}
-          class="flex min-h-11 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
+          aria-label="Canon, home"
+          class="flex min-h-11 min-w-11 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
         >
-          <Wordmark size={22} />
+          <Wordmark size={16} />
         </a>
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
           <nav aria-label="Sections" class="-mx-2 flex flex-wrap items-center text-sm">
@@ -102,7 +103,7 @@ const isCurrent = (href: string) =>
       <div class="flex flex-col gap-6 py-12 text-sm text-ink-soft sm:flex-row sm:items-end sm:justify-between">
         <p class="max-w-md">
           Every skill here is Canon's own, written by James Madson.
-          {` ${skillCount.charAt(0).toUpperCase()}${skillCount.slice(1)} of them, MIT licensed.`}
+          {` ${skillCount.charAt(0).toUpperCase()}${skillCount.slice(1)} of them, MIT\u00a0licensed.`}
         </p>
         <nav aria-label="More" class="-mx-2 flex flex-wrap items-center text-sm">
           <a href={withBase('/newsletter/')} class="tick-bar rounded-sm">Newsletter</a>

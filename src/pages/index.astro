@@ -1,35 +1,41 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ClosingStrip from '../components/ClosingStrip.astro';
-import MeshPanel from '../components/MeshPanel.astro';
 import HeroBoard from '../components/HeroBoard.astro';
 import McpWalkthrough from '../components/McpWalkthrough.astro';
-import Contact from '../components/Contact.astro';
 import { withBase } from '../lib/withBase';
 
 // One idea per row, each shown with the real screen. The screenshots come
 // from the sample project via scripts/capture-app-shots.mjs; every name and
-// quote in them is invented.
+// quote in them is invented. Text always sits left, the screen right.
 const FEATURES = [
   {
-    title: 'Every version, one stack.',
-    body: 'Drag in HTML files, zipped builds and whole folders, or paste a link. Versions of the same prototype stack together, newest on top, one marked current. Press ⌘K and open any of them. No more forty tabs.',
+    title: 'Every version, one&nbsp;stack.',
+    body: 'Drag in HTML files, zipped builds and whole folders, or paste a link. Versions of the same prototype stack together, newest on top, one marked current. Press ⌘K and open any of them. No more forty&nbsp;tabs.',
     shot: 'library',
+    width: 2352,
+    height: 1470,
     alt: 'The prototype library: six prototypes from a sample project, one of them a stack of three versions.',
   },
   {
-    title: 'See the whole site at once.',
-    body: 'A prototype with many pages opens as its map. Every page, the links between them, and the pages nothing points to anymore.',
+    title: 'See the whole site at&nbsp;once.',
+    body: 'A prototype with many pages opens as its map. Every page, the links between them, and the pages nothing points to&nbsp;anymore.',
     shot: 'map',
-    alt: 'A six-page prototype laid out as its information architecture, with the pricing page selected and its links highlighted.',
+    width: 2272,
+    height: 1420,
+    alt: 'A six-page prototype laid out as its map, with the pricing page selected and the pages it links to and from listed beside it.',
   },
   {
-    title: 'Leave yourself a note.',
-    body: 'Pin a note on a screen, a page or the space between. What changed, what to try next, which one is current. They stay on your machine with everything else.',
+    title: 'Leave yourself a&nbsp;note.',
+    body: 'Pin a note on a screen, a page or the space between. What changed, what to try next, which one is current. They stay on your machine with everything&nbsp;else.',
     shot: 'comments',
-    alt: 'A note pinned to a prototype on the canvas.',
+    width: 1520,
+    height: 950,
+    alt: 'A note pinned to a phone prototype on a board, open, with a question and its answer.',
   },
 ];
+
+const ADDRESS = 'james@jamesmadson.me';
 ---
 
 <BaseLayout
@@ -37,100 +43,111 @@ const FEATURES = [
   title="Canon"
   description="Every prototype in one place. Drop them in, see how the pages connect, and talk about them where the work is."
 >
-  {/* 1. The cover. The claim, and a board of prototypes beside it. */}
-  <section class="mx-auto max-w-6xl px-6 pt-6 pb-16 sm:pt-10 sm:pb-20">
-    <div class="flex flex-col gap-10 sm:flex-row-reverse sm:items-stretch sm:justify-between sm:gap-16">
-      <div class="w-full sm:max-w-[30rem] sm:flex-1">
+  {/* 1. The claim, and a board of prototypes beside it. */}
+  <section class="mx-auto max-w-6xl px-6 pt-8 pb-20 sm:pt-14 sm:pb-28">
+    <div class="grid grid-cols-1 gap-10 sm:gap-12 lg:grid-cols-12 lg:items-center">
+      <div class="min-w-0 lg:col-span-6">
+        <h1 class="display-xl max-w-[14ch]">Every prototype, from every tool, in one&nbsp;place.</h1>
+        <p class="mt-6 max-w-[40ch] text-[18px] leading-[1.45] text-ink-soft">
+          Claude Code, v0, Lovable, Figma Make, a branch, a zip. Canon puts them on one board you can
+          see, open and keep in&nbsp;order.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <a href={withBase('/app/')} class="btn btn-primary">Try it now</a>
+          <a href="#agents" class="tick-bar rounded-sm text-sm">Connect an agent</a>
+        </div>
+        <p class="mt-5 font-mono text-[11px] leading-[1.6] tracking-[0.08em] text-ink-soft">
+          Runs in your browser. Saves to a folder on your machine. Nothing is&nbsp;uploaded.
+        </p>
+      </div>
+      <div class="min-w-0 lg:col-span-6">
         <HeroBoard />
       </div>
-      <div class="flex min-w-0 flex-col justify-end sm:py-2">
-        <h1 class="display-lg max-w-[18ch]">Every prototype, from every tool, in one place.</h1>
-        <p class="mt-5 max-w-[46ch] text-[18px] leading-relaxed text-ink-soft">
-          Claude Code, v0, Lovable, Figma Make, a branch, a zip. Your prototypes
-          live everywhere. Canon puts them on one shelf you can see, open and keep in order.
-        </p>
-        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <a href={withBase('/app/')} class="btn btn-primary">Try it now</a>
-          <a href="#signup" class="btn btn-secondary">Get in touch</a>
-        </div>
-        <p class="mt-4 font-mono text-[11px] tracking-[0.08em] text-ink-soft">
-          Runs in your browser or as an app. Saves to a folder on your machine. Nothing is uploaded.
-        </p>
-      </div>
     </div>
   </section>
 
-  {/* 2. The product, big, on warm paper. */}
-  <section class="mx-auto max-w-6xl px-6 pb-24 sm:pb-32" aria-label="Canon, a board of prototypes">
-    <MeshPanel class="p-3 sm:p-6">
-      <img
-        src={withBase('/shots/board.jpg')}
-        alt="A board of prototypes: four phone and desktop screens, and a six-page site with its other pages fanning out from behind it."
-        width="2880"
-        height="1800"
-        fetchpriority="high"
-        class="shot block w-full"
-      />
-    </MeshPanel>
+  {/* 2. Three ideas, one screen each, ruled off like a contents page. */}
+  <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28" aria-label="What Canon does">
+    {
+      FEATURES.map((f, i) => (
+        <article
+          class:list={['feature grid grid-cols-1 items-start gap-6 pt-10 sm:pt-12 lg:grid-cols-12 lg:gap-12', i > 0 && 'mt-16 sm:mt-24']}
+          aria-labelledby={`feature-${f.shot}`}
+        >
+          <div class="min-w-0 lg:col-span-4">
+            <p class="rail-num text-[3rem] text-ink-soft" aria-hidden="true">
+              {String(i + 1).padStart(2, '0')}
+            </p>
+            <h2 id={`feature-${f.shot}`} class="display mt-6" set:html={f.title} />
+            <p class="mt-4 max-w-[38ch] text-[16px] leading-[1.5] text-ink-soft" set:html={f.body} />
+          </div>
+          <div class="min-w-0 lg:col-span-8">
+            <img
+              src={withBase(`/shots/${f.shot}.jpg`)}
+              alt={f.alt}
+              width={f.width}
+              height={f.height}
+              loading="lazy"
+              decoding="async"
+              class="shot block h-auto w-full"
+            />
+          </div>
+        </article>
+      ))
+    }
   </section>
 
-  {/* 3. Four ideas, one screen each. */}
-  {
-    FEATURES.map((f, i) => (
-      <section class="mx-auto max-w-6xl px-6 pb-24 sm:pb-32" aria-labelledby={`feature-${f.shot}`}>
-        <div class={`grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-12`}>
-          <div class={`lg:col-span-4 ${i % 2 ? 'lg:order-2' : ''}`}>
-            <h2 id={`feature-${f.shot}`} class="display">{f.title}</h2>
-            <p class="mt-4 text-[16px] leading-relaxed text-ink-soft">{f.body}</p>
-          </div>
-          <div class={`lg:col-span-8 ${i % 2 ? 'lg:order-1' : ''}`}>
-            <MeshPanel class="p-2 sm:p-4">
-              <img
-                src={withBase(`/shots/${f.shot}.jpg`)}
-                alt={f.alt}
-                width="2880"
-                height="1800"
-                loading="lazy"
-                decoding="async"
-                class="shot block w-full"
-              />
-            </MeshPanel>
-          </div>
-        </div>
-      </section>
-    ))
-  }
-
-  {/* The MCP, from the agent to the board. */}
+  {/* 3. The MCP, from the agent to the board. */}
   <McpWalkthrough />
 
-  {/* 4. The promise, plainly. */}
-  <section class="mx-auto max-w-6xl px-6 pb-24 sm:pb-32">
-    <div class="max-w-3xl">
-      <h2 class="display-lg">Your prototypes deserve better than a chat thread.</h2>
-      <p class="mt-5 max-w-[52ch] text-[18px] leading-relaxed text-ink-soft">
-        Canon points at your prototypes wherever they live, and keeps them in
-        one place. Your files stay on your machine.
+  {/* 4. The close, and how to reach me. */}
+  <section id="signup" class="mx-auto max-w-6xl scroll-mt-8 px-6 pb-24 sm:pb-32" aria-labelledby="close-heading">
+    <div class="max-w-xl">
+      <h2 id="close-heading" class="display-lg">Try it, then tell me how it&nbsp;goes.</h2>
+      <p class="mt-4 text-[16px] leading-[1.5] text-ink-soft">
+        Canon is early. I want to hear what works and what gets in the&nbsp;way.
       </p>
-      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
         <a href={withBase('/app/')} class="btn btn-primary">Try it now</a>
+        <a href={`mailto:${ADDRESS}?subject=Canon`} class="mail select-all font-mono text-[13px] text-ink-soft">
+          {ADDRESS}
+        </a>
       </div>
     </div>
   </section>
-
-  {/* 5. Contact. */}
-  <div id="signup" class="mx-auto max-w-6xl scroll-mt-8 px-6 pb-24 sm:pb-32">
-    <Contact />
-  </div>
 
   <ClosingStrip slot="after-footer" />
 </BaseLayout>
 
 <style>
+  .feature {
+    border-top: 1px solid var(--color-rule);
+  }
   .shot {
-    border-radius: 10px;
-    box-shadow:
-      0 1px 2px rgb(0 0 0 / 0.08),
-      0 24px 60px -20px rgb(0 0 0 / 0.35);
+    border-radius: var(--radius-lg);
+    /* The hairline. An inset shadow would paint under the image, so it is an
+       outline pulled just inside the edge. */
+    outline: 1px solid var(--color-rule);
+    outline-offset: -1px;
+    background-color: var(--color-ground);
+  }
+  .mail {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    border-radius: var(--radius-sm);
+    transition: color 220ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .mail:hover {
+    color: var(--color-ink);
+  }
+  .mail:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mail {
+      transition: none;
+    }
   }
 </style>
