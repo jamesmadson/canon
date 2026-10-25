@@ -131,13 +131,20 @@ the MCP has no file access. Revisit before sharing.
 - Several Canon tabs open: pick which acts; no stale state in the others.
 - Browsers: Chromium primary; its local-network-access prompt is expected.
   Check Safari/Firefox for an https page reaching loopback; state what works.
-  - Verified (Chrome, headless, 2026-10-24, `scripts/mcp-e2e.mjs`): the real
-    `canon mcp --dev` over stdio against the dev Canon app. Pairing from a
-    fresh page load, add, rename, URL change (version 2), open full screen at
-    phone width, a link to version 1, two agents at once on ports 47800 and
-    47801 against one tab. Closing the tab and Disconnect both returned a
-    "not connected" answer within 3 s (about 2.5 s) after the fix round;
-    after Disconnect the agent is told to run canon_pair, which pairs again.
+  - Verified (Chrome, headless, 2026-10-24, `scripts/mcp-e2e.mjs --port 4330`,
+    twice in a row): the real `canon mcp --dev --dev-port 4330` over stdio
+    against the dev Canon app in this repo, on the project and version-stack
+    model. Pairing from a fresh page load; add to a named project and board;
+    rename; a URL change that makes version 2 (find shows `"versions": 2`, the
+    board shows `v2/2`); open full screen at phone width; a link to version 1
+    that shows the version 1 URL with the Version select on v1; a second
+    project with a board of the same name, so an add with only the board name is
+    asked "which one"; two agents at once on ports 47800 and 47801 against one
+    tab. Closing the tab and Disconnect both returned a "not connected" answer
+    within 3 s (about 2.5 s); after Disconnect the agent is told to run
+    canon_pair, which pairs again, and the other agent is unaffected. A command
+    sent in the instant before a closing tab finishes going away is handed to
+    it and answers "didn't answer in time" after 10 s instead.
   - Not tested: Safari, Firefox, and the production https origin
     (`https://jamesmadson.github.io`) reaching loopback, including Chrome's
     local-network prompt. None of these could be run here. Check them before

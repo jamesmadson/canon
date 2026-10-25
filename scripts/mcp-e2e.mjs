@@ -1,7 +1,8 @@
 // Drives the real `canon mcp --dev` over stdio, as an agent would, against a
 // Canon dev server and headless Chrome (raw CDP, no dependencies).
-//   npm run dev -- --host 127.0.0.1   (in another shell)
-//   node scripts/mcp-e2e.mjs
+//   PORT=<n> npm run dev -- --host 127.0.0.1   (in another shell)
+//   node scripts/mcp-e2e.mjs --port <n> [--cdp-port 9340]
+// (--port or CANON_E2E_PORT, default 4321.)
 // Chrome maps localhost to 127.0.0.1 so a dev server on IPv4 counts as the
 // dev origin. A temp HOME keeps your real ~/.canon untouched. Not part of npm test.
 import { spawn } from 'node:child_process';
@@ -10,7 +11,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const APP = 'http://localhost:4321/canon/app/';
+const arg = (name) => { const i = process.argv.indexOf(`--${name}`); return i >= 0 ? process.argv[i + 1] : undefined; };
+const PORT = Number(arg('port') ?? process.env.CANON_E2E_PORT ?? 4321);
+const CDP = Number(arg('cdp-port') ?? 9340);
+const APP = `http://localhost:${PORT}/canon/app/`;
+// Not on the app's own origin (localhost), so it is a genuinely foreign prototype.
+const PROTO = `http://127.0.0.1:${PORT}/canon/`;
 const BIN = new URL('../cli/bin/canon.js', import.meta.url).pathname;
 const HOME = mkdtempSync(join(tmpdir(), 'canon-home-'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -20,7 +26,7 @@ const check = (name, ok, detail = '') => { results.push(ok); console.log(`${ok ?
 class Agent {
   constructor(name) { this.name = name; this.id = 0; this.waiting = new Map(); this.port = null; }
   async start() {
-    this.proc = spawn('node', [BIN, 'mcp', '--dev'], { env: { ...process.env, HOME }, stdio: ['pipe', 'pipe', 'pipe'] });
+    this.proc = spawn('node', [BIN, 'mcp', '--dev', '--dev-port', String(PORT)], { env: { ...process.env, HOME }, stdio: ['pipe', 'pipe', 'pipe'] });
     let buf = '';
     this.proc.stdout.on('data', (d) => { buf += d; let i; while ((i = buf.indexOf('\n')) >= 0) { const m = JSON.parse(buf.slice(0, i)); buf = buf.slice(i + 1); this.waiting.get(m.id)?.(m); } });
     this.proc.stderr.on('data', (d) => { const m = /port (\d+)/.exec(String(d)); if (m) this.port = Number(m[1]); });
@@ -32,12 +38,12 @@ class Agent {
   stop() { this.proc.kill(); }
 }
 
-const chrome = spawn(CHROME, ['--headless=new', '--remote-debugging-port=9340', '--host-resolver-rules=MAP localhost 127.0.0.1', `--user-data-dir=${mkdtempSync(join(tmpdir(), 'cc-'))}`, '--no-first-run', 'about:blank'], { stdio: 'ignore' });
-let targets; for (let i = 0; i < 40 && !targets; i++) { try { targets = await (await fetch('http://127.0.0.1:9340/json')).json(); } catch { await sleep(250); } }
+const chrome = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${CDP}`, '--host-resolver-rules=MAP localhost 127.0.0.1', `--user-data-dir=${mkdtempSync(join(tmpdir(), 'cc-'))}`, '--no-first-run', 'about:blank'], { stdio: 'ignore' });
+let targets; for (let i = 0; i < 40 && !targets; i++) { try { targets = await (await fetch(`http://127.0.0.1:${CDP}/json`)).json(); } catch { await sleep(250); } }
 
 class Page {
   async open(url) {
-    const t = await (await fetch(`http://127.0.0.1:9340/json/new?${encodeURIComponent('about:blank')}`, { method: 'PUT' })).json();
+    const t = await (await fetch(`http://127.0.0.1:${CDP}/json/new?${encodeURIComponent('about:blank')}`, { method: 'PUT' })).json();
     this.target = t.id; this.seq = 0; this.waiting = new Map();
     this.ws = new WebSocket(t.webSocketDebuggerUrl); await new Promise((r) => (this.ws.onopen = r));
     this.ws.onmessage = (e) => { const m = JSON.parse(e.data); if (m.id) this.waiting.get(m.id)?.(m); else if (m.method === 'Page.javascriptDialogOpening') this.cdp('Page.handleJavaScriptDialog', { accept: true }); };
@@ -58,7 +64,8 @@ try {
   const tool = await a.rpc('tools/list', {});
   check('tools/list has seven tools', tool.result.tools.length === 7, tool.result.tools.map((t) => t.name).join(','));
 
-  const first = await a.call('canon_add', { url: 'http://localhost:4321/canon/', board: 'MCP test', name: 'Canon home' });
+  const addArgs = { url: PROTO, project: 'MCP e2e', board: 'MCP test', name: 'Canon home' };
+  const first = await a.call('canon_add', addArgs);
   const pairUrl = linkOf(first.text);
   check('unpaired add returns a pairing link', first.error && Boolean(pairUrl), first.text.replace(/\n/g, ' | '));
 
@@ -66,33 +73,46 @@ try {
   check('pair dialog names the agent', Boolean(await page.until(`document.querySelector('#pair-title')?.textContent?.includes('Claude Code')`)));
   await connectNow(page);
   check('connect toast', Boolean(await page.until(`document.querySelector('.toast')?.textContent?.includes('Connected Claude Code')`)));
-  check('status answers once the tab is connected', Boolean(await connected(a)));
+  const st = await connected(a);
+  check('status answers once the tab is connected', Boolean(st), st?.text.replace(/\s+/g, ' ').slice(0, 160));
 
-  const add = await a.call('canon_add', { url: 'http://localhost:4321/canon/', board: 'MCP test', name: 'Canon home' });
-  check('add succeeds', !add.error, add.text.replace(/\s+/g, ' ').slice(0, 160));
-  check('add toasts and the board exists', Boolean(await page.until(`document.querySelector('.toast')?.textContent?.includes('added Canon home') || document.body.innerText.includes('MCP test')`)));
+  const add = await a.call('canon_add', addArgs);
+  check('add: first line names the board and project', !add.error && add.text.split('\n')[0] === 'Added Canon home to board MCP test in project MCP e2e.', add.text.replace(/\s+/g, ' ').slice(0, 200));
+  check('add shows on the tab', Boolean(await page.until(`document.querySelector('.toast')?.textContent?.includes('Canon home') || document.body.innerText.includes('MCP test')`)));
 
   const ren = await a.call('canon_update', { frame: 'Canon home', name: 'Home page' });
-  check('rename succeeds', !ren.error, ren.text.replace(/\s+/g, ' ').slice(0, 160));
-  const upd = await a.call('canon_update', { frame: 'Home page', url: 'http://localhost:4321/canon/app/' });
-  check('URL change succeeds', !upd.error, upd.text.replace(/\s+/g, ' ').slice(0, 200));
+  check('rename succeeds', !ren.error && ren.text.split('\n')[0] === 'Updated Home page on board MCP test in project MCP e2e.', ren.text.replace(/\s+/g, ' ').slice(0, 200));
+  const upd = await a.call('canon_update', { frame: 'Home page', url: `http://127.0.0.1:${PORT}/canon/app/` });
+  check('URL change: first line ends "It is version 2 now."', !upd.error && upd.text.split('\n')[0].endsWith('It is version 2 now.'), upd.text.replace(/\s+/g, ' ').slice(0, 200));
   const found = await a.call('canon_find', { query: 'Home' });
-  check('find shows version 2', /"version": 2/.test(found.text), found.text.replace(/\s+/g, ' ').slice(0, 200));
+  check('find shows "versions": 2', /"versions": 2/.test(found.text), found.text.replace(/\s+/g, ' ').slice(0, 240));
+  const boardId = /"boardId": "([^"]+)"/.exec(add.text)?.[1];
+  await page.ev(`location.hash = '#/b/${boardId}'`);
+  const label = await page.until(`/v2\\/2/.test(document.body.innerText) && document.body.innerText`);
+  check('board label shows v2/2', Boolean(label), String(label).replace(/\s+/g, ' ').slice(0, 200));
 
-  const open = await a.call('canon_open', { board: 'MCP test', frame: 'Home page', full: true, width: 'phone' });
+  const open = await a.call('canon_open', { project: 'MCP e2e', board: 'MCP test', frame: 'Home page', full: true, width: 'phone' });
   const hash = await page.until(`location.hash.includes('/full') && location.hash`);
-  check('open full screen navigates the tab at phone width', !open.error && Boolean(hash) && /w=390/.test(hash), `${hash} | ${open.text.replace(/\s+/g, ' ').slice(0, 160)}`);
-  const link = await a.call('canon_link', { board: 'MCP test', frame: 'Home page', version: 1 });
+  check('open full screen navigates the tab at phone width', !open.error && /^#\/b\/[^/]+\/f\/[^/]+\/full\?w=390/.test(hash ?? ''), `${hash} | ${open.text.replace(/\s+/g, ' ').slice(0, 160)}`);
+  const link = await a.call('canon_link', { project: 'MCP e2e', board: 'MCP test', frame: 'Home page', version: 1 });
   const v1 = /https?:\/\/[^\s"]+#[^\s"]+/.exec(link.text)?.[0];
-  check('link to v1 carries v=1', !link.error && /v=1/.test(v1 ?? ''), v1);
+  check('link with version 1 gives an address', !link.error && Boolean(v1), `${v1} | ${link.text.replace(/\s+/g, ' ').slice(0, 160)}`);
   const p2 = new Page(); await p2.open(v1);
   await p2.until(`document.querySelector('.focus iframe')?.src`); await sleep(1500);
-  const src = await p2.ev(`document.querySelector('.focus iframe')?.src + ' | ' + location.hash + ' | ' + document.querySelector('select[aria-label=Version]')?.value`);
-  check('v1 link opens the v1 URL', src.startsWith('http://localhost:4321/canon/ |'), String(src));
+  const src = await p2.ev(`JSON.stringify({ src: document.querySelector('.focus iframe')?.src, sel: document.querySelector('select[aria-label=Version]')?.selectedOptions[0]?.textContent })`);
+  const parsed = JSON.parse(src ?? '{}');
+  check('v1 link: iframe is the v1 URL and Version select shows 1', parsed.src === PROTO && /^v1\b/.test(parsed.sel ?? ''), String(src));
   await p2.close();
+
+  const other = await a.call('canon_add', { url: PROTO, project: 'MCP other', board: 'MCP test', name: 'Other home' });
+  check('second project with a board also called MCP test', !other.error && other.text.split('\n')[0] === 'Added Other home to board MCP test in project MCP other.', other.text.replace(/\s+/g, ' ').slice(0, 200));
+  const amb = await a.call('canon_add', { url: PROTO, board: 'MCP test' });
+  check('add with board only: asks which one', amb.error && amb.text.startsWith('More than one match for board "MCP test".'), amb.text.replace(/\s+/g, ' ').slice(0, 240));
 
   // Failure paths
   await page.close();
+  // Page.close is asynchronous; wait until Chrome really has no such tab before asking.
+  for (let i = 0; i < 40; i++) { const list = await (await fetch(`http://127.0.0.1:${CDP}/json`)).json(); if (!list.some((t) => t.id === page.target)) break; await sleep(100); }
   await sleep(200); const gone = await a.call('canon_status');
   check('Canon closed: answers within 3 s with the open link', gone.error && gone.ms < 3000 && gone.text.includes(APP), `${gone.ms} ms | ${gone.text.replace(/\n/g, ' | ')}`);
 
