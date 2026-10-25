@@ -46,6 +46,8 @@ Verified in Chrome. Chrome asks to allow Canon to reach your local network the f
 
 `canon_open` acts on the Canon tab that's connected, which may be behind others.
 
+After upgrading, reload any Canon tabs that were open, so they run the new version.
+
 ### What it can't do
 
 - It can't delete anything.
@@ -65,4 +67,4 @@ Verified in Chrome. Chrome asks to allow Canon to reach your local network the f
 
 ### Try it end to end
 
-`scripts/mcp-e2e.mjs` plays the agent against a running dev Canon and headless Chrome. Start `npm run dev -- --host 127.0.0.1`, then run `node scripts/mcp-e2e.mjs`. It uses a temporary home folder and is not part of `npm test`.
+`scripts/mcp-e2e.mjs` plays the agent against a running dev Canon and headless Chrome. Start `npm run dev -- --host 127.0.0.1`, then run `node scripts/mcp-e2e.mjs`. On another port, start the dev server with `--port <n>` and pass the same `--port <n>` to the script. It uses a temporary home folder and is not part of `npm test`.

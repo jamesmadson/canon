@@ -78,7 +78,8 @@ try {
 
   const add = await a.call('canon_add', addArgs);
   check('add: first line names the board and project', !add.error && add.text.split('\n')[0] === 'Added Canon home to board MCP test in project MCP e2e.', add.text.replace(/\s+/g, ' ').slice(0, 200));
-  check('add shows on the tab', Boolean(await page.until(`document.querySelector('.toast')?.textContent?.includes('Canon home') || document.body.innerText.includes('MCP test')`)));
+  const shown = await page.until(`(document.querySelector('.toast')?.textContent?.includes('Claude Code added Canon home') && 'toast') || ([...document.querySelectorAll('.frame-label .frame-name')].some((n) => n.textContent === 'Canon home') && 'label')`);
+  check('add shows on the tab', Boolean(shown), String(shown));
 
   const ren = await a.call('canon_update', { frame: 'Canon home', name: 'Home page' });
   check('rename succeeds', !ren.error && ren.text.split('\n')[0] === 'Updated Home page on board MCP test in project MCP e2e.', ren.text.replace(/\s+/g, ' ').slice(0, 200));
@@ -87,9 +88,10 @@ try {
   const found = await a.call('canon_find', { query: 'Home' });
   check('find shows "versions": 2', /"versions": 2/.test(found.text), found.text.replace(/\s+/g, ' ').slice(0, 240));
   const boardId = /"boardId": "([^"]+)"/.exec(add.text)?.[1];
-  await page.ev(`location.hash = '#/b/${boardId}'`);
-  const label = await page.until(`/v2\\/2/.test(document.body.innerText) && document.body.innerText`);
-  check('board label shows v2/2', Boolean(label), String(label).replace(/\s+/g, ' ').slice(0, 200));
+  check('add names its boardId', Boolean(boardId), String(boardId));
+  if (boardId) await page.ev(`location.hash = '#/b/${boardId}'`);
+  const label = boardId ? await page.until(`[...document.querySelectorAll('.frame-label')].map((l) => l.textContent).find((t) => t.includes('Home page') && /v2\\/2/.test(t))`) : null;
+  check('board label shows v2/2 on the Home page frame', Boolean(label), String(label).replace(/\s+/g, ' ').slice(0, 200));
 
   const open = await a.call('canon_open', { project: 'MCP e2e', board: 'MCP test', frame: 'Home page', full: true, width: 'phone' });
   const hash = await page.until(`location.hash.includes('/full') && location.hash`);
@@ -110,11 +112,18 @@ try {
   check('add with board only: asks which one', amb.error && amb.text.startsWith('More than one match for board "MCP test".'), amb.text.replace(/\s+/g, ' ').slice(0, 240));
 
   // Failure paths
+  // Ask the moment the tab is told to close, so the command can race the closing tab.
   await page.close();
-  // Page.close is asynchronous; wait until Chrome really has no such tab before asking.
-  for (let i = 0; i < 40; i++) { const list = await (await fetch(`http://127.0.0.1:${CDP}/json`)).json(); if (!list.some((t) => t.id === page.target)) break; await sleep(100); }
-  await sleep(200); const gone = await a.call('canon_status');
-  check('Canon closed: answers within 3 s with the open link', gone.error && gone.ms < 3000 && gone.text.includes(APP), `${gone.ms} ms | ${gone.text.replace(/\n/g, ' | ')}`);
+  const gone = await a.call('canon_status');
+  // Three honest answers: the closing tab still ran it, the bridge saw it go (the open link), or it went with the command (lost).
+  const goneHow = !gone.error ? 'answered before closing' : gone.text.includes(APP) ? 'not connected' : gone.text.startsWith('Canon closed before it answered.') ? 'lost' : null;
+  check('Canon closed: answers within 6 s, never the timeout', gone.ms < 6000 && goneHow !== null, `${goneHow} | ${gone.ms} ms | ${gone.text.replace(/\n/g, ' | ')}`);
+  // Page.close is asynchronous: the tab must really be gone before the reopen below.
+  let vanished = false;
+  for (let i = 0; i < 40 && !vanished; i++) { const list = await (await fetch(`http://127.0.0.1:${CDP}/json`)).json(); vanished = !list.some((t) => t.id === page.target); if (!vanished) await sleep(100); }
+  check('the closed tab is gone from Chrome', vanished);
+  await sleep(200); const shut = await a.call('canon_status');
+  check('Canon gone: answers within 3 s with the open link', shut.error && shut.ms < 3000 && shut.text.includes(APP), `${shut.ms} ms | ${shut.text.replace(/\n/g, ' | ')}`);
 
   const page2 = new Page(); await page2.open(APP);
   check('reopened Canon reconnects on its own', Boolean(await connected(a)));
