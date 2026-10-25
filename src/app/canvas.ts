@@ -159,10 +159,10 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
     if (tidy && was.id === id && was.shown && (!was.tidy || was.sort !== sort)) fit();
   });
   // A link to a frame selects the spot showing any version of it and centres that spot once.
-  // A frame that is not here leaves the board as it is.
+  // A frame that is not here leaves the board as it is, and so does opening it full screen: Focus covers the board.
   useLayoutEffect(() => {
     const el = canvasRef.current;
-    if (!frameId || !el) return;
+    if (!frameId || full || !el) return;
     const stack = store.stackOf(frameId);
     const f = frames.find((x) => x.id === frameId) ?? frames.find((x) => stack.some((m) => m.id === x.id));
     if (!f || centred.current === `${id}/${frameId}/${f.placementId}`) return;
