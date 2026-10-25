@@ -116,6 +116,7 @@ function candidateText(kind, names, what, query) {
 const FAILURES = {
   timeout: "Canon didn't answer in time. It may have done it anyway, so check with canon_find before trying again.",
   closed: 'The Canon connection closed. Try again.',
+  lost: 'Canon closed before it answered. It may have done it anyway, so check with canon_find.',
 };
 
 /** The first line of an add or update result: what was done, and on which board. */

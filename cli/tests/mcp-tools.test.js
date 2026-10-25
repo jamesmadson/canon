@@ -53,6 +53,11 @@ describe('canon tools', () => {
     const shut = await setup({ ok: false, error: 'closed' }).tools.call('canon_status', {});
     expect(shut.content[0].text).toBe('The Canon connection closed. Try again.');
   });
+  it('says Canon closed before answering when the command was lost', async () => {
+    const lost = await setup({ ok: false, error: 'lost' }).tools.call('canon_status', {});
+    expect(lost).toMatchObject({ isError: true });
+    expect(lost.content[0].text).toBe('Canon closed before it answered. It may have done it anyway, so check with canon_find.');
+  });
   it('says which lookup matched nothing, with the query', async () => {
     const reply = (what, query) => ({ ok: true, result: { status: 'none', candidates: [], what, query } });
     const say = async (what, query) => (await setup(reply(what, query)).tools.call('canon_update', { frame: 'x' })).content[0].text;

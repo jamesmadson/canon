@@ -38,6 +38,8 @@ export function startBridge({
   const queue = []; // commands not yet handed to the tab
   const pending = new Map(); // id -> { resolve, timers }
   const held = new Map(); // tabId -> { res, nonce, secret, timer }
+  const delivered = new Map(); // id -> { tabId, at }: handed to a poll, no reply yet
+  const lastPollAt = new Map(); // tabId -> when its last verified poll came in
   let lastEnded = -Infinity;
   let port = null;
   let closed = false;
@@ -48,6 +50,7 @@ export function startBridge({
     const p = pending.get(id);
     if (!p) return;
     pending.delete(id);
+    delivered.delete(id);
     for (const t of p.timers) clearTimeout(t);
     const i = queue.findIndex((c) => c.id === id);
     if (i !== -1) queue.splice(i, 1);
@@ -77,13 +80,24 @@ export function startBridge({
     return true;
   }
 
+  /** Note who got these commands and when, so a tab that closes before answering is noticed. */
+  function handed(tabId, commands) {
+    const at = Date.now();
+    for (const c of commands) delivered.set(c.id, { tabId, at });
+  }
+
   function release(tabId, commands) {
     const h = held.get(tabId);
     if (!h) return false;
     held.delete(tabId);
     clearTimeout(h.timer);
+    const s = h.res.socket;
+    // The tab may have gone just now, before the close event: don't write into a dead socket.
+    if (!s || s.destroyed || !s.writable) return false;
     lastEnded = Date.now();
-    return answer(h.res, h.origin, h, commands);
+    if (!answer(h.res, h.origin, h, commands)) return false;
+    handed(tabId, commands);
+    return true;
   }
 
   /** Hand every queued command to a held poll, if there is one. */
@@ -151,6 +165,7 @@ export function startBridge({
     if (!verify({ secret, role: 'tab', agentId, ts, nonce, payload, mac })) return unauthorized();
     if (!replay.accept(ts, nonce)) return unauthorized();
     if (!claimPairing(pairingFile, agentId, tabId)) return unauthorized();
+    lastPollAt.set(tabId, Date.now());
 
     let replies;
     try {
@@ -172,7 +187,8 @@ export function startBridge({
     if (queue.length > 0) {
       const commands = queue.splice(0, queue.length);
       lastEnded = Date.now();
-      answer(res, origin, { nonce, secret }, commands);
+      if (answer(res, origin, { nonce, secret }, commands)) handed(tabId, commands);
+      else queue.unshift(...commands);
       return;
     }
     const h = { res, origin, nonce, secret, timer: null };
@@ -241,9 +257,20 @@ export function startBridge({
       const timers = [setTimeout(() => settle(id, { ok: false, error: 'timeout' }), timeoutMs)];
       // Give a tab that is just opening (or between polls) a moment to take
       // the command; if it is still undelivered and no tab is there, say so.
+      // Once handed over, keep watching: a tab that closed before answering
+      // never polls again, so after about 2 x connectWaitMs with no poll since
+      // and no tab connected, say it was lost rather than wait for the timeout.
       const check = () => {
-        if (!queue.some((c) => c.id === id)) return;
-        if (!connected()) settle(id, { ok: false, error: 'not-connected' });
+        if (!pending.has(id)) return;
+        if (queue.some((c) => c.id === id)) {
+          if (!connected()) settle(id, { ok: false, error: 'not-connected' });
+          else timers.push(setTimeout(check, connectWaitMs));
+          return;
+        }
+        const d = delivered.get(id);
+        if (!d) return;
+        const polledSince = (lastPollAt.get(d.tabId) ?? -Infinity) > d.at;
+        if (!polledSince && !connected() && Date.now() - d.at >= connectWaitMs * 1.5) settle(id, { ok: false, error: 'lost' });
         else timers.push(setTimeout(check, connectWaitMs));
       };
       timers.push(setTimeout(check, connectWaitMs));

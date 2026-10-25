@@ -283,6 +283,34 @@ describe('bridge: commands and replies', () => {
     expect(Date.now() - t0).toBeLessThan(3_000);
   }, 10_000);
 
+  it('with the default timings, a command handed to a tab that then closes is answered in under 6 s', async () => {
+    const { b, secret } = await bridge({ holdMs: 25_000 });
+    // A fake tab: one held poll, then its socket goes away once the command reaches it.
+    const data = JSON.stringify(pollBody(secret));
+    const req = http.request({
+      host: '127.0.0.1',
+      port: b.port,
+      method: 'POST',
+      path: '/poll',
+      agent: false,
+      headers: { Host: `127.0.0.1:${b.port}`, Origin: ORIGIN, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) },
+    });
+    req.on('error', () => {});
+    const got = new Promise((resolve) => req.on('response', resolve));
+    req.end(data);
+    await new Promise((r) => setTimeout(r, 50));
+    expect(b.connected()).toBe(true);
+
+    const t0 = Date.now();
+    const sent = b.send('find', {});
+    await got; // handed over
+    req.destroy();
+    const out = await sent;
+    expect(['lost', 'not-connected']).toContain(out.error);
+    expect(out.ok).toBe(false);
+    expect(Date.now() - t0).toBeLessThan(6_000);
+  }, 15_000);
+
   it('connected() turns false once polls stop', async () => {
     const { b, secret } = await bridge({ holdMs: 20, graceMs: 60 });
     await poll(b.port, pollBody(secret));
