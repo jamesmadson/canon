@@ -2,6 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ClosingStrip from '../components/ClosingStrip.astro';
 import MeshPanel from '../components/MeshPanel.astro';
+import HeroBoard from '../components/HeroBoard.astro';
+import McpWalkthrough from '../components/McpWalkthrough.astro';
 import Contact from '../components/Contact.astro';
 import { withBase } from '../lib/withBase';
 
@@ -10,21 +12,18 @@ import { withBase } from '../lib/withBase';
 // quote in them is invented.
 const FEATURES = [
   {
-    label: 'Library',
     title: 'Every version, one stack.',
     body: 'Drag in HTML files, zipped builds and whole folders, or paste a link. Versions of the same prototype stack together, newest on top, one marked current. Press ⌘K and open any of them. No more forty tabs.',
     shot: 'library',
     alt: 'The prototype library: six prototypes from a sample project, one of them a stack of three versions.',
   },
   {
-    label: 'Map',
     title: 'See the whole site at once.',
     body: 'A prototype with many pages opens as its map. Every page, the links between them, and the pages nothing points to anymore.',
     shot: 'map',
     alt: 'A six-page prototype laid out as its information architecture, with the pricing page selected and its links highlighted.',
   },
   {
-    label: 'Notes',
     title: 'Leave yourself a note.',
     body: 'Pin a note on a screen, a page or the space between. What changed, what to try next, which one is current. They stay on your machine with everything else.',
     shot: 'comments',
@@ -38,15 +37,14 @@ const FEATURES = [
   title="Canon"
   description="Every prototype in one place. Drop them in, see how the pages connect, and talk about them where the work is."
 >
-  {/* 1. The cover. The name set the way a book sets it, the claim beside it. */}
+  {/* 1. The cover. The claim, and a board of prototypes beside it. */}
   <section class="mx-auto max-w-6xl px-6 pt-6 pb-16 sm:pt-10 sm:pb-20">
     <div class="flex flex-col gap-10 sm:flex-row-reverse sm:items-stretch sm:justify-between sm:gap-16">
-      <div class="cover-type" aria-hidden="true">
-        <span>canon</span><span>design</span>
+      <div class="w-full sm:max-w-[30rem] sm:flex-1">
+        <HeroBoard />
       </div>
       <div class="flex min-w-0 flex-col justify-end sm:py-2">
-        <p class="label">For people who prototype</p>
-        <h1 class="display-lg mt-3 max-w-[18ch]">Every prototype, from every tool, in one place.</h1>
+        <h1 class="display-lg max-w-[18ch]">Every prototype, from every tool, in one place.</h1>
         <p class="mt-5 max-w-[46ch] text-[18px] leading-relaxed text-ink-soft">
           Claude Code, v0, Lovable, Figma Make, a branch, a zip. Your prototypes
           live everywhere. Canon puts them on one shelf you can see, open and keep in order.
@@ -82,8 +80,7 @@ const FEATURES = [
       <section class="mx-auto max-w-6xl px-6 pb-24 sm:pb-32" aria-labelledby={`feature-${f.shot}`}>
         <div class={`grid grid-cols-1 items-center gap-8 lg:grid-cols-12 lg:gap-12`}>
           <div class={`lg:col-span-4 ${i % 2 ? 'lg:order-2' : ''}`}>
-            <p class="label">{f.label}</p>
-            <h2 id={`feature-${f.shot}`} class="display mt-3">{f.title}</h2>
+            <h2 id={`feature-${f.shot}`} class="display">{f.title}</h2>
             <p class="mt-4 text-[16px] leading-relaxed text-ink-soft">{f.body}</p>
           </div>
           <div class={`lg:col-span-8 ${i % 2 ? 'lg:order-1' : ''}`}>
@@ -103,6 +100,9 @@ const FEATURES = [
       </section>
     ))
   }
+
+  {/* The MCP, from the agent to the board. */}
+  <McpWalkthrough />
 
   {/* 4. The promise, plainly. */}
   <section class="mx-auto max-w-6xl px-6 pb-24 sm:pb-32">

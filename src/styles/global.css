@@ -580,13 +580,36 @@ summary,
   padding: clamp(30px, 5vw, 56px) clamp(20px, 4vw, 44px) clamp(18px, 3vw, 34px);
 }
 .closing-strip .giant {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
   font-weight: 200;
-  font-size: clamp(3.4rem, 12vw, 10rem);
-  line-height: 0.9;
+  /* Sized so "canon" runs edge to edge inside the strip's padding. */
+  font-size: 37vw;
+  line-height: 0.8;
   letter-spacing: -0.045em;
-  text-align: center;
   color: #ecebe4;
   will-change: transform;
+}
+.closing-strip .giant-dot {
+  flex: none;
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin: 0 0.02em 0 0.04em;
+  border-radius: 50%;
+  background: var(--brand-orange);
+  transition: transform 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+.closing-strip .giant-dot:hover {
+  transform: translateY(-0.04em);
+}
+.closing-strip .giant-dot:focus-visible {
+  outline: 2px solid #ecebe4;
+  outline-offset: 0.06em;
+}
+@media (prefers-reduced-motion: reduce) {
+  .closing-strip .giant-dot { transition: none; }
 }
 .closing-strip .meta {
   margin-top: 18px;

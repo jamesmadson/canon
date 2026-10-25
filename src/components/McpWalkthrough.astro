@@ -1,0 +1,459 @@
+---
+/**
+ * A four-step walkthrough of the Canon MCP: the agent transcript on the left,
+ * a small mock of a board on the right. Without script every step is shown,
+ * stacked. With script it is a carousel: one step at a time, advancing on its
+ * own every few seconds unless the reader is using it, it is off screen, the
+ * tab is hidden, they pressed Pause, or they prefer reduced motion.
+ */
+const STEPS = [
+  { title: 'Ask', note: 'Say it in your agent session, in plain words.' },
+  { title: 'Approve', note: 'First time only. Canon asks before the agent can do anything.' },
+  { title: 'It appears', note: 'The prototype shows up on the board, still running where it was.' },
+  { title: 'Get a link', note: 'Ask for a view and get a link to it.' },
+];
+const MOCK_ALT = [
+  'A Canon board, still empty.',
+  'A Canon board, still empty.',
+  'The Checkout board with one prototype on it, and a notice: Claude Code added Checkout.',
+  'The Checkout prototype open full screen at 390 pixels wide.',
+];
+---
+
+<section class="mx-auto max-w-6xl px-6 pb-24 sm:pb-32" aria-labelledby="mcp-heading" data-mcp>
+  <div class="max-w-3xl">
+    <h2 id="mcp-heading" class="display">Tell your agent. Canon does the&nbsp;rest.</h2>
+    <p class="mt-4 max-w-[52ch] text-[16px] leading-relaxed text-ink-soft">
+      <code class="font-mono text-[14px] text-ink">canon mcp</code> lets Claude Code, Codex or
+      Cursor talk to Canon. Canon points at your prototype where it already runs. It does not host it.
+    </p>
+    <p class="label mt-4">Coming with the alpha. Not released yet.</p>
+  </div>
+
+  <div class="mt-8 flex flex-wrap items-center gap-3" data-mcp-nav>
+    <button type="button" class="btn btn-utility nav-btn" data-mcp-toggle aria-pressed="false">Pause</button>
+    <ol class="pills flex items-center gap-2">
+      {STEPS.map((s, i) => (
+        <li>
+          <button type="button" class="pill" data-step-btn={i} aria-label={`Step ${i + 1}: ${s.title}`}>
+            <span class="pill-fill"></span>
+          </button>
+        </li>
+      ))}
+    </ol>
+    <div class="ml-auto flex gap-2">
+      <button type="button" class="btn btn-quiet nav-btn" data-mcp-back>Back</button>
+      <button type="button" class="btn btn-secondary nav-btn" data-mcp-next>Next</button>
+    </div>
+  </div>
+
+  <div class="stage mt-6 flex flex-col gap-10 sm:gap-12" aria-live="off" data-mcp-stage>
+    {STEPS.map((s, i) => (
+      <article class="step grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6" data-step={i}>
+        <header class="md:col-span-2">
+          <p class="label">Step {i + 1}. {s.title}</p>
+          <p class="mt-1 text-[14px] text-ink-soft">{s.note}</p>
+        </header>
+
+        <div class="term" role="group" aria-label="Agent session">
+          {i === 0 && (
+            <>
+              <p><span class="who">you</span> Add localhost:5173 to Canon, on a board called Checkout.</p>
+              <p><span class="who">agent</span> Working on it.</p>
+            </>
+          )}
+          {i === 1 && (
+            <>
+              <p><span class="who">agent</span> Canon needs you to approve me first. Open this link:</p>
+              <p class="link">…/canon/app/#pair=claude-code.47800.…</p>
+              <div class="ask">
+                <p class="text-ink">Connect Claude Code to Canon?</p>
+                <p class="mt-1 text-[13px] text-ink-soft">
+                  It can add and update prototypes and open views. It can't delete anything or read your files.
+                </p>
+                <div class="mt-3 flex gap-2">
+                  <span class="chip chip-on">Connect</span>
+                  <span class="chip">Cancel</span>
+                </div>
+              </div>
+            </>
+          )}
+          {i === 2 && (
+            <p><span class="who">agent</span> Added it to the Checkout board.</p>
+          )}
+          {i === 3 && (
+            <>
+              <p><span class="who">you</span> Give me the link to it at phone width.</p>
+              <p><span class="who">agent</span> Here you go:</p>
+              <p class="link">…/canon/app/#b/checkout/f/app/full?w=390</p>
+            </>
+          )}
+        </div>
+
+        <div class="mock" role="img" aria-label={MOCK_ALT[i]}>
+          <div class="mock-bar"><span>Checkout</span><span>{i === 3 ? '390' : 'Board'}</span></div>
+          {i < 2 && <div class="mock-body empty">Nothing here yet</div>}
+          {i === 2 && (
+            <div class="mock-body">
+              <div class="card"><span>Checkout</span><small>localhost:5173</small></div>
+              <p class="notice">Claude Code added Checkout</p>
+            </div>
+          )}
+          {i === 3 && (
+            <div class="mock-body center">
+              <div class="phone"><span>Checkout</span><small>390 wide</small></div>
+            </div>
+          )}
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<style>
+  .term,
+  .mock {
+    border-radius: var(--radius-lg);
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-rule);
+    min-width: 0;
+  }
+  .term {
+    padding: 16px;
+    font-family: var(--font-app-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+  }
+  .term > * + * {
+    margin-top: 8px;
+  }
+  .who {
+    color: var(--color-ink-soft);
+    margin-right: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 11px;
+  }
+  .link {
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-recess);
+  }
+  .ask {
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-rule-strong);
+    font-family: var(--font-app);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding-inline: 14px;
+    border-radius: 999px;
+    background-color: var(--color-recess);
+    color: var(--color-ink);
+    font-size: 13px;
+  }
+  .chip-on {
+    background-color: var(--color-ink);
+    color: var(--color-ground);
+  }
+  .mock {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+    font-family: var(--font-app);
+    font-size: 13px;
+  }
+  .mock-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-rule);
+    font-family: var(--font-app-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink-soft);
+  }
+  .mock-body {
+    flex: 1;
+    position: relative;
+    padding: 16px;
+    background-color: var(--color-ground);
+  }
+  .mock-body.empty,
+  .mock-body.center {
+    display: grid;
+    place-items: center;
+  }
+  .mock-body.empty {
+    color: var(--color-ink-soft);
+  }
+  .card,
+  .phone {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 2px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-rule);
+    color: var(--color-ink);
+  }
+  .card {
+    width: 150px;
+    height: 100px;
+  }
+  .phone {
+    width: 112px;
+    height: 190px;
+  }
+  small {
+    color: var(--color-ink-soft);
+    font-size: 11px;
+  }
+  .notice {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    max-width: calc(100% - 24px);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-ink);
+    color: var(--color-ground);
+    font-size: 12px;
+  }
+  .nav-btn {
+    min-width: 44px;
+    padding-inline: 14px;
+  }
+  /* Apple-style indicator: a small pill that stretches when active and fills
+     over the interval. The fill animates transform only. */
+  .pill {
+    position: relative;
+    display: block;
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background-color: var(--color-rule-strong);
+    overflow: hidden;
+    cursor: pointer;
+    transition: width 500ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  /* A 44px hit area around the 10px pill. */
+  .pill::before {
+    content: '';
+    position: absolute;
+    inset: -17px -4px;
+  }
+  .pill:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+  .pill[aria-current='step'] {
+    width: 40px;
+  }
+  .pill-fill {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: var(--color-ink);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  .pill[aria-current='step'] .pill-fill {
+    transform: scaleX(1);
+  }
+  [data-mcp].playing .pill[aria-current='step'] .pill-fill {
+    transform: scaleX(0);
+    animation: mcp-fill var(--mcp-interval, 5000ms) linear forwards;
+    animation-delay: var(--mcp-delay, 0ms);
+  }
+  [data-mcp].playing.holding .pill[aria-current='step'] .pill-fill {
+    animation-play-state: paused;
+  }
+  @keyframes mcp-fill {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  [data-mcp]:not(.js) [data-mcp-nav] {
+    display: none;
+  }
+  /* With script: the steps overlap in one grid cell and cross-fade. The stage
+     keeps the height of the tallest step so nothing jumps. */
+  [data-mcp].js .stage {
+    display: grid;
+    gap: 0;
+  }
+  [data-mcp].js .step {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  [data-mcp].js .step[data-active] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    [data-mcp].js .step {
+      transform: translateX(16px);
+      transition:
+        opacity 550ms cubic-bezier(0.2, 0, 0, 1),
+        transform 550ms cubic-bezier(0.2, 0, 0, 1),
+        visibility 0s linear 550ms;
+    }
+    [data-mcp].js .step[data-active] {
+      transform: none;
+      transition-delay: 0s;
+    }
+    [data-mcp].js .step[data-leaving] {
+      transform: translateX(-16px);
+    }
+  }
+</style>
+
+<script>
+  const INTERVAL = 5000;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-mcp]').forEach((root) => {
+    const stage = root.querySelector<HTMLElement>('[data-mcp-stage]')!;
+    const steps = Array.from(root.querySelectorAll<HTMLElement>('[data-step]'));
+    const btns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-step-btn]'));
+    const back = root.querySelector<HTMLButtonElement>('[data-mcp-back]')!;
+    const next = root.querySelector<HTMLButtonElement>('[data-mcp-next]')!;
+    const toggle = root.querySelector<HTMLButtonElement>('[data-mcp-toggle]')!;
+    root.style.setProperty('--mcp-interval', `${INTERVAL}ms`);
+
+    let cur = 0;
+    let userPaused = false; // the Pause button
+    let hover = false;
+    let focusIn = false;
+    let visible = true;
+    let tabShown = !document.hidden;
+    let timer = 0;
+    let remaining = INTERVAL; // ms left on the current step
+    let startedAt = 0;
+
+    const canPlay = () => !reduce.matches && !userPaused;
+    const holding = () => hover || focusIn || !visible || !tabShown;
+
+    const clearTimer = () => {
+      window.clearTimeout(timer);
+      timer = 0;
+    };
+    const stop = () => {
+      if (timer) remaining = Math.max(0, remaining - (performance.now() - startedAt));
+      clearTimer();
+    };
+    const go = (n: number, auto = false) => {
+      const to = (n + steps.length) % steps.length;
+      const from = cur;
+      cur = to;
+      steps.forEach((s, i) => {
+        s.removeAttribute('data-leaving');
+        if (i === cur) s.setAttribute('data-active', '');
+        else {
+          if (i === from && from !== to) s.setAttribute('data-leaving', '');
+          s.removeAttribute('data-active');
+        }
+      });
+      btns.forEach((b, i) => (i === cur ? b.setAttribute('aria-current', 'step') : b.removeAttribute('aria-current')));
+      stage.setAttribute('aria-live', auto && canPlay() ? 'off' : 'polite');
+      remaining = INTERVAL;
+      sync(true);
+    };
+    const schedule = () => {
+      clearTimer();
+      startedAt = performance.now();
+      timer = window.setTimeout(() => go(cur + 1, true), remaining);
+    };
+    // Bring the timer, the fill animation and the classes in line with state.
+    const sync = (restart = false) => {
+      const playing = canPlay();
+      root.classList.toggle('playing', playing);
+      root.classList.toggle('holding', playing && holding());
+      if (restart) {
+        // Restart the CSS animation for the new step.
+        root.classList.remove('playing');
+        void root.offsetWidth;
+        root.classList.toggle('playing', playing);
+      }
+      // A negative delay resumes the fill where it paused.
+      root.style.setProperty('--mcp-delay', `${-(INTERVAL - remaining)}ms`);
+      if (playing && !holding()) {
+        if (!timer) schedule();
+      } else {
+        stop();
+      }
+      toggle.textContent = userPaused ? 'Play' : 'Pause';
+      toggle.setAttribute('aria-pressed', String(userPaused));
+      toggle.hidden = reduce.matches;
+    };
+    const hold = () => {
+      stop();
+      sync();
+    };
+
+    btns.forEach((b, i) => b.addEventListener('click', () => go(i)));
+    back.addEventListener('click', () => go(cur - 1));
+    next.addEventListener('click', () => go(cur + 1));
+    toggle.addEventListener('click', () => {
+      userPaused = !userPaused;
+      stage.setAttribute('aria-live', userPaused ? 'polite' : 'off');
+      if (userPaused) stop();
+      sync();
+    });
+
+    root.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'touch') return;
+      hover = true;
+      hold();
+    });
+    root.addEventListener('pointerleave', () => {
+      hover = false;
+      sync();
+    });
+    root.addEventListener('focusin', () => {
+      focusIn = true;
+      hold();
+    });
+    root.addEventListener('focusout', (e) => {
+      if (e.relatedTarget && root.contains(e.relatedTarget as Node)) return;
+      focusIn = false;
+      sync();
+    });
+    new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (!visible) hold();
+        else sync();
+      },
+      { threshold: 0.25 },
+    ).observe(root);
+    document.addEventListener('visibilitychange', () => {
+      tabShown = !document.hidden;
+      if (!tabShown) hold();
+      else sync();
+    });
+    reduce.addEventListener('change', () => {
+      stop();
+      sync();
+    });
+
+    root.classList.add('js');
+    go(0);
+  });
+</script>

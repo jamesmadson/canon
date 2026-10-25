@@ -1,7 +1,8 @@
 ---
 /**
- * The closing strip: the name giant, paper on near-black, drifting slowly as it
- * comes into view.
+ * The closing strip: the name giant and edge to edge, paper on near-black,
+ * drifting slowly as it comes into view. Its o is the orange dot, and the dot
+ * takes you back to the top.
  *
  * The drift is transform and opacity only, driven from scroll progress. The
  * script does not run at all under prefers-reduced-motion, so what that reader
@@ -10,7 +11,9 @@
 ---
 
 <section class="closing-strip" aria-label="Canon" data-closing-strip>
-  <p class="giant" data-closing-giant>canon</p>
+  <p class="giant" data-closing-giant>
+    <span aria-hidden="true">can</span><a href="#" class="giant-dot" aria-label="Back to top" data-to-top></a><span aria-hidden="true">n</span>
+  </p>
   <p class="meta">every prototype · from every tool · in one place</p>
 </section>
 
@@ -18,6 +21,12 @@
   const strip = document.querySelector<HTMLElement>('[data-closing-strip]');
   const giant = document.querySelector<HTMLElement>('[data-closing-giant]');
   const still = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelector('[data-to-top]')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: still.matches ? 'auto' : 'smooth' });
+    document.querySelector<HTMLElement>('a[href], button')?.focus({ preventScroll: true });
+  });
 
   if (strip && giant && !still.matches) {
     let frame = 0;
