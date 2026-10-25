@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { acceptNavigate, activeHash, checkResponse, reportHash, takeReport, fitReplies, pairNotice, parsePairLink, probeDelay, stalePolls } from '../../src/app/bridge/client';
+import { acceptNavigate, activeHash, checkResponse, reportHash, takeReport, fitReplies, pairNotice, parsePairLink, probeDelay, retryAfter, stalePolls } from '../../src/app/bridge/client';
 import * as cli from '../../cli/src/mcp/auth.js';
 
 const secret = cli.newSecret() as string;
@@ -93,6 +93,18 @@ describe('probeDelay', () => {
   it('knocks on an empty port every 2 s in view and every 10 s in the background', () => {
     expect(probeDelay(false)).toBe(2_000);
     expect(probeDelay(true)).toBe(10_000);
+  });
+});
+
+describe('retryAfter', () => {
+  it('knocks again 30 s after the MCP turns the tab away, sooner if the pairings change', () => {
+    expect(retryAfter('unauthorized', false)).toBe(30_000);
+    expect(retryAfter('unauthorized', true)).toBe(30_000);
+  });
+  it('a refused or bad port waits one probe, and a changed pairing goes again at once', () => {
+    expect(retryAfter('refused', false)).toBe(2_000);
+    expect(retryAfter('bad', true)).toBe(10_000);
+    expect(retryAfter('changed', false)).toBe(0);
   });
 });
 

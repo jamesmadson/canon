@@ -27,6 +27,7 @@ const PROBE_HIDDEN = 10_000; // and while it is in a background tab
 const MIN_POLL = 1_000; // an empty answer sooner than this waits out the rest
 const POLL_TIMEOUT = 40_000; // the MCP holds a poll for 25 s
 const REPLY_BUDGET = 56 * 1024; // the MCP takes 64 KB per poll body
+const UNAUTHORIZED_RETRY = 30_000; // a turned-away tab asks /who again this often, in case the MCP restarted with a new pairing
 
 export interface Command { id: string; op: string; args: unknown }
 export interface PairLink { agentId: string; port: number; secret: string; name: string }
@@ -307,6 +308,13 @@ async function who(port: number, ctx: Ctx): Promise<string | null> {
 
 type End = 'refused' | 'unauthorized' | 'bad' | 'changed';
 
+/** How long a port waits after its poll loop ends: a changed pairing goes again at once, a turned-away tab waits 30 s (or for a pairing change), anything else one probe. */
+export function retryAfter(end: End, hidden: boolean): number {
+  if (end === 'changed') return 0;
+  if (end === 'unauthorized') return UNAUTHORIZED_RETRY;
+  return probeDelay(hidden);
+}
+
 async function pollLoop(port: number, agent: Agent, ctx: Ctx): Promise<End> {
   const mine = { ctl: new AbortController(), agent };
   pollAborts.set(port, mine);
@@ -393,9 +401,9 @@ async function portWorker(port: number, ctx: Ctx) {
     setLink(port, agent.id);
     const end = await pollLoop(port, agent, ctx);
     setLink(port, null);
-    // The MCP turned this tab away: wait for a new pairing rather than knock again.
-    if (end === 'unauthorized') await untilChanged(ctx);
-    else if (end !== 'changed') await untilProbe(ctx);
+    // The MCP turned this tab away: wait for a new pairing, or 30 s, rather than knock again at once.
+    const wait = retryAfter(end, isHidden());
+    if (wait > 0) await sleep(ctx, wait, end !== 'unauthorized');
   }
 }
 
