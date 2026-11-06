@@ -478,10 +478,11 @@ summary,
 }
 
 /* The name beside the dot shows on hover with a fine pointer and on keyboard
-   focus, selected the way a frame is on the board: a hairline box in orange
-   with a handle at each corner. The box settles first, then the name. It is
-   hidden from the accessibility tree, since the link already carries
-   "Canon, home". */
+   focus, selected the way a frame is on the board: the dot presses like a
+   click, a hairline box drags out from its top left corner to the bottom
+   right, then the corner handles and the name settle. Leaving undoes it at
+   once, with no delays. It is hidden from the accessibility tree, since the
+   link already carries "Canon, home". */
 .home-mark-name {
   position: relative;
   padding: 1px 6px;
@@ -489,7 +490,7 @@ summary,
 .home-mark-name .home-mark-word {
   display: block;
   opacity: 0;
-  transition: opacity 160ms cubic-bezier(0.2, 0, 0, 1);
+  transition: opacity 120ms cubic-bezier(0.2, 0, 0, 1);
 }
 .home-mark-name::before,
 .home-mark-name::after {
@@ -497,12 +498,16 @@ summary,
   position: absolute;
   pointer-events: none;
   opacity: 0;
-  transform: scale(1.12);
-  transition: opacity 200ms cubic-bezier(0.2, 0, 0, 1), transform 240ms cubic-bezier(0.2, 0, 0, 1);
+  transition: opacity 120ms cubic-bezier(0.2, 0, 0, 1), transform 120ms cubic-bezier(0.2, 0, 0, 1);
 }
 .home-mark-name::before {
   inset: 0;
   border: 1px solid var(--brand-orange);
+  transform-origin: top left;
+  transform: scale(0.08, 0.2);
+}
+@keyframes home-mark-click {
+  40% { transform: scale(0.8); }
 }
 /* Four 5px handles, one on each corner of the box. */
 .home-mark-name::after {
@@ -514,26 +519,37 @@ summary,
     var(--h) bottom left / 5px 5px no-repeat,
     var(--h) bottom right / 5px 5px no-repeat;
 }
+/* The settled state, and the order it settles in: click, drag, handles, name. */
+.home-mark:focus-visible .wordmark-dot { animation: home-mark-click 180ms cubic-bezier(0.2, 0, 0, 1); }
 .home-mark:focus-visible .home-mark-name::before,
 .home-mark:focus-visible .home-mark-name::after,
 .home-mark:focus-visible .home-mark-word {
   opacity: 1;
   transform: none;
 }
+.home-mark:focus-visible .home-mark-name::before {
+  transition: opacity 60ms cubic-bezier(0.2, 0, 0, 1) 120ms, transform 260ms cubic-bezier(0.2, 0, 0, 1) 120ms;
+}
+.home-mark:focus-visible .home-mark-name::after { transition-delay: 340ms; }
+.home-mark:focus-visible .home-mark-word { transition-delay: 360ms; }
 @media (hover: hover) and (pointer: fine) {
+  .home-mark:hover .wordmark-dot { animation: home-mark-click 180ms cubic-bezier(0.2, 0, 0, 1); }
   .home-mark:hover .home-mark-name::before,
   .home-mark:hover .home-mark-name::after,
   .home-mark:hover .home-mark-word {
     opacity: 1;
     transform: none;
   }
-  .home-mark:hover .home-mark-word {
-    transition-delay: 80ms;
+  .home-mark:hover .home-mark-name::before {
+    transition: opacity 60ms cubic-bezier(0.2, 0, 0, 1) 120ms, transform 260ms cubic-bezier(0.2, 0, 0, 1) 120ms;
   }
+  .home-mark:hover .home-mark-name::after { transition-delay: 340ms; }
+  .home-mark:hover .home-mark-word { transition-delay: 360ms; }
 }
+/* Reduced motion keeps the fades and drops the click and the drag. */
 @media (prefers-reduced-motion: reduce) {
-  .home-mark-name::before,
-  .home-mark-name::after { transform: none; }
+  .home-mark .wordmark-dot { animation: none !important; }
+  .home-mark-name::before { transform: none; }
 }
 
 /* ── The rail ─────────────────────────────────────────────────────────────
