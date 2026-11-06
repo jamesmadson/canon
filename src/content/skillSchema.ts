@@ -58,6 +58,14 @@ export const skillSchema = z.object({
   previewType: z.enum(['image', 'page', 'reply', 'file']),
   previewAssets: z.array(z.string()).min(1),
   previewNote: z.string().optional(),
+  // The exact prompt that made the preview, copyable from the page.
+  prompt: z.string().min(1),
+  // Two to four short lines on what to look at in the output.
+  notice: z.array(z.string().max(119)).min(2).max(4),
+  // One paragraph on what to do with the output.
+  next: z.string().min(1),
+  // A page the skill worked on, served from /previews/ and shown above its review.
+  subject: z.string().startsWith('/previews/').optional(),
   rating: z.number().min(1).max(5),
   addedDate: z.coerce.date(),
   lastVerified: z.coerce.date(),

@@ -12,6 +12,9 @@ const validSkill = {
   categories: ['ui-aesthetics'],
   previewType: 'image',
   previewAssets: ['/previews/deter.svg'],
+  prompt: 'Do the thing.',
+  notice: ['It did the thing.', 'It stopped there.'],
+  next: 'Ask for the next thing.',
   rating: 5,
   addedDate: '2026-07-01',
   lastVerified: '2026-07-29',
@@ -98,6 +101,24 @@ describe('skillSchema', () => {
   it('takes an optional note under the preview', () => {
     expect(skillSchema.parse(validSkill).previewNote).toBeUndefined();
     expect(skillSchema.parse({ ...validSkill, previewNote: 'A real run.' }).previewNote).toBe('A real run.');
+  });
+
+  // Mutation: dropping .min(2) from notice in skillSchema.ts fails this.
+  it('needs a prompt, two to four notice lines under 120 characters, and a next paragraph', () => {
+    const { prompt, ...noPrompt } = validSkill;
+    expect(() => skillSchema.parse(noPrompt)).toThrow();
+    expect(() => skillSchema.parse({ ...validSkill, notice: ['One.'] })).toThrow();
+    expect(() => skillSchema.parse({ ...validSkill, notice: ['a', 'b', 'c', 'd', 'e'] })).toThrow();
+    expect(() => skillSchema.parse({ ...validSkill, notice: ['a', 'x'.repeat(120)] })).toThrow();
+    const { next, ...noNext } = validSkill;
+    expect(() => skillSchema.parse(noNext)).toThrow();
+  });
+
+  // Mutation: dropping .startsWith('/previews/') fails this.
+  it('takes an optional subject served from /previews/', () => {
+    expect(skillSchema.parse(validSkill).subject).toBeUndefined();
+    expect(skillSchema.parse({ ...validSkill, subject: '/previews/prune/pricing.html' }).subject).toBe('/previews/prune/pricing.html');
+    expect(() => skillSchema.parse({ ...validSkill, subject: 'https://example.com/x.html' })).toThrow();
   });
 
   it('rejects a preview type outside the known set', () => {

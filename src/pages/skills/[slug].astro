@@ -1,16 +1,12 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ToolBadge from '../../components/ToolBadge.astro';
-import { CATEGORY_META } from '../../lib/categoryMeta';
-import StructureMap from '../../components/StructureMap.astro';
-import DepthDots from '../../components/DepthDots.astro';
 import { withBase } from '../../lib/withBase';
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 
 export async function getStaticPaths() {
-  // Hidden entries get no page at all — otherwise "hidden" only means
-  // "unlinked", and the URL is still public.
+  // Hidden entries get no page at all, because otherwise "hidden" only means
+  // "unlinked" and the URL is still public.
   const skills = await getCollection('skills', ({ data }) => data.status === 'active');
   return skills.map((entry) => ({
     params: { slug: entry.data.slug },
@@ -21,21 +17,17 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 const {
+  slug,
   name,
   tagline,
   tools,
-  categories,
-  rating,
-  sourceUrl,
-  sourceAuthor,
-  license,
-  lastVerified,
-  status,
-  fileTree,
-  contentOutline,
   previewType,
   previewAssets,
   previewNote,
+  prompt,
+  notice,
+  next,
+  subject,
 } = entry.data;
 
 // Text previews are read at build time from public/, so the page carries the
@@ -44,18 +36,62 @@ const TEXT_PREVIEWS = import.meta.glob('/public/previews/**/*.md', { query: '?ra
 const previewText = previewType === 'reply' || previewType === 'file' ? TEXT_PREVIEWS[`/public${previewAssets[0]}`] : undefined;
 const replyHtml = previewType === 'reply' && previewText ? (await (await createMarkdownProcessor()).render(previewText)).code : undefined;
 const previewFile = previewAssets[0].split('/').pop();
+
+// A Lath sketch has a fixed width and does not reflow, so its frame scales it
+// down to fit. A Graft page reflows, so it needs no scaling.
+const SKETCH_WIDTH = 1104;
+const SKETCH_HEIGHT = 760;
+const scaled = previewType === 'page' && slug === 'lath';
+
+const TOOL_LABELS: Record<string, string> = {
+  claude: 'Claude',
+  'claude-code': 'Claude Code',
+  cursor: 'Cursor',
+  codex: 'Codex',
+  copilot: 'Copilot',
+  figma: 'Figma',
+  miro: 'Miro',
+};
+const named = tools.filter((t) => t !== 'generic').map((t) => TOOL_LABELS[t] ?? t);
+const parts = tools.includes('generic') ? [...named, 'any agent that reads a SKILL.md'] : named;
+const worksWithLine = `Works with ${parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}` : parts[0]}`;
 ---
 
 <BaseLayout title={name} description={tagline}>
-  <div class="mb-12">
-    <span class="chip-outline">{CATEGORY_META[categories[0]].label}</span>
-    <h1 class="display-lg mt-6 max-w-3xl">{name}</h1>
-  </div>
+  <header class="mb-12">
+    <h1 class="display-lg max-w-3xl">{name}</h1>
+    <p class="mt-5 max-w-2xl text-[18px] leading-[1.45] text-ink-soft text-pretty">{tagline}</p>
+  </header>
+
+  <section class="mb-14" aria-labelledby="say-heading">
+    <h2 id="say-heading" class="mb-3 text-[20px] font-medium text-ink">What to say</h2>
+    <div class="overflow-hidden rounded-lg border border-rule bg-panel">
+      <pre id="prompt-text" class="max-h-[420px] overflow-auto px-5 py-5 font-mono text-[13px] leading-[1.6] whitespace-pre-wrap text-ink" tabindex="0" aria-label={`The prompt that made ${name}'s output`}>{prompt}</pre>
+      <div class="flex items-center gap-3 border-t border-rule px-5 py-3">
+        <button type="button" class="btn btn-utility" data-copy="prompt-text">Copy</button>
+        <span class="text-[13px] text-ink-soft" role="status" aria-live="polite" data-copy-status></span>
+      </div>
+    </div>
+  </section>
 
   {previewType !== 'image' && (
-    <section class="mb-16" aria-labelledby="preview-heading">
-      <h2 id="preview-heading" class="label mb-3">{previewType === 'page' ? 'Try it' : 'What it made'}</h2>
-      {previewType === 'page' && (
+    <section class="mb-14" aria-labelledby="made-heading">
+      <h2 id="made-heading" class="mb-3 text-[20px] font-medium text-ink">What it made</h2>
+
+      {subject && (
+        <figure class="mb-6">
+          <figcaption class="mb-2 text-[15px] font-medium text-ink">What it reviewed</figcaption>
+          <iframe
+            src={withBase(subject)}
+            title={`The page ${name} reviewed`}
+            loading="lazy"
+            sandbox=""
+            class="block h-[480px] w-full rounded-lg border border-rule bg-panel"
+          ></iframe>
+        </figure>
+      )}
+
+      {previewType === 'page' && !scaled && (
         <iframe
           src={withBase(previewAssets[0])}
           title={`What ${name} made on a real run`}
@@ -63,6 +99,19 @@ const previewFile = previewAssets[0].split('/').pop();
           sandbox="allow-scripts"
           class="block h-[760px] max-h-[85svh] w-full rounded-lg border border-rule bg-panel"
         ></iframe>
+      )}
+      {previewType === 'page' && scaled && (
+        <div class="sketch-frame overflow-x-auto rounded-lg border border-rule bg-panel" data-sketch-frame data-width={SKETCH_WIDTH} data-height={SKETCH_HEIGHT} style={`height:${SKETCH_HEIGHT}px`}>
+          <iframe
+            src={withBase(previewAssets[0])}
+            title={`What ${name} made on a real run`}
+            loading="lazy"
+            sandbox="allow-scripts"
+            class="block border-0"
+            style={`width:${SKETCH_WIDTH}px;height:${SKETCH_HEIGHT}px;transform-origin:0 0`}
+            data-sketch
+          ></iframe>
+        </div>
       )}
       {previewType === 'reply' && (
         <div class="max-h-[760px] overflow-y-auto rounded-lg border border-rule bg-panel px-6 py-6 sm:px-10 sm:py-8" tabindex="0" aria-label={`${name}'s reply`}>
@@ -80,63 +129,76 @@ const previewFile = previewAssets[0].split('/').pop();
     </section>
   )}
 
-  <div class="grid grid-cols-1 gap-12 lg:grid-cols-[2fr_1fr]">
-    <div>
-      <p class="mb-8 text-lg font-medium text-ink-soft">{tagline}</p>
-      <article class="prose prose-stone max-w-none prose-headings:text-ink prose-p:text-ink-soft prose-a:text-ink prose-a:hover:text-ink-soft prose-strong:text-ink">
-        <Content />
-      </article>
-    </div>
-    <aside class="flex flex-col gap-6 text-sm">
-      {status === 'superseded' && (
-        <p class="rounded-md bg-recess p-3 text-ink">
-          This skill has been superseded by a newer entry.
-        </p>
-      )}
-      <div>
-        <h2 class="label mb-2">Works with</h2>
-        <div class="flex flex-wrap gap-2">
-          {tools.map((tool) => <ToolBadge tool={tool} />)}
-        </div>
-      </div>
-      <div>
-        <h2 class="label mb-2">Categories</h2>
-        <div class="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <span class="chip-outline">
-              {CATEGORY_META[category].label}
-            </span>
-          ))}
-        </div>
-      </div>
-      <div>
-        <h2 class="label mb-2">Depth</h2>
-        <p><DepthDots rating={rating} /></p>
-        <p class="mt-1 text-[11px] font-medium text-ink-soft">
-          How much judgment this skill carries, from a single technique (1) to a
-          full method (5).
-        </p>
-      </div>
-      <div>
-        <h2 class="label mb-2">Source</h2>
-        <p><a href={sourceUrl} class="underline">{sourceAuthor}</a></p>
-      </div>
-      <div>
-        <h2 class="label mb-2">License</h2>
-        <p class="text-sm font-medium text-ink">{license === 'none' ? 'None stated' : license}</p>
-        {license === 'none' && (
-          <p class="mt-1 text-[11px] font-medium text-ink-soft">
-            The source states no license, so there is no permission to use, copy, or
-            modify it. Worth asking the author to add one.
-          </p>
-        )}
-      </div>
-      <div>
-        <h2 class="label mb-2">Last verified</h2>
-        <p class="font-medium">{lastVerified.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}</p>
-      </div>
-    </aside>
-  </div>
+  <section class="mb-14 max-w-2xl" aria-labelledby="notice-heading">
+    <h2 id="notice-heading" class="mb-3 text-[20px] font-medium text-ink">What to notice</h2>
+    <ul class="list-disc space-y-2 pl-5 text-[16px] leading-[1.5] text-ink-soft marker:text-ink-soft">
+      {notice.map((line) => <li class="text-pretty">{line}</li>)}
+    </ul>
+  </section>
 
-  <StructureMap name={name} tagline={tagline} fileTree={fileTree} contentOutline={contentOutline} />
+  <section class="mb-14 max-w-2xl" aria-labelledby="next-heading">
+    <h2 id="next-heading" class="mb-3 text-[20px] font-medium text-ink">What to do with it</h2>
+    <p class="text-[16px] leading-[1.5] text-ink-soft text-pretty">{next}</p>
+  </section>
+
+  <section class="mb-14 max-w-2xl" aria-labelledby="install-heading">
+    <h2 id="install-heading" class="mb-3 text-[20px] font-medium text-ink">Install</h2>
+    <p class="text-[16px] leading-[1.5] text-ink-soft">
+      In Claude Code, add the Canon marketplace, then install the {name} plugin.
+    </p>
+    <p class="mt-3">
+      <code class="rounded-sm bg-recess px-2 py-1 font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>
+    </p>
+  </section>
+
+  <article class="prose prose-stone mb-10 max-w-2xl prose-headings:text-ink prose-p:text-ink-soft prose-a:text-ink prose-a:hover:text-ink-soft prose-strong:text-ink">
+    <Content />
+  </article>
+
+  <p class="text-[14px] text-ink-soft">{worksWithLine}</p>
 </BaseLayout>
+
+<script>
+  // Copy the prompt. If the browser refuses, select the text so the person can
+  // copy it by hand.
+  document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => {
+    const target = document.getElementById(button.dataset.copy ?? '');
+    const status = button.parentElement?.querySelector<HTMLElement>('[data-copy-status]');
+    if (!target) return;
+    let timer: number | undefined;
+    const say = (text: string) => {
+      if (status) status.textContent = text;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => { if (status) status.textContent = ''; }, 2400);
+    };
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(target.textContent ?? '');
+        say('Copied');
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(target);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        say('Select and copy');
+      }
+    });
+  });
+
+  // Scale a fixed-width sketch down to the width available, so all of it shows.
+  document.querySelectorAll<HTMLElement>('[data-sketch-frame]').forEach((frame) => {
+    const sketch = frame.querySelector<HTMLElement>('[data-sketch]');
+    if (!sketch || typeof ResizeObserver === 'undefined') return;
+    const width = Number(frame.dataset.width);
+    const height = Number(frame.dataset.height);
+    const fit = () => {
+      const scale = Math.min(1, frame.clientWidth / width);
+      sketch.style.transform = scale < 1 ? `scale(${scale})` : '';
+      frame.style.height = `${Math.round(height * scale)}px`;
+      frame.style.overflowX = scale < 1 ? 'hidden' : 'auto';
+    };
+    new ResizeObserver(fit).observe(frame);
+    fit();
+  });
+</script>

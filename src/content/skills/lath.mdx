@@ -24,6 +24,22 @@ previewNote: >-
   checkout for Fieldwork, a made-up company. The prices and dates are ones it
   assumed, and its notes say so. The kit's stylesheet was fixed after this
   run, so the sketch carries the fixed kit and nothing else changed.
+prompt: |-
+  Wireframe one Fieldwork screen for me: the payment step of guest checkout, on a phone. Save it as wireframes/checkout-payment.html and add numbered notes for review. Nobody can answer questions in this headless run, so make sensible calls yourself.
+
+  The screen's job: a crew owner who has chosen the Crew plan on the annual option confirms exactly what they will be charged, then enters a card and starts their free trial. Recent feedback says people could not tell what the total was until the last screen, so the amount due must be the clearest thing on the screen.
+
+  The parts it needs: a title bar with a back arrow and the words "Payment"; a short order summary (Crew plan, annual billing, 8 users); a breakdown of the charge with subtotal, tax and the total due today; the date the first charge happens after the 14 day free trial; a card number field with expiry and security code; a postcode field; one primary button to start the trial; and a small link to change the plan.
+
+  Fieldwork is a scheduling, quotes and invoices tool for small field-service crews. If a price, tax rate or date is not given here, write a plausible one and say in the notes that you assumed it.
+notice:
+  - The amount due is the clearest thing on the screen, as the brief asked.
+  - Numbered notes say which prices, tax and dates it assumed.
+  - Every part comes from one fixed kit, so the sketch reads as a sketch.
+next: >-
+  Run scripts/check.py on the file to confirm it passes the eleven checks, then
+  send the wireframe for review with its numbered notes. Ask for one revision at
+  a time. Lath changes only what you name and leaves every other byte alone.
 rating: 4
 addedDate: 2026-11-02T00:00:00.000Z
 lastVerified: 2026-11-02T00:00:00.000Z
