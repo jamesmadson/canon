@@ -480,9 +480,11 @@ summary,
 /* The name beside the dot shows on hover with a fine pointer and on keyboard
    focus, selected the way a frame is on the board: the dot presses like a
    click, a hairline box drags out from its top left corner to the bottom
-   right, then the corner handles and the name settle. Leaving undoes it at
-   once, with no delays. It is hidden from the accessibility tree, since the
-   link already carries "Canon, home". */
+   right, then the corner handles and the name settle. Leaving plays it
+   backwards, quicker: the name goes, then the handles, then the box shrinks
+   into its corner. These base rules hold the leaving timings; the hover and
+   focus rules below hold the arriving ones. It is hidden from the
+   accessibility tree, since the link already carries "Canon, home". */
 .home-mark-name {
   position: relative;
   padding: 1px 6px;
@@ -490,7 +492,7 @@ summary,
 .home-mark-name .home-mark-word {
   display: block;
   opacity: 0;
-  transition: opacity 120ms cubic-bezier(0.2, 0, 0, 1);
+  transition: opacity 80ms cubic-bezier(0.2, 0, 0, 1);
 }
 .home-mark-name::before,
 .home-mark-name::after {
@@ -498,13 +500,14 @@ summary,
   position: absolute;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 120ms cubic-bezier(0.2, 0, 0, 1), transform 120ms cubic-bezier(0.2, 0, 0, 1);
+  transition: opacity 80ms cubic-bezier(0.2, 0, 0, 1) 40ms;
 }
 .home-mark-name::before {
   inset: 0;
   border: 1px solid var(--brand-orange);
   transform-origin: top left;
   transform: scale(0.08, 0.2);
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1) 80ms, opacity 40ms cubic-bezier(0.2, 0, 0, 1) 220ms;
 }
 @keyframes home-mark-click {
   40% { transform: scale(0.8); }
