@@ -3,8 +3,6 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ToolBadge from '../../components/ToolBadge.astro';
 import { CATEGORY_META } from '../../lib/categoryMeta';
-import { TOOL_META } from '../../lib/toolMeta';
-import { TOOL_VALUES } from '../../content/skillSchema';
 import StructureMap from '../../components/StructureMap.astro';
 import DepthDots from '../../components/DepthDots.astro';
 import { withBase } from '../../lib/withBase';
@@ -52,30 +50,6 @@ const previewFile = previewAssets[0].split('/').pop();
   <div class="mb-12">
     <span class="chip-outline">{CATEGORY_META[categories[0]].label}</span>
     <h1 class="display-lg mt-6 max-w-3xl">{name}</h1>
-    <div class="mt-10 grid max-w-md grid-cols-8 gap-1">
-      {TOOL_VALUES.map((toolValue) => {
-        const active = tools.includes(toolValue);
-        return (
-          <div
-            title={`${TOOL_META[toolValue].label}${active ? '' : ', not supported'}`}
-            aria-label={`${TOOL_META[toolValue].label}: ${active ? 'supported' : 'not supported'}`}
-            class={
-              active
-                ? 'flex aspect-square items-center justify-center rounded-sm bg-ink'
-                : 'flex aspect-square items-center justify-center rounded-sm bg-recess'
-            }
-          >
-            <span aria-hidden="true" class={active ? 'font-mono text-[10px] font-medium uppercase text-ground' : 'font-mono text-[10px] font-medium uppercase text-ink-soft'}>
-              {TOOL_META[toolValue].abbr}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-    <p class="mt-3 max-w-md text-xs text-ink-soft">
-      Tool coverage: filled cells are supported. Full names under “Works with”
-      below.
-    </p>
   </div>
 
   {previewType !== 'image' && (
