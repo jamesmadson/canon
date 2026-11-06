@@ -65,6 +65,8 @@ describe('a skill page is a run page', () => {
     expect(page).toContain("const STATIC_SANDBOX = 'allow-same-origin';");
     expect(page.match(/sandbox=\{STATIC_SANDBOX\}/g)).toHaveLength(2);
     expect(page).not.toContain('sandbox=""');
+    expect(page).toContain("const SCRIPTED_SANDBOX = 'allow-scripts allow-same-origin';");
+    expect(page).not.toContain('sandbox="allow-scripts"');
     // Blocking scripts is only safe for a sketch that has none to run.
     const sketch = readFileSync(path.join(root, 'public/previews/lath/checkout-payment.html'), 'utf-8');
     expect(sketch).not.toContain('<script');
