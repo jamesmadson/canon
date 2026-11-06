@@ -17,10 +17,11 @@ describe('the skills index', () => {
   });
 
   // Mutation: paste a local SKILL_LINES back into src/pages/index.astro; this fails.
-  it('is the same list as the homepage, from one component and one table of lines', () => {
+  it('the index is the list component, the homepage walks the same order, and neither owns a table of lines', () => {
     const home = read('pages/index.astro');
     const index = read('pages/skills/index.astro');
-    expect(home).toContain('<SkillList />');
+    expect(home).toContain('<SkillStep');
+    expect(home).toContain('ORDER.indexOf');
     expect(index).toContain('<SkillList />');
     expect(home).not.toMatch(/SKILL_LINES\s*[:=]/);
     expect(index).not.toMatch(/SKILL_LINES\s*[:=]/);

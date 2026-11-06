@@ -26,6 +26,8 @@ export const skillSchema = z.object({
   slug: z.string(),
   name: z.string(),
   tagline: z.string(),
+  // Where the skill earns its place in the work, shown under the name on its page.
+  story: z.string().min(1),
   sourceUrl: z.string().url(),
   sourceAuthor: z.string(),
   license: z.enum(LICENSE_VALUES),

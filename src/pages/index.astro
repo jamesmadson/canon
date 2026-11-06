@@ -4,7 +4,13 @@ import ClosingStrip from '../components/ClosingStrip.astro';
 import HeroBoard from '../components/HeroBoard.astro';
 import McpWalkthrough from '../components/McpWalkthrough.astro';
 import { withBase } from '../lib/withBase';
-import SkillList from '../components/SkillList.astro';
+import SkillStep from '../components/SkillStep.astro';
+import { getCollection } from 'astro:content';
+import { ORDER, SKILL_STEPS } from '../lib/skillLines';
+
+const skills = (await getCollection('skills', ({ data }) => data.status === 'active')).sort(
+  (a, b) => ORDER.indexOf(a.data.slug) - ORDER.indexOf(b.data.slug),
+);
 
 // One idea per row, each shown with the real screen. The screenshots come
 // from the sample project via scripts/capture-app-shots.mjs; every name and
@@ -104,13 +110,16 @@ const ADDRESS = 'james@jamesmadson.me';
   {/* 4. The skills, for the same agent. */}
   <section id="skills" class="mx-auto max-w-6xl scroll-mt-8 px-6 pb-24 sm:pb-32" aria-labelledby="skills-heading">
     <div class="max-w-3xl">
-      <h2 id="skills-heading" class="display-lg max-w-[20ch]">Design briefs your agent can&nbsp;follow.</h2>
-      <p class="mt-5 max-w-[44ch] text-[18px] leading-[1.45] text-ink-soft">
-        A skill is a plain text file your agent reads before a piece of work. These are written for
-        Canon, and install with one command in Claude&nbsp;Code.
+      <h2 id="skills-heading" class="display-lg max-w-[20ch]">Skills for each step of the&nbsp;work.</h2>
+      <p class="mt-5 max-w-[44ch] text-[18px] leading-[1.45] text-ink-soft text-pretty">
+        Canon installs four skills your agent can follow. They go in the order the work does, from what people told you to the turn you want&nbsp;back.
       </p>
     </div>
-    <SkillList />
+    <ol class="mt-10 border-b border-rule">
+      {skills.map((s, i) => (
+        <SkillStep slug={s.data.slug} name={s.data.name} story={s.data.story} step={SKILL_STEPS[s.data.slug]} flip={i % 2 === 1} />
+      ))}
+    </ol>
     <p class="mt-6 text-[14px] text-ink-soft">
       <code class="font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>
     </p>

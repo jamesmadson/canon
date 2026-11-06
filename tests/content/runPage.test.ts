@@ -9,6 +9,7 @@ const root = path.join(__dirname, '../..');
 const skillsDir = path.join(root, 'src/content/skills');
 const files = readdirSync(skillsDir).filter((f) => f.endsWith('.mdx'));
 const page = readFileSync(path.join(root, 'src/pages/skills/[slug].astro'), 'utf-8');
+const sandbox = readFileSync(path.join(root, 'src/lib/frameSandbox.ts'), 'utf-8');
 
 describe('a skill page is a run page', () => {
   it('has the four skills', () => {
@@ -62,10 +63,11 @@ describe('a skill page is a run page', () => {
 
   // Mutation: in [slug].astro, set the subject iframe back to `sandbox=""`.
   it('the reviewed page and the Lath sketch are framed with scripts blocked and an origin, so they draw', () => {
-    expect(page).toContain("const STATIC_SANDBOX = 'allow-same-origin';");
+    expect(sandbox).toContain("export const STATIC_SANDBOX = 'allow-same-origin';");
+    expect(page).toContain("from '../../lib/frameSandbox'");
     expect(page.match(/sandbox=\{STATIC_SANDBOX\}/g)).toHaveLength(2);
     expect(page).not.toContain('sandbox=""');
-    expect(page).toContain("const SCRIPTED_SANDBOX = 'allow-scripts allow-same-origin';");
+    expect(sandbox).toContain("export const SCRIPTED_SANDBOX = 'allow-scripts allow-same-origin';");
     expect(page).not.toContain('sandbox="allow-scripts"');
     // Blocking scripts is only safe for a sketch that has none to run.
     const sketch = readFileSync(path.join(root, 'public/previews/lath/checkout-payment.html'), 'utf-8');

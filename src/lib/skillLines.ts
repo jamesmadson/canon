@@ -10,3 +10,12 @@ export const SKILL_LINES: Record<string, string> = {
 };
 
 export const ORDER = Object.keys(SKILL_LINES);
+
+// The step of the work each skill belongs to, shown on the homepage. The last
+// two words are joined so a label never ends on a lone word.
+export const SKILL_STEPS: Record<string, string> = {
+  strata: 'When people tell you&nbsp;something',
+  lath: 'Before you&nbsp;design',
+  prune: 'Before a&nbsp;review',
+  graft: 'When you lose your&nbsp;way',
+};

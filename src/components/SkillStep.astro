@@ -1,0 +1,158 @@
+---
+// One skill as a step in the work: where it belongs, what it is for, and a
+// small piece of its own output. Every preview is built from the real file in
+// public/previews/, so each shows that skill's own interface.
+import { withBase } from '../lib/withBase';
+import { STATIC_SANDBOX, SCRIPTED_SANDBOX } from '../lib/frameSandbox';
+import { parseStrataEntry, parsePruneCut } from '../lib/previewParse';
+
+interface Props {
+  slug: string;
+  name: string;
+  story: string;
+  step: string;
+  flip?: boolean;
+}
+const { slug, name, story, step, flip = false } = Astro.props;
+
+// Read at build time, so the cards carry the files' own words with no script.
+const TEXT = import.meta.glob('/public/previews/**/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const [strataPath, strataText] = Object.entries(TEXT).find(([k]) => k.startsWith('/public/previews/strata/')) ?? ['', ''];
+const [prunePath, pruneText] = Object.entries(TEXT).find(([k]) => k === '/public/previews/prune/review.md') ?? ['', ''];
+
+const strata = slug === 'strata' ? parseStrataEntry(strataText) : undefined;
+const strataFile = strataPath.split('/').pop();
+const cut = slug === 'prune' ? parsePruneCut(pruneText) : undefined;
+const pruneFile = prunePath.split('/').pop();
+
+const FRAMES: Record<string, string> = {
+  lath: '/previews/lath/checkout-payment.html',
+  graft: '/previews/graft/demo-session.html',
+};
+---
+
+<li class="step border-t border-rule py-10 sm:py-14" data-skill-step={slug}>
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center lg:gap-12">
+    <div class:list={['min-w-0 lg:col-span-5', flip && 'lg:order-2']}>
+      <p class="label text-balance" set:html={step} />
+      <h3 class="display mt-4 text-[28px]">{name}</h3>
+      <p class="mt-4 max-w-[52ch] text-[16px] leading-[1.5] text-ink-soft text-pretty">{story}</p>
+      <p class="mt-5">
+        <a href={withBase(`/skills/${slug}/`)} class="tick-bar rounded-sm text-[14px]">
+          See what it made<span class="sr-only"> from {name}</span><span aria-hidden="true">&nbsp;→</span>
+        </a>
+      </p>
+    </div>
+
+    <div class:list={['min-w-0 lg:col-span-7', flip && 'lg:order-1']}>
+      <div class={`frame frame-${slug}`}>
+        {strata && (
+          <div class="card">
+            <p class="font-mono text-[12px] leading-[1.5] text-ink-soft">{strataFile}</p>
+            <p class="mt-2 text-[13px] leading-[1.45] text-ink-soft">{strata.date}, {strata.about}</p>
+            <p class="label mt-3">Said</p>
+            <p class="clamp clamp-3 mt-1 border-l-2 border-ink pl-3 text-[14px] leading-[1.45] text-ink">{strata.said}</p>
+            <p class="label mt-3">Meant</p>
+            <p class="clamp clamp-3 mt-1 text-[13px] leading-[1.45] text-ink-soft">{strata.meant}</p>
+          </div>
+        )}
+        {cut && (
+          <div class="card">
+            <p class="font-mono text-[12px] leading-[1.5] text-ink-soft">{pruneFile}</p>
+            <p class="label mt-3">Cut</p>
+            <p class="mt-1 text-[15px] leading-[1.4] font-medium text-ink line-through decoration-1">{cut.heading}</p>
+            <p class="label mt-3">Why</p>
+            <p class="clamp clamp-5 mt-1 text-[13px] leading-[1.45] text-ink-soft">{cut.reason}</p>
+          </div>
+        )}
+        {FRAMES[slug] && (
+          <iframe
+            src={withBase(FRAMES[slug])}
+            title=""
+            loading="lazy"
+            tabindex="-1"
+            aria-hidden="true"
+            sandbox={slug === 'graft' ? SCRIPTED_SANDBOX : STATIC_SANDBOX}
+            class={`shot-frame shot-${slug}`}
+          ></iframe>
+        )}
+      </div>
+    </div>
+  </div>
+</li>
+
+<style>
+  /* One frame for every preview, with a fixed height so nothing shifts as
+     the frames load. */
+  .frame {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+    border: 1px solid var(--color-rule);
+    border-radius: 11px;
+    background-color: var(--color-panel);
+  }
+  @media (min-width: 1024px) {
+    .frame {
+      height: 280px;
+    }
+  }
+  .card {
+    height: 100%;
+    overflow: hidden;
+    padding: 16px 20px;
+  }
+  .clamp {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .clamp-3 {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+  .clamp-5 {
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+  }
+
+  /* The frames show a page at its own size, scaled down by a fixed amount per
+     breakpoint. The link carries the action, so the frame takes no pointer. */
+  .shot-frame {
+    --h: 220px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 0;
+    transform-origin: 0 0;
+    pointer-events: none;
+    background-color: var(--color-panel);
+    transform: scale(var(--s));
+    width: var(--w);
+    height: calc(var(--h) / var(--s));
+  }
+  /* Lath's sketch is 1104 by 760 and fits whole, centred. */
+  .shot-lath {
+    --w: 1104px;
+    --s: 0.289;
+    left: 50%;
+    margin-left: calc(var(--w) * var(--s) / -2);
+    height: 760px;
+  }
+  .shot-graft {
+    --w: 640px;
+    --s: 0.5;
+  }
+  @media (min-width: 1024px) {
+    .shot-frame {
+      --h: 280px;
+    }
+    .shot-lath {
+      --s: 0.368;
+    }
+    .shot-graft {
+      --w: 1100px;
+      --s: 0.55;
+    }
+  }
+</style>

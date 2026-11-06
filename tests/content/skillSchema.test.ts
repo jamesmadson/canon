@@ -5,6 +5,7 @@ const validSkill = {
   slug: 'deter',
   name: 'Deter',
   tagline: 'A tagline.',
+  story: 'A story.',
   sourceUrl: 'https://github.com/jamesmadson/canon/tree/main/plugin/deter/skills/deter',
   sourceAuthor: 'James Madson',
   license: 'MIT',
