@@ -1,0 +1,19 @@
+---
+// The install steps, shown on /skills/ and on each skill's page so the two
+// say the same thing.
+interface Props {
+  name?: string;
+  headingId?: string;
+}
+const { name, headingId = 'install-heading' } = Astro.props;
+---
+
+<section class="mb-14 max-w-2xl" aria-labelledby={headingId}>
+  <h2 id={headingId} class="mb-3 text-[20px] font-medium text-ink">Install</h2>
+  <p class="text-[16px] leading-[1.5] text-ink-soft">
+    In Claude Code, add the Canon marketplace, then install {name ? `the ${name} plugin` : 'the plugin you want'}.
+  </p>
+  <p class="mt-3">
+    <code class="rounded-sm bg-recess px-2 py-1 font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>
+  </p>
+</section>

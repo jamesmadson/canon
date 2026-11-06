@@ -4,7 +4,7 @@ import ClosingStrip from '../components/ClosingStrip.astro';
 import HeroBoard from '../components/HeroBoard.astro';
 import McpWalkthrough from '../components/McpWalkthrough.astro';
 import { withBase } from '../lib/withBase';
-import { getCollection } from 'astro:content';
+import SkillList from '../components/SkillList.astro';
 
 // One idea per row, each shown with the real screen. The screenshots come
 // from the sample project via scripts/capture-app-shots.mjs; every name and
@@ -37,20 +37,6 @@ const FEATURES = [
 ];
 
 const ADDRESS = 'james@jamesmadson.me';
-
-// The skills go to the same agent the MCP connects. Each gets one plain line
-// here; its own page carries the rest and shows what it made on a real run.
-// They run in the order work does: hear users, sketch, cut, look back.
-const SKILL_LINES: Record<string, string> = {
-  strata: 'A record of what users said, in dated layers, with their words kept apart from your reading of&nbsp;them.',
-  lath: 'Wireframes from a fixed kit, with real copy, every state listed and numbered notes for&nbsp;review.',
-  prune: 'A review that removes. Each finding is weighed against what the screen is for, and one thing is&nbsp;kept.',
-  graft: 'Your Claude Code session as a timeline. Find the turn where you made a call, and go back to&nbsp;it.',
-};
-const ORDER = Object.keys(SKILL_LINES);
-const skills = (await getCollection('skills', ({ data }) => data.status === 'active')).sort(
-  (a, b) => ORDER.indexOf(a.data.slug) - ORDER.indexOf(b.data.slug),
-);
 ---
 
 <BaseLayout
@@ -124,19 +110,7 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
         Canon, and install with one command in Claude&nbsp;Code.
       </p>
     </div>
-    <ul class="mt-10">
-      {skills.map((s) => (
-        <li class="skill-row">
-          <a href={withBase(`/skills/${s.data.slug}/`)} class="skill-link grid grid-cols-1 gap-2 py-6 sm:grid-cols-12 sm:gap-12">
-            <span class="display text-[28px] sm:col-span-4">{s.data.name}</span>
-            <span class="max-w-[52ch] text-[16px] leading-[1.5] text-ink-soft sm:col-span-6" set:html={SKILL_LINES[s.data.slug] ?? s.data.tagline} />
-            <span class="text-[14px] text-ink sm:col-span-2 sm:text-right">
-              {s.data.previewType === 'page' ? 'Try it' : 'See what it made'}<span aria-hidden="true"> →</span>
-            </span>
-          </a>
-        </li>
-      ))}
-    </ul>
+    <SkillList />
     <p class="mt-6 text-[14px] text-ink-soft">
       <code class="font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>
     </p>
@@ -172,25 +146,6 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
     outline: 1px solid var(--color-rule);
     outline-offset: -1px;
     background-color: var(--color-ground);
-  }
-  .skill-row {
-    border-top: 1px solid var(--color-rule);
-  }
-  .skill-row:last-child {
-    border-bottom: 1px solid var(--color-rule);
-  }
-  .skill-link {
-    border-radius: var(--radius-sm);
-    transition: opacity 220ms cubic-bezier(0.2, 0, 0, 1);
-  }
-  .skill-link:focus-visible {
-    outline: 2px solid var(--color-ink);
-    outline-offset: 3px;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    ul:has(.skill-link:hover) .skill-link:not(:hover) {
-      opacity: 0.5;
-    }
   }
   .mail {
     display: inline-flex;

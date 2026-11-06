@@ -1,0 +1,47 @@
+---
+// The four skills as rows, in the order work does. The homepage and /skills/
+// both render this, so the two lists cannot drift.
+import { getCollection } from 'astro:content';
+import { withBase } from '../lib/withBase';
+import { SKILL_LINES, ORDER } from '../lib/skillLines';
+
+const skills = (await getCollection('skills', ({ data }) => data.status === 'active')).sort(
+  (a, b) => ORDER.indexOf(a.data.slug) - ORDER.indexOf(b.data.slug),
+);
+---
+
+<ul class="mt-10">
+  {skills.map((s) => (
+    <li class="skill-row">
+      <a href={withBase(`/skills/${s.data.slug}/`)} class="skill-link grid grid-cols-1 gap-2 py-6 sm:grid-cols-12 sm:gap-12">
+        <span class="display text-[28px] sm:col-span-4">{s.data.name}</span>
+        <span class="max-w-[52ch] text-[16px] leading-[1.5] text-ink-soft sm:col-span-6" set:html={SKILL_LINES[s.data.slug] ?? s.data.tagline} />
+        <span class="text-[14px] text-ink sm:col-span-2 sm:text-right">
+          {s.data.previewType === 'page' ? 'Try it' : 'See what it made'}<span aria-hidden="true"> →</span>
+        </span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .skill-row {
+    border-top: 1px solid var(--color-rule);
+  }
+  .skill-row:last-child {
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .skill-link {
+    border-radius: var(--radius-sm);
+    transition: opacity 220ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .skill-link:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    ul:has(.skill-link:hover) .skill-link:not(:hover) {
+      opacity: 0.5;
+    }
+  }
+</style>

@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import InstallBlock from '../../components/InstallBlock.astro';
 import { withBase } from '../../lib/withBase';
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 
@@ -141,15 +142,7 @@ const worksWithLine = `Works with ${parts.length > 1 ? `${parts.slice(0, -1).joi
     <p class="text-[16px] leading-[1.5] text-ink-soft text-pretty">{next}</p>
   </section>
 
-  <section class="mb-14 max-w-2xl" aria-labelledby="install-heading">
-    <h2 id="install-heading" class="mb-3 text-[20px] font-medium text-ink">Install</h2>
-    <p class="text-[16px] leading-[1.5] text-ink-soft">
-      In Claude Code, add the Canon marketplace, then install the {name} plugin.
-    </p>
-    <p class="mt-3">
-      <code class="rounded-sm bg-recess px-2 py-1 font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>
-    </p>
-  </section>
+  <InstallBlock name={name} />
 
   <article class="prose prose-stone mb-10 max-w-2xl prose-headings:text-ink prose-p:text-ink-soft prose-a:text-ink prose-a:hover:text-ink-soft prose-strong:text-ink">
     <Content />

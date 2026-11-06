@@ -1,14 +1,7 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import DepthLegend from '../../components/DepthLegend.astro';
-import FilterBar from '../../components/FilterBar.astro';
-import { spellNumber } from '../../lib/spellNumber';
-
-const allSkills = await getCollection('skills', ({ data }) => data.status === 'active');
-const sorted = [...allSkills].sort((a, b) => b.data.addedDate.valueOf() - a.data.addedDate.valueOf());
-const spelled = spellNumber(allSkills.length);
-const skillCount = `${spelled.charAt(0).toUpperCase()}${spelled.slice(1)}`;
+import SkillList from '../../components/SkillList.astro';
+import InstallBlock from '../../components/InstallBlock.astro';
 ---
 
 <BaseLayout
@@ -17,23 +10,14 @@ const skillCount = `${spelled.charAt(0).toUpperCase()}${spelled.slice(1)}`;
 >
   <section class="mb-12">
     <h1 class="display-lg max-w-2xl">
-      Design briefs your agent can follow.
+      Design briefs your agent can&nbsp;follow.
     </h1>
-    <p class="mt-5 max-w-xl text-[15px] leading-relaxed text-ink-soft">
-      A <strong class="font-semibold text-ink">skill</strong> is a plain text file
-      that tells an AI tool how to think about a piece of work, the same way a
-      good brief does. Drop one in, and your agent stops guessing.
+    <p class="mt-5 max-w-[44ch] text-[18px] leading-[1.45] text-ink-soft text-pretty">
+      A skill is a plain text file your agent reads before a piece of work. These are written for
+      Canon, and install with one command in Claude&nbsp;Code.
     </p>
-    <p class="mt-3 max-w-xl text-[15px] leading-relaxed text-ink-soft">
-      {skillCount} of them, all written for Canon by James Madson. Install them in
-      Claude Code with
-      <code class="rounded-sm bg-recess px-2 py-1 font-mono text-[13px] text-ink">/plugin marketplace add jamesmadson/canon</code>.
-    </p>
+    <SkillList />
   </section>
 
-  <section>
-    <h2 class="display mb-3">All skills</h2>
-    <DepthLegend />
-    <FilterBar skills={sorted} />
-  </section>
+  <InstallBlock />
 </BaseLayout>
