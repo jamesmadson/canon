@@ -76,6 +76,11 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
       width: 360px;
       height: 240px;
       margin-top: -120px;
+      /* The text cards take the height of their words, as on the homepage,
+         so Strata's Said and Meant are never cut off. */
+      &:has(.frame-strata, .frame-prune) {
+        height: auto;
+      }
       pointer-events: none;
       opacity: 0;
       transform: translateY(8px) scale(0.96);
