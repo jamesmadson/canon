@@ -5,6 +5,7 @@ import HeroBoard from '../components/HeroBoard.astro';
 import McpWalkthrough from '../components/McpWalkthrough.astro';
 import { withBase } from '../lib/withBase';
 import SkillStep from '../components/SkillStep.astro';
+import RadialMap from '../components/RadialMap.astro';
 import { getCollection } from 'astro:content';
 import { ORDER, SKILL_STEPS } from '../lib/skillLines';
 
@@ -126,8 +127,8 @@ const ADDRESS = 'james@jamesmadson.me';
   </section>
 
   {/* 5. The close, and how to reach me. */}
-  <section id="signup" class="mx-auto max-w-6xl scroll-mt-8 px-6 pb-24 sm:pb-32" aria-labelledby="close-heading">
-    <div class="max-w-xl">
+  <section id="signup" class="mx-auto grid max-w-6xl scroll-mt-8 grid-cols-1 items-center gap-12 px-6 pb-24 sm:pb-32 lg:grid-cols-12" aria-labelledby="close-heading">
+    <div class="max-w-xl lg:col-span-6">
       <h2 id="close-heading" class="display-lg">Try it, then tell me how it&nbsp;goes.</h2>
       <p class="mt-4 text-[16px] leading-[1.5] text-ink-soft">
         Canon is early. I want to hear what works and what gets in the&nbsp;way.
@@ -138,6 +139,9 @@ const ADDRESS = 'james@jamesmadson.me';
           {ADDRESS}
         </a>
       </div>
+    </div>
+    <div class="lg:col-span-6">
+      <RadialMap />
     </div>
   </section>
 

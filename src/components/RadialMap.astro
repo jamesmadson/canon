@@ -1,0 +1,81 @@
+---
+/**
+ * Every prototype connected to one place: Canon's rings at the hub (D-126),
+ * a spoke per family, a dot where the family started, and a tip per
+ * version, two where a family forked. Drawn at build time; the ink follows
+ * the theme through currentColor.
+ *
+ * Where scroll-driven animation exists, each spoke grows out of the hub as
+ * the drawing comes into view, one after another (CSS only, D-81's one-time
+ * reveal). Without it, or with reduced motion, the drawing is simply there.
+ */
+const SPOKES = 20;
+const HUB = 16;
+const KNOT = 48;
+const TIP = 90;
+// Two of every three families have forked into two versions.
+const spokes = Array.from({ length: SPOKES }, (_, i) => {
+  const a = (i / SPOKES) * Math.PI * 2 - Math.PI / 2;
+  const at = (r: number, t = a) => [Math.cos(t) * r, Math.sin(t) * r].map((n) => +n.toFixed(2));
+  const tips = i % 3 === 1 ? [a] : [a - 0.11, a + 0.11];
+  return { i, hub: at(HUB), knot: at(KNOT), tips: tips.map((t) => at(TIP, t)) };
+});
+---
+
+<svg class="radial-map text-ink" viewBox="-100 -100 200 200" aria-hidden="true">
+  {spokes.map((s) => (
+    <g class="spoke" style={`--i:${s.i}`}>
+      <line x1={s.hub[0]} y1={s.hub[1]} x2={s.knot[0]} y2={s.knot[1]} />
+      {s.tips.map((t) => <line x1={s.knot[0]} y1={s.knot[1]} x2={t[0]} y2={t[1]} />)}
+      <circle cx={s.knot[0]} cy={s.knot[1]} r="4.2" />
+      {s.tips.map((t) => <circle cx={t[0]} cy={t[1]} r="5.2" />)}
+    </g>
+  ))}
+  <circle r="14" fill="#FF9A2E" />
+  <circle r="10.08" fill="#FF4F00" />
+  <circle r="6.16" fill="#B83A00" />
+</svg>
+
+<style>
+  .radial-map {
+    display: block;
+    width: 100%;
+    max-width: 440px;
+    margin-inline: auto;
+    overflow: visible;
+  }
+  .radial-map line {
+    stroke: currentColor;
+    stroke-width: 1.6;
+  }
+  .radial-map .spoke circle {
+    fill: currentColor;
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* One timeline for the whole drawing, so the spokes keep clock order
+         rather than each timing itself to its own place on the page. */
+      .radial-map {
+        view-timeline: --radial block;
+      }
+      .radial-map .spoke {
+        transform-box: view-box;
+        transform-origin: 0 0;
+        animation: radial-grow cubic-bezier(0.2, 0, 0, 1) both;
+        animation-timeline: --radial;
+        /* Each spoke starts a little later, around the hub like a clock. */
+        animation-range: entry calc(10% + var(--i) * 3%) entry calc(50% + var(--i) * 3%);
+      }
+    }
+  }
+  @keyframes radial-grow {
+    from {
+      opacity: 0;
+      transform: scale(0.2);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
