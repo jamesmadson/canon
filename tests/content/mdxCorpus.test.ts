@@ -32,6 +32,20 @@ describe('seed content integrity', () => {
       }
     });
 
+    // A page preview is a real Graft page, so it must be one made with
+    // --public: no fork command, no session or message ids, no home folder.
+    it(`${file}'s page previews were made with --public`, () => {
+      const raw = readFileSync(path.join(skillsDir, file), 'utf-8');
+      const parsed = skillSchema.parse(matter(raw).data);
+      if (parsed.previewType !== 'page') return;
+      for (const asset of parsed.previewAssets) {
+        const page = readFileSync(path.join(publicDir, asset), 'utf-8');
+        expect(page, `${asset} offers a fork command`).not.toContain('Copy fork command');
+        expect(page, `${asset} carries an id`).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+        expect(page, `${asset} names a home folder`).not.toMatch(/\/Users\/|\/home\/|\/private\/tmp\//);
+      }
+    });
+
     it(`${file}'s fileTree has exactly one SKILL.md entry`, () => {
       const raw = readFileSync(path.join(skillsDir, file), 'utf-8');
       const { data } = matter(raw);

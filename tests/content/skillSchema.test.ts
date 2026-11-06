@@ -85,6 +85,15 @@ describe('skillSchema', () => {
     expect(() => skillSchema.parse({ ...validSkill, license: 'WTFPL' })).toThrow();
   });
 
+  it("accepts a 'page' preview, a page the skill made, shown in a frame", () => {
+    const result = skillSchema.parse({ ...validSkill, previewType: 'page', previewAssets: ['/previews/graft/demo-session.html'] });
+    expect(result.previewType).toBe('page');
+  });
+
+  it('rejects a preview type outside the known set', () => {
+    expect(() => skillSchema.parse({ ...validSkill, previewType: 'video' })).toThrow();
+  });
+
   it("accepts 'none' so an unlicensed source can be stated rather than omitted", () => {
     const result = skillSchema.parse({ ...validSkill, license: 'none' });
     expect(result.license).toBe('none');

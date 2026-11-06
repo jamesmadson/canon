@@ -7,6 +7,7 @@ import { TOOL_META } from '../../lib/toolMeta';
 import { TOOL_VALUES } from '../../content/skillSchema';
 import StructureMap from '../../components/StructureMap.astro';
 import DepthDots from '../../components/DepthDots.astro';
+import { withBase } from '../../lib/withBase';
 
 export async function getStaticPaths() {
   // Hidden entries get no page at all — otherwise "hidden" only means
@@ -33,6 +34,8 @@ const {
   status,
   fileTree,
   contentOutline,
+  previewType,
+  previewAssets,
 } = entry.data;
 ---
 
@@ -65,6 +68,24 @@ const {
       below.
     </p>
   </div>
+
+  {previewType === 'page' && (
+    <section class="mb-16" aria-labelledby="preview-heading">
+      <h2 id="preview-heading" class="label mb-3">Try it</h2>
+      <iframe
+        src={withBase(previewAssets[0])}
+        title={`A ${name} page of a short recorded session`}
+        loading="lazy"
+        sandbox="allow-scripts"
+        class="block h-[760px] max-h-[85svh] w-full rounded-lg border border-rule bg-panel"
+      ></iframe>
+      <p class="mt-3 max-w-2xl text-xs text-ink-soft text-pretty">
+        A real session, recorded for this page: five turns, three commits and a
+        compaction. Made with <code>--public</code>, so it leaves out the fork
+        and branch commands.
+      </p>
+    </section>
+  )}
 
   <div class="grid grid-cols-1 gap-12 lg:grid-cols-[2fr_1fr]">
     <div>

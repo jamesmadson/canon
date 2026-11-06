@@ -52,7 +52,9 @@ export const skillSchema = z.object({
   license: z.enum(LICENSE_VALUES),
   tools: z.array(z.enum(TOOL_VALUES)).min(1),
   categories: z.array(z.enum(CATEGORY_VALUES)).min(1),
-  previewType: z.enum(['image']),
+  // 'page' is a page the skill itself made, shown live in a frame on the
+  // skill's page.
+  previewType: z.enum(['image', 'page']),
   previewAssets: z.array(z.string()).min(1),
   rating: z.number().min(1).max(5),
   addedDate: z.coerce.date(),
