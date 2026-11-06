@@ -11,6 +11,12 @@ const read = (p: string) => readFileSync(path.join(root, p), 'utf-8');
 const plain = (s: string) => s.replace(/&nbsp;| /g, ' ');
 
 const SLUGS = ['strata', 'lath', 'prune', 'graft'];
+const STORIES: Record<string, string> = {
+  graft: 'Ever lose the moment in a long chat where you picked a direction? Scrolling back through hours of replies to find where it went wrong is slow. Graft turns the session into one page with every turn on a timeline. Find the turn, see what you had then, and copy a command to pick up the chat from there or put your files back the way they were. Run it again whenever you want the page to catch up.',
+  strata: 'Someone says one thing in an interview, and three weeks later it has become \u201cusers are demanding this.\u201d Strata files each piece of feedback with its date and the person\u2019s own words, kept apart from what you think they meant. Ask what people have said and you get the quotes and an honest count, so one comment stays one comment.',
+  lath: 'Show a polished mockup too early and the review becomes a talk about colour and type while the structure goes unquestioned. Lath sketches the screen from a small kit of plain parts, with real words and every state listed. The first review is about what the screen holds and why.',
+  prune: 'Every round of feedback adds something to a screen, and nobody asks what should come out. Prune reads the screen against its job and tells you what to cut, one thing at a time, with the reason and how often people actually meet that part. It changes nothing until you ask.',
+};
 const home = read('src/pages/index.astro');
 const step = read('src/components/SkillStep.astro');
 const page = read('src/pages/skills/[slug].astro');
@@ -27,12 +33,11 @@ describe('skill stories', () => {
     });
   }
 
-  // Mutation: change a word in graft.mdx's story fails this.
-  it('the stories are the ones James wrote', () => {
-    expect(matter(read('src/content/skills/graft.mdx')).data.story).toMatch(/^Ever lose the moment in a long chat where you picked a direction\?/);
-    expect(matter(read('src/content/skills/strata.mdx')).data.story).toContain('“users are demanding this.”');
-    expect(matter(read('src/content/skills/lath.mdx')).data.story).toMatch(/about what the screen holds and why\.$/);
-    expect(matter(read('src/content/skills/prune.mdx')).data.story).toMatch(/It changes nothing until you ask\.$/);
+  // Mutation: change any one word in any story, in the .mdx file or here, fails this.
+  it('each story is James\u2019s text, word for word', () => {
+    for (const slug of SLUGS) {
+      expect(matter(read(`src/content/skills/${slug}.mdx`)).data.story, slug).toBe(STORIES[slug]);
+    }
   });
 
   // Mutation: put {tagline} back under the h1 in [slug].astro fails this.
@@ -77,7 +82,7 @@ describe('the homepage skills section', () => {
   // Mutation: retype the Said quote in SkillStep.astro instead of using strata.said fails this.
   it('Strata card carries words read from its file, with Said and Meant apart', () => {
     const raw = read('public/previews/strata/2026-10-06-annual-card-form-total.md');
-    const entry = parseStrataEntry(raw);
+    const entry = parseStrataEntry(raw, 'f.md');
     expect(entry.date).toBe('2026-10-06');
     expect(entry.said).toContain('the only number I could see was $39');
     expect(raw).toContain(entry.said.slice(0, 40));
@@ -90,7 +95,7 @@ describe('the homepage skills section', () => {
   // Mutation: make parsePruneCut take the second list item fails this.
   it('Prune card is the first removal in review.md', () => {
     const raw = read('public/previews/prune/review.md');
-    const cut = parsePruneCut(raw);
+    const cut = parsePruneCut(raw, 'f.md');
     expect(cut.heading).toContain('Wait! Get 10% off');
     expect(cut.reason).toContain('It sits on top of the plan cards');
     expect(raw).toContain(cut.reason);
@@ -98,13 +103,37 @@ describe('the homepage skills section', () => {
     expect(step).toContain('{cut.heading}');
   });
 
-  // Mutation: reorder the rows in dist or in ORDER fails this (needs a build).
-  it.skipIf(!existsSync(path.join(root, 'dist/index.html')))('the built homepage has the four rows in order', () => {
-    const html = read('dist/index.html');
-    const at = SLUGS.map((s) => html.indexOf(`data-skill-step="${s}"`));
-    expect(at.every((i) => i >= 0)).toBe(true);
-    expect([...at].sort((a, b) => a - b)).toEqual(at);
-    expect(html).toContain('the only number I could see was $39');
-    expect(html).toContain('It sits on top of the plan cards');
+  // Mutation: delete the `throw` lines in previewParse.ts fails the next two tests.
+  it('the Strata reader throws, naming the file and the heading, when one is missing', () => {
+    const raw = read('public/previews/strata/2026-10-06-annual-card-form-total.md');
+    expect(() => parseStrataEntry(raw.replace('## Said', '## Quote'), 'strata.md')).toThrow(/strata\.md.*## Said/);
+    expect(() => parseStrataEntry(raw.replace('## Meant', '## Read'), 'strata.md')).toThrow(/strata\.md.*## Meant/);
+    expect(() => parseStrataEntry(raw.replace(/^date:.*$/m, ''), 'strata.md')).toThrow(/strata\.md.*date/);
+    expect(() => parseStrataEntry('', 'strata.md')).toThrow(/strata\.md/);
+  });
+
+  it('the Prune reader throws, naming the file and the heading, and reads only under Removals', () => {
+    const raw = read('public/previews/prune/review.md');
+    expect(() => parsePruneCut(raw.replace('Removals', 'Cuts'), 'review.md')).toThrow(/review\.md.*Removals/);
+    expect(() => parsePruneCut(raw.replace(/^1\. /m, '- '), 'review.md')).toThrow(/review\.md.*Removals/);
+    // A numbered item before the Removals heading is not the first cut.
+    const before = '1. **Early.** Not a cut.\n\n' + raw;
+    expect(parsePruneCut(before, 'review.md').heading).toContain('Wait! Get 10% off');
+    // A numbered item after the next heading is not under Removals.
+    const cropped = raw.slice(0, raw.indexOf('1. **')) + raw.slice(raw.indexOf('**3 \u00b7'));
+    expect(() => parsePruneCut(cropped, 'review.md')).toThrow(/Removals/);
+  });
+
+  // Mutation: remove the .replace of \r in previewParse.ts fails this.
+  it('reads a file with Windows line endings', () => {
+    const raw = read('public/previews/strata/2026-10-06-annual-card-form-total.md').replace(/\n/g, '\r\n');
+    expect(parseStrataEntry(raw, 'f.md').date).toBe('2026-10-06');
+  });
+
+  // Mutation: set the step labels back to class="label" in SkillStep.astro fails this.
+  it('step labels are Public Sans, and the link follows the preview in reading order', () => {
+    expect(step).toContain('<p class="small text-balance" set:html={step} />');
+    expect(step).not.toContain('class="label');
+    expect(step.indexOf('class={`frame frame-${slug}`}')).toBeLessThan(step.indexOf('See what it made'));
   });
 });

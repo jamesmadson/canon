@@ -16,14 +16,25 @@ interface Props {
 const { slug, name, story, step, flip = false } = Astro.props;
 
 // Read at build time, so the cards carry the files' own words with no script.
+// A missing or doubled file, or a file without the headings, fails the build.
 const TEXT = import.meta.glob('/public/previews/**/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
-const [strataPath, strataText] = Object.entries(TEXT).find(([k]) => k.startsWith('/public/previews/strata/')) ?? ['', ''];
-const [prunePath, pruneText] = Object.entries(TEXT).find(([k]) => k === '/public/previews/prune/review.md') ?? ['', ''];
+const only = (prefix: string): [string, string] => {
+  const found = Object.entries(TEXT).filter(([k]) => k.startsWith(prefix));
+  if (found.length !== 1) throw new Error(`Expected exactly one preview file under ${prefix}, found ${found.length}.`);
+  return found[0];
+};
 
-const strata = slug === 'strata' ? parseStrataEntry(strataText) : undefined;
-const strataFile = strataPath.split('/').pop();
-const cut = slug === 'prune' ? parsePruneCut(pruneText) : undefined;
-const pruneFile = prunePath.split('/').pop();
+let strata, strataFile, cut, pruneFile;
+if (slug === 'strata') {
+  const [p, text] = only('/public/previews/strata/');
+  strataFile = p.split('/').pop() as string;
+  strata = parseStrataEntry(text, strataFile);
+}
+if (slug === 'prune') {
+  const [p, text] = only('/public/previews/prune/');
+  pruneFile = p.split('/').pop() as string;
+  cut = parsePruneCut(text, pruneFile);
+}
 
 const FRAMES: Record<string, string> = {
   lath: '/previews/lath/checkout-payment.html',
@@ -32,37 +43,32 @@ const FRAMES: Record<string, string> = {
 ---
 
 <li class="step border-t border-rule py-10 sm:py-14" data-skill-step={slug}>
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center lg:gap-12">
-    <div class:list={['min-w-0 lg:col-span-5', flip && 'lg:order-2']}>
-      <p class="label text-balance" set:html={step} />
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-x-12 lg:gap-y-0">
+    <div class:list={['min-w-0 lg:row-start-1 lg:col-span-5 lg:self-end', flip ? 'lg:col-start-8' : 'lg:col-start-1']}>
+      <p class="small text-balance" set:html={step} />
       <h3 class="display mt-4 text-[28px]">{name}</h3>
       <p class="mt-4 max-w-[52ch] text-[16px] leading-[1.5] text-ink-soft text-pretty">{story}</p>
-      <p class="mt-5">
-        <a href={withBase(`/skills/${slug}/`)} class="tick-bar rounded-sm text-[14px]">
-          See what it made<span class="sr-only"> from {name}</span><span aria-hidden="true">&nbsp;→</span>
-        </a>
-      </p>
     </div>
 
-    <div class:list={['min-w-0 lg:col-span-7', flip && 'lg:order-1']}>
+    <div class:list={['min-w-0 lg:row-span-2 lg:row-start-1 lg:col-span-7 lg:self-center', flip ? 'lg:col-start-1' : 'lg:col-start-6']}>
       <div class={`frame frame-${slug}`}>
         {strata && (
           <div class="card">
             <p class="font-mono text-[12px] leading-[1.5] text-ink-soft">{strataFile}</p>
-            <p class="mt-2 text-[13px] leading-[1.45] text-ink-soft">{strata.date}, {strata.about}</p>
-            <p class="label mt-3">Said</p>
-            <p class="clamp clamp-3 mt-1 border-l-2 border-ink pl-3 text-[14px] leading-[1.45] text-ink">{strata.said}</p>
-            <p class="label mt-3">Meant</p>
-            <p class="clamp clamp-3 mt-1 text-[13px] leading-[1.45] text-ink-soft">{strata.meant}</p>
+            <p class="mt-2 text-[13px] leading-[1.45] text-ink-soft">{strata.date} · {strata.about}</p>
+            <p class="small mt-3">Said</p>
+            <p class="mt-1 border-l-2 border-ink pl-3 text-[14px] leading-[1.45] text-ink">{strata.said}</p>
+            <p class="small mt-3">Meant</p>
+            <p class="mt-1 text-[13px] leading-[1.45] text-ink-soft">{strata.meant}</p>
           </div>
         )}
         {cut && (
           <div class="card">
             <p class="font-mono text-[12px] leading-[1.5] text-ink-soft">{pruneFile}</p>
-            <p class="label mt-3">Cut</p>
+            <p class="small mt-3">Cut</p>
             <p class="mt-1 text-[15px] leading-[1.4] font-medium text-ink line-through decoration-1">{cut.heading}</p>
-            <p class="label mt-3">Why</p>
-            <p class="clamp clamp-5 mt-1 text-[13px] leading-[1.45] text-ink-soft">{cut.reason}</p>
+            <p class="small mt-3">Why</p>
+            <p class="mt-1 text-[13px] leading-[1.45] text-ink-soft">{cut.reason}</p>
           </div>
         )}
         {FRAMES[slug] && (
@@ -78,48 +84,50 @@ const FRAMES: Record<string, string> = {
         )}
       </div>
     </div>
+
+    <p class:list={['min-w-0 lg:row-start-2 lg:col-span-5 lg:self-start lg:pt-5', flip ? 'lg:col-start-8' : 'lg:col-start-1']}>
+      <a href={withBase(`/skills/${slug}/`)} class="tick-bar rounded-sm text-[14px]">
+        See what it made<span class="sr-only"> from {name}</span><span aria-hidden="true">&nbsp;→</span>
+      </a>
+    </p>
   </div>
 </li>
 
 <style>
-  /* One frame for every preview, with a fixed height so nothing shifts as
-     the frames load. */
+  .small {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-ink-soft);
+  }
+
+  /* One frame for every preview. The two iframe previews have a fixed height
+     so nothing shifts as they load. The text cards hold no iframe, so they
+     take the height of their words and never clip them. */
   .frame {
     position: relative;
-    height: 220px;
     overflow: hidden;
     border: 1px solid var(--color-rule);
     border-radius: 11px;
     background-color: var(--color-panel);
+    container-type: inline-size;
+  }
+  .frame-lath,
+  .frame-graft {
+    height: 220px;
   }
   @media (min-width: 1024px) {
-    .frame {
+    .frame-lath,
+    .frame-graft {
       height: 280px;
     }
   }
   .card {
-    height: 100%;
-    overflow: hidden;
-    padding: 16px 20px;
-  }
-  .clamp {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .clamp-3 {
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-  }
-  .clamp-5 {
-    -webkit-line-clamp: 5;
-    line-clamp: 5;
+    padding: 16px 20px 18px;
   }
 
-  /* The frames show a page at its own size, scaled down by a fixed amount per
-     breakpoint. The link carries the action, so the frame takes no pointer. */
+  /* The frames show a page scaled down, and the link carries the action, so
+     the frame takes no pointer. */
   .shot-frame {
-    --h: 220px;
     position: absolute;
     top: 0;
     left: 0;
@@ -128,31 +136,37 @@ const FRAMES: Record<string, string> = {
     pointer-events: none;
     background-color: var(--color-panel);
     transform: scale(var(--s));
-    width: var(--w);
-    height: calc(var(--h) / var(--s));
   }
   /* Lath's sketch is 1104 by 760 and fits whole, centred. */
   .shot-lath {
-    --w: 1104px;
     --s: 0.289;
-    left: 50%;
-    margin-left: calc(var(--w) * var(--s) / -2);
+    width: 1104px;
     height: 760px;
+    left: 50%;
+    margin-left: calc(1104px * var(--s) / -2);
   }
+  /* Graft's page reflows. Its iframe is as wide as the frame divided by the
+     scale, so the scaled page is exactly as wide as the frame, with no strip
+     and no crop at the sides. The top of the page, its header and timeline,
+     is what shows. */
   .shot-graft {
-    --w: 640px;
     --s: 0.5;
+    --h: 220px;
+    width: calc(100cqw / var(--s));
+    height: calc(var(--h) / var(--s));
+  }
+  @media (min-width: 560px) {
+    .shot-graft {
+      --s: 0.8;
+    }
   }
   @media (min-width: 1024px) {
-    .shot-frame {
-      --h: 280px;
-    }
     .shot-lath {
       --s: 0.368;
     }
     .shot-graft {
-      --w: 1100px;
       --s: 0.55;
+      --h: 280px;
     }
   }
 </style>
