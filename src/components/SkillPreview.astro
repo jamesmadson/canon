@@ -1,0 +1,168 @@
+---
+// A small piece of one skill's own output. The homepage steps and the hover on
+// /skills/ both render this, so the two cannot drift. Every preview is built
+// from the real file in public/previews/, so each shows that skill's own
+// interface.
+import { withBase } from '../lib/withBase';
+import { STATIC_SANDBOX, SCRIPTED_SANDBOX } from '../lib/frameSandbox';
+import { parseStrataEntry, parsePruneCut } from '../lib/previewParse';
+
+interface Props {
+  slug: string;
+  /** "step" sizes to the homepage row; "hover" fills a 360 by 240 box. */
+  variant?: 'step' | 'hover';
+}
+const { slug, variant = 'step' } = Astro.props;
+
+// Read at build time, so the cards carry the files' own words with no script.
+// A missing or doubled file, or a file without the headings, fails the build.
+const TEXT = import.meta.glob('/public/previews/**/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const only = (prefix: string): [string, string] => {
+  const found = Object.entries(TEXT).filter(([k]) => k.startsWith(prefix));
+  if (found.length !== 1) throw new Error(`Expected exactly one preview file under ${prefix}, found ${found.length}.`);
+  return found[0];
+};
+
+let strata, strataFile, cut, pruneFile;
+if (slug === 'strata') {
+  const [p, text] = only('/public/previews/strata/');
+  strataFile = p.split('/').pop() as string;
+  strata = parseStrataEntry(text, strataFile);
+}
+if (slug === 'prune') {
+  const [p, text] = only('/public/previews/prune/');
+  pruneFile = p.split('/').pop() as string;
+  cut = parsePruneCut(text, pruneFile);
+}
+
+const FRAMES: Record<string, string> = {
+  lath: '/previews/lath/checkout-payment.html',
+  graft: '/previews/graft/demo-session.html',
+};
+---
+
+<div class={`frame frame-${slug}`} data-variant={variant}>
+  {strata && (
+    <div class="card">
+      <p class="font-mono text-[12px] leading-[1.5] text-ink-soft">{strataFile}</p>
+      <p class="mt-2 text-[13px] leading-[1.45] text-ink-soft">{strata.date} · {strata.about}</p>
+      <p class="small mt-3">Said</p>
+      <p class="mt-1 border-l-2 border-ink pl-3 text-[14px] leading-[1.45] text-ink">{strata.said}</p>
+      <p class="small mt-3">Meant</p>
+      <p class="mt-1 text-[13px] leading-[1.45] text-ink-soft">{strata.meant}</p>
+    </div>
+  )}
+  {cut && (
+    <div class="card">
+      <p class="font-mono text-[12px] leading-[1.5] text-ink-soft">{pruneFile}</p>
+      <p class="small mt-3">Cut</p>
+      <p class="mt-1 text-[15px] leading-[1.4] font-medium text-ink line-through decoration-1">{cut.heading}</p>
+      <p class="small mt-3">Why</p>
+      <p class="mt-1 text-[13px] leading-[1.45] text-ink-soft">{cut.reason}</p>
+    </div>
+  )}
+  {FRAMES[slug] && (
+    <iframe
+      src={withBase(FRAMES[slug])}
+      title=""
+      loading="lazy"
+      tabindex="-1"
+      aria-hidden="true"
+      sandbox={slug === 'graft' ? SCRIPTED_SANDBOX : STATIC_SANDBOX}
+      class={`shot-frame shot-${slug}`}
+    ></iframe>
+  )}
+</div>
+
+<style>
+  .small {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-ink-soft);
+  }
+
+  /* One frame for every preview. The two iframe previews have a fixed height
+     so nothing shifts as they load. The text cards hold no iframe, so they
+     take the height of their words and never clip them. */
+  .frame {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--color-rule);
+    border-radius: 11px;
+    background-color: var(--color-panel);
+    container-type: inline-size;
+  }
+  .frame-lath,
+  .frame-graft {
+    height: 220px;
+  }
+  @media (min-width: 1024px) {
+    .frame-lath,
+    .frame-graft {
+      height: 280px;
+    }
+  }
+  .card {
+    padding: 16px 20px 18px;
+  }
+
+  /* The frames show a page scaled down, and the link carries the action, so
+     the frame takes no pointer. */
+  .shot-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 0;
+    transform-origin: 0 0;
+    pointer-events: none;
+    background-color: var(--color-panel);
+    transform: scale(var(--s));
+  }
+  /* Lath's sketch is 1104 by 760 and fits whole, centred. */
+  .shot-lath {
+    --s: 0.289;
+    width: 1104px;
+    height: 760px;
+    left: 50%;
+    margin-left: calc(1104px * var(--s) / -2);
+  }
+  /* Graft's page reflows. Its iframe is as wide as the frame divided by the
+     scale, so the scaled page is exactly as wide as the frame, with no strip
+     and no crop at the sides. The top of the page, its header and timeline,
+     is what shows. */
+  .shot-graft {
+    --s: 0.5;
+    --h: 220px;
+    width: calc(100cqw / var(--s));
+    height: calc(var(--h) / var(--s));
+  }
+  @media (min-width: 560px) {
+    .shot-graft {
+      --s: 0.8;
+    }
+  }
+  @media (min-width: 1024px) {
+    .shot-lath {
+      --s: 0.368;
+    }
+    .shot-graft {
+      --s: 0.55;
+      --h: 280px;
+    }
+  }
+
+  /* The hover preview on /skills/ is a 360 by 240 box whatever the viewport.
+     These come after the step rules and are more specific, so they win at
+     every width. Lath's sketch scales to 240 tall (760 * 0.316). */
+  .frame[data-variant='hover'] {
+    width: 100%;
+    height: 100%;
+  }
+  .frame[data-variant='hover'] .shot-lath {
+    --s: 0.316;
+  }
+  .frame[data-variant='hover'] .shot-graft {
+    --s: 0.5;
+    --h: 238px;
+  }
+</style>

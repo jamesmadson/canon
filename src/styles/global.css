@@ -88,6 +88,13 @@
      --ease-glide: a damped spring (ratio 0.7, 26 rad/s) over 360ms that
      peaks 4.6% past its target and settles. */
   --ease-glide: linear(0, 0.088, 0.277, 0.489, 0.68, 0.83, 0.934, 0.999, 1.033, 1.045, 1.044, 1.037, 1.027, 1.018, 1.01, 1.005, 1.001, 0.999, 0.998, 0.998, 1);
+
+  /* One small dot per bundled skill (D-125). They mean which skill and
+     nothing else; a dot always sits beside its skill's name. */
+  --skill-strata: #AD723F;
+  --skill-lath: #5E83A6;
+  --skill-prune: #658952;
+  --skill-graft: #8371CD;
 }
 
 /* Dark mode, site-wide.
@@ -109,6 +116,10 @@
   --color-ink-soft: #A29E96;
   --color-ink: #EDEBE6;
   --color-input-border: #77736B;
+  --skill-strata: #C08552;
+  --skill-lath: #7F9CB8;
+  --skill-prune: #7FA66A;
+  --skill-graft: #9A8BD6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -122,6 +133,10 @@
     --color-ink-soft: #A29E96;
     --color-ink: #EDEBE6;
     --color-input-border: #77736B;
+    --skill-strata: #C08552;
+    --skill-lath: #7F9CB8;
+    --skill-prune: #7FA66A;
+    --skill-graft: #9A8BD6;
   }
 }
 

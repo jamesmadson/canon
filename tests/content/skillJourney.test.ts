@@ -19,6 +19,7 @@ const STORIES: Record<string, string> = {
 };
 const home = read('src/pages/index.astro');
 const step = read('src/components/SkillStep.astro');
+const preview = read('src/components/SkillPreview.astro');
 const page = read('src/pages/skills/[slug].astro');
 
 describe('skill stories', () => {
@@ -68,12 +69,12 @@ describe('the homepage skills section', () => {
 
   // Mutation: remove the sandbox attribute from the Graft frame fails this.
   it('frames Lath and Graft from the real files with the shared sandbox values, inert and lazy', () => {
-    expect(step).toContain('/previews/lath/checkout-payment.html');
-    expect(step).toContain('/previews/graft/demo-session.html');
-    expect(step).toContain("from '../lib/frameSandbox'");
-    expect(step).toContain("slug === 'graft' ? SCRIPTED_SANDBOX : STATIC_SANDBOX");
+    expect(preview).toContain('/previews/lath/checkout-payment.html');
+    expect(preview).toContain('/previews/graft/demo-session.html');
+    expect(preview).toContain("from '../lib/frameSandbox'");
+    expect(preview).toContain("slug === 'graft' ? SCRIPTED_SANDBOX : STATIC_SANDBOX");
     for (const needle of ['loading="lazy"', 'tabindex="-1"', 'aria-hidden="true"', 'pointer-events: none']) {
-      expect(step, needle).toContain(needle);
+      expect(preview, needle).toContain(needle);
     }
     expect(existsSync(path.join(root, 'public/previews/lath/checkout-payment.html'))).toBe(true);
     expect(existsSync(path.join(root, 'public/previews/graft/demo-session.html'))).toBe(true);
@@ -87,9 +88,9 @@ describe('the homepage skills section', () => {
     expect(entry.said).toContain('the only number I could see was $39');
     expect(raw).toContain(entry.said.slice(0, 40));
     expect(entry.meant).toContain('One participant, so this is a quote, not a pattern.');
-    expect(step).toContain('{strata.said}');
-    expect(step).toContain('{strata.meant}');
-    expect(step).toMatch(/>Said<[\s\S]*>Meant</);
+    expect(preview).toContain('{strata.said}');
+    expect(preview).toContain('{strata.meant}');
+    expect(preview).toMatch(/>Said<[\s\S]*>Meant</);
   });
 
   // Mutation: make parsePruneCut take the second list item fails this.
@@ -99,8 +100,8 @@ describe('the homepage skills section', () => {
     expect(cut.heading).toContain('Wait! Get 10% off');
     expect(cut.reason).toContain('It sits on top of the plan cards');
     expect(raw).toContain(cut.reason);
-    expect(step).toContain('line-through');
-    expect(step).toContain('{cut.heading}');
+    expect(preview).toContain('line-through');
+    expect(preview).toContain('{cut.heading}');
   });
 
   // Mutation: delete the `throw` lines in previewParse.ts fails the next two tests.
@@ -134,6 +135,6 @@ describe('the homepage skills section', () => {
   it('step labels are Public Sans, and the link follows the preview in reading order', () => {
     expect(step).toContain('<p class="small text-balance" set:html={step} />');
     expect(step).not.toContain('class="label');
-    expect(step.indexOf('class={`frame frame-${slug}`}')).toBeLessThan(step.indexOf('See what it made'));
+    expect(step.indexOf('<SkillPreview slug={slug} />')).toBeLessThan(step.indexOf('See what it made'));
   });
 });

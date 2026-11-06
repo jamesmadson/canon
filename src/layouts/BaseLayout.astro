@@ -2,6 +2,8 @@
 import '../styles/global.css';
 import { getCollection } from 'astro:content';
 import Wordmark from '../components/Wordmark.astro';
+import SkillDot from '../components/SkillDot.astro';
+import { ORDER } from '../lib/skillLines';
 import { withBase } from '../lib/withBase';
 import { spellNumber } from '../lib/spellNumber';
 
@@ -75,6 +77,9 @@ const isCurrent = (href: string) =>
           class="home-mark flex min-h-11 min-w-11 items-center gap-2.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
         >
           <Wordmark size={16} />
+          <span aria-hidden="true" class="flex items-center gap-1">
+            {ORDER.map((slug) => <SkillDot slug={slug} size={6} />)}
+          </span>
           <span aria-hidden="true" class="home-mark-name text-[15px] text-ink"><span class="home-mark-word">Canon</span></span>
         </a>
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1">

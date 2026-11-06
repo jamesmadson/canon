@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import InstallBlock from '../../components/InstallBlock.astro';
+import SkillDot from '../../components/SkillDot.astro';
 import { withBase } from '../../lib/withBase';
 import { plateInk } from '../../lib/plateInk';
 import { STATIC_SANDBOX, SCRIPTED_SANDBOX } from '../../lib/frameSandbox';
@@ -64,7 +65,7 @@ const worksWithLine = `Works with ${parts.length > 1 ? `${parts.slice(0, -1).joi
 
 <BaseLayout title={name} description={tagline}>
   <header class="mb-12">
-    <h1 class="display-lg max-w-3xl">{name}</h1>
+    <h1 class="display-lg max-w-3xl"><SkillDot slug={slug} size={14} inline />{name}</h1>
     <p class="mt-5 max-w-2xl text-[18px] leading-[1.45] text-ink-soft text-pretty">{story}</p>
   </header>
 

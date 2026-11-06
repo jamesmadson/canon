@@ -1,9 +1,12 @@
 ---
-// The four skills as rows, in the order work does. The homepage and /skills/
-// both render this, so the two lists cannot drift.
+// The four skills as rows, in the order work does. The skills index renders
+// this. With a mouse, hovering or focusing a row floats that skill's own
+// preview over the row's type; the same SkillPreview the homepage shows.
 import { getCollection } from 'astro:content';
 import { withBase } from '../lib/withBase';
 import { SKILL_LINES, ORDER } from '../lib/skillLines';
+import SkillDot from './SkillDot.astro';
+import SkillPreview from './SkillPreview.astro';
 
 const skills = (await getCollection('skills', ({ data }) => data.status === 'active')).sort(
   (a, b) => ORDER.indexOf(a.data.slug) - ORDER.indexOf(b.data.slug),
@@ -14,18 +17,22 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
   {skills.map((s) => (
     <li class="skill-row">
       <a href={withBase(`/skills/${s.data.slug}/`)} class="skill-link grid grid-cols-1 gap-2 py-6 sm:grid-cols-12 sm:gap-12">
-        <span class="display text-[28px] sm:col-span-4">{s.data.name}</span>
+        <span class="display text-[28px] sm:col-span-4"><SkillDot slug={s.data.slug} size={10} inline />{s.data.name}</span>
         <span class="max-w-[52ch] text-[16px] leading-[1.5] text-ink-soft sm:col-span-6" set:html={SKILL_LINES[s.data.slug] ?? s.data.tagline} />
         <span class="text-[14px] text-ink sm:col-span-2 sm:text-right">
           {s.data.previewType === 'page' ? 'Try it' : 'See what it made'}<span aria-hidden="true"> →</span>
         </span>
       </a>
+      <div class="skill-preview" aria-hidden="true">
+        <SkillPreview slug={s.data.slug} variant="hover" />
+      </div>
     </li>
   ))}
 </ul>
 
 <style>
   .skill-row {
+    position: relative;
     border-top: 1px solid var(--color-rule);
   }
   .skill-row:last-child {
@@ -33,15 +40,79 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
   }
   .skill-link {
     border-radius: var(--radius-sm);
-    transition: opacity 220ms cubic-bezier(0.2, 0, 0, 1);
   }
   .skill-link:focus-visible {
     outline: 2px solid var(--color-ink);
     outline-offset: 3px;
   }
+
+  /* The preview is hidden from everyone until a fine pointer hovers or focuses
+     its row. Touch and coarse pointers never see it. */
+  .skill-preview {
+    display: none;
+  }
+
   @media (hover: hover) and (pointer: fine) {
-    ul:has(.skill-link:hover) .skill-link:not(:hover) {
+    .skill-link {
+      transition: opacity 160ms cubic-bezier(0.2, 0, 0, 1);
+    }
+    ul:has(.skill-link:is(:hover, :focus-visible)) .skill-link:not(:hover, :focus-visible) {
       opacity: 0.5;
+    }
+  }
+
+  /* About 360 by 240, over the middle of the row, overlapping the description
+     column and never past the right edge of the list. It floats above the
+     rows, takes no pointer, and fades in with a small rise, a scale and up to
+     4px of blur clearing (D-114). Leaving is a little faster. The display
+     change is part of the transition, so the preview stays until it has
+     faded. While it is display none, its lazy frame is not loaded. */
+  @media (hover: hover) and (pointer: fine) and (min-width: 640px) {
+    .skill-preview {
+      position: absolute;
+      z-index: 10;
+      top: 50%;
+      left: min(40%, calc(100% - 360px));
+      width: 360px;
+      height: 240px;
+      margin-top: -120px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(8px) scale(0.96);
+      filter: blur(4px);
+      transition:
+        opacity 160ms cubic-bezier(0.2, 0, 0, 1),
+        transform 160ms cubic-bezier(0.2, 0, 0, 1),
+        filter 160ms cubic-bezier(0.2, 0, 0, 1),
+        display 160ms allow-discrete;
+    }
+    .skill-link:is(:hover, :focus-visible) + .skill-preview {
+      display: block;
+      opacity: 1;
+      transform: none;
+      filter: none;
+      transition-duration: 220ms;
+    }
+    @starting-style {
+      .skill-link:is(:hover, :focus-visible) + .skill-preview {
+        opacity: 0;
+        transform: translateY(8px) scale(0.96);
+        filter: blur(4px);
+      }
+    }
+  }
+
+  /* Reduced motion keeps the fades and drops the rise, the scale and the blur. */
+  @media (hover: hover) and (pointer: fine) and (min-width: 640px) and (prefers-reduced-motion: reduce) {
+    .skill-preview {
+      transform: none;
+      filter: none;
+    }
+    @starting-style {
+      .skill-link:is(:hover, :focus-visible) + .skill-preview {
+        transform: none;
+        filter: none;
+      }
     }
   }
 </style>
