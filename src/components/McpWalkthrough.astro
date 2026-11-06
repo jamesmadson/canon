@@ -259,7 +259,7 @@ const MOCK_ALT = [
   /* What Canon shows: the board's dotted canvas, light prototypes on it. */
   .mock {
     --paper: var(--color-panel);
-    --paper-ink: #1a1815;
+    --paper-ink: #1A1918;
     --paper-line: #e2e0d9;
     position: relative;
     min-width: 0;
@@ -274,7 +274,12 @@ const MOCK_ALT = [
     font-size: 13px;
   }
   :global(:root[data-app-theme='dark']) .mock {
-    --paper: #f5f4ef;
+    --paper: #F5F4F1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root[data-app-theme='system']) .mock {
+      --paper: #F5F4F1;
+    }
   }
   @media (min-width: 768px) {
     .mock {

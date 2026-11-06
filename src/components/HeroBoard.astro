@@ -75,7 +75,7 @@ const FRAMES = [
   .board {
     /* Prototypes are light pages in both themes. */
     --paper: var(--color-panel);
-    --paper-ink: #1a1815;
+    --paper-ink: #1A1918;
     --paper-line: #e2e0d9;
     width: 100%;
     min-width: 0;
@@ -89,7 +89,12 @@ const FRAMES = [
     font-size: 13px;
   }
   :global(:root[data-app-theme='dark']) .board {
-    --paper: #f5f4ef;
+    --paper: #F5F4F1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :global(:root[data-app-theme='system']) .board {
+      --paper: #F5F4F1;
+    }
   }
   .board-bar {
     display: flex;

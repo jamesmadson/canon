@@ -46,14 +46,17 @@
   --font-app: "Public Sans", ui-sans-serif, system-ui, sans-serif;
   --font-app-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  --color-ground: #eeede9;
-  --color-panel: #fafaf8;
-  --color-recess: #e4e2dc;
-  --color-bg: #eeede9;
-  --color-surface: #e4e2dc;
-  --color-rule: #d8d6d0;
-  --color-ink-soft: #6e6b64;
-  --color-ink: #1a1815;
+  --color-ground: #E9E7E2;
+  --color-panel: #F5F4F1;
+  --color-recess: #DEDBD5;
+  --color-fill-2: #E4E2DD;
+  --color-rule: #D3D0CA;
+  --color-ink-soft: #5C5954;
+  --color-ink: #1A1918;
+  --color-input-border: #85817A;
+  --color-pin: #B83A00;
+  /* Canon orange. The mark, selection, the cursor, pins, the branch you are on. */
+  --color-orange: #FF4F00;
   /* Not a seventh colour: the hairline, carried toward the ink far enough to
      read as a deliberate divider where a section genuinely needs one. The live
      value is the color-mix on :root below; this literal only exists so Tailwind
@@ -72,13 +75,8 @@
   --font-weight-semibold: 500;
   --font-weight-bold: 500;
 
-  /* The only hues on the site, and they are quarantined here: nothing but the
-     illustration marks is allowed to read them. Chrome stays monochrome. */
-  --mark-ink: #1a1815;
-  --mark-orange: #ff4b12;
-  --mark-yellow: #e9b824;
   /* International orange, the dot in the wordmark. The same in both themes. */
-  --brand-orange: #ff4f00;
+  --brand-orange: #FF4F00;
 }
 
 /* Unlayered, so these win over the @theme block Tailwind emits into a layer.
@@ -99,33 +97,27 @@
    because an explicit Light has to win over a dark OS. */
 :root[data-app-theme="dark"] {
   color-scheme: dark;
-  --color-ground: #171814;
-  --color-panel: #22231e;
-  --color-recess: #2a2b25;
-  --color-bg: #171814;
-  --color-surface: #2a2b25;
-  --color-rule: #33342d;
-  --color-ink-soft: #a7a597;
-  --color-ink: #ecebe4;
-  --mark-ink: #ecebe4;
-  --mark-orange: #ff5c28;
-  --mark-yellow: #f0c441;
+  --color-ground: #151413;
+  --color-panel: #1F1E1C;
+  --color-recess: #2E2D2A;
+  --color-fill-2: #262522;
+  --color-rule: #34332F;
+  --color-ink-soft: #A29E96;
+  --color-ink: #EDEBE6;
+  --color-input-border: #77736B;
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-app-theme="system"] {
     color-scheme: dark;
-    --color-ground: #171814;
-    --color-panel: #22231e;
-    --color-recess: #2a2b25;
-    --color-bg: #171814;
-    --color-surface: #2a2b25;
-    --color-rule: #33342d;
-    --color-ink-soft: #a7a597;
-    --color-ink: #ecebe4;
-    --mark-ink: #ecebe4;
-    --mark-orange: #ff5c28;
-    --mark-yellow: #f0c441;
+    --color-ground: #151413;
+    --color-panel: #1F1E1C;
+    --color-recess: #2E2D2A;
+    --color-fill-2: #262522;
+    --color-rule: #34332F;
+    --color-ink-soft: #A29E96;
+    --color-ink: #EDEBE6;
+    --color-input-border: #77736B;
   }
 }
 
@@ -598,7 +590,7 @@ summary,
    motion is unwelcome, so the static state is the authored one. */
 .closing-strip {
   overflow: hidden;
-  background-color: #0e0d0b;
+  background-color: #151413;
   padding: clamp(30px, 5vw, 56px) clamp(20px, 4vw, 44px) clamp(18px, 3vw, 34px);
 }
 .closing-strip .giant {
@@ -610,7 +602,7 @@ summary,
   font-size: 37vw;
   line-height: 0.8;
   letter-spacing: -0.045em;
-  color: #ecebe4;
+  color: #EDEBE6;
   will-change: transform;
 }
 .closing-strip .giant-dot {
@@ -627,7 +619,7 @@ summary,
   transform: translateY(-0.04em);
 }
 .closing-strip .giant-dot:focus-visible {
-  outline: 2px solid #ecebe4;
+  outline: 2px solid #EDEBE6;
   outline-offset: 0.06em;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -640,5 +632,5 @@ summary,
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #a7a597;
+  color: #A29E96;
 }
