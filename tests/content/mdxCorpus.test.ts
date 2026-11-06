@@ -46,6 +46,20 @@ describe('seed content integrity', () => {
       }
     });
 
+    // Previews are real runs on a made-up team, and Strata keeps the real
+    // names in participants.local.md. Neither that file nor an address in it
+    // may reach the site.
+    it(`${file}'s previews carry no email address and no participants file`, () => {
+      const raw = readFileSync(path.join(skillsDir, file), 'utf-8');
+      const parsed = skillSchema.parse(matter(raw).data);
+      for (const asset of parsed.previewAssets) {
+        expect(asset).not.toMatch(/participants/);
+        if (parsed.previewType === 'image') continue;
+        const text = readFileSync(path.join(publicDir, asset), 'utf-8');
+        expect(text, `${asset} carries an email address`).not.toMatch(/[\w.+-]+@[\w-]+\.[\w.]+/);
+      }
+    });
+
     it(`${file}'s fileTree has exactly one SKILL.md entry`, () => {
       const raw = readFileSync(path.join(skillsDir, file), 'utf-8');
       const { data } = matter(raw);

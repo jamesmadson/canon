@@ -90,6 +90,16 @@ describe('skillSchema', () => {
     expect(result.previewType).toBe('page');
   });
 
+  it("accepts a 'reply' preview, the text a skill wrote back, and a 'file' preview, a file it wrote", () => {
+    expect(skillSchema.parse({ ...validSkill, previewType: 'reply', previewAssets: ['/previews/prune/review.md'] }).previewType).toBe('reply');
+    expect(skillSchema.parse({ ...validSkill, previewType: 'file', previewAssets: ['/previews/strata/entry.md'] }).previewType).toBe('file');
+  });
+
+  it('takes an optional note under the preview', () => {
+    expect(skillSchema.parse(validSkill).previewNote).toBeUndefined();
+    expect(skillSchema.parse({ ...validSkill, previewNote: 'A real run.' }).previewNote).toBe('A real run.');
+  });
+
   it('rejects a preview type outside the known set', () => {
     expect(() => skillSchema.parse({ ...validSkill, previewType: 'video' })).toThrow();
   });

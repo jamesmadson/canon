@@ -39,15 +39,17 @@ const FEATURES = [
 const ADDRESS = 'james@jamesmadson.me';
 
 // The skills go to the same agent the MCP connects. Each gets one plain line
-// here; its own page carries the rest, and shows its real output where there
-// is one. Graft leads, since its page has a live Graft page on it.
+// here; its own page carries the rest and shows what it made on a real run.
+// They run in the order work does: hear users, sketch, cut, look back.
 const SKILL_LINES: Record<string, string> = {
-  graft: 'Your Claude Code session as a timeline. Find the turn where you made a call, and go back to&nbsp;it.',
   strata: 'A record of what users said, in dated layers, with their words kept apart from your reading of&nbsp;them.',
-  deter: 'A review that removes. Each finding is weighed against what the screen is for, and one thing is&nbsp;kept.',
+  lath: 'Wireframes from a fixed kit, with real copy, every state listed and numbered notes for&nbsp;review.',
+  prune: 'A review that removes. Each finding is weighed against what the screen is for, and one thing is&nbsp;kept.',
+  graft: 'Your Claude Code session as a timeline. Find the turn where you made a call, and go back to&nbsp;it.',
 };
+const ORDER = Object.keys(SKILL_LINES);
 const skills = (await getCollection('skills', ({ data }) => data.status === 'active')).sort(
-  (a, b) => Number(b.data.previewType === 'page') - Number(a.data.previewType === 'page'),
+  (a, b) => ORDER.indexOf(a.data.slug) - ORDER.indexOf(b.data.slug),
 );
 ---
 
@@ -129,7 +131,7 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
             <span class="display text-[28px] sm:col-span-4">{s.data.name}</span>
             <span class="max-w-[52ch] text-[16px] leading-[1.5] text-ink-soft sm:col-span-6" set:html={SKILL_LINES[s.data.slug] ?? s.data.tagline} />
             <span class="text-[14px] text-ink sm:col-span-2 sm:text-right">
-              {s.data.previewType === 'page' ? 'Try it' : 'Read it'}<span aria-hidden="true"> →</span>
+              {s.data.previewType === 'page' ? 'Try it' : 'See what it made'}<span aria-hidden="true"> →</span>
             </span>
           </a>
         </li>

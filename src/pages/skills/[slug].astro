@@ -8,6 +8,7 @@ import { TOOL_VALUES } from '../../content/skillSchema';
 import StructureMap from '../../components/StructureMap.astro';
 import DepthDots from '../../components/DepthDots.astro';
 import { withBase } from '../../lib/withBase';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 
 export async function getStaticPaths() {
   // Hidden entries get no page at all — otherwise "hidden" only means
@@ -36,7 +37,15 @@ const {
   contentOutline,
   previewType,
   previewAssets,
+  previewNote,
 } = entry.data;
+
+// Text previews are read at build time from public/, so the page carries the
+// skill's own words with no script.
+const TEXT_PREVIEWS = import.meta.glob('/public/previews/**/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const previewText = previewType === 'reply' || previewType === 'file' ? TEXT_PREVIEWS[`/public${previewAssets[0]}`] : undefined;
+const replyHtml = previewType === 'reply' && previewText ? (await (await createMarkdownProcessor()).render(previewText)).code : undefined;
+const previewFile = previewAssets[0].split('/').pop();
 ---
 
 <BaseLayout title={name} description={tagline}>
@@ -69,21 +78,31 @@ const {
     </p>
   </div>
 
-  {previewType === 'page' && (
+  {previewType !== 'image' && (
     <section class="mb-16" aria-labelledby="preview-heading">
-      <h2 id="preview-heading" class="label mb-3">Try it</h2>
-      <iframe
-        src={withBase(previewAssets[0])}
-        title={`A ${name} page of a short recorded session`}
-        loading="lazy"
-        sandbox="allow-scripts"
-        class="block h-[760px] max-h-[85svh] w-full rounded-lg border border-rule bg-panel"
-      ></iframe>
-      <p class="mt-3 max-w-2xl text-xs text-ink-soft text-pretty">
-        A real session, recorded for this page: five turns, three commits and a
-        compaction. Made with <code>--public</code>, so it leaves out the fork
-        and branch commands.
-      </p>
+      <h2 id="preview-heading" class="label mb-3">{previewType === 'page' ? 'Try it' : 'What it made'}</h2>
+      {previewType === 'page' && (
+        <iframe
+          src={withBase(previewAssets[0])}
+          title={`What ${name} made on a real run`}
+          loading="lazy"
+          sandbox="allow-scripts"
+          class="block h-[760px] max-h-[85svh] w-full rounded-lg border border-rule bg-panel"
+        ></iframe>
+      )}
+      {previewType === 'reply' && (
+        <div class="max-h-[760px] overflow-y-auto rounded-lg border border-rule bg-panel px-6 py-6 sm:px-10 sm:py-8" tabindex="0" aria-label={`${name}'s reply`}>
+          <p class="label mb-4">{name} replied</p>
+          <div class="prose prose-stone max-w-[68ch] prose-headings:text-ink prose-p:text-ink-soft prose-li:text-ink-soft prose-strong:text-ink prose-code:text-ink" set:html={replyHtml} />
+        </div>
+      )}
+      {previewType === 'file' && (
+        <div class="overflow-hidden rounded-lg border border-rule bg-panel">
+          <p class="border-b border-rule px-5 py-3 font-mono text-[13px] text-ink-soft">{previewFile}</p>
+          <pre class="max-h-[760px] overflow-auto px-5 py-5 font-mono text-[13px] leading-[1.6] whitespace-pre-wrap text-ink" tabindex="0" aria-label={`The file ${name} wrote`}>{previewText}</pre>
+        </div>
+      )}
+      {previewNote && <p class="mt-3 max-w-2xl text-xs text-ink-soft text-pretty">{previewNote}</p>}
     </section>
   )}
 

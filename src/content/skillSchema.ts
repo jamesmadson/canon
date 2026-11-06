@@ -52,10 +52,12 @@ export const skillSchema = z.object({
   license: z.enum(LICENSE_VALUES),
   tools: z.array(z.enum(TOOL_VALUES)).min(1),
   categories: z.array(z.enum(CATEGORY_VALUES)).min(1),
-  // 'page' is a page the skill itself made, shown live in a frame on the
-  // skill's page.
-  previewType: z.enum(['image', 'page']),
+  // What the skill made on a real run, shown on its page: 'page' is a page it
+  // made, live in a frame; 'reply' is Markdown it wrote back, set as prose;
+  // 'file' is a file it wrote, shown as the file.
+  previewType: z.enum(['image', 'page', 'reply', 'file']),
   previewAssets: z.array(z.string()).min(1),
+  previewNote: z.string().optional(),
   rating: z.number().min(1).max(5),
   addedDate: z.coerce.date(),
   lastVerified: z.coerce.date(),

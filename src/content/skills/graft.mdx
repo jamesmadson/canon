@@ -2,8 +2,8 @@
 slug: graft
 name: Graft
 tagline: >-
-  Maps a Claude Code session as a branch diagram: your turns as the trunk,
-  subagents as forks, compactions as diamonds.
+  Your Claude Code session as a timeline. Find the turn where you made a call,
+  see the files as they were, and go back to it.
 sourceUrl: 'https://github.com/jamesmadson/canon/tree/main/plugin/graft/skills/graft'
 sourceAuthor: James Madson
 license: MIT
@@ -14,9 +14,13 @@ categories:
 previewType: page
 previewAssets:
   - /previews/graft/demo-session.html
+previewNote: >-
+  A real session, recorded for this page: five turns, three commits and a
+  compaction. Made with --public, so it leaves out the fork and branch
+  commands.
 rating: 4
 addedDate: 2026-08-27T00:00:00.000Z
-lastVerified: 2026-08-27T00:00:00.000Z
+lastVerified: 2026-11-04T00:00:00.000Z
 status: active
 featured: false
 fileTree:
@@ -25,24 +29,32 @@ fileTree:
     url: >-
       https://github.com/jamesmadson/canon/blob/main/plugin/graft/skills/graft/SKILL.md
 contentOutline:
+  - title: The page
+    subsections: []
   - title: Hard rules
     subsections: []
   - title: Procedure
     subsections: []
-  - title: Visual language (match jamesmadson.me/graft exactly)
+  - title: What the buttons copy
     subsections: []
-  - title: Known gap
+  - title: '`--public`'
+    subsections: []
+  - title: Implementation
+    subsections: []
+  - title: Deliberate choices a review should not re-raise
     subsections: []
   - title: Scope
     subsections: []
 ---
 
-Run `/graft` in any project and it renders that project's session history as a branch map: every turn you took as a node on the trunk, every subagent you launched as a fork sweeping off it, every compaction as a diamond. One self-contained HTML file, hand-rolled SVG, no d3, nothing leaves your machine.
+Run `/graft` in any project and it renders that project's Claude Code session as one page: every turn on a timeline, the turns where a decision was made or a commit landed listed as key turns, and a panel for the selected turn with what you asked, what Claude answered and what it committed. One self-contained HTML file, made on your machine, with nothing sent anywhere.
 
-It exists because long-running sessions become unreadable as scrollback. A month of work in one session is a real thing now, and the shape of that work, where you forked, where the context compacted, where the effort clustered, is invisible in a transcript. The map makes the shape legible in one glance.
+It exists for one job: finding the moment you picked a direction you now want to undo. A long session is unreadable as scrollback. On the timeline, the turn is a click away.
 
-The skill's hard rules are the interesting part: it refuses to read a transcript into context (they can exceed 100MB; parsing happens in a subprocess that emits a small summary), and it constrains itself to a three-word visual vocabulary. Trunk, fork, diamond. Nothing else.
+From that turn the page copies two commands. **Copy fork command** starts a new session from that point and leaves the original as it is. **Copy branch command** makes a git branch with the files as they were when the turn began. Nothing on the page runs a command itself.
 
-**Install**: `claude plugin marketplace add jamesmadson/canon`, then install the `graft` plugin. Or copy `plugin/graft/skills/graft/SKILL.md` from the repo into `~/.claude/skills/graft/`. New skills register as typed commands on your next session start.
+It never reads a transcript into context, since one can pass 100MB. A small parser reads it line by line and writes only counts back.
 
-**Gotcha**: Claude Code only, and it reads the local transcript format, which is undocumented and can drift between versions. The skill tells the agent to inspect a line and adapt before parsing, which has held so far, but a hard format change would need a skill update. The interactive editor it matches lives at jamesmadson.me/graft.
+**Install**: `claude plugin marketplace add jamesmadson/canon`, then install the `graft` plugin.
+
+**Gotcha**: Claude Code only. It reads the local transcript format, which is undocumented and can change between releases, and the fork command uses a flag Claude Code does not document. If a release breaks either, the skill says so rather than guessing.

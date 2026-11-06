@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fieldwork checkout payment</title>
+<style>
+:root{
+  --paper:#FFFFFF;
+  --ink:#000000;
+  --pin:#B83A00;
+  --line:1.5px solid #000000;
+  --dash:1.5px dashed #000000;
+  --sans:"Public Sans",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);
+  font:14px/20px var(--sans);padding:56px 80px}
+ul,ol{list-style:none}
+
+/* apparatus: the brief, the screens, and the notes beside them */
+.brief{display:flex;flex-direction:column;gap:8px;margin-bottom:28px}
+.brief-from{font-size:15px;line-height:22px}
+.brief-text{font-size:22px;line-height:28px;font-weight:500}
+.mono{font-family:var(--mono);font-size:13px}
+.wf{display:flex;flex-direction:column;gap:56px}
+.screen{display:flex;gap:40px;align-items:flex-start}
+.page{position:relative;width:1280px;min-height:800px;border:var(--line)}
+.page-tablet{width:768px;min-height:1024px}
+.body{padding:48px;display:flex;flex-direction:column;gap:24px}
+.heading{font-size:40px;line-height:48px;font-weight:200}
+.small{font-size:13px;line-height:20px}
+.strong{font-weight:600}
+.inline{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.stack{display:flex;flex-direction:column;gap:16px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.grow{flex-grow:1}
+.side{flex:0 0 360px;width:360px;display:flex;flex-direction:column}
+.side-title{font-size:15px;font-weight:600;padding:20px 0 8px}
+.side-title:first-child{padding-top:0}
+.state{display:flex;flex-direction:column;gap:4px;padding:12px 0;
+  border-top:var(--line)}
+.state b{font-size:14px;font-weight:600}
+.state span{font-size:13px;line-height:20px}
+.note{display:flex;gap:12px;align-items:flex-start;padding:8px 0;
+  font-size:13px;line-height:20px}
+
+/* 1 title bar */
+.titlebar{height:56px;padding:0 24px;border-bottom:var(--line);
+  display:flex;align-items:center;gap:24px}
+.titlebar-name{font-size:16px;font-weight:600}
+
+/* 2 sidebar */
+.split{display:flex;align-items:stretch}
+.sidebar{flex:0 0 240px;width:240px;padding:8px;border-right:var(--line);
+  display:flex;flex-direction:column}
+.nav{height:40px;padding:0 8px;display:flex;align-items:center;gap:12px}
+.nav::before{content:"";width:8px;height:1.5px;background:var(--ink)}
+.nav.on{font-weight:600}
+.nav.on::before{width:16px}
+
+/* 3 button ladder */
+.btn{height:40px;padding:0 20px;border:var(--line);border-radius:20px;
+  background:var(--paper);color:var(--ink);font:14px/20px var(--sans);
+  white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--ink);color:var(--paper);font-weight:500}
+.btn-quiet{border-color:transparent;padding:0 4px;
+  text-decoration:underline;text-underline-offset:4px}
+.btn-off{border:var(--dash)}
+.why{font-size:12px;line-height:16px}
+
+/* 4 field */
+.field{display:flex;flex-direction:column;gap:8px}
+.field-label{font-size:13px;font-weight:600}
+.field-input{height:40px;padding:0 12px;border:var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.field-help{font-size:13px;line-height:20px;display:flex;align-items:center;
+  gap:8px}
+.mark{flex:0 0 16px;width:16px;height:16px;border-radius:8px;
+  background:var(--ink);color:var(--paper);font:700 11px/16px var(--sans);
+  text-align:center}
+
+/* 5 chip */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{height:32px;padding:0 16px;border:var(--line);font-size:13px;
+  display:inline-flex;align-items:center}
+.chip.on{background:var(--ink);color:var(--paper)}
+
+/* 6 card */
+.card{padding:12px;border:var(--line);display:flex;flex-direction:column;
+  gap:8px}
+.crossed{display:block;width:100%;height:auto;border:var(--line)}
+.crossed line{stroke:var(--ink);stroke-width:1.5;
+  vector-effect:non-scaling-stroke}
+
+/* 7 list row */
+.list{border:var(--line)}
+.row{height:48px;padding:0 12px;display:flex;align-items:center;gap:12px}
+.row + .row{border-top:var(--line)}
+.row-mark{flex:0 0 24px;width:24px;height:24px;border:var(--line)}
+.row-detail{margin-left:auto;font-size:13px}
+
+/* 8 stat */
+.stat{padding:16px;border:var(--line);display:flex;flex-direction:column;
+  gap:4px}
+.stat-label,.stat-change{font-size:13px;line-height:20px}
+.stat-value{font-size:40px;line-height:48px;font-weight:200}
+
+/* 9 table */
+.table{width:100%;border:var(--line);border-collapse:collapse;font-size:13px}
+.table th,.table td{height:40px;padding:0 12px;text-align:left}
+.table th{font-weight:600;border-bottom:var(--line)}
+
+/* 10 sheet */
+.sheet{padding:24px;border:var(--line);background:var(--paper);
+  display:flex;flex-direction:column;gap:12px}
+.sheet-bottom{position:absolute;left:0;right:0;bottom:0;border-width:1.5px 0 0}
+.sheet-title{font-size:16px;font-weight:600}
+.actions{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+
+/* 11 empty state */
+.empty{padding:12px;display:flex;flex-direction:column;align-items:center;
+  gap:12px;text-align:center}
+.empty-mark{width:40px;height:40px;border:var(--line);border-radius:20px}
+
+/* 12 pin */
+.pin{position:absolute;width:24px;height:24px;border-radius:12px;
+  background:var(--pin);color:var(--paper);font:600 12px/24px var(--sans);
+  text-align:center}
+.note .pin{position:static;flex:0 0 24px}
+.leader{position:absolute;height:1.5px;background:var(--pin)}
+
+/* 1 your message */
+.thread{display:flex;flex-direction:column;gap:16px;padding:16px}
+.you{align-self:flex-end;max-width:240px;padding:8px 16px;border:var(--line);
+  border-radius:16px}
+
+/* 2 agent reply, 3 streaming */
+.agent{display:flex;gap:12px;align-items:flex-start;max-width:320px}
+.agent-mark{flex:0 0 24px;width:24px;height:24px;border:var(--line)}
+.caret{display:inline-block;width:8px;height:16px;margin-left:4px;
+  background:var(--ink);vertical-align:text-bottom}
+
+/* 4 tool call, 5 tool call open */
+.tool{padding:8px 12px;border:var(--line);display:flex;flex-direction:column;
+  gap:4px;font-size:13px}
+.tool-head{display:flex;gap:8px}
+.tool-item{padding-left:20px;line-height:20px}
+
+/* 6 composer, 7 composer writing */
+.composer{padding:8px 8px 8px 12px;border:var(--line);border-radius:16px;
+  display:flex;align-items:center;gap:8px}
+.attach{flex:0 0 32px;width:32px;height:32px;border:var(--line);
+  border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:16px}
+
+/* 8 suggestions */
+.suggestions{display:flex;gap:8px;flex-wrap:wrap}
+.suggestion{height:32px;padding:0 12px;border:var(--line);border-radius:16px;
+  font-size:13px;display:inline-flex;align-items:center}
+
+/* 9 threads */
+.threads{border:var(--line)}
+.thread-row{height:48px;padding:0 12px;display:flex;align-items:center;gap:12px}
+.thread-row + .thread-row{border-top:var(--line)}
+.thread-row::before{content:"";width:8px;height:1.5px;background:var(--ink)}
+.thread-row.on{font-weight:600}
+.thread-row.on::before{width:16px}
+.thread-when{margin-left:auto;font-size:12px;font-weight:400}
+
+/* 10 error */
+.error{display:flex;gap:12px;align-items:flex-start}
+.error-body{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+
+/* 11 sources */
+.ref{font-family:var(--mono);font-size:12px}
+.sources{display:flex;flex-direction:column;gap:8px;font-size:13px}
+.source{display:flex;gap:8px;padding-top:8px;border-top:var(--line)}
+
+/* 12 phone and tab bar */
+.phone{position:relative;width:390px;height:844px;border:var(--line);
+  border-radius:40px;overflow:hidden;display:flex;flex-direction:column}
+.phone-title{height:56px;border-bottom:var(--line);display:flex;
+  align-items:center;justify-content:center;font-weight:600}
+.phone-body{flex-grow:1;overflow:hidden}
+.tabbar{height:64px;border-top:var(--line);display:flex;align-items:center}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-size:12px}
+.tab-mark{width:24px;height:24px;border:var(--line)}
+.tab.on{font-weight:600}
+.tab.on .tab-mark{background:var(--ink)}
+</style>
+</head>
+<body>
+<header class="brief">
+  <span class="brief-from">Sketched with Lath from a one-paragraph brief</span>
+  <span class="brief-text">Brief: the payment step of guest checkout on a phone. A crew owner on the Crew plan, annual, confirms the charge, enters a card and starts the free trial. The amount due must be the clearest thing on the screen.</span>
+  <span class="mono">wireframes/checkout-payment.html</span>
+</header>
+<div class="wf">
+  <div class="screen">
+    <div class="phone">
+      <div class="titlebar">
+        <span class="titlebar-name">←</span><span class="titlebar-name">Payment</span>
+      </div>
+      <div class="phone-body thread">
+        <div class="card">
+          <span class="strong">Crew plan</span>
+          <span class="small">Annual billing, 8 users</span>
+        </div>
+        <table class="table">
+          <tr><td>Subtotal</td><td>$2,304.00</td></tr>
+          <tr><td>Tax (8%)</td><td>$184.32</td></tr>
+        </table>
+        <div class="stat">
+          <span class="stat-label">Total for the year</span>
+          <span class="stat-value">$2,488.32</span>
+          <span class="stat-change">First charge on 16 Nov 2026</span>
+          <span class="stat-change">Due today: $0.00</span>
+        </div>
+        <label class="field">
+          <span class="field-label">Card number</span>
+          <span class="field-input">1234 1234 1234 1234</span>
+        </label>
+        <div class="inline">
+          <label class="field grow">
+            <span class="field-label">Expiry</span>
+            <span class="field-input">MM / YY</span>
+          </label>
+          <label class="field grow">
+            <span class="field-label">Security code</span>
+            <span class="field-input">123</span>
+          </label>
+        </div>
+        <label class="field">
+          <span class="field-label">Postcode</span>
+          <span class="field-input">SW1A 1AA</span>
+        </label>
+        <div class="stack">
+          <button class="btn btn-primary">Start 14 day free trial</button>
+          <button class="btn btn-quiet">Change plan</button>
+        </div>
+      </div>
+      <span class="pin" style="top:16px;left:144px">1</span>
+      <span class="pin" style="top:84px;left:336px">2</span>
+      <span class="pin" style="top:176px;left:336px">3</span>
+      <span class="pin" style="top:276px;left:336px">4</span>
+      <span class="pin" style="top:352px;left:336px">5</span>
+      <span class="pin" style="top:436px;left:336px">6</span>
+      <span class="pin" style="top:604px;left:336px">7</span>
+      <span class="pin" style="top:692px;left:332px">8</span>
+      <span class="pin" style="top:744px;left:336px">9</span>
+    </div>
+    <aside class="side">
+      <span class="side-title">States</span>
+      <div class="state"><b>Default</b><span>Fields empty, button ready, total and first charge date shown.</span></div>
+      <div class="state"><b>Incomplete</b><span>Button is dashed, with “Enter your card details to continue” beside it.</span></div>
+      <div class="state"><b>Field error</b><span>The field gets a message under it saying how to fix it, such as “Enter all 16 digits of the card number.”</span></div>
+      <div class="state"><b>Starting trial</b><span>Button reads “Starting your trial” and the fields are inert.</span></div>
+      <div class="state"><b>Card declined</b><span>A message above the card number says the bank declined it and nothing was charged, with “Try another card.”</span></div>
+      <div class="state"><b>Could not load totals</b><span>The total area says it could not be worked out and offers Try again. The button stays dashed.</span></div>
+      <span class="side-title">Notes</span>
+      <div class="note"><span class="pin">1</span><span>Back returns to plan choice with Crew, annual and 8 users still selected. Assumed, so nobody re-enters them.</span></div>
+      <div class="note"><span class="pin">2</span><span>The summary is short on purpose: plan, billing, users, as briefed. It sits above the money so the sum reads top to bottom.</span></div>
+      <div class="note"><span class="pin">3</span><span>Assumed: $24 per user per month, billed yearly, so 8 users × $24 × 12 is $2,304.00. Tax of 8% is also assumed, giving $184.32.</span></div>
+      <div class="note"><span class="pin">4</span><span>Decision: the largest thing on the screen is the full year’s total, $2,488.32. Showing only $0.00 due today would repeat the feedback problem of not knowing the real amount.</span></div>
+      <div class="note"><span class="pin">5</span><span>The brief asks for the total due today, but a free trial means $0.00 today. Both are shown, with the first charge date. 16 Nov 2026 assumes the trial starts today, 2 Nov 2026.</span></div>
+      <div class="note"><span class="pin">6</span><span>Card number, expiry and security code are one group. Expiry and security code share a row to save height.</span></div>
+      <div class="note"><span class="pin">7</span><span>Open question: tax depends on location, but the postcode comes after the total. Should the tax line update once the postcode is entered? Until then it is an estimate.</span></div>
+      <div class="note"><span class="pin">8</span><span>The only primary action. The label says what it does and names the trial length. The stat above already says nothing is due today, so no extra reassurance is added here.</span></div>
+      <div class="note"><span class="pin">9</span><span>Quiet on purpose: a way out, not a competing action. Goes to plan choice, same as the back arrow.</span></div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>
