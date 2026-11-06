@@ -196,7 +196,9 @@ const worksWithLine = `Works with ${parts.length > 1 ? `${parts.slice(0, -1).joi
       const scale = Math.min(1, frame.clientWidth / width);
       sketch.style.transform = scale < 1 ? `scale(${scale})` : '';
       frame.style.height = `${Math.round(height * scale)}px`;
-      frame.style.overflowX = scale < 1 ? 'hidden' : 'auto';
+      // Both axes: hiding only x makes y compute to auto, and its
+      // scrollbar would take width from the scaled sketch.
+      frame.style.overflow = scale < 1 ? 'hidden' : '';
     };
     new ResizeObserver(fit).observe(frame);
     fit();

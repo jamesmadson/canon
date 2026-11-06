@@ -67,6 +67,4 @@ From that turn the page copies two commands. **Copy fork command** starts a new 
 
 It never reads a transcript into context, since one can pass 100MB. A small parser reads it line by line and writes only counts back.
 
-**Install**: `claude plugin marketplace add jamesmadson/canon`, then install the `graft` plugin.
-
 **Gotcha**: Claude Code only. It reads the local transcript format, which is undocumented and can change between releases, and the fork command uses a flag Claude Code does not document. If a release breaks either, the skill says so rather than guessing.
