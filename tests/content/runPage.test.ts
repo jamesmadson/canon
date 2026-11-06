@@ -60,6 +60,16 @@ describe('a skill page is a run page', () => {
     expect(existsSync(path.join(root, 'public', prune.subject))).toBe(true);
   });
 
+  // Mutation: in [slug].astro, set the subject iframe back to `sandbox=""`.
+  it('the reviewed page and the Lath sketch are framed with scripts blocked and an origin, so they draw', () => {
+    expect(page).toContain("const STATIC_SANDBOX = 'allow-same-origin';");
+    expect(page.match(/sandbox=\{STATIC_SANDBOX\}/g)).toHaveLength(2);
+    expect(page).not.toContain('sandbox=""');
+    // Blocking scripts is only safe for a sketch that has none to run.
+    const sketch = readFileSync(path.join(root, 'public/previews/lath/checkout-payment.html'), 'utf-8');
+    expect(sketch).not.toContain('<script');
+  });
+
   // Mutation: restoring a "Depth" heading in [slug].astro fails this.
   it('the page template has the run sections in order and none of the gallery', () => {
     const order = ['What to say', 'What it made', 'What to notice', 'What to do with it'];

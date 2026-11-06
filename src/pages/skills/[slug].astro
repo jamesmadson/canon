@@ -42,6 +42,11 @@ const previewFile = previewAssets[0].split('/').pop();
 
 // A Lath sketch has a fixed width and does not reflow, so its frame scales it
 // down to fit. A Graft page reflows, so it needs no scaling.
+// A page that needs no script is framed on the site's origin with scripts
+// blocked. A fully opaque sandbox draws nothing in some embedded browsers,
+// and with no scripts, sharing the origin gives the page nothing to act with.
+const STATIC_SANDBOX = 'allow-same-origin';
+
 const SKETCH_WIDTH = 1104;
 const SKETCH_HEIGHT = 760;
 const scaled = previewType === 'page' && slug === 'lath';
@@ -97,7 +102,7 @@ const worksWithLine = `Works with ${parts.length > 1 ? `${parts.slice(0, -1).joi
             src={withBase(subject)}
             title={`The page ${name} reviewed`}
             loading="lazy"
-            sandbox=""
+            sandbox={STATIC_SANDBOX}
             class="block h-[480px] w-full rounded-lg border border-rule bg-panel"
           ></iframe>
         </figure>
@@ -118,7 +123,7 @@ const worksWithLine = `Works with ${parts.length > 1 ? `${parts.slice(0, -1).joi
             src={withBase(previewAssets[0])}
             title={`What ${name} made on a real run`}
             loading="lazy"
-            sandbox="allow-scripts"
+            sandbox={STATIC_SANDBOX}
             class="block border-0"
             style={`width:${SKETCH_WIDTH}px;height:${SKETCH_HEIGHT}px;transform-origin:0 0`}
             data-sketch
