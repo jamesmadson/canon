@@ -7,6 +7,9 @@ import { withBase } from '../../lib/withBase';
 import { plateInk } from '../../lib/plateInk';
 import { STATIC_SANDBOX, SCRIPTED_SANDBOX } from '../../lib/frameSandbox';
 import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { lineDiff } from '../../lib/cutDiff';
 
 export async function getStaticPaths() {
   // Hidden entries get no page at all, because otherwise "hidden" only means
@@ -43,6 +46,23 @@ const TEXT_PREVIEWS = import.meta.glob('/public/previews/**/*.md', { query: '?ra
 const previewText = previewType === 'reply' || previewType === 'file' ? TEXT_PREVIEWS[`/public${previewAssets[0]}`] : undefined;
 const replyHtml = previewType === 'reply' && previewText ? (await (await createMarkdownProcessor()).render(previewText)).code : undefined;
 const previewFile = previewAssets[0].split('/').pop();
+
+// The one cut, as a diff of the reviewed page against the page after it.
+// The file name is the one the run edited, as the prompt names it.
+const fromPublic = (url: string) => readFileSync(path.join(process.cwd(), 'public', url.split('#')[0]), 'utf-8');
+const cut = (() => {
+  if (!subject || !subjectAfter) return undefined;
+  const lines = lineDiff(fromPublic(subject), fromPublic(subjectAfter));
+  const removed = lines.filter((d) => d.kind === 'removed').length;
+  const added = lines.length - removed;
+  const count = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+  return {
+    file: 'index.html',
+    summary: `${count(removed, 'line')} removed, ${added} added`,
+    lines,
+    hash: subjectAfter.includes('#') ? subjectAfter.slice(subjectAfter.indexOf('#')) : '',
+  };
+})();
 
 // A Lath sketch has a fixed width and does not reflow, so its frame scales it
 // down to fit. A Graft page reflows, so it needs no scaling.
@@ -135,17 +155,51 @@ const worksWithLine = `Works with ${parts.length > 1 ? `${parts.slice(0, -1).joi
           <div class="prose prose-stone max-w-[68ch] prose-headings:text-ink prose-p:text-ink-soft prose-li:text-ink-soft prose-strong:text-ink prose-code:text-ink" set:html={replyHtml} />
         </div>
       )}
-      {subjectAfter && (
-        <figure class="mt-6">
-          <figcaption class="mb-2 text-[15px] font-medium text-ink">After the one cut</figcaption>
-          <iframe
-            src={withBase(subjectAfter)}
-            title={`The page after the one cut ${name} was asked to make`}
-            loading="lazy"
-            sandbox={STATIC_SANDBOX}
-            class="block h-[480px] w-full rounded-lg border border-rule bg-panel"
-          ></iframe>
-        </figure>
+      {subjectAfter && cut && (
+        <section class="mt-8" aria-labelledby="cut-heading">
+          <h3 id="cut-heading" class="mb-3 text-[15px] font-medium text-ink">The one cut</h3>
+          <div class="overflow-hidden rounded-lg border border-rule bg-panel">
+            <p class="flex flex-wrap items-baseline gap-x-3 border-b border-rule px-5 py-3 font-mono text-[13px] text-ink">
+              <span>{cut.file}</span>
+              <span class="text-ink-soft">{cut.summary}</span>
+            </p>
+            <ul class="px-5 py-4 font-mono text-[13px] leading-[1.7] text-ink" aria-label={`Lines the cut changed in ${cut.file}`}>
+              {cut.lines.map((d) => (
+                <li class="flex gap-3">
+                  <span aria-hidden="true" class="w-3 shrink-0 text-ink-soft">{d.kind === 'removed' ? '−' : '+'}</span>
+                  <span class="sr-only">{d.kind === 'removed' ? 'Removed' : 'Added'}</span>
+                  <span class="w-10 shrink-0 text-right text-ink-soft">{d.line}</span>
+                  {d.tag && <span class="shrink-0 text-ink-soft">&lt;{d.tag}&gt;</span>}
+                  <span class="min-w-0">{d.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <figure>
+              <figcaption class="mb-2 flex items-center gap-2 text-[15px] font-medium text-ink">
+                <span aria-hidden="true" class="cut-key"></span>Before, what was cut outlined
+              </figcaption>
+              <iframe
+                src={withBase(`/previews/${slug}/marked.html${cut.hash}`)}
+                title={`The page ${name} reviewed, with what the cut removed outlined`}
+                loading="lazy"
+                sandbox={STATIC_SANDBOX}
+                class="block h-[420px] w-full rounded-lg border border-rule bg-panel"
+              ></iframe>
+            </figure>
+            <figure>
+              <figcaption class="mb-2 text-[15px] font-medium text-ink">After</figcaption>
+              <iframe
+                src={withBase(subjectAfter)}
+                title={`The page after the one cut ${name} was asked to make`}
+                loading="lazy"
+                sandbox={STATIC_SANDBOX}
+                class="block h-[420px] w-full rounded-lg border border-rule bg-panel"
+              ></iframe>
+            </figure>
+          </div>
+        </section>
       )}
       {previewType === 'file' && (
         <div class="overflow-hidden rounded-lg border border-rule bg-panel">
@@ -224,3 +278,15 @@ const worksWithLine = `Works with ${parts.length > 1 ? `${parts.slice(0, -1).joi
     fit();
   });
 </script>
+
+<style>
+  /* The key for the outline drawn in the marked page: the same orange, the
+     colour of a pin. */
+  .cut-key {
+    display: inline-block;
+    width: 14px;
+    height: 10px;
+    border: 2px solid #ff4f00;
+    border-radius: 2px;
+  }
+</style>

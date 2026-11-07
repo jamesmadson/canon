@@ -73,11 +73,21 @@ describe('a skill page is a run page', () => {
     expect(page.indexOf('withBase(subjectAfter)')).toBeGreaterThan(page.indexOf('set:html={replyHtml}'));
   });
 
+  // Mutation: removing the marked frame or the diff list from [slug].astro fails this.
+  it('the one cut shows as a diff list and a marked page beside the after page', () => {
+    expect(page).toContain('lineDiff(fromPublic(subject), fromPublic(subjectAfter))');
+    expect(page).toContain('cut.lines.map');
+    expect(page).toContain('/previews/${slug}/marked.html${cut.hash}');
+    expect(page.indexOf('marked.html')).toBeLessThan(page.indexOf('withBase(subjectAfter)'));
+    const route = readFileSync(path.join(root, 'src/pages/previews/[slug]/marked.html.ts'), 'utf-8');
+    expect(route).toContain('markRemoved(before, lineDiff(before, fromPublic(props.after)))');
+  });
+
   // Mutation: in [slug].astro, set the subject iframe back to `sandbox=""`.
-  it('the reviewed page, its after page and the Lath sketch are framed with scripts blocked and an origin, so they draw', () => {
+  it('the reviewed page, its marked and after pages and the Lath sketch are framed with scripts blocked and an origin, so they draw', () => {
     expect(sandbox).toContain("export const STATIC_SANDBOX = 'allow-same-origin';");
     expect(page).toContain("from '../../lib/frameSandbox'");
-    expect(page.match(/sandbox=\{STATIC_SANDBOX\}/g)).toHaveLength(3);
+    expect(page.match(/sandbox=\{STATIC_SANDBOX\}/g)).toHaveLength(4);
     expect(page).not.toContain('sandbox=""');
     expect(sandbox).toContain("export const SCRIPTED_SANDBOX = 'allow-scripts allow-same-origin';");
     expect(page).not.toContain('sandbox="allow-scripts"');
