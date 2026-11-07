@@ -97,9 +97,12 @@ describe('the homepage skills section', () => {
   it('Prune card is the first removal in review.md', () => {
     const raw = read('public/previews/prune/review.md');
     const cut = parsePruneCut(raw, 'f.md');
-    expect(cut.heading).toContain('Wait! Get 10% off');
-    expect(cut.reason).toContain('It sits on top of the plan cards');
-    expect(raw).toContain(cut.reason);
+    expect(cut.heading).toContain('Table rows that are identical across all three plans');
+    expect(cut.reason).toContain('cannot help anyone choose');
+    expect(raw.replace(/\*\*/g, '')).toContain(cut.reason);
+    // Mutation: drop the bold-marker replace in parsePruneCut fails this.
+    expect(cut.reason).toContain('Drop the Price per month row');
+    expect(cut.reason).not.toContain('**');
     expect(preview).toContain('line-through');
     expect(preview).toContain('{cut.heading}');
   });
@@ -119,10 +122,13 @@ describe('the homepage skills section', () => {
     expect(() => parsePruneCut(raw.replace(/^1\. /m, '- '), 'review.md')).toThrow(/review\.md.*Removals/);
     // A numbered item before the Removals heading is not the first cut.
     const before = '1. **Early.** Not a cut.\n\n' + raw;
-    expect(parsePruneCut(before, 'review.md').heading).toContain('Wait! Get 10% off');
-    // A numbered item after the next heading is not under Removals.
-    const cropped = raw.slice(0, raw.indexOf('1. **')) + raw.slice(raw.indexOf('**3 \u00b7'));
+    expect(parsePruneCut(before, 'review.md').heading).toContain('Table rows that are identical');
+    // A numbered item after the next part's heading is not under Removals,
+    // whether that heading is written as a heading or in bold.
+    const cropped = raw.slice(0, raw.indexOf('1. **')) + raw.slice(raw.indexOf('## 3 \u00b7')) + '\n1. **Late.** Not a cut.\n';
     expect(() => parsePruneCut(cropped, 'review.md')).toThrow(/Removals/);
+    const bold = cropped.replace('## 3 \u00b7 Kept', '**3 \u00b7 Kept**');
+    expect(() => parsePruneCut(bold, 'review.md')).toThrow(/Removals/);
   });
 
   // Mutation: remove the .replace of \r in previewParse.ts fails this.

@@ -35,17 +35,19 @@ export function parseStrataEntry(raw: string, file: string): StrataEntry {
 }
 
 // The first numbered item between the line that names removals and the next
-// bold heading line.
+// part's heading, written either bold ("**3 · Kept**") or as a heading
+// ("## 3 · Kept").
 export function parsePruneCut(raw: string, file: string): PruneCut {
   const lines = unix(raw).split('\n');
   const start = lines.findIndex((l) => /\bRemovals\b/.test(l));
   if (start < 0) throw new Error(`${file}: there is no heading that names the removals ("Removals").`);
   const after = lines.slice(start + 1);
-  const end = after.findIndex((l) => /^\*\*\d+ ·/.test(l));
+  const end = after.findIndex((l) => /^(\*\*|#{1,6}\s+)\d+ ·/.test(l));
   const within = end < 0 ? after : after.slice(0, end);
   const item = within.find((l) => /^1[.)]\s/.test(l));
   if (!item) throw new Error(`${file}: there is no numbered first item under the "Removals" heading.`);
   const m = item.replace(/^1[.)]\s+/, '').match(/^\*\*(.+?)\*\*\s*(.*)$/);
   if (!m) throw new Error(`${file}: the first item under "Removals" does not start with a bold heading.`);
-  return { heading: m[1].replace(/\.$/, ''), reason: m[2] };
+  // The card shows plain text, so bold markers inside the reason go.
+  return { heading: m[1].replace(/\.$/, ''), reason: m[2].replace(/\*\*(.+?)\*\*/g, '$1') };
 }

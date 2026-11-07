@@ -76,6 +76,13 @@ describe('skillSchema', () => {
     expect(() => skillSchema.parse({ ...validSkill, subject: 'https://example.com/x.html' })).toThrow();
   });
 
+  // Mutation: dropping .startsWith('/previews/') from subjectAfter fails this.
+  it('takes an optional after page served from /previews/', () => {
+    expect(skillSchema.parse(validSkill).subjectAfter).toBeUndefined();
+    expect(skillSchema.parse({ ...validSkill, subjectAfter: '/previews/prune/after.html' }).subjectAfter).toBe('/previews/prune/after.html');
+    expect(() => skillSchema.parse({ ...validSkill, subjectAfter: 'https://example.com/x.html' })).toThrow();
+  });
+
   it('rejects a preview type outside the known set', () => {
     expect(() => skillSchema.parse({ ...validSkill, previewType: 'video' })).toThrow();
   });

@@ -1,32 +1,32 @@
-Defaults here are generic: the Canon record has no recorded design decisions about this page, only three pieces of feedback, which I cite below.
+No Canon record (`.strata/`) exists in this project, so nothing below is checked against a prior team decision.
 
-**1 · The job.** A crew owner compares four plans and starts a free trial. They meet the page once or twice, in the days before they buy. That means anything built to win a return visit or force a quick decision has no payoff.
+## 1 · The job
 
-**2 · Removals, in the order a visitor hits them**
+Lets an owner of a small field-service crew pick one of three plans and start the free trial. Most visitors meet it once, at the moment they decide, so every repeated line costs them time during that one decision.
 
-1. **The "Wait! Get 10% off" popup.** It sits on top of the plan cards, so the page's one job is covered on load. It also contradicts the promo bar's 30% off. "I like paying full price" shames the reader at the moment they're deciding.
-2. **The countdown bar, struck-through prices and pulsing "SAVE 20%!".** The script comment says the sale isn't real. A fake clock ahead of a high-trust purchase costs credibility. The struck prices ($62 → $43) also leave the reader unsure what the real price is, which is the thing the feedback says they can't find. Keep a static "Save 20% annually" label.
-3. **The hero.** The promo bar, nav, 54px headline, three equal CTAs and logo strip all sit above the first price, with about 200px of padding on top of that. The plan cards already carry "Start free trial", so the hero's demo and sales buttons compete with it. Cut it to a one-line heading.
-4. **The two coloured nav buttons.** "Book a demo" and "Start free" both compete with the card buttons. Keep one.
-5. **The "12 crews are looking at this page" toast.** It is unverifiable, and it stacks with the chat button and cookie bar in the bottom corners. These pop-ups cover the bottom of the cards on a phone.
-6. **Three of the four plan badges.** NEW, MOST POPULAR, BEST VALUE, BETA and a second NEW chip all shout at once. Keep MOST POPULAR, since it's the only one that helps someone choose. The "?" chips have no tooltip behind them, so they promise help and don't give any.
-7. **The all-tick rows in the compare table** (scheduling, quotes and invoices, card payments). A row that's identical across every plan can't help anyone compare.
-8. **The logo strip and the badge row.** The strip is five placeholder names. The badge row has five emoji-led claims, including an unsourced "Top rated 2026". Pricing already has the quotes for social proof. Cut both and keep the quotes.
+## 2 · Removals
 
-**3 · Kept**
+1. **Table rows that are identical across all three plans: Jobs, Quotes, Scheduling and invoices, 14-day free trial.** A row that reads the same in every column cannot help anyone choose, and the Jobs and Quotes rows repeat what the cards already say. Four of the eleven rows are noise, and they sit among the six that do separate the plans (People, Dispatch board, Team calendar, Custom invoice branding, QuickBooks sync, Priority support). Drop the **Price per month** row as well. The prices are already in the cards, and the script that rewrites that row on the monthly/yearly toggle goes with it. This leaves a table with only differences in it.
 
-- **The plan cards.** Each has a name, a "for whom" line, a price, a short list and one action, and "Everything in Solo" stops the lists repeating.
-- **The feature table's differing rows.** This is the real comparison, and it's easy to scan.
-- **The FAQ.** "What happens after the trial?" answers an objection at the moment someone has it.
-- **The quotes.** The first one ("nine days faster") is concrete.
+2. **The trial-note line under the cards ("Every plan starts with a 14-day free trial. No card needed.").** The trial is stated in the lede, on every button ("Start free trial"), in this line, in the table, and in the FAQ. The lede and the buttons already settle it for someone about to click, and the FAQ answers the "after the trial" worry. The extra line adds nothing at the point of decision.
 
-**4 · Missing**
+3. **The "Most popular" badge on Crew.** The Crew card already has a heavier border, and its column is tinted in the table. The badge is a third signal for the same thing. It also pushes Crew's name and price about 1.5rem lower than Solo's and Company's, so the three prices no longer sit on one line. Comparing those prices side by side is the main thing the cards are for. It is also an unsupported claim that a skeptical buyer will notice.
 
-**What a crew will actually be charged.** The page never says whether $43 is per seat or flat, whether Crew is capped at eight, what the annual total is, or whether tax is added. The feedback in `.strata` asks for exactly this three times:
-- the 2026-10-06 interview, where P-01 couldn't tell if $39 was monthly or annual
-- the 2026-10-19 ticket, where P-02 had eight people and couldn't find the post-trial bill
-- the 2026-10-27 survey, where P-03 wanted the total with tax before entering a card
+4. **The footer sentence about yearly billing.** "Yearly plans are billed once a year and cost ten months, not twelve" repeats the "Pay yearly and get two months free" note and the per-card "billed once a year" line, both of which sit right next to the toggle where someone would act on them. Keep "Prices are in US dollars" if you want a footer.
 
-"No credit card required*" also has an asterisk with no footnote.
+5. **FAQ "Do you charge per job?"** Every card says "Unlimited jobs," and the FAQ answer says only that. A question whose answer is already in the plan lists is a second place to read the same fact.
 
-**5 · The smallest next step.** Delete the popup. It's one block, and it uncovers the plan cards.
+## 3 · Kept
+
+- **The monthly/yearly toggle, with the per-card "billed" line that changes with it.** It is the only element that changes what a visitor pays, and it states the real charge ("$190 billed once a year") right next to the lower monthly figure. That keeps the discount honest. The 44px targets and the `aria-pressed` state make it dependable on a phone in a truck cab.
+- **The remaining comparison rows once the identical ones are gone.** They show exactly where Solo, Crew and Company differ, which is what makes the second step of choosing possible. The sticky row labels and the scroll region keep that readable on narrow screens.
+
+## 4 · Missing
+
+All three "Start free trial" buttons link to `href="#"`. The page's whole job ends at that click, and today the click goes nowhere. This needs a real signup destination, ideally one that knows which plan was picked.
+
+## 5 · The smallest next step
+
+Delete the four identical rows (Jobs, Quotes, Scheduling and invoices, 14-day free trial) from the comparison table, since they are the largest block of text that can't help anyone choose.
+
+Say which cut to make and I will make only that one.

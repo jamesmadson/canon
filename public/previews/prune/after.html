@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fieldwork pricing</title>
+<meta name="description" content="Scheduling, quotes and invoices for small field-service crews. Three plans, 14-day free trial, no card.">
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --surface: #ffffff;
+    --ink: #1c2321;
+    --muted: #55615c;
+    --line: #d9d5ca;
+    --accent: #1f5f4a;
+    --accent-ink: #ffffff;
+    --accent-soft: #e3efe9;
+    --focus: #0b57d0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141816;
+      --surface: #1d2321;
+      --ink: #eef0ec;
+      --muted: #a2aea8;
+      --line: #333c38;
+      --accent: #5fc19c;
+      --accent-ink: #0c1512;
+      --accent-soft: #223a30;
+      --focus: #8ab4ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 1rem/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .wrap { max-width: 68rem; margin: 0 auto; padding: 0 1rem; }
+
+  header { padding: 2.5rem 0 1.5rem; }
+  .brand { font-weight: 700; letter-spacing: .01em; margin: 0 0 1.5rem; }
+  h1 { font-size: clamp(1.75rem, 5vw, 2.75rem); line-height: 1.15; margin: 0 0 .75rem; max-width: 22ch; text-wrap: balance; }
+  .lede { margin: 0; color: var(--muted); max-width: 40rem; font-size: 1.125rem; }
+
+  .toggle-row { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; margin: 1.75rem 0 1.5rem; }
+  .toggle { display: inline-flex; border: 2px solid var(--ink); border-radius: 999px; padding: 3px; background: var(--surface); }
+  .toggle button {
+    font: inherit; font-weight: 600; border: 0; background: transparent; color: var(--ink);
+    padding: .6rem 1.25rem; min-height: 44px; border-radius: 999px; cursor: pointer;
+  }
+  .toggle button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .save-note { margin: 0; color: var(--muted); font-weight: 600; }
+
+  .plans { display: grid; gap: 1rem; grid-template-columns: 1fr; padding: 0; list-style: none; margin: 0; }
+  .plan {
+    position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 1.5rem 1.25rem; display: flex; flex-direction: column;
+  }
+  .plan.popular { border: 2px solid var(--accent); }
+  .badge {
+    align-self: flex-start; background: var(--accent); color: var(--accent-ink);
+    font-size: .8125rem; font-weight: 700; padding: .15rem .65rem; border-radius: 999px; margin-bottom: .5rem;
+  }
+  .plan h2 { margin: 0; font-size: 1.375rem; }
+  .for { margin: .15rem 0 1rem; color: var(--muted); }
+  .price { margin: 0; display: flex; align-items: baseline; gap: .35rem; }
+  .price .amt { font-size: 2.75rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+  .price .per { color: var(--muted); }
+  .billed { margin: .35rem 0 1.25rem; color: var(--muted); font-size: .9375rem; min-height: 1.45em; }
+  .plan ul { margin: 0 0 1.5rem; padding: 0; list-style: none; flex: 1; }
+  .plan li { padding: .4rem 0 .4rem 1.6rem; position: relative; border-top: 1px solid var(--line); }
+  .plan li:first-child { border-top: 0; }
+  .plan li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 800; }
+  .cta {
+    display: block; text-align: center; text-decoration: none; font-weight: 700; font-size: 1.0625rem;
+    padding: .85rem 1rem; min-height: 48px; border-radius: 8px;
+    background: var(--accent); color: var(--accent-ink); border: 2px solid var(--accent);
+  }
+  .cta:hover { filter: brightness(1.08); }
+  .trial-note { text-align: center; color: var(--muted); margin: 1.25rem 0 0; font-weight: 600; }
+
+  section { padding-top: 3.5rem; }
+  section h2.sec { font-size: 1.5rem; margin: 0 0 1rem; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 34rem; }
+  th, td { padding: .75rem 1rem; text-align: center; border-bottom: 1px solid var(--line); }
+  thead th { font-size: 1rem; }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
+  th[scope="row"] { text-align: left; font-weight: 500; position: sticky; left: 0; background: var(--surface); }
+  thead th:first-child { position: sticky; left: 0; background: var(--surface); }
+  td.hl, thead th.hl { background: var(--accent-soft); }
+  .yes { color: var(--accent); font-weight: 800; }
+  .no { color: var(--muted); }
+
+  .faq { display: grid; gap: 1.25rem; }
+  .faq h3 { margin: 0 0 .25rem; font-size: 1.0625rem; }
+  .faq p { margin: 0; color: var(--muted); max-width: 42rem; }
+  .faq div { border-top: 1px solid var(--line); padding-top: 1rem; }
+
+  footer { padding: 3.5rem 0 3rem; color: var(--muted); }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  @media (min-width: 48rem) {
+    .plans { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
+    .plan { padding: 1.75rem 1.5rem; }
+    .faq { grid-template-columns: 1fr 1fr; gap: 1.5rem 2.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="brand">Fieldwork</p>
+    <h1>Scheduling, quotes and invoices for crews on the road.</h1>
+    <p class="lede">Built for plumbers, electricians and cleaners. Pick a plan, try it free for 14 days, no card needed.</p>
+
+    <div class="toggle-row">
+      <div class="toggle" role="group" aria-label="Billing period">
+        <button type="button" id="btn-monthly" aria-pressed="true">Monthly</button>
+        <button type="button" id="btn-yearly" aria-pressed="false">Yearly</button>
+      </div>
+      <p class="save-note">Pay yearly and get two months free.</p>
+    </div>
+  </header>
+
+  <main>
+    <ul class="plans">
+      <li class="plan">
+        <h2>Solo</h2>
+        <p class="for">Just you and the van.</p>
+        <p class="price"><span class="amt" data-monthly="19" data-yearly="15.83">$19</span><span class="per">a month</span></p>
+        <p class="billed" data-monthly="Billed monthly" data-yearly="$190 billed once a year">Billed monthly</p>
+        <ul>
+          <li>One person</li>
+          <li>Unlimited jobs</li>
+          <li>Unlimited quotes</li>
+        </ul>
+        <a class="cta" href="#" aria-label="Start free trial, Solo plan">Start free trial</a>
+      </li>
+
+      <li class="plan popular">
+        <span class="badge">Most popular</span>
+        <h2>Crew</h2>
+        <p class="for">A few people on the road.</p>
+        <p class="price"><span class="amt" data-monthly="49" data-yearly="40.83">$49</span><span class="per">a month</span></p>
+        <p class="billed" data-monthly="Billed monthly" data-yearly="$490 billed once a year">Billed monthly</p>
+        <ul>
+          <li>Up to 10 people</li>
+          <li>Unlimited jobs and quotes</li>
+          <li>Dispatch board</li>
+          <li>Team calendar</li>
+        </ul>
+        <a class="cta" href="#" aria-label="Start free trial, Crew plan">Start free trial</a>
+      </li>
+
+      <li class="plan">
+        <h2>Company</h2>
+        <p class="for">A bigger outfit.</p>
+        <p class="price"><span class="amt" data-monthly="119" data-yearly="99.17">$119</span><span class="per">a month</span></p>
+        <p class="billed" data-monthly="Billed monthly" data-yearly="$1,190 billed once a year">Billed monthly</p>
+        <ul>
+          <li>Unlimited people</li>
+          <li>Everything in Crew</li>
+          <li>Custom invoice branding</li>
+          <li>QuickBooks sync</li>
+          <li>Priority support</li>
+        </ul>
+        <a class="cta" href="#" aria-label="Start free trial, Company plan">Start free trial</a>
+      </li>
+    </ul>
+    <p class="trial-note">Every plan starts with a 14-day free trial. No card needed.</p>
+
+    <section aria-labelledby="compare">
+      <h2 class="sec" id="compare">Compare the plans</h2>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Plan comparison, scrolls sideways on small screens">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col"><span class="sr">Feature</span></th>
+              <th scope="col">Solo</th>
+              <th scope="col" class="hl">Crew</th>
+              <th scope="col">Company</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Price per month</th><td>$19</td><td class="hl">$49</td><td>$119</td></tr>
+            <tr><th scope="row">People</th><td>1</td><td class="hl">Up to 10</td><td>Unlimited</td></tr>
+            <tr><th scope="row">Dispatch board</th><td><span class="no">–</span><span class="sr">Not included</span></td><td class="hl"><span class="yes">✓</span><span class="sr"> Included</span></td><td><span class="yes">✓</span><span class="sr"> Included</span></td></tr>
+            <tr><th scope="row">Team calendar</th><td><span class="no">–</span><span class="sr">Not included</span></td><td class="hl"><span class="yes">✓</span><span class="sr"> Included</span></td><td><span class="yes">✓</span><span class="sr"> Included</span></td></tr>
+            <tr><th scope="row">Custom invoice branding</th><td><span class="no">–</span><span class="sr">Not included</span></td><td class="hl"><span class="no">–</span><span class="sr">Not included</span></td><td><span class="yes">✓</span><span class="sr"> Included</span></td></tr>
+            <tr><th scope="row">QuickBooks sync</th><td><span class="no">–</span><span class="sr">Not included</span></td><td class="hl"><span class="no">–</span><span class="sr">Not included</span></td><td><span class="yes">✓</span><span class="sr"> Included</span></td></tr>
+            <tr><th scope="row">Priority support</th><td><span class="no">–</span><span class="sr">Not included</span></td><td class="hl"><span class="no">–</span><span class="sr">Not included</span></td><td><span class="yes">✓</span><span class="sr"> Included</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="faq">
+      <h2 class="sec" id="faq">Questions people ask</h2>
+      <div class="faq">
+        <div>
+          <h3>Can I switch plans?</h3>
+          <p>Yes. Move up when the crew grows or down when it shrinks, any time.</p>
+        </div>
+        <div>
+          <h3>What happens after the trial?</h3>
+          <p>You pick a plan to keep going. We never took a card, so nothing gets charged by surprise.</p>
+        </div>
+        <div>
+          <h3>Do you charge per job?</h3>
+          <p>No. You pay the flat price for your plan. Jobs and quotes are unlimited.</p>
+        </div>
+        <div>
+          <h3>Can I cancel any time?</h3>
+          <p>Yes. No contract and no cancellation fee.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Prices are in US dollars. Yearly plans are billed once a year and cost ten months, not twelve.</p>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var btns = { monthly: document.getElementById('btn-monthly'), yearly: document.getElementById('btn-yearly') };
+    var amts = document.querySelectorAll('.amt');
+    var billed = document.querySelectorAll('.billed');
+    var rows = document.querySelectorAll('tbody tr:first-child td');
+
+    function fmt(n) { return '$' + (Number(n) % 1 ? Number(n).toFixed(2) : n); }
+
+    function set(mode) {
+      for (var k in btns) btns[k].setAttribute('aria-pressed', String(k === mode));
+      amts.forEach(function (el) { el.textContent = fmt(el.dataset[mode]); });
+      billed.forEach(function (el) { el.textContent = el.dataset[mode]; });
+      rows.forEach(function (td, i) { td.textContent = fmt(amts[i].dataset[mode]); });
+      document.querySelector('tbody tr:first-child th').textContent =
+        mode === 'yearly' ? 'Price per month, billed yearly' : 'Price per month';
+    }
+
+    btns.monthly.addEventListener('click', function () { set('monthly'); });
+    btns.yearly.addEventListener('click', function () { set('yearly'); });
+  })();
+</script>
+</body>
+</html>

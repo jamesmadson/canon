@@ -61,11 +61,23 @@ describe('a skill page is a run page', () => {
     expect(existsSync(path.join(root, 'public', prune.subject))).toBe(true);
   });
 
+  // Mutation: removing `subjectAfter` from prune.mdx, or the after frame from [slug].astro, fails this.
+  it("Prune's after page exists, differs from the page it reviewed, and is framed below the reply", () => {
+    const prune = matter(readFileSync(path.join(skillsDir, 'prune.mdx'), 'utf-8')).data;
+    // It opens at the table the cut changed.
+    expect(prune.subjectAfter).toBe('/previews/prune/after.html#compare');
+    const after = readFileSync(path.join(root, 'public', prune.subjectAfter.split('#')[0]), 'utf-8');
+    const before = readFileSync(path.join(root, 'public', prune.subject), 'utf-8');
+    expect(after).not.toBe(before);
+    expect(page).toContain('withBase(subjectAfter)');
+    expect(page.indexOf('withBase(subjectAfter)')).toBeGreaterThan(page.indexOf('set:html={replyHtml}'));
+  });
+
   // Mutation: in [slug].astro, set the subject iframe back to `sandbox=""`.
-  it('the reviewed page and the Lath sketch are framed with scripts blocked and an origin, so they draw', () => {
+  it('the reviewed page, its after page and the Lath sketch are framed with scripts blocked and an origin, so they draw', () => {
     expect(sandbox).toContain("export const STATIC_SANDBOX = 'allow-same-origin';");
     expect(page).toContain("from '../../lib/frameSandbox'");
-    expect(page.match(/sandbox=\{STATIC_SANDBOX\}/g)).toHaveLength(2);
+    expect(page.match(/sandbox=\{STATIC_SANDBOX\}/g)).toHaveLength(3);
     expect(page).not.toContain('sandbox=""');
     expect(sandbox).toContain("export const SCRIPTED_SANDBOX = 'allow-scripts allow-same-origin';");
     expect(page).not.toContain('sandbox="allow-scripts"');

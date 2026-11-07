@@ -33,6 +33,7 @@ const {
   notice,
   next,
   subject,
+  subjectAfter,
   subjectBrand,
 } = entry.data;
 
@@ -133,6 +134,18 @@ const worksWithLine = `Works with ${parts.length > 1 ? `${parts.slice(0, -1).joi
           <p class="label mb-4">{name} replied</p>
           <div class="prose prose-stone max-w-[68ch] prose-headings:text-ink prose-p:text-ink-soft prose-li:text-ink-soft prose-strong:text-ink prose-code:text-ink" set:html={replyHtml} />
         </div>
+      )}
+      {subjectAfter && (
+        <figure class="mt-6">
+          <figcaption class="mb-2 text-[15px] font-medium text-ink">After the one cut</figcaption>
+          <iframe
+            src={withBase(subjectAfter)}
+            title={`The page after the one cut ${name} was asked to make`}
+            loading="lazy"
+            sandbox={STATIC_SANDBOX}
+            class="block h-[480px] w-full rounded-lg border border-rule bg-panel"
+          ></iframe>
+        </figure>
       )}
       {previewType === 'file' && (
         <div class="overflow-hidden rounded-lg border border-rule bg-panel">

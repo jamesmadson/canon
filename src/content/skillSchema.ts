@@ -46,6 +46,8 @@ export const skillSchema = z.object({
   next: z.string().min(1),
   // A page the skill worked on, served from /previews/ and shown above its review.
   subject: z.string().startsWith('/previews/').optional(),
+  // The same page after the one change the person asked for, shown below the review.
+  subjectAfter: z.string().startsWith('/previews/').optional(),
   // The reviewed page's own name and primary colour, for its label row
   // (D-124). The colour is read from the page by the dashboard's rule.
   subjectBrand: z.object({ name: z.string().min(1), colour: z.string().regex(/^#[0-9a-f]{6}$/i) }).optional(),

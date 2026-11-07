@@ -19,27 +19,29 @@ previewType: reply
 previewAssets:
   - /previews/prune/review.md
 previewNote: >-
-  Prune's reply on a real run, asked to review a crowded pricing page for
-  Fieldwork, a made-up company. P-01, P-02 and P-03 are pseudonyms Strata gave
-  the people in its record.
-  The prompt above leaves out one line the run needed, saying nobody
-  could answer questions.
+  Prune's reply on a real run, on a pricing page Claude Code made from one
+  brief for Fieldwork, a made-up company. Prune wrote the review to a file,
+  then made the one cut it named as the smallest next step. The file's own
+  title line is left out here.
 prompt: |-
-  Sam drafted the Fieldwork pricing page (pricing.html) and it feels like too much. Review it and tell me what to cut. Give me the review in your reply.
+  Use the prune skill to review index.html, a pricing page for Fieldwork, scheduling and invoicing software for small field-service crews. Write the review to review.md and change nothing else.
 
-  For the record, the page's job is to let a crew owner compare the plans and start a free trial. Most people meet it once, in the days before they buy.
+  Then, once you have read the review:
+
+  Make the smallest next step your review names, and only that one cut, in index.html.
 subject: /previews/prune/pricing.html
 subjectBrand:
   name: Fieldwork
-  colour: "#3366ff"
+  colour: "#1f5f4a"
+subjectAfter: /previews/prune/after.html#compare
 notice:
-  - Each removal is priced against the job line in part 1.
-  - Part 4 cites the three Strata entries by date.
-  - It wrote no revised page.
+  - There is no record here, so it says so once and weighs every cut against the job line alone.
+  - It keeps the monthly and yearly toggle, because the toggle states the real yearly charge.
+  - Asked for one cut, it removed four rows and left the Price row, a separate cut, alone.
 next: >-
-  Pick the one cut you believe in and ask for it, for example the popup, which
-  the review names as the smallest next step. Prune makes only that change and
-  nothing else, and you review the result before asking for another.
+  Read the cuts that are left and ask for the next one you believe in, for
+  example the trial line under the cards. Prune makes only that change, and
+  you check the page before asking for another.
 addedDate: 2026-08-27T00:00:00.000Z
 status: active
 ---

@@ -15,6 +15,6 @@ describe('plateInk', () => {
   });
 
   it('reads Fieldwork’s letter at 4.5:1 or more', () => {
-    expect(contrast('#3366ff', plateInk('#3366ff'))).toBeGreaterThanOrEqual(4.5);
+    expect(contrast('#1f5f4a', plateInk('#1f5f4a'))).toBeGreaterThanOrEqual(4.5);
   });
 });
