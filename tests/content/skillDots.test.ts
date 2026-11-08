@@ -108,18 +108,22 @@ describe('the hover preview', () => {
     expect(list).toContain('pointer-events: none');
   });
   // Mutation: delete the reduced-motion block in SkillList.astro.
-  it('reduced motion drops transform and filter', () => {
+  it('reduced motion drops the transform', () => {
     const rm = list.slice(list.indexOf('(prefers-reduced-motion: reduce)'));
     const rest = rm.slice(rm.indexOf('.skill-preview {'));
-    expect(rest.slice(0, rest.indexOf('}'))).toMatch(/transform: none;\s*filter: none;/);
+    expect(rest.slice(0, rest.indexOf('}'))).toMatch(/transform: none;/);
     const start = rm.slice(rm.indexOf('@starting-style'));
-    expect(start.slice(0, start.indexOf('}'))).toMatch(/transform: none;\s*filter: none;/);
+    expect(start.slice(0, start.indexOf('}'))).toMatch(/transform: none;/);
     expect(rm).not.toContain('opacity: 0');
   });
   // Mutation: change 220ms to 300ms in the hover rule.
   it('fades in over 220ms and out over 160ms on the one curve', () => {
     expect(list).toContain('transition-duration: 220ms');
     expect(list).toContain('opacity 160ms cubic-bezier(0.2, 0, 0, 1)');
-    expect(list).toContain('filter: blur(4px)');
+  });
+  // Mutation: put a blur back on the preview. D-114 allows blur only on a
+  // floating surface opening or closing, and a hover preview is not one.
+  it('never blurs the preview', () => {
+    expect(list).not.toMatch(/filter|blur/);
   });
 });

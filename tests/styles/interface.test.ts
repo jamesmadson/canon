@@ -129,9 +129,8 @@ describe('transitions', () => {
             .split(',')
             .map((p) => p.trim().split(/\s+/)[0])
             .filter((p) => p && p !== 'none' && !/^[\d.]/.test(p));
-          // visibility and display are discrete flips that wait for an opacity fade; filter is the
-          // up to 4px blur on a floating surface that D-114 allows (the SkillList preview).
-          for (const p of props) if (!['transform', 'opacity', 'visibility', 'display', 'filter'].includes(p)) bad.push(`${name}: ${r.sel} ${p}`);
+          // visibility and display are discrete flips that wait for an opacity fade.
+          for (const p of props) if (!['transform', 'opacity', 'visibility', 'display'].includes(p)) bad.push(`${name}: ${r.sel} ${p}`);
         }
       }
     }
