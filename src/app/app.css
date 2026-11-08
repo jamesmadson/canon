@@ -74,7 +74,8 @@ a { color: inherit; }
 
 /* ── Shell ─────────────────────────────────────────────────────────────── */
 .shell { display: grid; grid-template-columns: 248px 1fr; height: 100vh; }
-.main { position: relative; min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
+/* min-height: 0 keeps .main one screen tall; without it the library grows .main to fit every card, the body clips it, and nothing scrolls */
+.main { position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; background: var(--bg); }
 
 .rail {
   display: flex; flex-direction: column; gap: 4px;
