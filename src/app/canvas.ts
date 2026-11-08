@@ -215,7 +215,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
     return () => removeEventListener('keydown', onKey);
   });
 
-  const drag = useRef<null | { kind: 'pan' | 'frame'; sx: number; sy: number; ox: number; oy: number; id?: string; pl?: string; moved: boolean }>(null);
+  const drag = useRef<null | { kind: 'pan' | 'frame'; sx: number; sy: number; ox: number; oy: number; id?: string; pl?: string; moved: boolean; el: HTMLElement; pointer: number }>(null);
   const onPointerDown = (e: PointerEvent) => {
     if (e.button !== 0 && e.button !== 1) return;
     setMenu(false);
@@ -234,7 +234,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
       }
       setSelected(f.id);
       setLive(null);
-      drag.current = { kind: 'frame', id: f.id, pl: f.placementId, sx: e.clientX, sy: e.clientY, ox: f.x, oy: f.y, moved: false };
+      drag.current = { kind: 'frame', id: f.id, pl: f.placementId, sx: e.clientX, sy: e.clientY, ox: f.x, oy: f.y, moved: false, el: e.currentTarget as HTMLElement, pointer: e.pointerId };
     } else {
       setLive(null);
       if (tool === 'comment' && e.button === 0) {
@@ -243,10 +243,9 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
       }
       setSelected(null);
       setDraft(null);
-      drag.current = { kind: 'pan', sx: e.clientX, sy: e.clientY, ox: cam.x, oy: cam.y, moved: false };
+      drag.current = { kind: 'pan', sx: e.clientX, sy: e.clientY, ox: cam.x, oy: cam.y, moved: false, el: e.currentTarget as HTMLElement, pointer: e.pointerId };
       setPanning(true);
     }
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   };
   const onPointerMove = (e: PointerEvent) => {
     const d = drag.current;
@@ -254,7 +253,13 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
     const dx = e.clientX - d.sx;
     const dy = e.clientY - d.sy;
     if (Math.abs(dx) + Math.abs(dy) > 3) {
-      if (!d.moved) setHover(null);
+      if (!d.moved) {
+        setHover(null);
+        // Capture only once the press is a drag. Captured at the press,
+        // Chrome hands the click and the double-click to the board instead
+        // of the frame, so a double-click never made a frame live.
+        try { d.el.setPointerCapture(d.pointer); } catch { /* the pointer already went */ }
+      }
       d.moved = true;
     }
     if (d.kind === 'pan') setCam((c) => ({ ...c, x: d.ox + dx, y: d.oy + dy }));
