@@ -69,14 +69,26 @@ describe('the hover preview', () => {
     expect(start.slice(0, start.indexOf('}'))).toMatch(/transform: none;/);
     expect(rm).not.toContain('opacity: 0');
   });
-  // Mutation: change 220ms to 300ms in the hover rule.
-  it('fades in over 220ms and out over 160ms on the one curve', () => {
-    expect(list).toContain('transition-duration: 220ms');
-    expect(list).toContain('opacity 160ms cubic-bezier(0.2, 0, 0, 1)');
+  // Mutation: change 320ms back to 220ms in the hover rule.
+  it('fades in over 320ms and out over 200ms on the one curve', () => {
+    expect(list).toContain('transition-duration: 320ms');
+    expect(list).toContain('opacity 200ms cubic-bezier(0.2, 0, 0, 1)');
   });
   // Mutation: put a blur back on the preview. D-114 allows blur only on a
   // floating surface opening or closing, and a hover preview is not one.
   it('never blurs the preview', () => {
     expect(list).not.toMatch(/filter|blur/);
+  });
+
+  // Mutation: position the preview with top/left from the script, or drop
+  // the translate, so it stops following the cursor.
+  it('follows the cursor by translate, below and beside it, flipping near the right edge', () => {
+    expect(list).toContain('translate: var(--x, 0px) var(--y, 72px);');
+    expect(list).toMatch(/row\.addEventListener\('pointermove'/);
+    expect(list).toContain('x + OFFSET + WIDTH > box.width ? x - OFFSET - WIDTH : x + OFFSET');
+  });
+  // Mutation: ease toward the cursor even with reduced motion.
+  it('places it outright with reduced motion', () => {
+    expect(list).toContain('if (!at || still.matches) {');
   });
 });

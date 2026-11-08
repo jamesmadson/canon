@@ -1,7 +1,8 @@
 ---
 // The four skills as rows, in the order work does. The skills index renders
 // this. With a mouse, hovering or focusing a row floats that skill's own
-// preview over the row's type; the same SkillPreview the homepage shows.
+// preview beside the cursor, following it, so the row's words stay readable;
+// the same SkillPreview the homepage shows.
 import { getCollection } from 'astro:content';
 import { withBase } from '../lib/withBase';
 import { SKILL_LINES, ORDER } from '../lib/skillLines';
@@ -60,28 +61,32 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
     }
   }
 
-  /* About 360 by 240, over the middle of the row, overlapping the description
-     column and never past the right edge of the list. It floats above the
-     rows, takes no pointer, and fades in with a small rise and a scale.
-     Leaving is a little faster. The display
-     change is part of the transition, so the preview stays until it has
-     faded. While it is display none, its lazy frame is not loaded. */
+  /* About 360 by 240. It sits below and to the right of the cursor and
+     follows it (--x and --y, set by the script below, moved by translate so
+     it never touches layout), flipping to the cursor's left near the list's
+     right edge, so the words under the cursor stay readable. Keyboard focus
+     has no cursor, so it starts under the skill's name. It floats above the
+     rows, takes no pointer, and fades in over 320ms with a small rise and a
+     scale; leaving takes 200ms. The display change is part of the
+     transition, so the preview stays until it has faded. While it is display
+     none, its lazy frame is not loaded. */
   @media (hover: hover) and (pointer: fine) and (min-width: 640px) {
     .skill-preview {
       position: absolute;
       z-index: 10;
-      top: 50%;
-      left: min(40%, calc(100% - 360px));
+      top: 0;
+      left: 0;
       width: 360px;
       height: 240px;
-      margin-top: -120px;
+      translate: var(--x, 0px) var(--y, 72px);
       pointer-events: none;
       opacity: 0;
       transform: translateY(8px) scale(0.96);
+      transform-origin: top left;
       transition:
-        opacity 160ms cubic-bezier(0.2, 0, 0, 1),
-        transform 160ms cubic-bezier(0.2, 0, 0, 1),
-        display 160ms allow-discrete;
+        opacity 200ms cubic-bezier(0.2, 0, 0, 1),
+        transform 200ms cubic-bezier(0.2, 0, 0, 1),
+        display 200ms allow-discrete;
     }
     /* The text cards take the height of their words, as on the homepage,
        so Strata's Said and Meant are never cut off. */
@@ -92,7 +97,7 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
       display: block;
       opacity: 1;
       transform: none;
-      transition-duration: 220ms;
+      transition-duration: 320ms;
     }
     @starting-style {
       .skill-link:is(:hover, :focus-visible) + .skill-preview {
@@ -114,3 +119,63 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
     }
   }
 </style>
+
+<script>
+  // The preview trails the cursor a little, easing toward it each frame, so
+  // it glides rather than snaps. With reduced motion it sits at the cursor
+  // with no easing. Only a fine pointer ever sees a preview.
+  const OFFSET = 24;
+  const WIDTH = 360;
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  for (const row of document.querySelectorAll<HTMLElement>('.skill-row')) {
+    const preview = row.querySelector<HTMLElement>('.skill-preview');
+    if (!preview) continue;
+    let target = { x: 0, y: 0 };
+    let at: { x: number; y: number } | null = null;
+    let frame = 0;
+
+    const place = (x: number, y: number) => {
+      preview.style.setProperty('--x', `${x}px`);
+      preview.style.setProperty('--y', `${y}px`);
+    };
+    const step = () => {
+      frame = 0;
+      if (!at) return;
+      at.x += (target.x - at.x) * 0.2;
+      at.y += (target.y - at.y) * 0.2;
+      place(at.x, at.y);
+      if (Math.abs(target.x - at.x) > 0.5 || Math.abs(target.y - at.y) > 0.5) frame = requestAnimationFrame(step);
+    };
+
+    row.addEventListener('pointermove', (event) => {
+      if (!fine.matches) return;
+      const box = row.getBoundingClientRect();
+      const x = event.clientX - box.left;
+      const y = event.clientY - box.top;
+      // Right of the cursor while it fits inside the row, otherwise left.
+      const left = x + OFFSET + WIDTH > box.width ? x - OFFSET - WIDTH : x + OFFSET;
+      target = { x: left, y: y + OFFSET };
+      // The first move after entering places it outright: it is still faded
+      // out, and a glide in from the last row's spot would read as a jump.
+      if (!at || still.matches) {
+        at = { ...target };
+        place(at.x, at.y);
+        return;
+      }
+      if (!frame) frame = requestAnimationFrame(step);
+    });
+    row.addEventListener('pointerleave', () => {
+      at = null;
+      cancelAnimationFrame(frame);
+      frame = 0;
+    });
+    // Focus from the keyboard: under the skill's name, where it always was.
+    row.addEventListener('focusin', () => {
+      if (at) return;
+      preview.style.removeProperty('--x');
+      preview.style.removeProperty('--y');
+    });
+  }
+</script>
