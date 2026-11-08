@@ -32,6 +32,36 @@
   font-display: swap;
 }
 
+/* Fallbacks sized to the real faces, so the swap moves nothing. Each one is a
+   system face stretched and lined up to the metrics of the font that replaces
+   it. Measured from the font files in public/fonts with fontkitten, as
+   hhea ascent and descent over unitsPerEm and the average advance of the
+   lowercase letters and space weighted by English frequency, against Arial
+   and Courier New read from macOS. size-adjust is the ratio of the two
+   averages; each override is the metric divided by size-adjust.
+     Public Sans: 2000 upm, ascent 0.95, descent 0.225, line gap 0, average
+       0.4662 em; Arial averages 0.4514 em, so size-adjust is 103.29%.
+     IBM Plex Mono: 1000 upm, ascent 1.025, descent 0.275, line gap 0, every
+       advance 0.6 em; Courier New averages 0.6001 em, so 99.98%. */
+@font-face {
+  font-family: "Public Sans Fallback";
+  src: local("Arial");
+  font-weight: 100 900;
+  size-adjust: 103.29%;
+  ascent-override: 91.97%;
+  descent-override: 21.78%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "IBM Plex Mono Fallback";
+  src: local("Courier New");
+  font-weight: 400 500;
+  size-adjust: 99.98%;
+  ascent-override: 102.52%;
+  descent-override: 27.50%;
+  line-gap-override: 0%;
+}
+
 /* ── The palette, now the site's ──────────────────────────────────────────
    These lived on [data-app-shell] so the product could carry one language and
    the gallery another. The gallery is a section of the product's site now, so
@@ -41,10 +71,10 @@
    opinion in the palette: it is why the grey reads as chosen rather than
    defaulted. Colour lives only inside RamsMark and the orange dot. */
 @theme {
-  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --font-app: "Public Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-app-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-sans: "Public Sans", "Public Sans Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "IBM Plex Mono Fallback", ui-monospace, monospace;
+  --font-app: "Public Sans", "Public Sans Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-app-mono: "IBM Plex Mono", "IBM Plex Mono Fallback", ui-monospace, monospace;
 
   --color-ground: #E9E7E2;
   --color-panel: #F5F4F1;
@@ -151,6 +181,23 @@ body {
   line-height: 1.6;
 }
 
+/* Browser surfaces the page didn't draw, themed like the dashboard: orange
+   selection with ink type (ground on orange would not hold contrast, so the
+   ink is fixed in both themes), an orange caret, and scrollbars drawn from
+   the site's own tokens so dark follows the theme. */
+::selection {
+  background-color: var(--color-orange);
+  color: #1A1918;
+}
+input,
+textarea,
+[contenteditable] {
+  caret-color: var(--color-orange);
+}
+html {
+  scrollbar-color: var(--color-input-border) var(--color-recess);
+}
+
 /* Entrance motion. A visitor sees the first paint once, so the frequency gate
    allows it — but only transform and opacity, and only when motion is welcome.
    The whole block lives inside the media query so reduced-motion users never
@@ -167,6 +214,7 @@ body {
     }
   }
 
+  /* The one-time reveal (D-81), so it keeps 450ms, under its 640ms ceiling. */
   .rise {
     animation: rise 0.45s cubic-bezier(0.2, 0, 0, 1) both;
   }
@@ -209,17 +257,14 @@ summary,
   font-weight: 500;
   line-height: 1.2;
   text-align: center;
-  transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    transform 120ms ease;
+  transition: transform 120ms cubic-bezier(0.2, 0, 0, 1);
 }
 .btn:focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 3px;
 }
 .btn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 .btn-primary {
@@ -227,8 +272,10 @@ summary,
   background-color: var(--color-ink);
   color: var(--color-ground);
 }
-.btn-primary:hover {
-  background-color: color-mix(in oklab, var(--color-ink) 86%, var(--color-ground));
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    background-color: color-mix(in oklab, var(--color-ink) 86%, var(--color-ground));
+  }
 }
 
 .btn-secondary {
@@ -236,8 +283,10 @@ summary,
   background-color: var(--color-recess);
   color: var(--color-ink);
 }
-.btn-secondary:hover {
-  background-color: color-mix(in oklab, var(--color-recess) 80%, var(--color-ink));
+@media (hover: hover) and (pointer: fine) {
+  .btn-secondary:hover {
+    background-color: color-mix(in oklab, var(--color-recess) 80%, var(--color-ink));
+  }
 }
 
 .btn-utility {
@@ -245,8 +294,10 @@ summary,
   background-color: var(--color-recess);
   color: var(--color-ink);
 }
-.btn-utility:hover {
-  background-color: color-mix(in oklab, var(--color-recess) 80%, var(--color-ink));
+@media (hover: hover) and (pointer: fine) {
+  .btn-utility:hover {
+    background-color: color-mix(in oklab, var(--color-recess) 80%, var(--color-ink));
+  }
 }
 
 .btn-quiet {
@@ -254,9 +305,11 @@ summary,
   background-color: transparent;
   color: var(--color-ink-soft);
 }
-.btn-quiet:hover {
-  background-color: color-mix(in oklab, var(--color-recess) 55%, transparent);
-  color: var(--color-ink);
+@media (hover: hover) and (pointer: fine) {
+  .btn-quiet:hover {
+    background-color: color-mix(in oklab, var(--color-recess) 55%, transparent);
+    color: var(--color-ink);
+  }
 }
 
 .btn[disabled],
@@ -288,6 +341,13 @@ summary,
   outline: 2px solid var(--color-ink);
   outline-offset: 3px;
 }
+/* iPhone Safari zooms the page when a field under 16px takes focus, and stays
+   zoomed. Touch screens get 16px; a fine pointer keeps the 14px. */
+@media (pointer: coarse) {
+  .field {
+    font-size: 16px;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .btn {
@@ -298,7 +358,7 @@ summary,
   }
 }
 
-/* Silkscreened control labels: the eyebrows, the dt in a definition list, the
+/* Silkscreened control labels: the dt in a definition list, the
    caption over a group. Mono, small, wide, and never a sentence. In the
    components layer so a text-ink on the markup can still win. */
 @layer components {
@@ -394,7 +454,8 @@ summary,
 
 /* ── The tick rail ────────────────────────────────────────────────────────
    Every nav row and list link: a 14px rule that extends to 64px and carries
-   from ink-soft to ink. Width and colour only, on the shared curve. */
+   from ink-soft to ink. The rule is drawn 64px wide and scaled from its right
+   edge, so it moves by transform only; the colour change is instant. */
 .tick-link {
   display: grid;
   grid-template-columns: 64px 1fr;
@@ -402,29 +463,37 @@ summary,
   gap: 14px;
   min-height: 44px;
   color: var(--color-ink-soft);
-  transition: color 220ms cubic-bezier(0.2, 0, 0, 1);
 }
 .tick-link .tick {
   display: block;
   height: 1px;
-  width: 14px;
+  width: 64px;
   margin-left: auto;
   background-color: var(--color-ink-soft);
   opacity: 0.55;
+  transform: scaleX(0.21875);
+  transform-origin: right center;
   transition:
-    width 260ms cubic-bezier(0.2, 0, 0, 1),
-    opacity 260ms cubic-bezier(0.2, 0, 0, 1),
-    background-color 260ms cubic-bezier(0.2, 0, 0, 1);
+    transform 260ms cubic-bezier(0.2, 0, 0, 1),
+    opacity 260ms cubic-bezier(0.2, 0, 0, 1);
 }
-.tick-link:hover,
 .tick-link:focus-visible {
   color: var(--color-ink);
 }
-.tick-link:hover .tick,
 .tick-link:focus-visible .tick {
-  width: 64px;
+  transform: none;
   opacity: 1;
   background-color: var(--color-ink);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tick-link:hover {
+    color: var(--color-ink);
+  }
+  .tick-link:hover .tick {
+    transform: none;
+    opacity: 1;
+    background-color: var(--color-ink);
+  }
 }
 .tick-link:focus-visible {
   outline: 2px solid var(--color-ink);
@@ -434,13 +503,14 @@ summary,
   color: var(--color-ink);
 }
 .tick-link[aria-current="page"] .tick {
-  width: 30px;
+  transform: scaleX(0.46875);
   opacity: 0.9;
   background-color: var(--color-ink);
 }
 
 /* The same gesture in a horizontal bar, where a 64px rule has nowhere to go:
-   the tick sits under the label and grows to the label's width. */
+   a 14px tick rests under the label, and a full-width rule grows over it from
+   the left edge to the label's width. */
 .tick-bar {
   position: relative;
   display: inline-flex;
@@ -448,41 +518,46 @@ summary,
   min-height: 44px;
   padding-inline: 10px;
   color: var(--color-ink-soft);
-  transition: color 220ms cubic-bezier(0.2, 0, 0, 1);
 }
+.tick-bar::before,
 .tick-bar::after {
   content: "";
   position: absolute;
   left: 10px;
   bottom: 8px;
   height: 1px;
+}
+.tick-bar::before {
   width: 14px;
   background-color: var(--color-ink-soft);
   opacity: 0.55;
-  transition:
-    width 260ms cubic-bezier(0.2, 0, 0, 1),
-    opacity 260ms cubic-bezier(0.2, 0, 0, 1),
-    background-color 260ms cubic-bezier(0.2, 0, 0, 1);
 }
-.tick-bar:hover,
+.tick-bar::after {
+  width: calc(100% - 20px);
+  background-color: var(--color-ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 260ms cubic-bezier(0.2, 0, 0, 1);
+}
 .tick-bar:focus-visible {
   color: var(--color-ink);
-}
-.tick-bar:hover::after,
-.tick-bar:focus-visible::after {
-  width: calc(100% - 20px);
-  opacity: 1;
-  background-color: var(--color-ink);
-}
-.tick-bar:focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
 }
+.tick-bar:focus-visible::after {
+  transform: scaleX(1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tick-bar:hover {
+    color: var(--color-ink);
+  }
+  .tick-bar:hover::after {
+    transform: scaleX(1);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .tick-link,
   .tick-link .tick,
-  .tick-bar,
   .tick-bar::after {
     transition-duration: 0s;
   }
@@ -647,8 +722,10 @@ summary,
   background: radial-gradient(circle closest-side, #B83A00 44%, #FF4F00 44% 72%, #FF9A2E 72%);
   transition: transform 240ms cubic-bezier(0.2, 0, 0, 1);
 }
-.closing-strip .giant-dot:hover {
-  transform: translateY(-0.04em);
+@media (hover: hover) and (pointer: fine) {
+  .closing-strip .giant-dot:hover {
+    transform: translateY(-0.04em);
+  }
 }
 .closing-strip .giant-dot:focus-visible {
   outline: 2px solid #EDEBE6;

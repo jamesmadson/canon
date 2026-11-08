@@ -32,24 +32,40 @@ export function isStale(lastActivity: string, asOf: string): boolean {
   return daysIdle(lastActivity, asOf) >= STALE_AFTER_DAYS;
 }
 
-/** "Today" / "2 days ago" / "26 days ago" — plain words, no relative-time API. */
+/** Relative wording holds for a week; after that a date is easier to place. */
+export const RELATIVE_UNTIL_DAYS = 7;
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** "12 Oct" in the reference year, "12 Oct 2024" in an earlier one. */
+function plainDate(lastActivity: string, asOf: string): string {
+  const then = new Date(utcMidnight(lastActivity));
+  const day = `${then.getUTCDate()} ${MONTHS[then.getUTCMonth()]}`;
+  return then.getUTCFullYear() === new Date(utcMidnight(asOf)).getUTCFullYear()
+    ? day
+    : `${day} ${then.getUTCFullYear()}`;
+}
+
+/** "Today" / "2 days ago" up to a week, then "12 Oct" or "12 Oct 2024". */
 export function idleLabel(lastActivity: string, asOf: string): string {
   const days = daysIdle(lastActivity, asOf);
   if (days === 0) return 'Today';
   if (days === 1) return 'Yesterday';
-  return `${days} days ago`;
+  if (days <= RELATIVE_UNTIL_DAYS) return `${days} days ago`;
+  return plainDate(lastActivity, asOf);
 }
 
 /**
- * The line a card carries: "Updated 2 days ago". Derived on every card from
- * the same two dates, so no card can be caught holding a sentence the data
- * stopped agreeing with.
+ * The line a card carries: "Updated 2 days ago", or "Updated 12 Oct" once it
+ * is older than a week. Derived on every card from the same two dates, so no
+ * card can be caught holding a sentence the data stopped agreeing with.
  */
 export function updatedLabel(lastActivity: string, asOf: string): string {
   const days = daysIdle(lastActivity, asOf);
   if (days === 0) return 'Updated today';
   if (days === 1) return 'Updated yesterday';
-  return `Updated ${days} days ago`;
+  if (days <= RELATIVE_UNTIL_DAYS) return `Updated ${days} days ago`;
+  return `Updated ${plainDate(lastActivity, asOf)}`;
 }
 
 /** The flag itself: the word, and the count that earned it. */

@@ -1,0 +1,171 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
+
+const root = join(__dirname, '..', '..');
+const css = readFileSync(join(root, 'src/styles/global.css'), 'utf8');
+const mcp = readFileSync(join(root, 'src/components/McpWalkthrough.astro'), 'utf8');
+const index = readFileSync(join(root, 'src/pages/index.astro'), 'utf8');
+
+/** Top-level blocks as [prelude, body]. */
+function blocks(source: string): Array<[string, string]> {
+  const out: Array<[string, string]> = [];
+  let depth = 0;
+  let start = 0;
+  let prelude = '';
+  for (let i = 0; i < source.length; i++) {
+    const ch = source[i];
+    if (ch === '{') {
+      if (depth === 0) {
+        prelude = source.slice(start, i).trim();
+        start = i + 1;
+      }
+      depth++;
+    } else if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        out.push([prelude, source.slice(start, i)]);
+        start = i + 1;
+      }
+    }
+  }
+  return out;
+}
+
+/** Style rules as {ctx, sel, body}, with media and layer blocks flattened. */
+function rules(source: string, ctx = ''): Array<{ ctx: string; sel: string; body: string }> {
+  const out: Array<{ ctx: string; sel: string; body: string }> = [];
+  for (const [prelude, body] of blocks(source.replace(/\/\*[\s\S]*?\*\//g, ''))) {
+    const p = prelude.replace(/^[\s\S]*;\s*/, '');
+    if (p.startsWith('@media') || p.startsWith('@layer')) {
+      out.push(...rules(body, `${ctx} ${p}`.trim()));
+    } else if (!p.startsWith('@')) {
+      out.push({ ctx, sel: p, body });
+    }
+  }
+  return out;
+}
+
+const FINE = '(hover: hover) and (pointer: fine)';
+const styleOf = (s: string) => (s.match(/<style[^>]*>([\s\S]*?)<\/style>/) ?? [])[1] ?? '';
+const sources: Array<[string, string]> = [
+  ['global.css', css],
+  ['McpWalkthrough.astro', styleOf(mcp)],
+  ['index.astro', styleOf(index)],
+];
+
+describe('fields', () => {
+  // Mutation: delete the coarse-pointer font-size rule for .field, or set it under 16px.
+  it('show 16px or more under a coarse pointer', () => {
+    const r = rules(css).find((x) => x.sel === '.field' && x.ctx.includes('(pointer: coarse)'));
+    expect(r, 'a .field rule inside @media (pointer: coarse)').toBeTruthy();
+    expect(Number(r!.body.match(/font-size:\s*(\d+)px/)?.[1])).toBeGreaterThanOrEqual(16);
+  });
+});
+
+describe('browser surfaces', () => {
+  // Mutation: remove ::selection, or change its background away from orange.
+  it('selects in orange with ink type, as the dashboard does', () => {
+    const r = rules(css).find((x) => x.sel === '::selection');
+    expect(r?.body).toMatch(/background-color:\s*var\(--color-orange\)/);
+    expect(r?.body).toMatch(/color:\s*#1A1918/i);
+  });
+
+  // Mutation: delete the caret-color declaration.
+  it('draws the caret in orange on text entries', () => {
+    const r = rules(css).find((x) => /input/.test(x.sel) && /textarea/.test(x.sel) && /caret-color/.test(x.body));
+    expect(r?.body).toMatch(/caret-color:\s*var\(--color-orange\)/);
+  });
+
+  // Mutation: delete scrollbar-color, or hardcode hex values in it.
+  it('colours scrollbars from the site tokens, so dark follows the theme', () => {
+    const r = rules(css).find((x) => /scrollbar-color/.test(x.body));
+    expect(r?.body).toMatch(/scrollbar-color:\s*var\(--color-input-border\)\s+var\(--color-recess\)/);
+  });
+});
+
+describe('hover', () => {
+  // Mutation: write any :hover selector in these files outside the fine-pointer media query.
+  it('is gated by a fine pointer everywhere', () => {
+    const bad: string[] = [];
+    for (const [name, src] of sources) {
+      for (const r of rules(src)) {
+        if (/:hover/.test(r.sel) && !r.ctx.includes(FINE)) bad.push(`${name}: ${r.sel}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+});
+
+describe('transitions', () => {
+  // Mutation: add width, color or background-color back to any transition.
+  it('animate only transform and opacity', () => {
+    const bad: string[] = [];
+    for (const [name, src] of sources) {
+      for (const r of rules(src)) {
+        for (const m of r.body.matchAll(/transition(?:-property)?:\s*([^;]+);/g)) {
+          const props = m[1]
+            .split(',')
+            .map((p) => p.trim().split(/\s+/)[0])
+            .filter((p) => p && p !== 'none' && !/^[\d.]/.test(p));
+          // visibility is discrete: it only flips after an opacity fade ends, and animates nothing itself.
+          for (const p of props) if (!['transform', 'opacity', 'visibility'].includes(p)) bad.push(`${name}: ${r.sel} ${p}`);
+        }
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  // Mutation: put width back into the .tick or ::after transition, or drop scaleX.
+  it('grows the tick rules by scaleX from the start edge', () => {
+    const all = rules(css);
+    const tick = all.find((x) => x.sel === '.tick-link .tick');
+    expect(tick?.body).toMatch(/transform-origin:\s*right/);
+    expect(tick?.body).not.toMatch(/width:\s*14px/);
+    const bar = all.find((x) => x.sel === '.tick-bar::after');
+    expect(bar?.body).toMatch(/transform-origin:\s*left/);
+    expect(bar?.body).toMatch(/transform:\s*scaleX\(0\)/);
+    const hover = all.find((x) => x.sel.includes('.tick-bar:hover::after'));
+    expect(hover?.body).toMatch(/scaleX\(1\)/);
+  });
+});
+
+describe('press', () => {
+  // Mutation: change .btn:active back to scale(0.96).
+  it('scales to 0.97', () => {
+    const r = rules(css).find((x) => x.sel === '.btn:active');
+    expect(r?.body).toMatch(/scale\(0\.97\)/);
+  });
+});
+
+describe('rise', () => {
+  // Mutation: lengthen .rise past the 640ms reveal ceiling (D-81).
+  it('stays within the one-time reveal ceiling', () => {
+    const r = rules(css).find((x) => x.sel === '.rise');
+    const ms = Number(r?.body.match(/animation:\s*rise\s+([\d.]+)s/)?.[1]) * 1000;
+    expect(ms).toBeLessThanOrEqual(640);
+  });
+});
+
+describe('fonts', () => {
+  // Mutation: remove a fallback face, one of its overrides, or the fallback from a font stack.
+  it('carry metric-matched fallbacks so swapping does not shift layout', () => {
+    for (const family of ['Public Sans Fallback', 'IBM Plex Mono Fallback']) {
+      const face = blocks(css.replace(/\/\*[\s\S]*?\*\//g, '')).find(([p, b]) => p === '@font-face' && b.includes(`"${family}"`));
+      expect(face, family).toBeTruthy();
+      for (const d of ['size-adjust', 'ascent-override', 'descent-override', 'line-gap-override']) {
+        expect(face![1], `${family} ${d}`).toContain(d);
+      }
+    }
+    for (const token of ['--font-sans', '--font-mono', '--font-app', '--font-app-mono']) {
+      expect(css).toMatch(new RegExp(`${token}:[^;]*Fallback`));
+    }
+  });
+});
+
+describe('words', () => {
+  // Mutation: restore the word in the .label comment.
+  it('does not call labels eyebrows', () => {
+    expect(css.toLowerCase()).not.toContain('eyebrow');
+  });
+});
