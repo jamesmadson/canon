@@ -180,6 +180,28 @@
   }
 }
 
+/* Tailwind Typography's colours, drawn from the site's own tokens. Its
+   defaults are fixed light-theme values that never flip, so inline code and
+   the like went near-black on the dark ground. Unlayered, so these win over
+   prose-stone; the tokens carry dark mode by themselves. */
+.prose {
+  --tw-prose-body: var(--color-ink-soft);
+  --tw-prose-headings: var(--color-ink);
+  --tw-prose-lead: var(--color-ink-soft);
+  --tw-prose-links: var(--color-ink);
+  --tw-prose-bold: var(--color-ink);
+  --tw-prose-counters: var(--color-ink-soft);
+  --tw-prose-bullets: var(--color-input-border);
+  --tw-prose-hr: var(--color-rule);
+  --tw-prose-quotes: var(--color-ink);
+  --tw-prose-quote-borders: var(--color-rule-strong);
+  --tw-prose-captions: var(--color-ink-soft);
+  --tw-prose-kbd: var(--color-ink);
+  --tw-prose-code: var(--color-ink);
+  --tw-prose-th-borders: var(--color-rule-strong);
+  --tw-prose-td-borders: var(--color-rule);
+}
+
 * {
   box-sizing: border-box;
 }

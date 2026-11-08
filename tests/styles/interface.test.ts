@@ -190,3 +190,16 @@ describe('words', () => {
     expect(css.toLowerCase()).not.toContain('eyebrow');
   });
 });
+
+describe('prose colours', () => {
+  // Mutation: drop --tw-prose-code from the .prose block, so inline code
+  // falls back to Typography's fixed dark value and vanishes on the dark ground.
+  it('draws every Typography text and border colour from the site tokens', () => {
+    const prose = blocks(css).find(([prelude]) => prelude.endsWith('.prose'));
+    expect(prose).toBeDefined();
+    const body = prose![1];
+    for (const name of ['body', 'headings', 'links', 'bold', 'counters', 'bullets', 'hr', 'quotes', 'quote-borders', 'captions', 'kbd', 'code', 'th-borders', 'td-borders']) {
+      expect(body, name).toMatch(new RegExp(`--tw-prose-${name}:\\s*var\\(--color-`));
+    }
+  });
+});
