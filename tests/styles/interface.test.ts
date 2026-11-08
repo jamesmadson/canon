@@ -1,11 +1,9 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const root = join(__dirname, '..', '..');
 const css = readFileSync(join(root, 'src/styles/global.css'), 'utf8');
-const mcp = readFileSync(join(root, 'src/components/McpWalkthrough.astro'), 'utf8');
-const index = readFileSync(join(root, 'src/pages/index.astro'), 'utf8');
 
 /** Top-level blocks as [prelude, body]. */
 function blocks(source: string): Array<[string, string]> {
@@ -47,11 +45,20 @@ function rules(source: string, ctx = ''): Array<{ ctx: string; sel: string; body
 }
 
 const FINE = '(hover: hover) and (pointer: fine)';
-const styleOf = (s: string) => (s.match(/<style[^>]*>([\s\S]*?)<\/style>/) ?? [])[1] ?? '';
+const styleOf = (s: string) => [...s.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n');
+
+/** Every .astro file under src/ except src/app/, which belongs to the hosted app. */
+function astroFiles(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const full = join(dir, e.name);
+    if (e.isDirectory()) return full === join(root, 'src/app') ? [] : astroFiles(full);
+    return e.name.endsWith('.astro') ? [full] : [];
+  });
+}
+const astro = astroFiles(join(root, 'src')).map((f) => [f.slice(root.length + 1), readFileSync(f, 'utf8')] as const);
 const sources: Array<[string, string]> = [
-  ['global.css', css],
-  ['McpWalkthrough.astro', styleOf(mcp)],
-  ['index.astro', styleOf(index)],
+  ['src/styles/global.css', css],
+  ...astro.map(([name, src]) => [name, styleOf(src)] as [string, string]),
 ];
 
 describe('fields', () => {
@@ -97,6 +104,20 @@ describe('hover', () => {
   });
 });
 
+describe('tailwind hover utilities', () => {
+  // Mutation: write hover: (not fine-hover:) in any class attribute, or drop the variant from global.css.
+  it('use the fine-pointer variant, never bare hover:', () => {
+    const bad: string[] = [];
+    for (const [name, src] of astro) {
+      for (const m of src.matchAll(/(?<![\w-])(?:[\w[\]=-]+:)*hover:[\w[\]/.%-]+/g)) {
+        if (!m[0].includes('fine-hover:')) bad.push(`${name}: ${m[0]}`);
+      }
+    }
+    expect(bad).toEqual([]);
+    expect(css).toMatch(/@custom-variant fine-hover[\s\S]*?\(hover: hover\) and \(pointer: fine\)/);
+  });
+});
+
 describe('transitions', () => {
   // Mutation: add width, color or background-color back to any transition.
   it('animate only transform and opacity', () => {
@@ -108,8 +129,9 @@ describe('transitions', () => {
             .split(',')
             .map((p) => p.trim().split(/\s+/)[0])
             .filter((p) => p && p !== 'none' && !/^[\d.]/.test(p));
-          // visibility is discrete: it only flips after an opacity fade ends, and animates nothing itself.
-          for (const p of props) if (!['transform', 'opacity', 'visibility'].includes(p)) bad.push(`${name}: ${r.sel} ${p}`);
+          // visibility and display are discrete flips that wait for an opacity fade; filter is the
+          // up to 4px blur on a floating surface that D-114 allows (the SkillList preview).
+          for (const p of props) if (!['transform', 'opacity', 'visibility', 'display', 'filter'].includes(p)) bad.push(`${name}: ${r.sel} ${p}`);
         }
       }
     }

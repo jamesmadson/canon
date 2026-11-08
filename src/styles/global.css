@@ -2,6 +2,16 @@
 @source "../**/*.{astro,ts,mdx}";
 @plugin "@tailwindcss/typography";
 
+/* Tailwind's hover: is only (hover: hover). Canon's rule is a fine pointer as
+   well, so markup uses fine-hover: for hover effects. */
+@custom-variant fine-hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 /* Font URLs below are base-coupled: plain CSS can't read import.meta.env.BASE_URL,
    so the "/canon" deploy base is hardcoded here. If the deploy path ever changes,
    update these alongside astro.config.mjs (site/base) and buildInstallScript.ts. */
