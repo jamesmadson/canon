@@ -1,8 +1,7 @@
 ---
 /**
- * The logo: three rings, amber, Canon orange and pin (D-126). The rings mean
- * Canon; flat orange elsewhere means selection or you. The name itself is
- * set large once, in the closing strip.
+ * The logo: one solid orange circle. The dot is the brand, and the only hue
+ * the chrome carries. The name itself is set large once, in the closing strip.
  */
 interface Props {
   /** Diameter in px. */
@@ -13,10 +12,4 @@ interface Props {
 const { size = 16, class: className = '' } = Astro.props;
 ---
 
-<svg
-  aria-hidden="true"
-  class:list={['wordmark-dot', className]}
-  width={size}
-  height={size}
-  viewBox="0 0 100 100"
-><circle cx="50" cy="50" r="50" fill="#FF9A2E" /><circle cx="50" cy="50" r="36" fill="#FF4F00" /><circle cx="50" cy="50" r="22" fill="#B83A00" /></svg>
+<span aria-hidden="true" class:list={['wordmark-dot', className]} style={`width:${size}px;height:${size}px`}></span>

@@ -1,6 +1,6 @@
 ---
 /**
- * Every prototype connected to one place: Canon's rings at the hub (D-126),
+ * Every prototype connected to one place: Canon's orange dot at the hub,
  * a spoke per family, a dot where the family started, and a tip per
  * version, two where a family forked. Drawn at build time; the ink follows
  * the theme through currentColor.
@@ -31,9 +31,7 @@ const spokes = Array.from({ length: SPOKES }, (_, i) => {
       {s.tips.map((t) => <circle cx={t[0]} cy={t[1]} r="5.2" />)}
     </g>
   ))}
-  <circle r="14" fill="#FF9A2E" />
-  <circle r="10.08" fill="#FF4F00" />
-  <circle r="6.16" fill="#B83A00" />
+  <circle r="14" fill="var(--brand-orange)" />
 </svg>
 
 <style>

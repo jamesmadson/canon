@@ -5,7 +5,6 @@
 import { getCollection } from 'astro:content';
 import { withBase } from '../lib/withBase';
 import { SKILL_LINES, ORDER } from '../lib/skillLines';
-import SkillDot from './SkillDot.astro';
 import SkillPreview from './SkillPreview.astro';
 
 const skills = (await getCollection('skills', ({ data }) => data.status === 'active')).sort(
@@ -17,7 +16,7 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
   {skills.map((s) => (
     <li class="skill-row">
       <a href={withBase(`/skills/${s.data.slug}/`)} class="skill-link grid grid-cols-1 gap-2 py-6 sm:grid-cols-12 sm:gap-12">
-        <span class="display text-[28px] sm:col-span-4"><SkillDot slug={s.data.slug} size={10} inline />{s.data.name}</span>
+        <span class="display text-[28px] sm:col-span-4">{s.data.name}</span>
         <span class="max-w-[52ch] text-[16px] leading-[1.5] text-ink-soft sm:col-span-6" set:html={SKILL_LINES[s.data.slug] ?? s.data.tagline} />
         <span class="text-[14px] text-ink sm:col-span-2 sm:text-right">
           {s.data.previewType === 'page' ? 'Try it' : 'See what it made'}<span aria-hidden="true"> →</span>

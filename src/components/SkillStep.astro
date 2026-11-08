@@ -3,7 +3,6 @@
 // small piece of its own output (SkillPreview).
 import { withBase } from '../lib/withBase';
 import SkillPreview from './SkillPreview.astro';
-import SkillDot from './SkillDot.astro';
 
 interface Props {
   slug: string;
@@ -19,7 +18,7 @@ const { slug, name, story, step, flip = false } = Astro.props;
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-x-12 lg:gap-y-0">
     <div class:list={['min-w-0 lg:row-start-1 lg:col-span-5 lg:self-end', flip ? 'lg:col-start-8' : 'lg:col-start-1']}>
       <p class="small text-balance" set:html={step} />
-      <h3 class="display mt-4 text-[28px]"><SkillDot slug={slug} size={10} inline />{name}</h3>
+      <h3 class="display mt-4 text-[28px]">{name}</h3>
       <p class="mt-4 max-w-[52ch] text-[16px] leading-[1.5] text-ink-soft text-pretty">{story}</p>
     </div>
 
