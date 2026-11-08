@@ -2,7 +2,7 @@
 slug: graft
 name: Graft
 tagline: >-
-  Your Claude Code session as a timeline. Find the turn where you made a call,
+  Your Claude Code or Codex session as a timeline. Find the turn where you made a call,
   see the files as they were, and go back to it.
 story: >-
   Ever lose the moment in a long chat where you picked a direction? Scrolling back through hours of replies to find where it went wrong is slow. Graft turns the session into one page with every turn on a timeline. Find the turn, see what you had then, and copy a command to pick up the chat from there or put your files back the way they were. Run it again whenever you want the page to catch up.
@@ -11,6 +11,7 @@ sourceAuthor: James Madson
 license: MIT
 tools:
   - claude-code
+  - codex
 previewType: page
 previewAssets:
   - /previews/graft/demo-session.html
@@ -28,7 +29,7 @@ notice:
   - The buttons only copy commands. Nothing on the page runs one.
 next: >-
   Find the turn where you made the call you now want to undo and select it.
-  On a page made for you, not this public copy, Copy fork command starts a new
+  On a page made for you from a Claude Code session, not this public copy, Copy fork command starts a new
   session from that turn, and Copy branch command makes a git branch with the
   files as they were. Paste the fork command into a terminal and carry on from
   there. The original session stays as it is.
@@ -36,7 +37,7 @@ addedDate: 2026-08-27T00:00:00.000Z
 status: active
 ---
 
-Run `/graft` in any project and it renders that project's Claude Code session as one page: every turn on a timeline, the turns where a decision was made or a commit landed listed as key turns, and a panel for the selected turn with what you asked, what Claude answered and what it committed. One self-contained HTML file, made on your machine, with nothing sent anywhere.
+Run `/graft` in any project and it renders that project's Claude Code or Codex session as one page: every turn on a timeline, the turns where a decision was made or a commit landed listed as key turns, and a panel for the selected turn with what you asked, what Claude answered and what it committed. One self-contained HTML file, made on your machine, with nothing sent anywhere.
 
 It exists for one job: finding the moment you picked a direction you now want to undo. A long session is unreadable as scrollback. On the timeline, the turn is a click away.
 
