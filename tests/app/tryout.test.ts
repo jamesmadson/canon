@@ -45,7 +45,7 @@ describe('the try link', () => {
     const main = read('src/app/main.ts');
     expect(main).toMatch(/if \(getState\(\)\.projects\.length > 0\) return;\s*\n\s*const \{ project, board \} = await createSampleProject\(\)/);
     expect(main).toContain("history.replaceState(null, '', location.pathname + location.search);\n  return t;");
-    expect(main).toContain('if (tryAtLoad) await openTry(tryAtLoad);');
+    expect(main).toContain('await openTry(tryAtLoad);');
   });
 });
 

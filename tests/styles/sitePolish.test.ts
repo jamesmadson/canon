@@ -96,8 +96,8 @@ describe('the footer dot', () => {
   // Mutation: move the ring or the lift outside the fine-pointer query.
   it('sends one soft ring out and lifts, for a fine pointer', () => {
     const fine = css.slice(css.indexOf('@media (hover: hover) and (pointer: fine) {\n  .closing-strip .giant-dot:hover'));
-    expect(fine.slice(0, 700)).toMatch(/giant-dot:hover::after[\s\S]*giant-ring 700ms cubic-bezier\(0\.2, 0, 0, 1\)/);
-    expect(fine.slice(0, 700)).toMatch(/translateY\(-0\.04em\)/);
+    expect(fine.slice(0, 800)).toMatch(/giant-dot:hover::after[\s\S]*giant-ring 380ms cubic-bezier\(0\.2, 0, 0, 1\)/);
+    expect(fine.slice(0, 800)).toMatch(/translateY\(-0\.04em\)/);
   });
   // Mutation: change the press back to a colour change, or to a different scale.
   it('presses to 0.97', () => {
@@ -106,7 +106,7 @@ describe('the footer dot', () => {
   // Mutation: stop adding .rising on click, or add it under reduced motion.
   it('rises on click unless motion is unwelcome', () => {
     expect(strip).toContain("if (!still.matches) {\n      toTop.classList.add('rising');");
-    expect(css).toMatch(/\.giant-dot\.rising \{\s*transform: translateY\(-0\.16em\)/);
+    expect(css).toMatch(/\.giant-dot\[data-to-top\]\.rising \{\s*transform: translateY\(-0\.16em\)/);
   });
   // Mutation: let the dot move with reduced motion.
   it('keeps only the arrow fade with reduced motion', () => {
@@ -168,5 +168,56 @@ describe('the hero board', () => {
     const style = hero.slice(hero.indexOf('<style>'));
     expect(style).not.toContain('font-app-mono');
     expect(hero).toContain('<span>Explorations</span><span>Sample project</span>');
+  });
+});
+
+describe('review fixes', () => {
+  const read2 = (p: string) => readFileSync(join(root, p), 'utf8');
+  const app = read2('src/app/app.css');
+  const lum = (hex: string) => {
+    const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  };
+  const ratio = (a: string, b: string) => {
+    const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+    return (x + 0.05) / (y + 0.05);
+  };
+  const token = (name: string, from = app) => from.match(new RegExp(`${name}:\\s*(#[0-9A-Fa-f]{6})`))![1];
+
+  // Mutation: darken --faint, or lighten the rail's hover fill, until small text drops under 4.5:1.
+  it('keeps faint and muted text at 4.5:1 on every app surface, rail overrides included', () => {
+    const rail = app.slice(app.indexOf('.rail {'), app.indexOf('}', app.indexOf('.rail {')));
+    const surfaces = [token('--bg'), token('--panel'), token('--raised'), token('--hover'), token('--panel', rail), token('--raised', rail), token('--hover', rail)];
+    for (const text of [token('--faint'), token('--soft')]) {
+      for (const s of surfaces) expect(ratio(text, s), `${text} on ${s}`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  // Mutation: lengthen the ring back to 700ms.
+  it('runs the footer ring in 400ms or less', () => {
+    const ms = Number(css.match(/giant-ring (\d+)ms/)![1]);
+    expect(ms).toBeLessThanOrEqual(400);
+    expect(ms).toBeGreaterThanOrEqual(120);
+  });
+
+  // Mutation: move the .rising rule back above the hover block, or drop its extra weight.
+  it('lets the click rise outrank the hover lift', () => {
+    const rise = css.indexOf('.closing-strip .giant-dot[data-to-top].rising {');
+    expect(rise).toBeGreaterThan(css.lastIndexOf('.closing-strip .giant-dot:active:hover'));
+    expect(rise).toBeGreaterThan(css.lastIndexOf('.closing-strip .giant-dot:hover {'));
+  });
+
+  // Mutation: paint a status dot in the accent again.
+  it('keeps orange off the app status dots and the drop overlay', () => {
+    expect(app).not.toMatch(/\.agent \.dot\[data-state="on"\][^}]*accent/);
+    expect(app).not.toMatch(/\.store-line\.warn \.dot[^}]*accent/);
+    expect(app.slice(app.indexOf('.dropzone {'), app.indexOf('}', app.indexOf('.dropzone {')))).not.toMatch(/accent|255,79,0/);
+  });
+
+  // Mutation: take the try/catch off openTry in boot, so a failed sample blanks the page.
+  it('draws the app even when the sample fails to load', () => {
+    const main = read2('src/app/main.ts');
+    expect(main).toMatch(/try \{\s*await openTry\(tryAtLoad\);\s*\} catch \(err\) \{[\s\S]*toast\('The sample project could not be loaded/);
+    expect(main.indexOf('await openTry(tryAtLoad)')).toBeLessThan(main.indexOf('render(h(App'));
   });
 });

@@ -60,7 +60,15 @@ async function boot() {
   // Ask the browser not to evict the library, then pick up the Canon folder if there is one.
   void askPersistence();
   await initVault();
-  if (tryAtLoad) await openTry(tryAtLoad);
+  if (tryAtLoad) {
+    // A failed sample load must never stop the app drawing: fall back to the normal library.
+    try {
+      await openTry(tryAtLoad);
+    } catch (err) {
+      console.warn('Canon: the sample project could not be loaded.', err);
+      toast('The sample project could not be loaded. Use Try the sample project on the home screen to try again.');
+    }
+  }
   // A preview tab files comments straight into IndexedDB and says so here.
   watchOtherTabs();
   // Before render, so the first paint already shows it.
