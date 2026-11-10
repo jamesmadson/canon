@@ -4,14 +4,14 @@
 
 `canon mcp` runs a small local server that your coding agent talks to. It passes the agent's requests to the Canon tab you have open, so the agent can put prototypes on your boards.
 
-The npm package name is not picked yet. Where you see `<package-name>`, use the real name once it exists. From a checkout, run `node /path/to/cli/bin/canon.js mcp` instead.
+The npm package is `usecanon`. From a checkout, run `node /path/to/cli/bin/canon.js mcp` instead.
 
 ### Set up
 
 Claude Code:
 
 ```
-claude mcp add canon -- npx <package-name> mcp
+claude mcp add canon -- npx -y usecanon mcp
 ```
 
 From a checkout of this repo instead:
@@ -25,13 +25,13 @@ Codex, in `~/.codex/config.toml`:
 ```toml
 [mcp_servers.canon]
 command = "npx"
-args = ["<package-name>", "mcp"]
+args = ["-y", "usecanon", "mcp"]
 ```
 
 Cursor, in `.cursor/mcp.json`:
 
 ```json
-{ "mcpServers": { "canon": { "command": "npx", "args": ["<package-name>", "mcp"] } } }
+{ "mcpServers": { "canon": { "command": "npx", "args": ["-y", "usecanon", "mcp"] } } }
 ```
 
 Add `--dev` to the args to talk to a Canon app on `http://localhost:4321`.

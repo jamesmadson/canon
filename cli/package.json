@@ -1,10 +1,9 @@
 {
-  "name": "@canon-design/cli",
-  "_name": "TODO(name): the package name is not picked yet. canon and canon-design are taken on npm, usecanon and canon-cli are free, and the scoped name here needs the org claimed. The bin name canon is final either way.",
+  "name": "usecanon",
   "version": "0.1.0",
-  "description": "Index the prototype branches in a repository, keep a feedback record beside them, and draw both into one local HTML file.",
+  "description": "Canon for coding agents: a local MCP server that lets your agent put prototypes on the Canon boards open in your browser.",
   "type": "module",
-  "license": "MIT",
+  "license": "LicenseRef-FSL-1.1-ALv2",
   "author": "James Madson",
   "bin": {
     "canon": "./bin/canon.js"
@@ -14,16 +13,26 @@
   },
   "files": [
     "bin",
-    "src"
+    "src",
+    "LICENSE"
   ],
   "keywords": [
+    "canon",
+    "mcp",
     "prototype",
     "design",
-    "research",
-    "cli"
+    "claude-code",
+    "codex",
+    "cursor"
   ],
   "dependencies": {},
   "scripts": {
     "test": "vitest run --root .. cli/tests"
+  },
+  "homepage": "https://jamesmadson.github.io/canon/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamesmadson/canon.git",
+    "directory": "cli"
   }
 }
