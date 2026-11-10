@@ -1,44 +1,52 @@
 ---
 /**
- * The hero's picture: a small mock of a Canon board with four prototypes on it,
- * each labelled with where it runs. Decorative, in the same language as the
+ * The hero's picture: a small board of four prototypes from the Fernwell
+ * sample project, each one a real link that opens the app with the sample
+ * loaded and that prototype showing. Hovering or focusing a card fans its
+ * screens out the way the app does for a stack of versions or a prototype with
+ * many pages. The drawn screens are decorative, in the same language as the
  * board mock in McpWalkthrough: a dotted canvas, light prototypes on it, and
  * the orange dot of a note as the only hue.
  */
+import { withBase } from '../lib/withBase';
+
+// Every name here exists in src/app/samples.ts, and `to` is the target that
+// src/app/lib/tryout.ts opens. `fan` says what the card spreads out.
 const FRAMES = [
-  { name: 'Checkout', source: 'localhost:5173', tag: 'v3/3', kind: 'form' },
-  { name: 'Onboarding', source: 'v0 preview', kind: 'ring' },
-  { name: 'Pricing', source: 'Figma prototype', kind: 'plans' },
-  { name: 'Settings', source: 'Vercel preview', tag: '2 notes', kind: 'list', pin: true },
+  { name: 'Today ring', to: 'today-ring', source: 'Claude Code', tag: '3 versions', kind: 'ring', fan: 'versions' },
+  { name: 'Fernwell site', to: 'fernwell-site', source: 'Lovable', tag: '6 pages', kind: 'site', fan: 'pages' },
+  { name: 'Held lane, option B', to: 'held-lane', source: 'Figma Make', tag: '1 note', kind: 'list', pin: true },
+  { name: 'Streak', to: 'streak', source: 'v0 preview', kind: 'streak' },
 ];
 ---
 
-<div
-  class="board"
-  role="img"
-  aria-label="A Canon board with four prototypes: Checkout on localhost, Onboarding from a v0 preview, Pricing from a Figma prototype and Settings from a Vercel preview. Checkout is on version 3 and Settings has 2 notes."
->
-  <div class="board-bar" aria-hidden="true"><span>Explorations</span><span>Board</span></div>
-  <div class="board-body" aria-hidden="true">
+<div class="board" role="group" aria-label="A sample Canon board with four prototypes. Each one opens in the app.">
+  <div class="board-bar" aria-hidden="true"><span>Explorations</span><span>Sample project</span></div>
+  <div class="board-body">
     <div class="grid">
       {FRAMES.map((f, i) => (
-        <div class="item rise" style={`animation-delay:${120 + i * 70}ms`}>
+        <a
+          class="item rise"
+          style={`animation-delay:${120 + i * 70}ms`}
+          href={withBase(`/app/#try/${f.to}`)}
+          aria-label={`Open ${f.name} in the sample project`}
+          data-fan={f.fan}
+        >
           <p class="caption">
             <span class="name">{f.name}</span>
             {f.tag && <span class="tag">{f.tag}</span>}
           </p>
-          <div class:list={['frame', f.tag === 'v3/3' && 'stacked']}>
+          <div class="frame">
+            {f.fan && (
+              <>
+                <span class="sheet a" aria-hidden="true"><span class="bar title"></span><span class="bar"></span></span>
+                <span class="sheet b" aria-hidden="true"><span class="bar title"></span><span class="bar"></span></span>
+                {f.fan === 'pages' && <span class="sheet c" aria-hidden="true"><span class="bar title"></span><span class="bar"></span></span>}
+              </>
+            )}
             <div class="paper">
               <span class="bar nav"></span>
               <span class="bar title"></span>
-              {f.kind === 'form' && (
-                <>
-                  <span class="input"></span>
-                  <span class="input"></span>
-                  <span class="spacer"></span>
-                  <span class="pill"></span>
-                </>
-              )}
               {f.kind === 'ring' && (
                 <>
                   <span class="ring"></span>
@@ -47,27 +55,37 @@ const FRAMES = [
                   <span class="pill"></span>
                 </>
               )}
-              {f.kind === 'plans' && (
-                <span class="plans">
-                  <span class="plan"></span>
-                  <span class="plan on"></span>
-                </span>
+              {f.kind === 'site' && (
+                <>
+                  <span class="bar"></span>
+                  <span class="bar wide"></span>
+                  <span class="spacer"></span>
+                  <span class="pill"></span>
+                </>
               )}
               {f.kind === 'list' && (
                 <>
                   <span class="row"><span></span><i></i></span>
                   <span class="row"><span></span><i class="on"></i></span>
                   <span class="row"><span></span><i></i></span>
+                  <span class="spacer"></span>
+                  <span class="pill"></span>
                 </>
+              )}
+              {f.kind === 'streak' && (
+                <span class="days">
+                  {Array.from({ length: 21 }, (_, d) => <i class:list={[d % 9 !== 4 && d < 16 && 'on']}></i>)}
+                </span>
               )}
             </div>
             {f.pin && <span class="pin"></span>}
+            <span class="edge" aria-hidden="true"></span>
           </div>
           <small>{f.source}</small>
-        </div>
+        </a>
       ))}
     </div>
-    <p class="notice rise">Claude Code added&nbsp;Checkout</p>
+    <p class="notice rise" aria-hidden="true">Claude Code added&nbsp;Today ring</p>
   </div>
 </div>
 
@@ -101,8 +119,7 @@ const FRAMES = [
     justify-content: space-between;
     padding: 11px 16px;
     border-bottom: 1px solid var(--color-rule);
-    font-family: var(--font-app-mono);
-    font-size: 11px;
+    font-size: 13px;
     color: var(--color-ink-soft);
   }
   .board-body {
@@ -121,7 +138,16 @@ const FRAMES = [
     gap: 20px clamp(12px, 3vw, 24px);
   }
   .item {
+    position: relative;
+    display: block;
     min-width: 0;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+  }
+  .item:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 6px;
   }
   .caption {
     display: flex;
@@ -134,7 +160,7 @@ const FRAMES = [
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--color-ink-soft);
   }
   .tag {
@@ -143,26 +169,11 @@ const FRAMES = [
     border-radius: 5px;
     background-color: var(--color-recess);
     color: var(--color-ink-soft);
-    font-family: var(--font-app-mono);
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.5;
   }
   .frame {
     position: relative;
-  }
-  /* Two older versions under the current one, each a step darker. */
-  .frame.stacked::before,
-  .frame.stacked::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-md);
-    background-color: color-mix(in oklab, var(--paper) 88%, var(--color-ink-soft));
-    transform: translate(4px, 4px);
-  }
-  .frame.stacked::before {
-    background-color: color-mix(in oklab, var(--paper) 76%, var(--color-ink-soft));
-    transform: translate(8px, 8px);
   }
   .paper {
     position: relative;
@@ -193,6 +204,10 @@ const FRAMES = [
     height: 7px;
     background-color: color-mix(in oklab, var(--paper-ink) 70%, var(--paper));
   }
+  .bar.wide {
+    width: 78%;
+    height: 12px;
+  }
   .bar.short {
     width: 40%;
     align-self: center;
@@ -222,6 +237,22 @@ const FRAMES = [
     border-radius: 50%;
     border: 3px solid color-mix(in oklab, var(--paper-ink) 55%, var(--paper));
     border-left-color: var(--paper-line);
+  }
+  .days {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-top: 6px;
+    align-content: start;
+  }
+  .days i {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background-color: var(--paper-line);
+  }
+  .days i.on {
+    background-color: color-mix(in oklab, var(--paper-ink) 70%, var(--paper));
   }
   .plans {
     flex: 1;
@@ -276,8 +307,7 @@ const FRAMES = [
     display: block;
     margin-top: 14px;
     color: var(--color-ink-soft);
-    font-family: var(--font-app-mono);
-    font-size: 10px;
+    font-size: 13px;
     overflow-wrap: anywhere;
   }
   .notice {
@@ -291,5 +321,98 @@ const FRAMES = [
     color: var(--color-ground);
     font-size: 12px;
     animation-delay: 700ms;
+  }
+
+  /* The fan. Sheets sit behind the card: older versions stacked a step apart,
+     or the other pages of a prototype peeking over its top edge. On hover with
+     a fine pointer, or on keyboard focus, they spread the way the app's
+     version stack and page tease do. Transform and opacity only, 280ms in and
+     200ms out on Canon's curve, and a transition that is reversed mid-way
+     continues from where it is. */
+  .sheet {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background-color: color-mix(in oklab, var(--paper) 88%, var(--color-ink-soft));
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.06);
+    transform: var(--rest);
+    transform-origin: 50% 80%;
+    transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .sheet .bar.title {
+    height: 5px;
+  }
+  .item[data-fan='versions'] .sheet.a {
+    --rest: translate(4px, 4px);
+    --out: translate(-10%, 4%) rotate(-6deg);
+  }
+  .item[data-fan='versions'] .sheet.b {
+    --rest: translate(8px, 8px);
+    --out: translate(10%, 6%) rotate(6deg);
+    background-color: color-mix(in oklab, var(--paper) 76%, var(--color-ink-soft));
+  }
+  .item[data-fan='pages'] .sheet.a {
+    --rest: translate(0, -5px) scale(0.94);
+    --out: translate(-9%, -9%) rotate(-6deg);
+  }
+  .item[data-fan='pages'] .sheet.b {
+    --rest: translate(0, -9px) scale(0.88);
+    --out: translate(9%, -9%) rotate(6deg);
+  }
+  .item[data-fan='pages'] .sheet.c {
+    --rest: translate(0, -13px) scale(0.82);
+    --out: translate(0, -17%) rotate(0.001deg);
+    background-color: color-mix(in oklab, var(--paper) 80%, var(--color-ink-soft));
+  }
+  .item:focus-visible {
+    z-index: 3;
+  }
+  .item:focus-visible .sheet {
+    transform: var(--out);
+    transition-duration: 280ms;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .item:hover {
+      z-index: 3;
+    }
+    .item:hover .sheet {
+      transform: var(--out);
+      transition-duration: 280ms;
+    }
+  }
+
+  /* The edge ring is the reduced-motion answer to the fan: no sheet moves,
+     the card's edge fades in instead. */
+  .edge {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sheet {
+      transform: var(--rest) !important;
+      transition: none;
+    }
+    .edge {
+      display: block;
+      position: absolute;
+      z-index: 2;
+      inset: -3px;
+      border-radius: calc(var(--radius-md) + 3px);
+      box-shadow: 0 0 0 2px var(--color-ink-soft);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms cubic-bezier(0.2, 0, 0, 1);
+    }
+    .item:focus-visible .edge {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) and (hover: hover) and (pointer: fine) {
+    .item:hover .edge {
+      opacity: 1;
+    }
   }
 </style>
