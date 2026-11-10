@@ -588,14 +588,22 @@ summary,
   background: var(--brand-orange);
 }
 
-/* The name beside the dot shows on hover with a fine pointer and on keyboard
-   focus, selected the way a frame is on the board: the dot presses like a
-   click, a hairline box drags out from its top left corner to the bottom
-   right, then the corner handles and the name settle. Leaving plays it
-   backwards: the name goes, then the handles, then the box springs back
-   into its corner on Canon's one spring and fades as it settles. These base rules hold the leaving timings; the hover and
-   focus rules below hold the arriving ones. It is hidden from the
-   accessibility tree, since the link already carries "Canon, home". */
+/* The name beside the dot answers the pointer in two ways, taking turns.
+   Odd hovers play a selection, the way a frame is selected on the board: the
+   dot presses, a hairline box drags out from its top left corner, then the
+   corner handles and the name settle. Even hovers lay the five letters of
+   canon out as a small flowchart, nodes drawn in one after another and joined
+   by thin connectors, the o as the orange dot. Keyboard focus plays the
+   selection only.
+
+   Everything here is a transition on transform and opacity, on Canon's one
+   curve, with the same duration in both directions. Leaving runs the same
+   moves backwards with the delays mirrored, and because a transition always
+   continues from where the value is, pointing back in mid-exit carries on
+   from there instead of restarting. The script only sets data-show on the
+   link (select or flow) while a fine pointer is over it. The name and the
+   flowchart are hidden from the accessibility tree, since the link already
+   carries "Canon, home". */
 .home-mark-name {
   position: relative;
   padding: 1px 6px;
@@ -603,7 +611,10 @@ summary,
 .home-mark-name .home-mark-word {
   display: block;
   opacity: 0;
-  transition: opacity 80ms cubic-bezier(0.2, 0, 0, 1);
+  transform: translateX(-4px);
+  transition:
+    opacity 200ms cubic-bezier(0.2, 0, 0, 1) 0ms,
+    transform 280ms cubic-bezier(0.2, 0, 0, 1) 0ms;
 }
 .home-mark-name::before,
 .home-mark-name::after {
@@ -611,17 +622,16 @@ summary,
   position: absolute;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 80ms cubic-bezier(0.2, 0, 0, 1) 40ms;
 }
+/* The box. */
 .home-mark-name::before {
   inset: 0;
   border: 1px solid var(--brand-orange);
   transform-origin: top left;
   transform: scale(0.08, 0.2);
-  transition: transform 360ms var(--ease-glide) 60ms, opacity 80ms cubic-bezier(0.2, 0, 0, 1) 300ms;
-}
-@keyframes home-mark-click {
-  40% { transform: scale(0.8); }
+  transition:
+    opacity 200ms cubic-bezier(0.2, 0, 0, 1) 80ms,
+    transform 320ms cubic-bezier(0.2, 0, 0, 1) 80ms;
 }
 /* Four 5px handles, one on each corner of the box. */
 .home-mark-name::after {
@@ -632,38 +642,112 @@ summary,
     var(--h) top right / 5px 5px no-repeat,
     var(--h) bottom left / 5px 5px no-repeat,
     var(--h) bottom right / 5px 5px no-repeat;
+  transform: scale(0.9);
+  transition:
+    opacity 200ms cubic-bezier(0.2, 0, 0, 1) 40ms,
+    transform 280ms cubic-bezier(0.2, 0, 0, 1) 40ms;
 }
-/* The settled state, and the order it settles in: click, drag, handles, name. */
-.home-mark:focus-visible .wordmark-dot { animation: home-mark-click 180ms cubic-bezier(0.2, 0, 0, 1); }
+.home-mark .wordmark-dot {
+  transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* The flowchart: nine pieces, indexed in drawing order by --i, five nodes and
+   the four connectors between them. */
+.home-mark-flow {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  translate: 0 -50%;
+  pointer-events: none;
+}
+.home-mark-flow > * {
+  flex: none;
+  opacity: 0;
+  transition:
+    opacity 200ms cubic-bezier(0.2, 0, 0, 1) calc((8 - var(--i)) * 24ms),
+    transform 280ms cubic-bezier(0.2, 0, 0, 1) calc((8 - var(--i)) * 24ms);
+}
+.home-mark-flow .fn {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding-inline: 5px;
+  border-radius: 6px;
+  background-color: var(--color-panel);
+  box-shadow: inset 0 0 0 1px var(--color-input-border);
+  color: var(--color-ink);
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1;
+  transform: scale(0.7);
+}
+.home-mark-flow .fn.hub {
+  min-width: 0;
+  width: 22px;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+.home-mark-flow .fn.hub::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--brand-orange);
+}
+.home-mark-flow .fc {
+  width: 10px;
+  height: 1px;
+  background-color: var(--color-input-border);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* Settled: selection, by keyboard focus or an odd hover. The order it settles
+   in is click, drag, handles, name. */
+.home-mark:focus-visible .wordmark-dot,
+.home-mark[data-show='select'] .wordmark-dot {
+  transform: scale(0.86);
+}
 .home-mark:focus-visible .home-mark-name::before,
-.home-mark:focus-visible .home-mark-name::after,
-.home-mark:focus-visible .home-mark-word {
+.home-mark[data-show='select'] .home-mark-name::before {
   opacity: 1;
   transform: none;
+  transition-delay: 0ms;
 }
-.home-mark:focus-visible .home-mark-name::before {
-  transition: opacity 60ms cubic-bezier(0.2, 0, 0, 1) 120ms, transform 260ms cubic-bezier(0.2, 0, 0, 1) 120ms;
+.home-mark:focus-visible .home-mark-name::after,
+.home-mark[data-show='select'] .home-mark-name::after {
+  opacity: 1;
+  transform: none;
+  transition-delay: 200ms;
 }
-.home-mark:focus-visible .home-mark-name::after { transition-delay: 340ms; }
-.home-mark:focus-visible .home-mark-word { transition-delay: 360ms; }
-@media (hover: hover) and (pointer: fine) {
-  .home-mark:hover .wordmark-dot { animation: home-mark-click 180ms cubic-bezier(0.2, 0, 0, 1); }
-  .home-mark:hover .home-mark-name::before,
-  .home-mark:hover .home-mark-name::after,
-  .home-mark:hover .home-mark-word {
-    opacity: 1;
-    transform: none;
-  }
-  .home-mark:hover .home-mark-name::before {
-    transition: opacity 60ms cubic-bezier(0.2, 0, 0, 1) 120ms, transform 260ms cubic-bezier(0.2, 0, 0, 1) 120ms;
-  }
-  .home-mark:hover .home-mark-name::after { transition-delay: 340ms; }
-  .home-mark:hover .home-mark-word { transition-delay: 360ms; }
+.home-mark:focus-visible .home-mark-word,
+.home-mark[data-show='select'] .home-mark-word {
+  opacity: 1;
+  transform: none;
+  transition-delay: 240ms;
 }
-/* Reduced motion keeps the fades and drops the click and the drag. */
+/* Settled: the flowchart, on an even hover. */
+.home-mark[data-show='flow'] .home-mark-flow > * {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--i) * 45ms);
+}
+
+/* Reduced motion keeps the fades and drops every movement. */
 @media (prefers-reduced-motion: reduce) {
-  .home-mark .wordmark-dot { animation: none !important; }
-  .home-mark-name::before { transform: none; }
+  .home-mark .wordmark-dot,
+  .home-mark-name::before,
+  .home-mark-name::after,
+  .home-mark-word,
+  .home-mark-flow > * {
+    transform: none !important;
+    transition-duration: 160ms !important;
+    transition-delay: 0ms !important;
+  }
 }
 
 /* ── The rail ─────────────────────────────────────────────────────────────
@@ -728,7 +812,14 @@ summary,
   color: #EDEBE6;
   will-change: transform;
 }
+/* The dot takes you back to the top, and says so. On hover with a fine pointer
+   or on keyboard focus it lifts a little, an up arrow in ink fades in inside
+   it and one soft ring leaves the dot and fades. Pressing scales it to 0.97.
+   On click the dot rises a short way while the page starts to scroll (the
+   script adds .rising). Transform and opacity only; reduced motion keeps the
+   arrow's fade and moves nothing. */
 .closing-strip .giant-dot {
+  position: relative;
   flex: none;
   display: inline-block;
   width: 0.5em;
@@ -738,9 +829,65 @@ summary,
   background: var(--brand-orange);
   transition: transform 240ms cubic-bezier(0.2, 0, 0, 1);
 }
+.closing-strip .giant-arrow {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 34%;
+  height: 34%;
+  fill: none;
+  stroke: #1A1918;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transition: opacity 200ms cubic-bezier(0.2, 0, 0, 1);
+  pointer-events: none;
+}
+.closing-strip .giant-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 0.012em solid var(--brand-orange);
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes giant-ring {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.32);
+  }
+}
+.closing-strip .giant-dot:focus-visible .giant-arrow {
+  opacity: 1;
+}
+.closing-strip .giant-dot:focus-visible {
+  transform: translateY(-0.04em);
+}
+.closing-strip .giant-dot:active {
+  transform: translateY(-0.04em) scale(0.97);
+}
+.closing-strip .giant-dot.rising {
+  transform: translateY(-0.16em);
+  transition-duration: 360ms;
+}
 @media (hover: hover) and (pointer: fine) {
   .closing-strip .giant-dot:hover {
     transform: translateY(-0.04em);
+  }
+  .closing-strip .giant-dot:hover .giant-arrow {
+    opacity: 1;
+  }
+  .closing-strip .giant-dot:hover::after {
+    animation: giant-ring 700ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  .closing-strip .giant-dot:active:hover {
+    transform: translateY(-0.04em) scale(0.97);
   }
 }
 .closing-strip .giant-dot:focus-visible {
@@ -748,7 +895,16 @@ summary,
   outline-offset: 0.06em;
 }
 @media (prefers-reduced-motion: reduce) {
-  .closing-strip .giant-dot { transition: none; }
+  .closing-strip .giant-dot {
+    transform: none !important;
+    transition-duration: 0s !important;
+  }
+  .closing-strip .giant-dot::after {
+    animation: none !important;
+  }
+  .closing-strip .giant-arrow {
+    transition-duration: 160ms;
+  }
 }
 .closing-strip .meta {
   margin-top: 18px;

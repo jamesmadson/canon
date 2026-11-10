@@ -4,6 +4,9 @@
  * drifting slowly as it comes into view. Its o is the orange dot, and the dot
  * takes you back to the top.
  *
+ * Hovering the dot lifts it, fades an up arrow in and sends out one soft ring;
+ * clicking it makes it rise as the page scrolls.
+ *
  * The drift is transform and opacity only, driven from scroll progress. The
  * script does not run at all under prefers-reduced-motion, so what that reader
  * gets is the authored static state rather than a stopped animation.
@@ -12,7 +15,7 @@
 
 <section class="closing-strip" aria-label="Canon" data-closing-strip>
   <p class="giant" data-closing-giant>
-    <span aria-hidden="true">can</span><a href="#" class="giant-dot" aria-label="Back to top" data-to-top></a><span aria-hidden="true">n</span>
+    <span aria-hidden="true">can</span><a href="#" class="giant-dot" aria-label="Back to top" data-to-top><svg class="giant-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" /></svg></a><span aria-hidden="true">n</span>
   </p>
   <p class="meta">Every prototype · from any tool · in one place</p>
 </section>
@@ -22,8 +25,14 @@
   const giant = document.querySelector<HTMLElement>('[data-closing-giant]');
   const still = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  document.querySelector('[data-to-top]')?.addEventListener('click', (e) => {
+  const toTop = document.querySelector<HTMLElement>('[data-to-top]');
+  toTop?.addEventListener('click', (e) => {
     e.preventDefault();
+    // The dot rises a short way as the page starts to scroll, then settles.
+    if (!still.matches) {
+      toTop.classList.add('rising');
+      setTimeout(() => toTop.classList.remove('rising'), 450);
+    }
     window.scrollTo({ top: 0, behavior: still.matches ? 'auto' : 'smooth' });
     document.querySelector<HTMLElement>('a[href], button')?.focus({ preventScroll: true });
   });

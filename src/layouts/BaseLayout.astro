@@ -75,7 +75,12 @@ const isCurrent = (href: string) =>
           class="home-mark flex min-h-11 min-w-11 items-center gap-2.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
         >
           <Wordmark size={16} />
-          <span aria-hidden="true" class="home-mark-name text-[15px] text-ink"><span class="home-mark-word">Canon</span></span>
+          <span aria-hidden="true" class="home-mark-name text-[15px] text-ink">
+            <span class="home-mark-word">Canon</span>
+            <span class="home-mark-flow">
+              <i class="fn" style="--i:0">c</i><b class="fc" style="--i:1"></b><i class="fn" style="--i:2">a</i><b class="fc" style="--i:3"></b><i class="fn" style="--i:4">n</i><b class="fc" style="--i:5"></b><i class="fn hub" style="--i:6"></i><b class="fc" style="--i:7"></b><i class="fn" style="--i:8">n</i>
+            </span>
+          </span>
         </a>
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
           <nav aria-label="Sections" class="-mx-2 flex flex-wrap items-center text-sm">
@@ -120,5 +125,26 @@ const isCurrent = (href: string) =>
       </div>
     </footer>
     <slot name="after-footer" />
+    <script>
+      // The logo answers a fine pointer in turns: the first hover of the page
+      // session plays the selection, the next lays out the letters as a
+      // flowchart, and so on. Pointing back in before the last one has
+      // finished leaving keeps the same one, so it carries on from where it is.
+      const mark = document.querySelector<HTMLElement>('.home-mark');
+      if (mark) {
+        let count = 0;
+        let left = 0;
+        let last = 'select';
+        mark.addEventListener('pointerenter', (e) => {
+          if (e.pointerType !== 'mouse') return;
+          if (performance.now() - left > 600) last = count++ % 2 === 0 ? 'select' : 'flow';
+          mark.dataset.show = last;
+        });
+        mark.addEventListener('pointerleave', () => {
+          left = performance.now();
+          delete mark.dataset.show;
+        });
+      }
+    </script>
   </body>
 </html>
