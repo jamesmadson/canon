@@ -394,8 +394,9 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
       <button class="btn ghost" onClick=${() => setPicked(new Set())}>Clear</button>
     </div>`}
 
-    ${all.length === 0 && html`<div class="empty-board" style="position:static;padding:80px 0"><div>
-      <h2>No prototypes yet</h2><p>Drop HTML files, zips or folders anywhere here.</p>
+    <div class="drop-hint" data-drop-hint><b>Drop a prototype here:</b> HTML, a zip or a folder</div>
+    ${all.length === 0 && html`<div class="empty-board" style="position:static;padding:40px 0"><div>
+      <h2>No prototypes yet</h2><p>Or use Add, above, to pick files or link a folder.</p>
     </div></div>`}
     ${all.length > 0 && items.length === 0 && html`<div class="empty">Nothing matches. <button class="btn ghost" onClick=${() => setFilter({ source: 'all' })}>Clear filters</button></div>`}
 

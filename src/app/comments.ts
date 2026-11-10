@@ -1,7 +1,7 @@
 import { useState } from 'preact/hooks';
 import * as store from './store';
 import type { Note } from './db';
-import { initials, personColor } from './lib/library';
+import { initials, personTone } from './lib/library';
 import { html, Icon, ago, pageName } from './shared';
 
 /** Where a new thread will go, plus where on screen to open the composer. */
@@ -11,13 +11,13 @@ export const isComment = (n: Note) => n.kind === 'comment';
 const authorOf = (n: Note) => n.author || 'You';
 
 export const Avatar = ({ name, size = 22 }: { name: string; size?: number }) =>
-  html`<span class="avatar" style=${{ width: size, height: size, background: personColor(name), fontSize: size * 0.42 }}>${initials(name)}</span>`;
+  html`<span class=${`avatar${personTone(name) === 'pin' ? ' alt' : ''}`} style=${{ width: size, height: size, fontSize: size * 0.42 }}>${initials(name)}</span>`;
 
 /** Comments are round with the author's initials, Figma style; older notes without an author are numbered. */
 export function Pin({ n, note, left, top, active, onOpen }: { n: number; note: Note; left: number; top: number; active?: boolean; onOpen: () => void }) {
   const comment = isComment(note);
-  const cls = `pin${comment ? ' comment' : ''}${note.source === 'preview' && !comment ? ' from-preview' : ''}${note.resolved ? ' resolved' : ''}${active ? ' active' : ''}`;
-  const style = comment ? { left, top, background: personColor(authorOf(note)) } : { left, top };
+  const cls = `pin${comment ? ` comment${personTone(authorOf(note)) === 'pin' ? ' alt' : ''}` : ''}${note.source === 'preview' && !comment ? ' from-preview' : ''}${note.resolved ? ' resolved' : ''}${active ? ' active' : ''}`;
+  const style = comment ? { left, top } : { left, top };
   return html`<button class=${cls} style=${style} title=${note.said}
     onPointerDown=${(e: Event) => { e.stopPropagation(); onOpen(); }}>${comment ? initials(authorOf(note)) : n}${(note.replies?.length ?? 0) > 0 && html`<i>${note.replies!.length + 1}</i>`}</button>`;
 }

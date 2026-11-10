@@ -37,10 +37,13 @@ export function initials(name: string): string {
   return parts.slice(0, 2).map((p) => p[0].toUpperCase()).join('');
 }
 
-/** A stable colour per person, from a short palette that reads on dark. */
-export function personColor(name: string): string {
-  const palette = ['#4d8dff', '#f26d5b', '#3ccf7f', '#c084fc', '#f5b041', '#22c3d6'];
+/**
+ * A stable look per person, in Canon's colours only: orange with ink initials,
+ * or the pin colour with white ones. The disc carries the initials, so two
+ * people are never told apart by colour alone.
+ */
+export function personTone(name: string): 'orange' | 'pin' {
   let h = 0;
   for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return palette[h % palette.length];
+  return h % 2 === 0 ? 'orange' : 'pin';
 }
