@@ -61,11 +61,11 @@ const ADDRESS = 'james@jamesmadson.me';
           see, open and keep in&nbsp;order.
         </p>
         <div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3">
-          <a href={withBase('/app/')} class="btn btn-primary">Try it now</a>
+          <a href={withBase('/app/#try')} class="btn btn-primary">Try it now</a>
           <a href="#agents" class="tick-bar rounded-sm text-sm">Connect an agent</a>
         </div>
-        <p class="mt-5 font-mono text-[11px] leading-[1.6] tracking-[0.08em] text-ink-soft">
-          Runs in your browser. Saves to a folder on your machine. Nothing is&nbsp;uploaded.
+        <p class="mt-6 max-w-[44ch] text-[16px] leading-[1.5] text-ink-soft text-pretty">
+          Opens with a sample project. Drop in your own HTML, zips or folders. Nothing is&nbsp;uploaded.
         </p>
       </div>
       <div class="min-w-0 lg:col-span-6">
@@ -74,12 +74,12 @@ const ADDRESS = 'james@jamesmadson.me';
     </div>
   </section>
 
-  {/* 2. Three ideas, one screen each, ruled off like a contents page. */}
+  {/* 2. Three ideas, one screen each. Space does the grouping. */}
   <section class="mx-auto max-w-6xl px-6 pb-20 sm:pb-28" aria-label="What Canon does">
     {
       FEATURES.map((f, i) => (
         <article
-          class:list={['feature grid grid-cols-1 items-start gap-6 pt-10 sm:pt-12 lg:grid-cols-12 lg:gap-12', i > 0 && 'mt-16 sm:mt-24']}
+          class:list={['feature grid grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-12', i > 0 && 'mt-16 sm:mt-24']}
           aria-labelledby={`feature-${f.shot}`}
         >
           <div class="min-w-0 lg:col-span-4">
@@ -111,12 +111,13 @@ const ADDRESS = 'james@jamesmadson.me';
   {/* 4. The skills, for the same agent. */}
   <section id="skills" class="mx-auto max-w-6xl scroll-mt-8 px-6 pb-24 sm:pb-32" aria-labelledby="skills-heading">
     <div class="max-w-3xl">
-      <h2 id="skills-heading" class="display-lg max-w-[20ch]">Skills for each step of the&nbsp;work.</h2>
+      <p class="display-xl" aria-hidden="true">Skills</p>
+      <h2 id="skills-heading" class="display-lg mt-8 max-w-[20ch]">Skills for each step of the&nbsp;work.</h2>
       <p class="mt-5 max-w-[44ch] text-[18px] leading-[1.45] text-ink-soft text-pretty">
         Canon installs four skills your agent can follow. They go in the order the work does, from what people told you to the turn you want&nbsp;back.
       </p>
     </div>
-    <ol class="mt-10 border-b border-rule">
+    <ol class="mt-10">
       {skills.map((s, i) => (
         <SkillStep slug={s.data.slug} name={s.data.name} story={s.data.story} step={SKILL_STEPS[s.data.slug]} flip={i % 2 === 1} />
       ))}
@@ -134,7 +135,7 @@ const ADDRESS = 'james@jamesmadson.me';
         Canon is early. I want to hear what works and what gets in the&nbsp;way.
       </p>
       <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
-        <a href={withBase('/app/')} class="btn btn-primary">Try it now</a>
+        <a href={withBase('/app/#try')} class="btn btn-primary">Try it now</a>
         <a href={`mailto:${ADDRESS}?subject=Canon`} class="mail select-all font-mono text-[13px] text-ink-soft">
           {ADDRESS}
         </a>
@@ -149,9 +150,6 @@ const ADDRESS = 'james@jamesmadson.me';
 </BaseLayout>
 
 <style>
-  .feature {
-    border-top: 1px solid var(--color-rule);
-  }
   .shot {
     border-radius: var(--radius-lg);
     /* The hairline. An inset shadow would paint under the image, so it is an

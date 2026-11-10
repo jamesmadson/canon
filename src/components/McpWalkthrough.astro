@@ -45,6 +45,27 @@ const MOCK_ALT = [
   </div>
 
   <div class="carousel mt-10" data-mcp-carousel>
+    <div class="controls" data-mcp-nav>
+      <div class="tabs" role="tablist" aria-label="Steps">
+        {STEPS.map((s, i) => (
+          <button
+            type="button"
+            class="tab"
+            role="tab"
+            id={`mcp-tab-${i}`}
+            aria-controls={`mcp-scene-${i}`}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? 0 : -1}
+            data-step-btn={i}
+          >
+            <span class="tab-cap">{s.title}</span>
+            <span class="track"><span class="fill" data-fill></span></span>
+          </button>
+        ))}
+      </div>
+      <button type="button" class="btn btn-quiet toggle" data-mcp-toggle aria-pressed="false">Pause</button>
+    </div>
+
     <div class="panel" data-mcp-panel>
       <div class="stage" aria-live="off" data-mcp-stage>
         {STEPS.map((s, i) => (
@@ -144,27 +165,6 @@ const MOCK_ALT = [
           </article>
         ))}
       </div>
-    </div>
-
-    <div class="controls" data-mcp-nav>
-      <div class="tabs" role="tablist" aria-label="Steps">
-        {STEPS.map((s, i) => (
-          <button
-            type="button"
-            class="tab"
-            role="tab"
-            id={`mcp-tab-${i}`}
-            aria-controls={`mcp-scene-${i}`}
-            aria-selected={i === 0 ? 'true' : 'false'}
-            tabindex={i === 0 ? 0 : -1}
-            data-step-btn={i}
-          >
-            <span class="tab-cap">{s.title}</span>
-            <span class="track"><span class="fill" data-fill></span></span>
-          </button>
-        ))}
-      </div>
-      <button type="button" class="btn btn-quiet toggle" data-mcp-toggle aria-pressed="false">Pause</button>
     </div>
   </div>
 </section>
@@ -378,30 +378,44 @@ const MOCK_ALT = [
     font-size: 12px;
   }
 
-  /* The steps under the panel: a caption and a thin track per step. The
+  /* The steps above the panel: a caption and a thin track per step. The
      active track fills over the interval; the fill animates transform only,
      and its end is what advances the carousel. */
   .controls {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-top: 10px;
+    margin-bottom: 14px;
   }
   .tabs {
     flex: 1;
     min-width: 0;
     display: flex;
-    gap: 8px;
+    gap: 16px;
+  }
+  @media (max-width: 479px) {
+    .controls {
+      flex-wrap: wrap;
+    }
+    .tabs {
+      flex-basis: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 16px;
+    }
+    .tab {
+      max-width: none;
+    }
   }
   .tab {
     flex: 1;
     min-width: 0;
-    max-width: 140px;
+    max-width: 180px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 7px;
-    min-height: 48px;
+    gap: 8px;
+    min-height: 52px;
     padding: 0;
     border: 0;
     border-radius: 4px;
@@ -425,8 +439,8 @@ const MOCK_ALT = [
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 12px;
-    line-height: 1.2;
+    font-size: 16px;
+    line-height: 1.3;
   }
   .track {
     position: relative;
@@ -450,7 +464,7 @@ const MOCK_ALT = [
     flex-shrink: 0;
     min-width: 44px;
     padding-inline: 12px;
-    font-size: 13px;
+    font-size: 16px;
   }
 
   [data-mcp]:not(.js) [data-mcp-nav] {
