@@ -1,48 +1,48 @@
 #!/usr/bin/env node
 /**
- * Argv in, exit code out. Everything else lives in src.
+ * Argv in, exit code out. The package does one thing: canon mcp.
  */
 
 import { readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-import { init, index, note, open, USAGE } from '../src/commands.js';
 import { mcp } from '../src/mcp/index.js';
 
-const COMMANDS = { init, index, note, open, mcp };
+const COMMANDS = { mcp };
+
+const USAGE = [
+  'canon connects your coding agent to the Canon boards open in your browser.',
+  '',
+  'Usage: canon mcp [--dev [--dev-port N]]',
+  '',
+  '  mcp                  serve Canon to an agent over stdio (MCP)',
+  '    --dev              talk to a Canon app on http://localhost:4321',
+  '    --dev-port N       use another local port with --dev',
+  '',
+  '  --help               this text',
+  '  --version            the version',
+  '',
+  'Set up: claude mcp add canon -- npx -y usecanon mcp',
+  'It runs on your machine. Nothing is uploaded.',
+].join('\n');
 
 /** The flags that take a value, and the key each one lands under. */
-const VALUE_FLAGS = { '--about': 'about', '--said': 'said', '--as': 'as', '--dev-port': 'devPort' };
+const VALUE_FLAGS = { '--dev-port': 'devPort' };
 
 /**
  * A tiny flag reader. A CLI framework would be a dependency, and there are none.
  *
  * A value flag at the end of the line, or followed by another flag, has no
- * value. Taking the next token anyway turns `canon note --about --said "x"`
- * into an entry filed about the literal string "--said", so a typo becomes a
- * wrong record entry. The flag is named and the run stops instead.
- *
- * Only a leading `--` disqualifies a value, so a quote that opens with a dash
- * is still a quote.
+ * value. The flag is named and the run stops rather than taking the next flag
+ * as its value.
  */
 export function parseArgv(argv) {
-  const parsed = {
-    command: null,
-    all: false,
-    choose: false,
-    noOpen: false,
-    dev: false,
-    help: false,
-    version: false,
-  };
+  const parsed = { command: null, dev: false, help: false, version: false };
   const rest = [];
   for (let i = 0; i < argv.length; i += 1) {
     const token = argv[i];
     if (token === '--help' || token === '-h') parsed.help = true;
     else if (token === '--version' || token === '-v') parsed.version = true;
-    else if (token === '--all') parsed.all = true;
-    else if (token === '--choose') parsed.choose = true;
-    else if (token === '--no-open') parsed.noOpen = true;
     else if (token === '--dev') parsed.dev = true;
     else if (VALUE_FLAGS[token]) {
       const value = argv[i + 1];
@@ -87,7 +87,8 @@ export async function main(argv, io) {
   }
   const command = COMMANDS[parsed.command];
   if (!command) {
-    io.err(`${parsed.command} is not a command. Run canon --help for the list.`);
+    io.err(`${parsed.command} is not a command. canon mcp is the only one.`);
+    io.err(USAGE);
     return 1;
   }
   return command(parsed, io);
@@ -98,8 +99,6 @@ export async function main(argv, io) {
  *
  * A global install puts a symlink on PATH and points it at the real file under
  * node_modules, so argv[1] is the link while import.meta.url is the target.
- * Comparing the two as written strings is false in exactly the case every
- * person installing the package lands in, which left the whole CLI silent.
  * Both sides go through realpath so the link and its target compare equal.
  */
 function wasRun() {

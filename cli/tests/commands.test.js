@@ -15,7 +15,7 @@ import { PassThrough, Writable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 
 import { mcp } from '../src/mcp/index.js';
-import { main, parseArgv } from '../bin/canon.js';
+import { main, parseArgv } from '../src/legacy-cli.js';
 import { sharedSegments, parseSelection, orderCandidates, today } from '../src/commands.js';
 import { openerFor } from '../src/opener.js';
 import { listBranches } from '../src/git.js';
@@ -824,7 +824,7 @@ describe('openerFor', () => {
 describe('the executable', () => {
   it('runs help without throwing', () => {
     const out = execFileSync('node', [binPath, '--help'], { encoding: 'utf8' });
-    expect(out).toContain('Usage: canon');
+    expect(out).toContain('Usage: canon mcp');
   });
 
   /**
@@ -840,16 +840,20 @@ describe('the executable', () => {
     expect(execFileSync('node', [link, '--version'], { encoding: 'utf8' })).toMatch(
       /^\d+\.\d+\.\d+\n$/,
     );
-    expect(execFileSync('node', [link, '--help'], { encoding: 'utf8' })).toContain('Usage: canon');
+    expect(execFileSync('node', [link, '--help'], { encoding: 'utf8' })).toContain('Usage: canon mcp');
   });
 
-  it('runs every command end to end in a scratch repository', () => {
+  it('runs every parked command end to end in a scratch repository', async () => {
     const root = scratchRepo(['proto/ring/base', 'proto/ring/alt']);
-    const run = (args) => execFileSync('node', [binPath, ...args], { cwd: root, encoding: 'utf8' });
-    expect(run(['init'])).toContain('Next: canon index');
-    expect(run(['index', '--all'])).toContain('families');
-    expect(run(['note', '--about', 'ring', '--said', 'a quote'])).toContain('Wrote');
-    expect(run(['open', '--no-open'])).toContain('Left it closed');
+    const run = async (args) => {
+      const io = capture(root);
+      expect(await main(args, io)).toBe(0);
+      return io.text();
+    };
+    expect(await run(['init'])).toContain('Next: canon index');
+    expect(await run(['index', '--all'])).toContain('families');
+    expect(await run(['note', '--about', 'ring', '--said', 'a quote'])).toContain('Wrote');
+    expect(await run(['open', '--no-open'])).toContain('Left it closed');
     mkdirSync(join(root, '.canon'), { recursive: true });
   });
 });

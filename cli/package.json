@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Canon for coding agents: a local MCP server that lets your agent put prototypes on the Canon boards open in your browser.",
   "type": "module",
-  "license": "LicenseRef-FSL-1.1-ALv2",
+  "license": "MIT",
   "author": "James Madson",
   "bin": {
     "canon": "./bin/canon.js"
@@ -13,7 +13,7 @@
   },
   "files": [
     "bin",
-    "src",
+    "src/mcp",
     "LICENSE"
   ],
   "keywords": [
