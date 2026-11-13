@@ -4,7 +4,7 @@ Canon is a board in your browser for the prototypes your coding agent builds.
 You drop in HTML, zips or folders, compare versions side by side, and nothing
 is uploaded.
 
-![A Canon board: phone and desktop prototypes on a dark canvas, with a multi-page site fanning its other pages out from behind it](public/shots/board.jpg)
+![Canon’s library: six prototypes for phone and desktop, with a place to drop in your own](public/shots/library.jpg)
 
 ## Try it
 
