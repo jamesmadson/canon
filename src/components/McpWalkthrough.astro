@@ -39,8 +39,9 @@ const MOCK_ALT = [
       Your agent runs it as <code class="font-mono text-[15px] text-ink">canon mcp</code>. Canon points at your
       prototype where it already runs. It does not host&nbsp;it.
     </p>
-    <p class="mt-4 font-mono text-[11px] leading-[1.6] tracking-[0.08em] text-ink-soft">
-      Coming with the alpha. Not released&nbsp;yet.
+    <pre class="setup mt-6 max-w-[44ch]" tabindex="0" aria-label="The command that connects Claude Code to Canon"><code>claude mcp add canon -- npx -y usecanon mcp</code></pre>
+    <p class="mt-3 max-w-[44ch] text-[14px] leading-[1.45] text-ink-soft">
+      For Codex and Cursor, see the <a class="underline" href="https://github.com/jamesmadson/canon#connect-your-agent">README</a>.
     </p>
   </div>
 
@@ -170,6 +171,20 @@ const MOCK_ALT = [
 </section>
 
 <style>
+  .setup {
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-recess);
+    color: var(--color-ink);
+    font-family: var(--font-app-mono);
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+  .setup:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
   .panel {
     overflow: hidden;
     border-radius: var(--radius-lg);

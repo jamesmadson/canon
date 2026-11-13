@@ -43,7 +43,6 @@ const FEATURES = [
   },
 ];
 
-const ADDRESS = 'james@jamesmadson.me';
 ---
 
 <BaseLayout
@@ -136,8 +135,8 @@ const ADDRESS = 'james@jamesmadson.me';
       </p>
       <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
         <a href={withBase('/app/#try')} class="btn btn-primary">Try it now</a>
-        <a href={`mailto:${ADDRESS}?subject=Canon`} class="mail select-all font-mono text-[13px] text-ink-soft">
-          {ADDRESS}
+        <a href="https://github.com/jamesmadson/canon/issues" class="mail text-[15px] text-ink-soft underline">
+          Send feedback on&nbsp;GitHub
         </a>
       </div>
     </div>
