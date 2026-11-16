@@ -185,11 +185,14 @@ describe('review fixes', () => {
   const token = (name: string, from = app) => from.match(new RegExp(`${name}:\\s*(#[0-9A-Fa-f]{6})`))![1];
 
   // Mutation: darken --faint, or lighten the rail's hover fill, until small text drops under 4.5:1.
-  it('keeps faint and muted text at 4.5:1 on every app surface, rail overrides included', () => {
-    const rail = app.slice(app.indexOf('.rail {'), app.indexOf('}', app.indexOf('.rail {')));
-    const surfaces = [token('--bg'), token('--panel'), token('--raised'), token('--hover'), token('--panel', rail), token('--raised', rail), token('--hover', rail)];
-    for (const text of [token('--faint'), token('--soft')]) {
-      for (const s of surfaces) expect(ratio(text, s), `${text} on ${s}`).toBeGreaterThanOrEqual(4.5);
+  it('keeps faint and muted text at 4.5:1 on every app surface, rail hover included, in light and dark', () => {
+    const dark = app.slice(app.indexOf('@media (prefers-color-scheme: dark)'));
+    const light = app.slice(0, app.indexOf('@media (prefers-color-scheme: dark)'));
+    for (const scheme of [light, dark]) {
+      const surfaces = ['--bg', '--ground', '--panel', '--raised', '--hover', '--rail-hover'].map((t) => token(t, scheme));
+      for (const text of [token('--faint', scheme), token('--soft', scheme)]) {
+        for (const s of surfaces) expect(ratio(text, s), `${text} on ${s}`).toBeGreaterThanOrEqual(4.5);
+      }
     }
   });
 
