@@ -32,7 +32,7 @@ export async function probeLoopback(url: string, fetchImpl: typeof fetch = fetch
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    await fetchImpl(`${new URL(url).origin}/`, { method: 'GET', mode: 'no-cors', credentials: 'omit', cache: 'no-store', signal: controller.signal });
+    await fetchImpl(`${new URL(url).origin}/`, { method: 'GET', mode: 'no-cors', credentials: 'omit', cache: 'no-store', redirect: 'manual', referrerPolicy: 'no-referrer', signal: controller.signal });
     return 'up';
   } catch {
     return 'down';
