@@ -461,7 +461,7 @@ export async function updateFrame(id: string, patch: Partial<Frame>, persist = t
 }
 
 /** Applies metadata to every version of a prototype, so the stack always agrees. */
-export async function updateMeta(frameId: string, patch: FrameMeta) {
+export async function updateMeta(frameId: string, patch: FrameMeta, touch = true) {
   for (const f of stackOf(frameId)) await updateFrame(f.id, patch);
 }
 
@@ -471,9 +471,9 @@ const metaNow = (frameId: string): FrameMeta => {
 };
 const projectOf = (frameId: string) => state.frames.find((f) => f.id === frameId)?.projectId ?? '';
 
-export const setStarred = (id: string, starred: boolean) => updateMeta(id, { starred });
-export const setNote = (id: string, note: string) => updateMeta(id, { note });
-export const setArchived = (id: string, archived: boolean) => updateMeta(id, { archived });
+export const setStarred = (id: string, starred: boolean) => updateMeta(id, { starred }, false);
+export const setNote = (id: string, note: string) => updateMeta(id, { note }, false);
+export const setArchived = (id: string, archived: boolean) => updateMeta(id, { archived }, false);
 
 /** The person adds a tag to a prototype. It reuses a near tag the project already has. */
 export async function tagPrototype(id: string, tag: string) {
