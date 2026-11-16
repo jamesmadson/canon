@@ -160,6 +160,9 @@ try {
   const stillB = await b.call('canon_status');
   check('the other agent is unaffected', !stillB.error);
   a.stop(); b.stop();
+} catch (error) {
+  // An error here used to vanish behind the exit below, and the run read as passed.
+  check('the run finished without an error', false, String(error?.stack ?? error).slice(0, 400));
 } finally {
   chrome.kill();
   const bad = results.filter((r) => !r).length;
