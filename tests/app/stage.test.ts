@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BUILD_LIMITS, createStaging } from '../../src/app/lib/stage';
+import { BUILD_LIMITS, MAX_PIECES, createStaging } from '../../src/app/lib/stage';
 import { BUILD_LIMITS as CLI_LIMITS } from '../../cli/src/mcp/folder.js';
 
 const b64 = (s: string | Uint8Array) => Buffer.from(s).toString('base64');
@@ -97,6 +97,36 @@ describe('what the tab refuses', () => {
   it('parts that are not a list', () => {
     expect(bad('x')).toThrow('parts must be a list');
     expect(bad(Array.from({ length: 1001 }, () => part('a', 'x')))).toThrow('parts must be a list');
+  });
+});
+
+describe('an upload cannot grow without bound', () => {
+  it('refuses a part with no bytes unless the file is empty', () => {
+    const s = createStaging();
+    expect(() => s.part({ upload: UP, parts: [{ path: 'a', at: 0, size: 5, data: '' }] })).toThrow('A part with no bytes is only allowed for an empty file.');
+    expect(() => s.part({ upload: UP, parts: [{ path: 'e', at: 0, size: 0, data: '' }] })).not.toThrow();
+  });
+  it('refuses more pieces than a build of the largest size could need', () => {
+    const s = createStaging();
+    const one = [{ path: 'a', at: 0, size: 1, data: b64('x') }];
+    let n = 0;
+    expect(() => { for (; n < 100000; n++) s.part({ upload: UP, parts: one }); }).toThrow('The build was sent in too many pieces.');
+    expect(n).toBe(MAX_PIECES);
+  });
+  it('refuses more parts than the files and pieces could need', () => {
+    const s = createStaging();
+    let n = 0;
+    expect(() => {
+      for (; n < 10000; n++) s.part({ upload: UP, parts: Array.from({ length: 10 }, (_, i) => ({ path: 'a', at: n * 10 + i, size: 1e6, data: b64('x') })) });
+    }).toThrow('The build was sent in too many parts.');
+  });
+  it('drops an upload ten minutes after it started, however often it is added to', () => {
+    let now = 0;
+    const s = createStaging(() => now);
+    s.part({ upload: UP, parts: [part('index.html', 'x')] });
+    for (let t = 1; t <= 9; t++) { now = t * 60_000; s.part({ upload: UP, parts: [part('index.html', 'x')] }); }
+    now = 10 * 60_000 + 1;
+    expect(() => s.take({ upload: UP, count: 1, bytes: 1 })).toThrow('Canon no longer has those files');
   });
 });
 

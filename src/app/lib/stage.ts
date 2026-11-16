@@ -10,6 +10,12 @@
 export const BUILD_LIMITS = { maxBytes: 25 * 1024 * 1024, maxFiles: 2000, maxPath: 500 };
 
 const MAX_PARTS = 1000;
+/** Pieces the MCP process cuts are at most about 36 KB; counting 30 KB makes the caps below roomy for a real build and tight for a flood. */
+const PIECE_BYTES = 30_000;
+/** A build of the largest size in pieces of PIECE_BYTES, twice over for small files that share a piece. */
+export const MAX_PIECES = 2 * Math.ceil(BUILD_LIMITS.maxBytes / PIECE_BYTES);
+/** Every file once, plus every piece-sized run of bytes split across pieces. */
+const MAX_UPLOAD_PARTS = BUILD_LIMITS.maxFiles + MAX_PIECES;
 const MAX_UPLOADS = 4;
 const KEEP_MS = 10 * 60 * 1000;
 const UPLOAD = /^[0-9a-f]{16}$/;
@@ -18,7 +24,7 @@ const BASE64 = /^[A-Za-z0-9+/]*={0,2}$/;
 export interface BuildFile { path: string; bytes: Uint8Array }
 
 interface Entry { size: number; chunks: Map<number, Uint8Array> }
-interface Upload { at: number; files: Map<string, Entry>; held: number }
+interface Upload { started: number; files: Map<string, Entry>; held: number; pieces: number; parts: number }
 
 export interface Staging {
   /** Takes one piece. Throws a sentence that says what is wrong. */
@@ -49,17 +55,17 @@ export function createStaging(now: () => number = Date.now): Staging {
   const uploads = new Map<string, Upload>();
 
   function forget() {
-    for (const [id, u] of uploads) if (now() - u.at > KEEP_MS) uploads.delete(id);
+    for (const [id, u] of uploads) if (now() - u.started > KEEP_MS) uploads.delete(id);
   }
 
   function open(id: string): Upload {
     let u = uploads.get(id);
     if (!u) {
       while (uploads.size >= MAX_UPLOADS) {
-        const oldest = [...uploads].sort((a, b) => a[1].at - b[1].at)[0][0];
+        const oldest = [...uploads].sort((a, b) => a[1].started - b[1].started)[0][0];
         uploads.delete(oldest);
       }
-      u = { at: now(), files: new Map(), held: 0 };
+      u = { started: now(), files: new Map(), held: 0, pieces: 0, parts: 0 };
       uploads.set(id, u);
     }
     return u;
@@ -71,13 +77,16 @@ export function createStaging(now: () => number = Date.now): Staging {
       if (!isObject(args) || typeof args.upload !== 'string' || !UPLOAD.test(args.upload)) throw new Error('upload must be 16 hex digits.');
       if (!Array.isArray(args.parts) || args.parts.length > MAX_PARTS) throw new Error(`parts must be a list of at most ${MAX_PARTS} parts.`);
       const u = open(args.upload);
-      u.at = now();
+      if (++u.pieces > MAX_PIECES) throw new Error('The build was sent in too many pieces.');
+      u.parts += args.parts.length;
+      if (u.parts > MAX_UPLOAD_PARTS) throw new Error('The build was sent in too many parts.');
       for (const p of args.parts) {
         if (!isObject(p)) throw new Error('Each part must be an object.');
         if (!safe(p.path)) throw new Error(`"${String(p.path).slice(0, 80)}" is not a path inside the build.`);
         if (!whole(p.at) || !whole(p.size)) throw new Error('at and size must be whole numbers.');
         if (p.size > BUILD_LIMITS.maxBytes) throw new Error('The build is larger than 25 MB.');
         const bytes = decode(p.data);
+        if (bytes.length === 0 && p.size !== 0) throw new Error('A part with no bytes is only allowed for an empty file.');
         if (p.at + bytes.length > p.size) throw new Error(`A part of ${p.path} runs past the end of the file.`);
         let file = u.files.get(p.path);
         if (!file) {
