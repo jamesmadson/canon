@@ -25,8 +25,9 @@ foreign="$(grep -rhoE "from '[^']+'" cli/src/mcp cli/bin | grep -vE "from '(node
 if [ -z "$foreign" ]; then line ok imports "cli imports only node: and its own files"; else line FAIL imports "$foreign"; fail=1; fi
 
 # No em or en dashes in files this branch changed.
+DASH="$(printf '\342\200\224|\342\200\223')"
 changed="$(git diff --name-only --diff-filter=AM "$BASE"... -- . ':!package-lock.json' 2>/dev/null; git ls-files --others --exclude-standard)"
-dashes="$(printf '%s\n' "$changed" | sort -u | while read -r f; do [ -f "$f" ] && grep -lE '—|–' "$f"; done | tr '\n' ' ')"
+dashes="$(printf '%s\n' "$changed" | sort -u | while read -r f; do [ -f "$f" ] && grep -lE "$DASH" "$f"; done | tr '\n' ' ')"
 if [ -z "$dashes" ]; then line ok dashes "no em or en dashes in changed files"; else line FAIL dashes "$dashes"; fail=1; fi
 
 # No tool attribution on this branch's commits.
