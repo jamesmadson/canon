@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { openProjectId, runOp, type OpsDeps } from '../../src/app/bridge/ops';
 import type { State } from '../../src/app/store';
-import type { Board, Frame, Placement, Project } from '../../src/app/db';
+import type { Board, Frame, FrameMeta, Placement, Project } from '../../src/app/db';
 import type { Address } from '../../src/app/lib/address';
 import { SIZES } from '../../src/app/lib/sizes';
 
@@ -14,7 +14,7 @@ const frame = (id: string, projectId: string, name: string, extra: Partial<Frame
 });
 const place = (id: string, boardId: string, frameId: string): Placement => ({ id, boardId, frameId, x: 0, y: 0 });
 
-interface Seed { projects?: Project[]; boards?: Board[]; frames?: Frame[]; placements?: Placement[]; route?: Address }
+interface Seed { projects?: Project[]; boards?: Board[]; frames?: Frame[]; placements?: Placement[]; route?: Address; agentName?: string }
 
 /** An in-memory stand-in for the store, with the same action shapes. Every write is logged. */
 function fake(seed: Seed = {}) {
@@ -41,10 +41,10 @@ function fake(seed: Seed = {}) {
     if (state.placements.some((p) => p.boardId === boardId && p.frameId === frameId)) return;
     set({ placements: [...state.placements, place(`np${++n}`, boardId, frameId)] });
   };
-  const addUrl = async (projectId: string, url: string, opts: { boardId?: string; name?: string; size?: { w: number; h: number }; stack?: boolean } = {}) => {
+  const addUrl = async (projectId: string, url: string, opts: { boardId?: string; name?: string; size?: { w: number; h: number }; stack?: boolean; meta?: FrameMeta } = {}) => {
     addUrlCalls.push([projectId, url, opts]);
     writes.push(`addUrl ${url}`);
-    const f = frame(`nf${++n}`, projectId, opts.name || new URL(url).host, { url, w: opts.size?.w ?? 1280, h: opts.size?.h ?? 800, createdAt: clock++ });
+    const f = frame(`nf${++n}`, projectId, opts.name || new URL(url).host, { url, w: opts.size?.w ?? 1280, h: opts.size?.h ?? 800, createdAt: clock++, ...opts.meta });
     set({ frames: [...state.frames, f] });
     if (opts.boardId) await placeOnBoard(opts.boardId, f.id);
     return f;
@@ -69,7 +69,9 @@ function fake(seed: Seed = {}) {
       versionCalls.push([frameId, url]);
       const current = currentOf(stackOf(frameId));
       if (current.url === url) return { frame: current, added: false };
-      const made = await addUrl(current.projectId, url, { name: current.name, size: { w: current.w, h: current.h }, stack: false });
+      const meta: FrameMeta = {};
+      for (const k of ['summary', 'repo', 'branch', 'tool', 'tags', 'removedTags', 'starred', 'note', 'archived'] as const) if (current[k] !== undefined) (meta as any)[k] = current[k];
+      const made = await addUrl(current.projectId, url, { name: current.name, size: { w: current.w, h: current.h }, stack: false, meta });
       const k = key(current);
       set({
         frames: state.frames.map((f) => (key(f) === k || f.id === made.id ? { ...f, stackId: k, current: f.id === made.id } : f)),
@@ -81,6 +83,11 @@ function fake(seed: Seed = {}) {
       writes.push(`updateFrame ${id}`);
       set({ frames: state.frames.map((f) => (f.id === id ? { ...f, ...patch } : f)) });
     },
+    async updateMeta(frameId: string, patch: FrameMeta) {
+      writes.push(`updateMeta ${frameId}`);
+      const ids = new Set(stackOf(frameId).map((f) => f.id));
+      set({ frames: state.frames.map((f) => (ids.has(f.id) ? { ...f, ...patch } : f)) });
+    },
     placeOnBoard,
     async moveToBoard(placementId: string, boardId: string) {
       writes.push(`move ${placementId} ${boardId}`);
@@ -88,7 +95,7 @@ function fake(seed: Seed = {}) {
     },
     navigate: (hash: string) => navigated.push(hash),
     appBase: APP,
-    agentName: 'Claude',
+    agentName: seed.agentName ?? 'Claude',
     toast: (m: string) => toasts.push(m),
   };
   return { deps, writes, toasts, navigated, addUrlCalls, versionCalls, state: () => state };
@@ -123,7 +130,7 @@ describe('runOp add', () => {
     expect(s.placements.some((x) => x.boardId === b.id && x.frameId === f.id)).toBe(true);
     expect(r).toEqual({
       ok: true,
-      result: { frameId: f.id, frame: 'Sheet', projectId: p.id, project: 'Gamma', boardId: b.id, board: 'Onboarding', version: 1, versions: 1, link: `${APP}#/b/${b.id}/f/${f.id}` },
+      result: { frameId: f.id, frame: 'Sheet', projectId: p.id, project: 'Gamma', boardId: b.id, board: 'Onboarding', version: 1, versions: 1, link: `${APP}#/b/${b.id}/f/${f.id}`, tags: ['claude'], names: [] },
     });
     expect(t.toasts).toEqual(['Claude added Sheet']);
   });
@@ -233,7 +240,7 @@ describe('runOp update', () => {
     expect(t.state().frames.find((f) => f.id === 'f0')).toBeTruthy();
     expect(r).toEqual({
       ok: true,
-      result: { frameId: made.id, frame: 'Cart', projectId: 'a', project: 'Alpha', boardId: 'b1', board: 'Checkout', version: 2, versions: 2, newVersion: true, link: `${APP}#/b/b1/f/${made.id}` },
+      result: { frameId: made.id, frame: 'Cart', projectId: 'a', project: 'Alpha', boardId: 'b1', board: 'Checkout', version: 2, versions: 2, newVersion: true, tags: [], link: `${APP}#/b/b1/f/${made.id}` },
     });
     expect(t.toasts).toEqual(['Claude updated Cart']);
   });
@@ -406,12 +413,12 @@ describe('runOp find and status', () => {
           {
             id: 'a', name: 'Alpha',
             boards: [{ id: 'b1', name: 'Checkout' }, { id: 'b2', name: 'Archive' }],
-            prototypes: [{ id: 'f1', name: 'Cart v2', kind: 'url', url: 'https://cart.test/2', boards: ['Checkout'], version: 2, versions: 2 }],
+            prototypes: [{ id: 'f1', name: 'Cart v2', kind: 'url', url: 'https://cart.test/2', boards: ['Checkout'], version: 2, versions: 2, created: expect.any(String), updated: expect.any(String) }],
           },
           {
             id: 'z', name: 'Zeta',
             boards: [{ id: 'b3', name: 'Launch' }],
-            prototypes: [{ id: 'g1', name: 'Hero', kind: 'url', url: 'https://g1.test/', boards: ['Launch'], version: 1, versions: 1 }],
+            prototypes: [{ id: 'g1', name: 'Hero', kind: 'url', url: 'https://g1.test/', boards: ['Launch'], version: 1, versions: 1, created: expect.any(String), updated: expect.any(String) }],
           },
         ],
       },
@@ -463,5 +470,170 @@ describe('runOp find and status', () => {
     const t = fake();
     expect(await runOp('delete', {}, t.deps)).toEqual({ ok: false, error: 'Canon does not know how to delete.' });
     expect(await runOp('__proto__', {}, t.deps)).toMatchObject({ ok: false });
+  });
+});
+
+
+describe('names, summaries, tags, star, note and archive', () => {
+  const proj = () => [project('a', 'Alpha')];
+  const rows = (r: any) => (r.ok ? r.result.projects.flatMap((p: any) => p.prototypes) : r);
+
+  it('find with the query pricing returns a prototype whose summary mentions pricing and whose name does not', async () => {
+    const t = fake({
+      projects: proj(),
+      frames: [
+        frame('f1', 'a', 'Plans, annual toggle', { summary: 'The pricing page with yearly billing on by default.' }),
+        frame('f2', 'a', 'Hero'),
+      ],
+    });
+    const r = rows(await runOp('find', { query: 'pricing' }, t.deps));
+    expect(r.map((x: any) => x.name)).toEqual(['Plans, annual toggle']);
+    expect(r[0].summary).toBe('The pricing page with yearly billing on by default.');
+  });
+
+  it('find searches tags', async () => {
+    const t = fake({ projects: proj(), frames: [frame('f1', 'a', 'One', { tags: ['onboarding'] }), frame('f2', 'a', 'Two')] });
+    expect(rows(await runOp('find', { query: 'onboard' }, t.deps)).map((x: any) => x.name)).toEqual(['One']);
+  });
+
+  it("find filters by tag, and a near tag finds the project's own tag", async () => {
+    const t = fake({
+      projects: proj(),
+      frames: [frame('f1', 'a', 'One', { tags: ['pricing'], createdAt: 1 }), frame('f2', 'a', 'Two', { tags: ['hero'], createdAt: 2 }), frame('f3', 'a', 'Three', { createdAt: 3 })],
+    });
+    expect(rows(await runOp('find', { tag: 'pricing' }, t.deps)).map((x: any) => x.name)).toEqual(['One']);
+    expect(rows(await runOp('find', { tag: ' Pricing! ' }, t.deps)).map((x: any) => x.name)).toEqual(['One']);
+    expect(rows(await runOp('find', { tag: 'Pricing page' }, t.deps)).map((x: any) => x.name)).toEqual(['One']);
+    // A project name match no longer pulls in prototypes that fail the filter, or ones that only share the project.
+    const a = await runOp('find', { tag: 'pricing', query: 'alpha' }, t.deps);
+    expect(rows(a)).toEqual([]);
+    const b = await runOp('find', { tag: 'pricing', project: 'Alpha' }, t.deps);
+    expect(rows(b).map((x: any) => x.name)).toEqual(['One']);
+  });
+
+  it('find filters by starred', async () => {
+    const t = fake({ projects: proj(), frames: [frame('f1', 'a', 'One', { starred: true, createdAt: 1 }), frame('f2', 'a', 'Two', { createdAt: 2 })] });
+    const yes = rows(await runOp('find', { starred: true }, t.deps));
+    expect(yes.map((x: any) => x.name)).toEqual(['One']);
+    expect(yes[0].starred).toBe(true);
+    expect(rows(await runOp('find', { starred: false }, t.deps)).map((x: any) => x.name)).toEqual(['Two']);
+    expect(rows(await runOp('find', {}, t.deps))[0]).not.toHaveProperty('starred');
+  });
+
+  it('find leaves archived prototypes out, and archived: true shows only them', async () => {
+    const t = fake({ projects: proj(), frames: [frame('f1', 'a', 'Old', { archived: true, createdAt: 1 }), frame('f2', 'a', 'New', { createdAt: 2 })] });
+    expect(rows(await runOp('find', {}, t.deps)).map((x: any) => x.name)).toEqual(['New']);
+    const only = rows(await runOp('find', { archived: true }, t.deps));
+    expect(only.map((x: any) => x.name)).toEqual(['Old']);
+    expect(only[0].archived).toBe(true);
+  });
+
+  it('add stores summary, source, star and note, and returns the names already in the project', async () => {
+    const t = fake({ projects: proj(), frames: [frame('f1', 'a', 'Older', { createdAt: 1 }), frame('f2', 'a', 'Newer', { createdAt: 2 })] });
+    const r = await runOp('add', { url: 'https://proto.test/', project: 'Alpha', name: 'Fresh', summary: 'A fresh one.', repo: 'shop', branch: 'cart', starred: true, note: 'Look at this.' }, t.deps);
+    const f = t.state().frames[t.state().frames.length - 1];
+    expect(f).toMatchObject({ summary: 'A fresh one.', repo: 'shop', branch: 'cart', tool: 'Claude', starred: true, note: 'Look at this.' });
+    expect(r).toMatchObject({ ok: true, result: { summary: 'A fresh one.', names: ['Newer', 'Older'] } });
+  });
+
+  it("add merges the agent's tags with automatic ones from the page, the agent, the repo and the branch", async () => {
+    const t = fake({ projects: proj() });
+    const r = await runOp('add', {
+      url: 'https://proto.test/', project: 'Alpha', tags: ['Mobile'], repo: 'shop', branch: 'cart-redo',
+      page: { title: 'Checkout flow | Shop', headings: ['Payment', 'Review order'] },
+    }, t.deps);
+    expect(r.ok && r.result.tags).toEqual(expect.arrayContaining(['mobile', 'claude', 'shop', 'cart-redo', 'checkout flow', 'payment']));
+    expect(r.ok && r.result.tags[0]).toBe('mobile');
+    expect(t.state().frames[0].tags).toEqual(r.ok && r.result.tags);
+  });
+
+  it('add with no page gets only the source tag', async () => {
+    const t = fake({ projects: proj(), agentName: 'Agent' });
+    const r = await runOp('add', { url: 'https://proto.test/', project: 'Alpha' }, t.deps);
+    expect(r.ok && r.result.tags).toEqual(['agent']);
+  });
+
+  it('add reuses a tag the project already has', async () => {
+    const t = fake({ projects: proj(), frames: [frame('f1', 'a', 'Plans', { tags: ['pricing'] })] });
+    const r = await runOp('add', { url: 'https://proto.test/', project: 'Alpha', page: { title: 'Pricing page', headings: [] } }, t.deps);
+    const tags: string[] = r.ok ? r.result.tags : [];
+    expect(tags.filter((x) => x === 'pricing')).toHaveLength(1);
+    expect(tags).not.toContain('pricing page');
+  });
+
+  it('add refuses tags that are not a list of text, before writing', async () => {
+    const t = fake({ projects: proj() });
+    for (const tags of ['pricing', [1, 2], { a: 1 }, Array.from({ length: 500 }, (_, i) => `t${i}`)]) {
+      const r = await runOp('add', { url: 'https://proto.test/', project: 'Gamma', board: 'New', tags }, t.deps);
+      expect(r.ok).toBe(false);
+      expect(t.writes).toEqual([]);
+    }
+    const r = await runOp('add', { url: 'https://proto.test/', project: 'Gamma', tags: 'x' }, t.deps);
+    expect(r).toEqual({ ok: false, error: 'tags must be a list of text.' });
+    const s = await runOp('add', { url: 'https://proto.test/', project: 'Gamma', starred: 'yes' }, t.deps);
+    expect(s).toEqual({ ok: false, error: 'starred must be true or false.' });
+    expect(t.writes).toEqual([]);
+  });
+
+  it('add ignores a malformed page and cuts long text', async () => {
+    const t = fake({ projects: proj(), agentName: 'Agent' });
+    const r = await runOp('add', { url: 'https://proto.test/', project: 'Alpha', page: 'nope', summary: 'x'.repeat(900), note: 'n'.repeat(5000) }, t.deps);
+    expect(r.ok && r.result.tags).toEqual(['agent']);
+    const f = t.state().frames[0];
+    expect(f.summary).toHaveLength(300);
+    expect(f.note).toHaveLength(2000);
+  });
+
+  it('update removes a tag and it stays removed when a new URL brings it back', async () => {
+    const t = fake({
+      projects: proj(),
+      frames: [frame('f1', 'a', 'Cart', { url: 'https://cart.test/1', tags: ['claude', 'payment'], createdAt: 1 })],
+    });
+    const r = await runOp('update', { frame: 'Cart', removeTags: ['Payment'] }, t.deps);
+    expect(r.ok && r.result.tags).toEqual(['claude']);
+    expect(t.state().frames[0].removedTags).toEqual(['payment']);
+    const u = await runOp('update', { frame: 'Cart', url: 'https://cart.test/2', page: { title: 'Payment', headings: ['Payment', 'Totals'] } }, t.deps);
+    expect(u.ok && u.result.tags).toEqual(['claude', 'totals']);
+    const cur = t.state().frames.find((f) => f.url === 'https://cart.test/2')!;
+    expect(cur.tags).toEqual(['claude', 'totals']);
+    expect(cur.removedTags).toEqual(['payment']);
+  });
+
+  it('update sets star, note and archive across every version', async () => {
+    const t = twoProjects();
+    const r = await runOp('update', { frame: 'Cart', starred: true, note: 'Ship this', archived: true, summary: 'The cart.' }, t.deps);
+    expect(r.ok).toBe(true);
+    for (const id of ['f0', 'f1']) {
+      expect(t.state().frames.find((f) => f.id === id)).toMatchObject({ starred: true, note: 'Ship this', archived: true, summary: 'The cart.' });
+    }
+    expect(t.state().frames.find((f) => f.id === 'g1')).not.toHaveProperty('starred');
+    expect(t.writes.filter((w) => w.startsWith('updateMeta'))).toHaveLength(1);
+    expect(t.toasts).toEqual(['Claude updated Cart v2']);
+  });
+
+  it('update refuses bad fields before writing', async () => {
+    const t = twoProjects();
+    expect(await runOp('update', { frame: 'Cart', name: 'X', removeTags: [1] }, t.deps)).toEqual({ ok: false, error: 'removeTags must be a list of text.' });
+    expect(await runOp('update', { frame: 'Cart', name: 'X', archived: 1 }, t.deps)).toEqual({ ok: false, error: 'archived must be true or false.' });
+    expect(t.writes).toEqual([]);
+  });
+
+  it('a prototype saved before these fields can be found, updated and opened, and gains no fields it was not given', async () => {
+    const t = twoProjects({ name: 'board', board: 'b1', frame: null });
+    const before = JSON.stringify(t.state().frames);
+    const found = await runOp('find', {}, t.deps);
+    expect(rows(found)[0]).toEqual(expect.not.objectContaining({ tags: expect.anything() }));
+    expect(JSON.stringify(t.state().frames)).toBe(before);
+    expect(await runOp('open', { frame: 'Cart' }, t.deps)).toMatchObject({ ok: true });
+    expect(JSON.stringify(t.state().frames)).toBe(before);
+    const r = await runOp('update', { frame: 'Cart', name: 'Basket' }, t.deps);
+    expect(r).toMatchObject({ ok: true, result: { tags: [] } });
+    expect(t.writes).toEqual(['updateFrame f1']);
+    for (const f of t.state().frames) {
+      for (const k of ['tags', 'removedTags', 'summary', 'starred', 'note', 'archived', 'repo', 'branch', 'tool']) expect(f).not.toHaveProperty(k);
+    }
+    const v = await runOp('update', { frame: 'Basket', url: 'https://cart.test/3' }, t.deps);
+    expect(v).toMatchObject({ ok: true, result: { newVersion: true, tags: [] } });
+    for (const f of t.state().frames) expect(f).not.toHaveProperty('tags');
   });
 });

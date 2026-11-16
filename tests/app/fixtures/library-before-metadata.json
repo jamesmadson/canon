@@ -1,0 +1,33 @@
+{
+  "format": "canon-library",
+  "version": 1,
+  "savedAt": 1700000000000,
+  "projects": [
+    { "id": "p1", "name": "Fernwell", "createdAt": 1700000000000, "updatedAt": 1700000100000 },
+    { "id": "p2", "name": "Harbor", "createdAt": 1700000200000, "updatedAt": 1700000200000 }
+  ],
+  "boards": [
+    { "id": "b1", "projectId": "p1", "name": "Checkout", "createdAt": 1700000000000, "updatedAt": 1700000100000, "arrangement": "free" },
+    { "id": "b2", "projectId": "p2", "name": "Launch", "createdAt": 1700000200000, "updatedAt": 1700000200000, "arrangement": "tidy" }
+  ],
+  "frames": [
+    { "id": "f1", "projectId": "p1", "name": "Cart v1", "kind": "url", "url": "https://cart.example.test/1", "stackId": "f1", "x": 0, "y": 0, "w": 1280, "h": 800, "rev": 0, "createdAt": 1700000000000, "updatedAt": 1700000000000 },
+    { "id": "f2", "projectId": "p1", "name": "Cart v2", "kind": "url", "url": "https://cart.example.test/2", "stackId": "f1", "current": true, "x": 0, "y": 0, "w": 1280, "h": 800, "rev": 0, "createdAt": 1700000050000, "updatedAt": 1700000050000 },
+    { "id": "f3", "projectId": "p1", "name": "Onboarding", "kind": "files", "entry": "index.html", "fileCount": 3, "pages": ["index.html", "about.html"], "links": [["index.html", "about.html"]], "x": 0, "y": 0, "w": 390, "h": 844, "rev": 2, "createdAt": 1700000060000, "updatedAt": 1700000070000 },
+    { "id": "f4", "projectId": "p2", "name": "Hero", "kind": "linked", "entry": "index.html", "handleId": "h1", "x": 0, "y": 0, "w": 1280, "h": 800, "rev": 1, "createdAt": 1700000210000, "updatedAt": 1700000210000 }
+  ],
+  "placements": [
+    { "id": "pl1", "boardId": "b1", "frameId": "f2", "x": 40, "y": 60 },
+    { "id": "pl2", "boardId": "b1", "frameId": "f3", "x": 700, "y": 60 },
+    { "id": "pl3", "boardId": "b2", "frameId": "f4", "x": 0, "y": 0 }
+  ],
+  "notes": [
+    { "id": "n1", "boardId": "b1", "frameId": "f2", "page": "index.html", "kind": "comment", "author": "Sam", "said": "The button is hard to see.", "fx": 0.4, "py": 220, "createdAt": 1700000080000, "replies": [{ "id": "r1", "author": "Alex", "body": "Agreed.", "createdAt": 1700000090000 }] },
+    { "id": "n2", "boardId": "b1", "kind": "comment", "author": "Alex", "said": "Move this board to the front.", "wx": 100, "wy": 120, "resolved": true, "createdAt": 1700000095000 }
+  ],
+  "files": [
+    { "key": "f3/index.html", "frameId": "f3", "type": "text/html" },
+    { "key": "f3/about.html", "frameId": "f3", "type": "text/html" },
+    { "key": "f3/style.css", "frameId": "f3", "type": "text/css" }
+  ]
+}

@@ -1,5 +1,6 @@
 import * as db from './db';
-import type { Board, Frame, Note, Placement, Project, Reply } from './db';
+import type { Board, Frame, FrameMeta, Note, Placement, Project, Reply } from './db';
+import { addTag, hostTag, mergeTags, removeTag } from './lib/tags';
 import type { Prepared } from './intake';
 import { walkHandle, prepare } from './intake';
 import type { LibraryItem } from './lib/library';
@@ -270,17 +271,42 @@ export async function addPrepared(
   return frame;
 }
 
-export async function addUrl(
+const META_KEYS = ['summary', 'repo', 'branch', 'tool', 'tags', 'removedTags', 'starred', 'note', 'archived'] as const;
+
+/** The metadata a frame actually carries: keys it never had stay absent. */
+function metaOf(f: Frame): FrameMeta {
+  const out: FrameMeta = {};
+  for (const k of META_KEYS) if (f[k] !== undefined) (out as Record<string, unknown>)[k] = f[k];
+  return out;
+}
+
+const projectTagsOf = (projectId: string) => state.frames.filter((f) => f.projectId === projectId).flatMap((f) => f.tags ?? []);
+
+async function makeUrlFrame(
   projectId: string, url: string,
-  opts: { boardId?: string; at?: { x: number; y: number }; name?: string; size?: { w: number; h: number }; stack?: boolean } = {}
+  opts: { boardId?: string; at?: { x: number; y: number }; name?: string; size?: { w: number; h: number }; stack?: boolean; meta?: FrameMeta },
+  sourceTag: boolean,
 ) {
+  const meta: FrameMeta = { ...opts.meta };
+  if (sourceTag && meta.tags === undefined) {
+    // A link added by hand gets its source as a tag.
+    const { tags } = mergeTags({ auto: [hostTag(url)], projectTags: projectTagsOf(projectId) });
+    if (tags.length) meta.tags = tags;
+  }
   const frame: Frame = {
     id: uid(), projectId, name: opts.name || new URL(url).host || url, kind: 'url', url, x: 0, y: 0,
-    w: opts.size?.w ?? 1280, h: opts.size?.h ?? 800, rev: 0, createdAt: now(), updatedAt: now(),
+    w: opts.size?.w ?? 1280, h: opts.size?.h ?? 800, rev: 0, createdAt: now(), updatedAt: now(), ...meta,
   };
   await insertFrame(frame, opts.boardId, opts.at);
   if (opts.stack !== false) await autoStack(frame);
   return frame;
+}
+
+export async function addUrl(
+  projectId: string, url: string,
+  opts: { boardId?: string; at?: { x: number; y: number }; name?: string; size?: { w: number; h: number }; stack?: boolean; meta?: FrameMeta } = {}
+) {
+  return makeUrlFrame(projectId, url, opts, true);
 }
 
 function sameUrl(a: string, b: string) {
@@ -297,7 +323,7 @@ export async function addUrlVersion(frameId: string, url: string): Promise<{ fra
   if (!base) throw new Error('That prototype is not in the library.');
   const current = currentOf(stackOf(frameId));
   if (current.kind === 'url' && current.url && sameUrl(current.url, url)) return { frame: current, added: false };
-  const frame = await addUrl(current.projectId, url, { name: current.name, size: { w: current.w, h: current.h }, stack: false });
+  const frame = await makeUrlFrame(current.projectId, url, { name: current.name, size: { w: current.w, h: current.h }, stack: false, meta: metaOf(current) }, false);
   const spots = swapsFor(state.placements, current.id);
   await joinStack(frame.id, current.id);
   for (const pl of spots) await swapOnBoard(pl.id, frame.id);
@@ -437,6 +463,34 @@ export async function updateFrame(id: string, patch: Partial<Frame>, persist = t
   const next = { ...frame, ...patch, updatedAt: touch ? now() : frame.updatedAt };
   set({ frames: state.frames.map((f) => (f.id === id ? next : f)) });
   if (persist) await db.put('frames', next);
+}
+
+/** Applies metadata to every version of a prototype, so the stack always agrees. */
+export async function updateMeta(frameId: string, patch: FrameMeta) {
+  for (const f of stackOf(frameId)) await updateFrame(f.id, patch);
+}
+
+const metaNow = (frameId: string): FrameMeta => {
+  const st = stackOf(frameId);
+  return st.length ? metaOf(currentOf(st)) : {};
+};
+const projectOf = (frameId: string) => state.frames.find((f) => f.id === frameId)?.projectId ?? '';
+
+export const setStarred = (id: string, starred: boolean) => updateMeta(id, { starred });
+export const setNote = (id: string, note: string) => updateMeta(id, { note });
+export const setArchived = (id: string, archived: boolean) => updateMeta(id, { archived });
+
+/** The person adds a tag to a prototype. It reuses a near tag the project already has. */
+export async function tagPrototype(id: string, tag: string) {
+  const meta = metaNow(id);
+  const next = addTag(meta, tag, projectTagsOf(projectOf(id)));
+  await updateMeta(id, { tags: next.tags, ...(next.removedTags.length || meta.removedTags ? { removedTags: next.removedTags } : {}) });
+}
+
+/** The person removes a tag. It is remembered so automatic tagging does not bring it back. */
+export async function untagPrototype(id: string, tag: string) {
+  const next = removeTag(metaNow(id), tag);
+  await updateMeta(id, { tags: next.tags, removedTags: next.removedTags });
 }
 
 /** Deletes a prototype from the library, every board, and its notes. */

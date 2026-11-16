@@ -286,6 +286,7 @@ function opsDeps(ctx: Ctx, agent: Agent): OpsDeps {
     addUrl: store.addUrl,
     addUrlVersion: store.addUrlVersion,
     updateFrame: (id, patch) => store.updateFrame(id, patch),
+    updateMeta: (frameId, patch) => store.updateMeta(frameId, patch),
     placeOnBoard: (boardId, frameId) => store.placeOnBoard(boardId, frameId),
     moveToBoard: store.moveToBoard,
     navigate: navigateActive,

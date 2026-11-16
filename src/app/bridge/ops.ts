@@ -8,15 +8,17 @@
  * what, query }, because the bridge keeps only the message of a failed one.
  * what says which lookup it was: 'project', 'board', 'moveTo' or 'frame'.
  * Real failures (a refused URL, an unknown op) are { ok: false, error }.
- * Everything that can fail is settled before the first write.
+ * Everything that can fail is settled before the first write, including the
+ * checks on summary, tags, star, note and archive.
  */
 
 import type * as store from '../store';
 import type { State } from '../store';
-import type { Board, Frame, Placement, Project } from '../db';
+import type { Board, Frame, FrameMeta, Placement, Project } from '../db';
 import { type Address, buildAddress, safePath } from '../lib/address';
 import { checkPrototypeUrl, parseWidth, resolveByName, resolveStack } from '../lib/resolve';
 import { SIZES } from '../lib/sizes';
+import { autoTags, mergeTags, normalizeTag, removeTag, reuseTag } from '../lib/tags';
 import { currentOf, stacks, versionOf } from '../lib/versions';
 
 export interface OpsDeps {
@@ -29,6 +31,8 @@ export interface OpsDeps {
   addUrl: typeof store.addUrl;
   addUrlVersion: typeof store.addUrlVersion;
   updateFrame(id: string, patch: Partial<Frame>): Promise<void>;
+  /** Sets metadata on every version of the prototype. */
+  updateMeta(frameId: string, patch: FrameMeta): Promise<void>;
   placeOnBoard(boardId: string, frameId: string): Promise<void>;
   moveToBoard(placementId: string, boardId: string): Promise<void>;
   navigate(hash: string): void;
@@ -42,6 +46,13 @@ export type OpResult = { ok: true; result: any } | { ok: false; error: string };
 const MAX_NAME = 200;
 const MAX_WIDTH = 3840;
 const MAX_FOUND = 200;
+const MAX_SUMMARY = 300;
+const MAX_NOTE = 2000;
+const MAX_SHORT = 200;
+const MAX_LIST = 20;
+const MAX_TITLE = 300;
+const MAX_HEADINGS = 20;
+const MAX_NAMES = 50;
 const DEFAULT_PROJECT = 'My prototypes';
 
 type Lookup = 'project' | 'board' | 'moveTo' | 'frame';
@@ -72,6 +83,64 @@ function checkedUrl(v: unknown, appBase: string): string {
   const c = checkPrototypeUrl(typeof v === 'string' ? v : '', own);
   if (!c.ok) throw new Refused(c.message);
   return c.url;
+}
+
+/* ── Metadata ──────────────────────────────────────────────────────────── */
+
+const META_KEYS = ['summary', 'repo', 'branch', 'tool', 'tags', 'removedTags', 'starred', 'note', 'archived'] as const;
+
+/** The metadata a frame carries. A frame saved before these fields has none, and reads as empty. */
+function metaOf(f: Frame): FrameMeta {
+  const out: Record<string, unknown> = {};
+  for (const k of META_KEYS) if (f[k] !== undefined) out[k] = f[k];
+  return out as FrameMeta;
+}
+
+const projectTagsOf = (s: State, projectId: string) => s.frames.filter((f) => f.projectId === projectId).flatMap((f) => f.tags ?? []);
+
+/** A list of at most MAX_LIST pieces of text, or undefined when absent. Anything else is refused. */
+function textList(v: unknown, field: string): string[] | undefined {
+  if (v === undefined) return undefined;
+  if (!Array.isArray(v) || !v.every((x) => typeof x === 'string')) throw new Refused(`${field} must be a list of text.`);
+  if (v.length > MAX_LIST) throw new Refused(`${field} can hold at most ${MAX_LIST} entries.`);
+  return v as string[];
+}
+
+function flag(v: unknown, field: string): boolean | undefined {
+  if (v === undefined) return undefined;
+  if (typeof v !== 'boolean') throw new Refused(`${field} must be true or false.`);
+  return v;
+}
+
+/** What the MCP process read from the page. A page that is not shaped right is ignored, never refused. */
+function pageOf(v: unknown): { title?: string; headings: string[] } | null {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
+  const { title, headings } = v as { title?: unknown; headings?: unknown };
+  return {
+    ...(typeof title === 'string' ? { title: title.slice(0, MAX_TITLE) } : {}),
+    headings: Array.isArray(headings) ? headings.filter((h): h is string => typeof h === 'string').slice(0, MAX_HEADINGS).map((h) => h.slice(0, MAX_SHORT)) : [],
+  };
+}
+
+/** Text fields an agent may set, cut to their limits. A field not given is absent. */
+function textFields(args: Args) {
+  const cut = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max).trim() : undefined);
+  return {
+    summary: cut(args.summary, MAX_SUMMARY), note: cut(args.note, MAX_NOTE),
+    repo: cut(args.repo, MAX_SHORT), branch: cut(args.branch, MAX_SHORT),
+  };
+}
+
+/** Everything an add or update takes in, checked before anything is written. */
+function metaArgs(args: Args) {
+  return {
+    ...textFields(args),
+    tags: textList(args.tags, 'tags'),
+    removeTags: textList(args.removeTags, 'removeTags'),
+    starred: flag(args.starred, 'starred'),
+    archived: flag(args.archived, 'archived'),
+    page: pageOf(args.page),
+  };
 }
 
 /* ── Where the person is ───────────────────────────────────────────────── */
@@ -184,6 +253,7 @@ async function add(args: Args, deps: OpsDeps) {
   const name = nameText(args.name);
   const s = deps.state();
   const route = deps.route();
+  const m = metaArgs(args);
 
   // Project and board are exact name or id only: a near name makes a new one rather than landing on someone else's.
   const projectQ = text(args.project);
@@ -222,13 +292,30 @@ async function add(args: Args, deps: OpsDeps) {
     if (open && open.projectId === project.have.id) board = { have: open };
   }
 
+  // Tags and the names already in the project, settled from what exists now.
+  const mine = 'have' in project ? s.frames.filter((f) => f.projectId === project.have.id) : [];
+  const { tags } = mergeTags({
+    auto: autoTags({ title: m.page?.title, headings: m.page?.headings, tool: deps.agentName, repo: m.repo, branch: m.branch }),
+    passed: m.tags,
+    projectTags: mine.flatMap((f) => f.tags ?? []),
+  });
+  const names = stacks(mine)
+    .sort((a, b) => b[b.length - 1].createdAt - a[a.length - 1].createdAt)
+    .slice(0, MAX_NAMES)
+    .map((st) => currentOf(st).name);
+  const meta: FrameMeta = {
+    ...(m.summary ? { summary: m.summary } : {}), ...(m.repo ? { repo: m.repo } : {}), ...(m.branch ? { branch: m.branch } : {}),
+    tool: deps.agentName, tags,
+    ...(m.starred ? { starred: true } : {}), ...(m.note ? { note: m.note } : {}), ...(m.archived ? { archived: true } : {}),
+  };
+
   // Writes start here.
   const p = 'have' in project ? project.have : await deps.createProject(project.make);
   const b = board === null ? null : 'have' in board ? board.have : await deps.createBoard(p.id, board.make);
   const size = typeof width === 'number' ? { w: width, h: SIZES.find((x) => x.w === width)?.h ?? 800 } : undefined;
-  const frame = await deps.addUrl(p.id, url, { boardId: b?.id, ...(name ? { name } : {}), ...(size ? { size } : {}), stack: false });
+  const frame = await deps.addUrl(p.id, url, { boardId: b?.id, ...(name ? { name } : {}), ...(size ? { size } : {}), stack: false, meta });
   deps.toast(`${deps.agentName} added ${frame.name}`);
-  return { ...summary(deps, frame.id, b), link: frameLink(deps, frame.id, b) };
+  return { ...summary(deps, frame.id, b), ...(m.summary ? { summary: m.summary } : {}), tags, names, link: frameLink(deps, frame.id, b) };
 }
 
 /* ── update ────────────────────────────────────────────────────────────── */
@@ -238,6 +325,7 @@ async function update(args: Args, deps: OpsDeps) {
   const url = args.url === undefined ? null : checkedUrl(args.url, deps.appBase);
   const { stack, project, board } = pickStack(s, args);
   const name = nameText(args.name);
+  const m = metaArgs(args);
 
   let target: Board | null = null;
   let move: Placement | null = null;
@@ -259,6 +347,24 @@ async function update(args: Args, deps: OpsDeps) {
     move = spots[0] ?? null;
   }
 
+  // What changes in the metadata, settled from the current version before anything is written.
+  const before = metaOf(currentOf(stack));
+  const patch: FrameMeta = {};
+  for (const k of ['summary', 'note', 'repo', 'branch'] as const) {
+    if (m[k] !== undefined && m[k] !== (before[k] ?? '')) patch[k] = m[k] || undefined;
+  }
+  if (m.starred !== undefined && m.starred !== !!before.starred) patch.starred = m.starred;
+  if (m.archived !== undefined && m.archived !== !!before.archived) patch.archived = m.archived;
+  const auto = url !== null && m.page
+    ? autoTags({ title: m.page.title, headings: m.page.headings, repo: m.repo ?? before.repo, branch: m.branch ?? before.branch })
+    : [];
+  const merged = mergeTags({ current: before.tags, removed: before.removedTags, auto, passed: m.tags, projectTags: projectTagsOf(s, project.id) });
+  let next = { tags: merged.tags, removedTags: merged.removedTags };
+  for (const t of m.removeTags ?? []) next = removeTag(next, t);
+  if (next.tags.join('\n') !== (before.tags ?? []).join('\n')) patch.tags = next.tags;
+  if (next.removedTags.join('\n') !== (before.removedTags ?? []).join('\n')) patch.removedTags = next.removedTags;
+  const metaChanged = Object.keys(patch).length > 0;
+
   // Writes start here.
   let current = currentOf(stack);
   let newVersion = false;
@@ -272,6 +378,7 @@ async function update(args: Args, deps: OpsDeps) {
     await deps.updateFrame(current.id, { name });
     renamed = true;
   }
+  if (metaChanged) await deps.updateMeta(current.id, patch);
   let moved = false;
   if (target) {
     if (!move) {
@@ -286,8 +393,8 @@ async function update(args: Args, deps: OpsDeps) {
   const after = deps.state();
   const shown = target ?? linkBoard(after, deps, stackNow(after, current.id), board);
   const result = summary(deps, current.id, shown);
-  if (newVersion || renamed || moved) deps.toast(`${deps.agentName} updated ${result.frame}`);
-  return { ...result, newVersion, link: frameLink(deps, current.id, shown) };
+  if (newVersion || renamed || moved || metaChanged) deps.toast(`${deps.agentName} updated ${result.frame}`);
+  return { ...result, newVersion, tags: next.tags, link: frameLink(deps, current.id, shown) };
 }
 
 /* ── find and status ───────────────────────────────────────────────────── */
@@ -298,6 +405,10 @@ function find(args: Args, deps: OpsDeps) {
   const scope = projectQ ? [pickProject(s, projectQ)] : [...s.projects].sort((a, b) => b.updatedAt - a.updatedAt);
   const q = text(args.query).toLowerCase();
   const has = (v: string | undefined) => !q || (v ?? '').toLowerCase().includes(q);
+  const tagQ = typeof args.tag === 'string' ? normalizeTag(args.tag) : '';
+  const starred = flag(args.starred, 'starred');
+  const archived = flag(args.archived, 'archived');
+  const filtering = (args.tag !== undefined) || starred !== undefined || archived !== undefined;
   let left = MAX_FOUND;
   let truncated = false;
   const projects = [];
@@ -307,19 +418,37 @@ function find(args: Args, deps: OpsDeps) {
     const boards = whole ? allBoards : allBoards.filter((b) => has(b.name));
     const shownBoards = new Set(boards.map((b) => b.id));
     const rows = [];
-    const all = stacks(s.frames.filter((f) => f.projectId === p.id))
-      .sort((a, b) => b[b.length - 1].createdAt - a[a.length - 1].createdAt);
+    const inProject = s.frames.filter((f) => f.projectId === p.id);
+    const wanted = tagQ ? new Set([tagQ, reuseTag(tagQ, projectTagsOf(s, p.id))]) : null;
+    const all = stacks(inProject).sort((a, b) => b[b.length - 1].createdAt - a[a.length - 1].createdAt);
     for (const st of all) {
+      const cur = currentOf(st);
+      const meta = metaOf(cur);
+      if (archived === true ? !meta.archived : !!meta.archived) continue;
+      if (wanted && !(meta.tags ?? []).some((t) => wanted.has(t))) continue;
+      if (starred !== undefined && !!meta.starred !== starred) continue;
       const spots = placementsOfStack(s, st);
-      const hit = whole || st.some((f) => has(f.name) || has(f.url)) || spots.some((pl) => shownBoards.has(pl.boardId));
+      const own = st.some((f) => has(f.name) || has(f.url)) || has(meta.summary) || (meta.tags ?? []).some((t) => has(t));
+      // Under a filter, a project or board name match no longer pulls in every prototype.
+      const hit = own || (!filtering && (whole || spots.some((pl) => shownBoards.has(pl.boardId))));
       if (!hit) continue;
       if (left === 0) { truncated = true; break; }
       left--;
-      const cur = currentOf(st);
       const on = [...new Set(spots.map((pl) => pl.boardId))].map((id) => s.boards.find((b) => b.id === id)?.name).filter((n): n is string => !!n);
-      rows.push({ id: cur.id, name: cur.name, kind: cur.kind, url: cur.kind === 'url' ? cur.url ?? null : null, boards: on, version: versionOf(st, cur.id), versions: st.length });
+      rows.push({
+        id: cur.id, name: cur.name, kind: cur.kind, url: cur.kind === 'url' ? cur.url ?? null : null, boards: on, version: versionOf(st, cur.id), versions: st.length,
+        ...(meta.summary ? { summary: meta.summary } : {}),
+        ...(meta.tags?.length ? { tags: meta.tags } : {}),
+        ...(meta.starred ? { starred: true } : {}),
+        ...(meta.note ? { note: meta.note } : {}),
+        ...(meta.archived ? { archived: true } : {}),
+        ...(meta.repo ? { repo: meta.repo } : {}),
+        ...(meta.branch ? { branch: meta.branch } : {}),
+        created: new Date(st[0].createdAt).toISOString(),
+        updated: new Date(Math.max(...st.map((f) => f.updatedAt))).toISOString(),
+      });
     }
-    if (!whole && !boards.length && !rows.length) continue;
+    if (filtering ? !rows.length : !whole && !boards.length && !rows.length) continue;
     projects.push({ id: p.id, name: p.name, boards: boards.map((b) => ({ id: b.id, name: b.name })), prototypes: rows });
   }
   return { projects, ...(truncated ? { truncated: true } : {}) };
