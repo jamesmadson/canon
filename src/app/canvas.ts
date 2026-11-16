@@ -10,6 +10,7 @@ import { currentOf, isLocal, versionOf } from './lib/versions';
 import { safeFrameUrl } from './lib/resolve';
 import { type Address, buildAddress, joinPath } from './lib/address';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
+import { PrototypeActions, ZoomControls } from './bar';
 import {
   html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES, showsCover, coverSrc,
   addGroups, runWay, NoteItem, type Way,
@@ -427,13 +428,13 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
             </div>`}
           </div>
           <span class="sep"></span>`}
-          <button class="btn icon" aria-pressed=${tool === 'select'} onClick=${() => setTool('select')} title="Select (V)"><${Icon} name="cursor" /></button>
-          ${html`<button class="btn icon" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Note (N): click a prototype or the canvas"><${Icon} name="comment" /></button>`}
+          <button type="button" class="btn icon" aria-label="Select tool" aria-pressed=${tool === 'select'} onClick=${() => setTool('select')} title="Select (V)"><${Icon} name="cursor" /></button>
+          ${html`<button type="button" class="btn icon" aria-label="Pin a note on the page" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Pin a note (N): click a prototype or the canvas"><${Icon} name="comment" /></button>`}
           <span class="sep"></span>
-          <button class="btn icon" onClick=${() => zoomBy(0.8)} title="Zoom out (-)"><${Icon} name="minus" /></button>
-          <button class="btn zoom" onClick=${() => setCam((c) => zoomAt(c, { x: canvasRef.current!.clientWidth / 2, y: canvasRef.current!.clientHeight / 2 }, 1))} title="Zoom to 100%">${Math.round(cam.zoom * 100)}%</button>
-          <button class="btn icon" onClick=${() => zoomBy(1.25)} title="Zoom in (+)"><${Icon} name="plus" /></button>
-          <button class="btn icon" onClick=${fit} title="Fit everything (Shift+1)"><${Icon} name="fit" /></button>
+          <${PrototypeActions} frame=${sel ?? undefined} />
+          <span class="sep"></span>
+          <${ZoomControls} zoom=${cam.zoom} onOut=${() => zoomBy(0.8)} onIn=${() => zoomBy(1.25)} onFit=${fit}
+            onReset=${() => setCam((c) => zoomAt(c, { x: canvasRef.current!.clientWidth / 2, y: canvasRef.current!.clientHeight / 2 }, 1))} />
         </div>
       </div>
 
@@ -772,11 +773,12 @@ export function BundleView({ frameId, fromBoard, startPage }: { frameId: string;
         <div class="toolbar" onPointerDown=${(e: Event) => e.stopPropagation()}>
           <a class="btn" href=${back} title="Back (Esc)"><${Icon} name="back" />${board ? board.name : 'Library'}</a>
           <span class="sep"></span>
-          <button class="btn icon" aria-pressed=${tool === 'select'} onClick=${() => setTool('select')} title="Select (V)"><${Icon} name="cursor" /></button>
-          <button class="btn icon" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Note (N): click a page"><${Icon} name="comment" /></button>
+          <button type="button" class="btn icon" aria-label="Select tool" aria-pressed=${tool === 'select'} onClick=${() => setTool('select')} title="Select (V)"><${Icon} name="cursor" /></button>
+          <button type="button" class="btn icon" aria-label="Pin a note on the page" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Pin a note (N): click a page"><${Icon} name="comment" /></button>
           <span class="sep"></span>
-          <button class="btn zoom" onClick=${() => fit()} title="Fit (Shift+1)">${Math.round(cam.zoom * 100)}%</button>
-          <button class="btn icon" onClick=${() => fit()} title="Fit everything (Shift+1)"><${Icon} name="fit" /></button>
+          <${PrototypeActions} frame=${frame} />
+          <span class="sep"></span>
+          <${ZoomControls} zoom=${cam.zoom} onFit=${() => fit()} />
         </div>
       </div>
       ${selected && html`<${PageInspector} frame=${frame} page=${selected} onFocus=${() => setFocus(selected)} onPick=${(p: string) => { setSelected(p); fit(p); }} onComment=${() => setTool('comment')} onOpenThread=${(n: Note) => setOpenThread(n.id)} />`}

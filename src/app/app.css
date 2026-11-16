@@ -854,3 +854,20 @@ button.ver-chip:hover { color: var(--text); }
 @media (hover: hover) and (pointer: fine) {
   .lib-card:hover .st { opacity: 1; }
 }
+
+/* Canvas bottom bar: star, note, archive and zoom. A pressed star or archive is a fill, not orange. */
+.bar-group { display: flex; align-items: center; gap: 2px; }
+.bar-note { position: relative; display: flex; }
+.toolbar .btn.icon { position: relative; }
+.toolbar .bar-group .btn[aria-pressed="true"] { background: var(--raised); color: var(--text); }
+.toolbar .btn .badge { position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--text); }
+.bar-pop {
+  position: absolute; bottom: calc(100% + 14px); left: 50%; transform: translateX(-50%); z-index: 12; width: 280px; padding: 10px;
+  border-radius: 12px; background: var(--pop); box-shadow: 0 0 0 1px var(--line-strong), 0 16px 40px var(--shadow-lg);
+  display: flex; flex-direction: column; gap: 8px; text-align: left;
+}
+.bar-pop .row { justify-content: flex-end; }
+
+/* A board drawn as outlines. */
+.thumb .page { fill: var(--ground); }
+.thumb .sheet { fill: var(--hover); }
