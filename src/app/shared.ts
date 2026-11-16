@@ -38,9 +38,16 @@ const P: Record<string, string> = {
   grid: 'M2.5 2.5h4.5v4.5H2.5zM9 2.5h4.5v4.5H9zM2.5 9h4.5v4.5H2.5zM9 9h4.5v4.5H9z',
   table: 'M2.5 3h11v10h-11zM2.5 6.5h11M2.5 10h11M6.5 3v10',
   project: 'M2 4.5h4.5l1.5 1.5H14v7.5H2z',
+  home: 'M2.5 7 8 2.5 13.5 7v6.5h-11z',
+  star: 'm8 2 1.8 3.8 4.2.6-3 2.9.7 4.1L8 11.4l-3.7 2 .7-4.1-3-2.9 4.2-.6z',
+  archive: 'M2 3.5h12v3H2zM3 6.5v6h10v-6M6.5 9h3',
+  filter: 'M2.5 4h11M4.5 8h7M6.5 12h3',
+  chevron: 'm4 6 4 4 4-4',
+  note: 'M3 2.5h10v8l-3 3H3zM10 13.5v-3h3M5.5 6h5M5.5 8.5h3',
+  copy: 'M5.5 5.5h7v8h-7zM3.5 10.5v-8h7',
 };
-export const Icon = ({ name, size = 16 }: { name: string; size?: number }) =>
-  html`<svg width=${size} height=${size} viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d=${P[name]} /></svg>`;
+export const Icon = ({ name, size = 16, fill = false }: { name: string; size?: number; fill?: boolean }) =>
+  html`<svg width=${size} height=${size} viewBox="0 0 16 16" fill=${fill ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d=${P[name]} /></svg>`;
 
 export function useStore() {
   const [, force] = useState(0);

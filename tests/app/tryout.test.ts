@@ -67,10 +67,12 @@ describe('the drop hint', () => {
 
 describe('the app in Canon colours', () => {
   const css = read('src/app/app.css');
-  const root_ = css.slice(css.indexOf(':root {'), css.indexOf('}', css.indexOf(':root {')));
+  // The dark tokens sit in the system dark block; light is the default and the home screen brief sets both.
+  const dark_ = css.indexOf('@media (prefers-color-scheme: dark)');
+  const root_ = css.slice(dark_, css.indexOf('}', css.indexOf(':root {', dark_)));
   // Mutation: restore an olive ground or a blue accent in :root.
   it('takes the site dark tokens and orange accent', () => {
-    for (const [name, hex] of [['--bg', '#151413'], ['--panel', '#1F1E1C'], ['--raised', '#262522'], ['--hover', '#2E2D2A'], ['--text', '#EDEBE6'], ['--soft', '#A29E96'], ['--input-border', '#77736B'], ['--accent', '#FF4F00']]) {
+    for (const [name, hex] of [['--bg', '#151413'], ['--panel', '#211F1E'], ['--raised', '#2A2927'], ['--hover', '#34322F'], ['--text', '#EDEBE6'], ['--soft', '#A29E96'], ['--input-border', '#77736B'], ['--accent', '#FF4F00']]) {
       expect(root_, name).toMatch(new RegExp(`${name}:\\s*${hex}`, 'i'));
     }
     expect(css).not.toMatch(/#4d8dff|#3ccf7f|#1b1c18|255, 246, 222/i);

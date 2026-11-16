@@ -66,7 +66,7 @@ async function boot() {
       await openTry(tryAtLoad);
     } catch (err) {
       console.warn('Canon: the sample project could not be loaded.', err);
-      toast('The sample project could not be loaded. Use Try the sample project on the home screen to try again.');
+      toast('The sample project could not be loaded. Use Try the sample project in the sidebar to try again.');
     }
   }
   // A preview tab files comments straight into IndexedDB and says so here.

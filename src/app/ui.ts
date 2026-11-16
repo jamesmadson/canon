@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import * as store from './store';
-import * as vault from './vault';
 import type { Frame, Note } from './db';
 import { canLinkFolders, groupsFromDrop } from './intake';
 import { BoardView, BundleView, Focus } from './canvas';
@@ -8,7 +7,11 @@ import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort 
 import { currentOf, stackKey, stacks as stacksOf, versionOf } from './lib/versions';
 import { checkPrototypeUrl, safeFrameUrl } from './lib/resolve';
 import { type Address, buildAddress, parseAddress } from './lib/address';
-import { type PairLink, bridgeView, pairNotice, parsePairLink, removeAgent, saveAgent, subscribeBridge } from './bridge/client';
+import { type PairLink, pairNotice, parsePairLink, saveAgent } from './bridge/client';
+import { Home } from './home';
+import { SearchHost } from './palette';
+import { Sidebar, useBridge } from './sidebar';
+import { type Card, type Scope, cardsOf } from './lib/home';
 import { Avatar } from './comments';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, KIND, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
@@ -69,53 +72,7 @@ function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) {
   </div>`;
 }
 
-/* ── Where the library is kept ─────────────────────────────────────────── */
-function pickBackup() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.canon,.zip';
-  input.onchange = () => input.files?.[0] && vault.restoreFromFile(input.files[0]);
-  input.click();
-}
-
-function Storage() {
-  const { vault: v } = useStore();
-  const tools = html`<div class="store-tools">
-    <button onClick=${() => vault.downloadBackup()}>Back up</button><button onClick=${pickBackup}>Restore</button>
-    ${v.status === 'connected' && html`<button onClick=${() => vault.forgetFolder()}>Stop saving</button>`}
-  </div>`;
-  if (v.status === 'connected') {
-    const when = v.saving ? 'Saving…' : v.savedAt ? `Saved ${ago(v.savedAt)}` : 'Connected';
-    return html`<div class="store">
-      <div class=${`store-line${v.error ? ' warn' : ''}`}><span class="dot"></span><span><b>${v.name}</b> folder · ${v.error ?? when}</span></div>
-      ${tools}
-    </div>`;
-  }
-  if (v.status === 'needs-permission') {
-    return html`<div class="store">
-      <button class="store-cta" onClick=${() => vault.reconnect()}><b>Reconnect “${v.name}”</b><small>The browser needs your OK to keep saving there.</small></button>
-      ${tools}
-    </div>`;
-  }
-  if (v.status === 'none') {
-    return html`<div class="store">
-      <button class="store-cta" onClick=${() => vault.chooseFolder()}><b>Save to a folder</b><small>Only in this browser right now. A folder keeps it safe if the browser is cleared.</small></button>
-      ${tools}
-    </div>`;
-  }
-  return html`<div class="store">
-    <div class="store-line warn"><span class="dot"></span><span>Only in this browser. Back up now and then.</span></div>
-    ${tools}
-  </div>`;
-}
-
 /* ── Agents: pairing and the sidebar list ───────────────────────────────── */
-function useBridge() {
-  const [, force] = useState(0);
-  useEffect(() => subscribeBridge(() => force((n) => n + 1)), []);
-  return bridgeView();
-}
-
 function PairDialog({ pair, onClose }: { pair: PairLink; onClose: () => void }) {
   const notice = pairNotice(useBridge().agents.find((a) => a.id === pair.agentId), pair);
   const connect = async () => {
@@ -140,122 +97,22 @@ function PairDialog({ pair, onClose }: { pair: PairLink; onClose: () => void }) 
   </div>`;
 }
 
-function Agents() {
-  const { agents, connected, connecting } = useBridge();
-  if (!agents.length) return null;
-  const disconnect = (id: string, name: string) => {
-    if (confirm(`Disconnect ${name}? It will need a new pairing link to reach Canon again.`)) removeAgent(id).catch(() => store.toast(`Could not disconnect ${name}.`));
-  };
-  return html`<div class="rail-section label">Agents</div>
-    ${[...agents].sort((a, b) => a.name.localeCompare(b.name)).map((a) => {
-      const state = connected.has(a.id) ? 'on' : connecting.has(a.id) ? 'wait' : 'off';
-      const label = { on: 'Connected', wait: 'Connecting', off: 'Not connected' }[state];
-      return html`<div class="nav-item agent">
-        <span class="dot" data-state=${state} role="img" aria-label=${label} title=${label}></span>
-        <span class="agent-name">${a.name}</span>
-        <button class="btn ghost" onClick=${() => disconnect(a.id, a.name)}>Disconnect</button>
-      </div>`;
-    })}`;
-}
-
-/* ── Sidebar ───────────────────────────────────────────────────────────── */
-function Sidebar({ route }: { route: Route }) {
-  const s = useStore();
-  const active = projectOf(route);
-  const projects = [...s.projects].sort((a, b) => b.updatedAt - a.updatedAt);
-  const me = store.myName();
-  return html`<aside class="rail">
-    <a class="workspace" href="#/" style="text-decoration:none">
-      <div class="mark"></div>
-      <div><b>Canon</b><small>${s.vault.status === 'connected' ? `Saving to ${s.vault.name}` : 'Local · this browser'}</small></div>
-    </a>
-    <button class="nav-item find" onClick=${openSwitcher}><${Icon} name="search" />Open a prototype<kbd>${isMac ? '⌘' : 'Ctrl '}K</kbd></button>
-    <a class="nav-item" href="#/" aria-current=${route.name === 'home' ? 'page' : undefined}><${Icon} name="project" />All projects<span class="count">${s.projects.length}</span></a>
-    <div class="rail-section label">Projects</div>
-    <div class="rail-boards">
-      ${projects.map((p) => {
-        const open = p.id === active;
-        return html`<div>
-          <a class="nav-item" href=${`#/p/${p.id}`} aria-current=${route.name === 'project' && route.project === p.id && route.tab === 'prototypes' ? 'page' : undefined}>
-            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${open ? 'color:var(--text)' : ''}">${p.name}</span>
-            <span class="count">${store.prototypesOf(p.id).length}</span>
-          </a>
-          ${open && html`<div class="rail-sub">
-            <a class="nav-item" href=${`#/p/${p.id}`} aria-current=${route.name === 'project' && route.tab === 'prototypes' ? 'page' : undefined}><${Icon} name="grid" />Prototypes</a>
-            ${store.boardsOf(p.id).map((b) => html`<a class="nav-item" href=${`#/b/${b.id}`} aria-current=${boardOf(route) === b.id ? 'page' : undefined}><${Icon} name="boards" /><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name}</span><span class="count">${store.placementsOf(b.id).length}</span></a>`)}
-            <a class="nav-item" href=${`#/p/${p.id}/comments`} aria-current=${route.name === 'project' && route.tab === 'comments' ? 'page' : undefined}><${Icon} name="comment" />Notes<span class="count">${store.notesInProject(p.id).filter((n) => !n.resolved).length}</span></a>
-          </div>`}
-        </div>`;
-      })}
-    </div>
-    ${!store.isInstalled() && store.canInstall() && html`<button class="install" onClick=${() => store.install()}>
-      <img src="/canon/icons/canon-192.png" alt="" width="28" height="28" />
-      <span><b>Install Canon</b><small>Its own window, in your Dock or taskbar</small></span>
-    </button>`}
-    ${!store.isInstalled() && !store.canInstall() && /Safari/.test(navigator.userAgent) && !/Chrome|Chromium|Edg/.test(navigator.userAgent) && html`<div class="install hint">
-      <img src="/canon/icons/canon-192.png" alt="" width="28" height="28" />
-      <span><b>Install Canon</b><small>In Safari: File, then Add to Dock</small></span>
-    </div>`}
-    <${Agents} />
-    <div class="rail-foot">
-      ${me ? html`<div class="row" style="align-items:center;margin-bottom:8px;flex-wrap:nowrap"><${Avatar} name=${me} /><span style="color:var(--soft)">${me}</span></div>` : null}
-      <${Storage} />
-    </div>
-  </aside>`;
-}
-
-/* ── Home: projects ────────────────────────────────────────────────────── */
-function Thumb({ rects }: { rects: { x: number; y: number; w: number; h: number; multi?: boolean }[] }) {
+/* ── A board drawn as its prototypes' outlines ─────────────────────────── */
+function BoardThumb({ rects }: { rects: { x: number; y: number; w: number; h: number; multi?: boolean }[] }) {
   if (!rects.length) return html`<div class="thumb"></div>`;
   const minX = Math.min(...rects.map((f) => f.x));
   const minY = Math.min(...rects.map((f) => f.y));
   const maxX = Math.max(...rects.map((f) => f.x + f.w));
   const maxY = Math.max(...rects.map((f) => f.y + f.h));
   const pad = Math.max(maxX - minX, maxY - minY) * 0.08;
-  return html`<div class="thumb"><svg viewBox=${`${minX - pad} ${minY - pad} ${maxX - minX + pad * 2} ${maxY - minY + pad * 2}`} preserveAspectRatio="xMidYMid meet">
+  return html`<div class="thumb"><svg viewBox=${`${minX - pad} ${minY - pad} ${maxX - minX + pad * 2} ${maxY - minY + pad * 2}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
     ${rects.map((f) => html`<g>
-      ${f.multi && html`<rect x=${f.x + f.w * 0.06} y=${f.y - f.h * 0.05} width=${f.w * 0.88} height=${f.h} rx=${Math.min(f.w, f.h) * 0.03} fill="#6b6a66" />`}
-      <rect x=${f.x} y=${f.y} width=${f.w} height=${f.h} rx=${Math.min(f.w, f.h) * 0.03} fill="#ecebe6" />
+      ${f.multi && html`<rect class="sheet" x=${f.x + f.w * 0.06} y=${f.y - f.h * 0.05} width=${f.w * 0.88} height=${f.h} rx=${Math.min(f.w, f.h) * 0.03} />`}
+      <rect class="page" x=${f.x} y=${f.y} width=${f.w} height=${f.h} rx=${Math.min(f.w, f.h) * 0.03} />
     </g>`)}
   </svg></div>`;
 }
 const boardRects = (boardId: string) => store.framesOf(boardId).map((f) => ({ x: f.x, y: f.y, w: f.w, h: f.h, multi: pageCount(f) > 1 }));
-
-function Home() {
-  const s = useStore();
-  const projects = [...s.projects].sort((a, b) => b.updatedAt - a.updatedAt);
-  const newProject = async () => go(`/p/${(await store.createProject()).id}`);
-  const sample = async () => {
-    const { project } = await store.createSampleProject();
-    go(`/p/${project.id}`);
-  };
-  return html`<div class="main">
-    <div class="topbar"><h1>Projects</h1><span class="spacer"></span>
-      <button class="btn primary" onClick=${newProject}><${Icon} name="plus" />New project</button>
-    </div>
-    <div class="page">
-      ${!projects.length && html`<section class="connect">
-        <div class="connect-head"><h2>Start a project</h2><span class="faint">A project holds every prototype for one product, and the boards you arrange them on.</span></div>
-        <div class="ways" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-          <button class="way" onClick=${newProject}><span class="way-icon"><${Icon} name="plus" /></span><b>New project</b><span>Then drop in HTML, zips or folders, or link a folder on your machine.</span></button>
-          <button class="way" onClick=${sample}><span class="way-icon"><${Icon} name="spark" /></span><b>Try the sample project</b><span>Fernwell: six prototypes including a six-page site, two boards, and a few notes.</span></button>
-        </div>
-        <p class="hint" style="margin:14px 2px 0">Had Canon before? ${vault.folderSupported() && html`<button class="link" onClick=${() => vault.chooseFolder()}>Open your Canon folder</button> or `}<button class="link" onClick=${pickBackup}>restore a backup</button>.</p>
-      </section>`}
-      ${projects.length > 0 && html`<div class="grid">
-        ${projects.map((p) => {
-          const boards = store.boardsOf(p.id);
-          return html`<a class="card" href=${`#/p/${p.id}`}>
-            <${Thumb} rects=${boards[0] ? boardRects(boards[0].id) : []} />
-            <div class="meta"><b>${p.name}</b><small>${store.prototypesOf(p.id).length} prototypes · ${boards.length} boards · edited ${ago(p.updatedAt)}</small></div>
-          </a>`;
-        })}
-        <button class="card new" onClick=${newProject}><span><${Icon} name="plus" /> New project</span></button>
-        <button class="card new" onClick=${sample}><span><${Icon} name="spark" /> Sample project</span></button>
-      </div>`}
-    </div>
-  </div>`;
-}
 
 /* ── Project ───────────────────────────────────────────────────────────── */
 function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boards' | 'comments'; askUrl: () => Promise<string | null> }) {
@@ -288,7 +145,7 @@ function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boa
     ${tab === 'prototypes' && html`<${Library} projectId=${id} askUrl=${askUrl} />`}
     ${tab === 'boards' && html`<div class="page"><div class="grid">
       ${store.boardsOf(id).map((b) => html`<a class="card" href=${`#/b/${b.id}`}>
-        <${Thumb} rects=${boardRects(b.id)} />
+        <${BoardThumb} rects=${boardRects(b.id)} />
         <div class="meta"><b>${b.name}</b><small>${store.placementsOf(b.id).length} prototypes · edited ${ago(b.updatedAt)}</small></div>
       </a>`)}
       <button class="card new" onClick=${newBoard}><span><${Icon} name="plus" /> New board</span></button>
@@ -486,65 +343,18 @@ function FullOverProject({ address, askUrl }: { address: Extract<Address, { name
 }
 
 /* ── App ───────────────────────────────────────────────────────────────── */
-/* ── ⌘K: jump to any prototype ─────────────────────────────────────────── */
-const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
-export const openSwitcher = () => dispatchEvent(new Event('canon:switcher'));
-
-function openPrototype(f: Frame, focus: (id: string) => void) {
+export function openPrototype(f: Frame, focus: (id: string) => void) {
   if (f.kind === 'url') window.open(safeFrameUrl(f.url), '_blank', 'noopener');
   else if (pageCount(f) > 1) go(`/f/${f.id}`);
   else focus(f.id);
 }
 
-function Switcher({ onClose, onFocus }: { onClose: () => void; onFocus: (id: string) => void }) {
-  const s = useStore();
-  const [q, setQ] = useState('');
-  const [at, setAt] = useState(0);
-  const input = useRef<HTMLInputElement>(null);
-  useEffect(() => input.current?.focus(), []);
-  const query = q.trim().toLowerCase();
-  const projectName = (id: string) => s.projects.find((p) => p.id === id)?.name ?? '';
-  const rows = stacksOf(s.frames)
-    .map((stack) => ({ stack, cur: currentOf(stack), last: Math.max(...stack.map((f) => f.updatedAt)) }))
-    .filter(({ stack, cur }) =>
-      !query ||
-      projectName(cur.projectId).toLowerCase().includes(query) ||
-      stack.some((f) => f.name.toLowerCase().includes(query) || (f.url ?? '').toLowerCase().includes(query)))
-    .sort((a, b) => b.last - a.last)
-    .slice(0, 12);
-  const pick = (f: Frame) => {
-    onClose();
-    openPrototype(f, onFocus);
-  };
-  const onKey = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') onClose();
-    else if (e.key === 'ArrowDown') { e.preventDefault(); setAt(Math.min(at + 1, rows.length - 1)); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setAt(Math.max(at - 1, 0)); }
-    else if (e.key === 'Enter' && rows[at]) { e.preventDefault(); pick(rows[at].cur); }
-  };
-  return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose()}>
-    <div class="switcher" role="dialog" aria-label="Open a prototype">
-      <label class="search"><${Icon} name="search" /><input ref=${input} placeholder="Open a prototype" value=${q} onInput=${(e: Event) => { setQ((e.target as HTMLInputElement).value); setAt(0); }} onKeyDown=${onKey} /></label>
-      <ul>
-        ${rows.length === 0 && html`<li class="sw-empty">${s.frames.length ? 'Nothing by that name.' : 'No prototypes yet.'}</li>`}
-        ${rows.map(({ stack, cur }, n) => html`<li class=${n === at ? 'on' : ''} onMouseEnter=${() => setAt(n)}>
-          <button class="sw-main" onClick=${() => pick(cur)}>
-            <b>${cur.name}</b>
-            <small>${projectName(cur.projectId)} · ${KIND[cur.kind]}${stack.length > 1 ? ` · v${versionOf(stack, cur.id)} of ${stack.length}` : ''}</small>
-          </button>
-          ${stack.length > 1 && html`<span class="sw-vers">${[...stack].reverse().filter((f) => f.id !== cur.id).slice(0, 4).map((f) => html`<button class="ver-chip old" onClick=${() => pick(f)} title=${f.name}>v${versionOf(stack, f.id)}</button>`)}</span>`}
-        </li>`)}
-      </ul>
-      <div class="sw-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> opens the current version</span><span><kbd>esc</kbd> to close</span></div>
-    </div>
-  </div>`;
-}
+const SCOPES: Record<string, Scope> = { home: { kind: 'home' }, starred: { kind: 'starred' }, archive: { kind: 'archive' } };
 
 export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
   const s = useStore();
   const route = useRoute();
   const url = useUrlDialog();
-  const [switcher, setSwitcher] = useState(false);
   const [focusId, setFocusId] = useState<string | null>(null);
   const [pair, setPair] = useState<PairLink | null>(pairAtLoad);
   // A pairing link counts only when it opened this page (main.ts reads it). Anything
@@ -559,28 +369,14 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
     addEventListener('hashchange', later);
     return () => removeEventListener('hashchange', later);
   }, []);
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setSwitcher((v) => !v);
-      }
-    };
-    const open = () => setSwitcher(true);
-    addEventListener('keydown', key);
-    addEventListener('canon:switcher', open);
-    return () => {
-      removeEventListener('keydown', key);
-      removeEventListener('canon:switcher', open);
-    };
-  }, []);
   const focused = focusId ? s.frames.find((f) => f.id === focusId) : undefined;
-  const overlays = html`
-    ${switcher && html`<${Switcher} onClose=${() => setSwitcher(false)} onFocus=${setFocusId} />`}
-    ${focused && html`<${Focus} frame=${focused} onClose=${() => setFocusId(null)} />`}`;
+  const cards = useMemo(() => cardsOf(s.frames), [s.frames]);
+  const projectName = (id: string) => s.projects.find((p) => p.id === id)?.name ?? '';
+  const open = (c: Card) => openPrototype(c.frame, setFocusId);
+  const scope: Scope | null = route.name === 'tag' ? { kind: 'tag', tag: route.tag } : SCOPES[route.name] ?? null;
 
   return html`<div class="shell">
-    <${Sidebar} route=${route} />
+    <${Sidebar} route=${route} activeProject=${projectOf(route)} />
     ${!s.ready
       ? html`<div class="main"></div>`
       : route.name === 'bundle'
@@ -591,11 +387,11 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
             ? html`<${FullOverProject} address=${route} askUrl=${url.ask} />`
             : route.name === 'project'
               ? html`<${ProjectView} id=${route.project} tab=${route.tab} askUrl=${url.ask} />`
-              : html`<${Home} />`}
+              : html`<${Home} scope=${scope ?? SCOPES.home} askUrl=${url.ask} onOpen=${open} />`}
     ${url.view}
-    ${overlays}
+    <${SearchHost} cards=${cards} projectName=${projectName} onPick=${open} />
+    ${focused && html`<${Focus} frame=${focused} onClose=${() => setFocusId(null)} />`}
     ${pair && html`<${PairDialog} pair=${pair} onClose=${() => setPair(null)} />`}
     ${s.toast && html`<div class="toast" role="status">${s.toast}</div>`}
   </div>`;
 }
-

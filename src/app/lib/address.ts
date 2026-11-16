@@ -2,6 +2,9 @@ export type ProjectTab = 'prototypes' | 'boards' | 'comments';
 export type Width = number | 'fill' | null;
 export type Address =
   | { name: 'home' }
+  | { name: 'starred' }
+  | { name: 'archive' }
+  | { name: 'tag'; tag: string }
   | { name: 'project'; project: string; tab: ProjectTab }
   | { name: 'board'; board: string; frame: string | null }
   | { name: 'bundle'; frame: string; from: string | null; page: string | null }
@@ -18,6 +21,9 @@ export function parseAddress(hash: string): Address {
   const [route, query] = cut < 0 ? [raw, ''] : [raw.slice(0, cut), raw.slice(cut + 1)];
   const seg = route.split('/');
   const q = new URLSearchParams(query);
+  if (seg.length === 1 && seg[0] === 'starred') return { name: 'starred' };
+  if (seg.length === 1 && seg[0] === 'archive') return { name: 'archive' };
+  if (seg[0] === 't' && seg[1] && seg.length === 2) return { name: 'tag', tag: dec(seg[1]) };
   if (seg[0] === 'p' && seg[1] && seg.length <= 3) {
     const tab = seg[2];
     if (seg.length === 2) return { name: 'project', project: dec(seg[1]), tab: 'prototypes' };
@@ -56,6 +62,12 @@ export function buildAddress(a: Address): string {
   switch (a.name) {
     case 'home':
       return '#/';
+    case 'starred':
+      return '#/starred';
+    case 'archive':
+      return '#/archive';
+    case 'tag':
+      return `#/t/${enc(a.tag)}`;
     case 'project':
       return `#/p/${enc(a.project)}${a.tab === 'prototypes' ? '' : `/${a.tab}`}`;
     case 'board':
