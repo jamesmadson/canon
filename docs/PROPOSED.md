@@ -79,3 +79,45 @@ James moves them into `docs/DECISIONS.md`.
 21. **The arrival keeps its tags.** After a drop the new card keeps showing
     its tags and the orange mark until you leave Home or drop again.
 22. **jsdom is a dev dependency** so component tests can render the screens.
+
+## Stored copy of a prototype made from code (D-134)
+
+My calls, for James to correct.
+
+1. **Limits on a build folder.** At most 2000 files, 25 MB in all and 500
+   characters in a path. They sit in `cli/src/mcp/folder.js` and again in
+   `src/app/lib/stage.ts`, and a test keeps the two equal.
+2. **What is skipped.** Folders named `node_modules`, any folder starting with
+   a dot, and `.DS_Store`. A symbolic link that stays inside the folder and
+   points at a file is kept; a link that leaves the folder, breaks, or points
+   at a folder is left out.
+3. **How files travel.** The bridge refuses arguments over 64 KB, so the MCP
+   process sends a new `stage` command carrying base64 pieces of about 36 KB,
+   six at a time. The `add` or `update` that follows names the upload. The
+   tab holds pieces in memory only, for ten minutes, four uploads at most.
+   Pairing and signing are unchanged.
+4. **Where the live address lives.** A new optional field `liveUrl` on the
+   prototype's version (not on the shared metadata). A stored copy is a
+   `files` prototype with that field. Nothing about boards, backups or the
+   database version changed.
+5. **`canon_update` is how a copy moves forward.** `canon_add` still never
+   joins a stack on its own. `canon_update` with a folder adds the next
+   version, keeps the name, size, star, note and tags, and keeps the live
+   address unless a new `url` comes with it. A link-only prototype that gets
+   a folder keeps its link as the live address. A new version is made even
+   when the files are identical to the last one.
+6. **`canon_update` with only a localhost `url`** still adds a link version,
+   as before, and now returns the same warning as `canon_add`. It does not
+   quietly change the live address of a stored copy.
+7. **A live address that is not on this machine.** It cannot be checked, so
+   the Live switch is offered without a check. Only localhost, 127.0.0.1 and
+   `[::1]` are ever requested. `*.localhost` names, 0.0.0.0 and private
+   network addresses are not.
+8. **The check.** One GET of the server's root (not the path), no cookies, no
+   headers, answer unread, 2.5 second limit, repeated when the tab regains
+   focus. A browser that blocks a request from the hosted app to localhost
+   would read as “not running”. I could not test that across browsers.
+9. **Where the switch and the message show.** The Live switch is in the
+   prototype's panel on a board. The canvas tile and the full-size view follow
+   it. Home thumbnails and the project list always show the stored copy, and a
+   link to a localhost server keeps its drawing there.

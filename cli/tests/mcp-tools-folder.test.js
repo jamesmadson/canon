@@ -178,7 +178,7 @@ describe('canon_add description', () => {
   });
   it('has no dashes in any description', () => {
     for (const d of TOOL_DEFS) {
-      expect(JSON.stringify(d)).not.toMatch(/[–—]/);
+      expect(JSON.stringify(d)).not.toMatch(new RegExp(String.fromCharCode(91, 0x2013, 0x2014, 93)));
     }
   });
 });
