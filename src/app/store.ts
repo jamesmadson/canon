@@ -462,7 +462,7 @@ export async function updateFrame(id: string, patch: Partial<Frame>, persist = t
 
 /** Applies metadata to every version of a prototype, so the stack always agrees. */
 export async function updateMeta(frameId: string, patch: FrameMeta, touch = true) {
-  for (const f of stackOf(frameId)) await updateFrame(f.id, patch);
+  for (const f of stackOf(frameId)) await updateFrame(f.id, patch, true, touch);
 }
 
 const metaNow = (frameId: string): FrameMeta => {
