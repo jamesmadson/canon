@@ -1,5 +1,5 @@
 /**
- * The repo and branch of the git checkout the MCP process runs in, read from
+ * The repo and branch of the repository the MCP process runs in, read from
  * the files in .git. Git itself is never run.
  */
 

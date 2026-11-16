@@ -28,12 +28,22 @@ const PLACEHOLDER = new RegExp(`^(?:${PLACEHOLDER_WORDS.join('|')})[ _-]?\\d*$`,
 const FILE_NAME = /^[^\s/\\]+\.(?:html?|jsx?|tsx?|mjs|cjs|css|scss|vue|svelte|astro|md|mdx|json|php|py|rb|png|jpe?g|gif|svg|webp|pdf|fig|sketch)$/i;
 const SCHEME = /^[a-z][a-z0-9+.-]*:\/\//i;
 const LOCALHOST = /^localhost(?::\d+)?(?:[/?#]|$)/i;
-const HOST = /^(?:\d{1,3}(?:\.\d{1,3}){3}|[a-z0-9-]+(?:\.[a-z0-9-]+)+)(?::\d+)?(?:[/?#]\S*)?$/i;
+// A dotted name is an address only with a port, a path, or an ending addresses use, so "Pricing.v2" is left alone.
+const IP = /^\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?(?:[/?#]\S*)?$/;
+const DOTTED = /^[a-z0-9-]+(?:\.[a-z0-9-]+)+((?::\d+)?(?:[/?#]\S*)?)$/i;
+const ENDINGS = /\.(?:com|net|org|io|app|dev|co|ai|sh|me|site|xyz|design|cloud|run|studio|tech|uk|au|ca|de|fr|jp|nz|br|eu|us|test|local|localhost)$/i;
+
+function isHost(name) {
+  if (IP.test(name)) return true;
+  const dotted = DOTTED.exec(name);
+  if (!dotted) return false;
+  return dotted[1] !== '' || ENDINGS.test(name);
+}
 
 function kindOf(name) {
   if (SCHEME.test(name) || LOCALHOST.test(name)) return 'a web address';
   if (FILE_NAME.test(name)) return 'a file name';
-  if (HOST.test(name)) return 'a web address';
+  if (isHost(name)) return 'a web address';
   if (PLACEHOLDER.test(name)) return 'a placeholder';
   return null;
 }

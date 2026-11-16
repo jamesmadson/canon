@@ -56,3 +56,14 @@ describe('followsNamingRule', () => {
     expect(followsNamingRule('index.html')).toBe(false);
   });
 });
+
+describe('nameWarning on dotted names that are not addresses', () => {
+  it('leaves Pricing.v2 and Settings.page alone', () => {
+    expect(nameWarning('Pricing.v2')).toBeNull();
+    expect(nameWarning('Settings.page')).toBeNull();
+  });
+  it('still warns on a host with a port or a path', () => {
+    expect(nameWarning('preview.internal:8080')).toContain('a web address');
+    expect(nameWarning('acme.vercel.app')).toContain('a web address');
+  });
+});

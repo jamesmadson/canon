@@ -127,3 +127,22 @@ describe('readPage', () => {
     expect(await readPage('http://x.invalid/', { fetchImpl })).toBeNull();
   });
 });
+
+describe('extractPage on hostile HTML', () => {
+  const cases = {
+    'many unclosed titles': '<title>'.repeat(73000),
+    'many h1 tags that never end': '<h1 '.repeat(131000),
+    'a heading full of unclosed tags': `<h1>${'<a '.repeat(170000)}</h1>`,
+    'many unclosed headings': '<h1>a'.repeat(100000),
+  };
+  for (const [name, html] of Object.entries(cases)) {
+    it(`reads ${name} in well under a second`, () => {
+      const started = Date.now();
+      extractPage(html);
+      expect(Date.now() - started).toBeLessThan(500);
+    });
+  }
+  it('keeps headings in page order across h1 and h2', () => {
+    expect(extractPage('<h2>One</h2><H1 class="x">Two</H1><h2>Three</h2>').headings).toEqual(['One', 'Two', 'Three']);
+  });
+});
