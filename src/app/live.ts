@@ -106,7 +106,7 @@ export function LiveSwitch({ frame }: { frame: Frame }) {
   const hint = `hint-${frame.id}`;
   return html`<div class="insp-sec">
     <div class="label">Running version</div>
-    <div class="seg"><button type="button" aria-pressed=${on} aria-describedby=${hint} onClick=${() => setLive(frame.id, !on)}>Live</button></div>
+    <div class="seg live-seg"><button type="button" aria-pressed=${on} aria-describedby=${hint} onClick=${() => setLive(frame.id, !on)}>Live</button></div>
     <p class="hint insp-hint" id=${hint}>Shows what is running at ${loopbackHost(frame.liveUrl) ?? new URL(frame.liveUrl).host} instead of the stored copy. Not saved.</p>
   </div>`;
 }
