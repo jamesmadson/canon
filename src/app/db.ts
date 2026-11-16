@@ -28,6 +28,12 @@ export interface Frame {
    * prototype's stored files.
    */
   cover?: string; display?: 'live' | 'cover';
+  /**
+   * The address a stored copy was built from, such as the localhost address of
+   * its dev server. A prototype with files and a liveUrl shows its files by
+   * default; the person can switch to the running version while it answers.
+   */
+  liveUrl?: string;
   /** Versions of one prototype share a stackId. current marks the one to show; else the newest shows. */
   stackId?: string; current?: boolean;
   /** These belong to the prototype across its versions, so every version of a stack carries the same values. */

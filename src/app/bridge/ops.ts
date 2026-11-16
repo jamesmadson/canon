@@ -21,6 +21,7 @@ import { metaOf } from '../lib/meta';
 import { SIZES } from '../lib/sizes';
 import { autoTags, mergeTags, normalizeTag, removeTag, reuseTag } from '../lib/tags';
 import { currentOf, stacks, versionOf } from '../lib/versions';
+import type { BuildFile, Staging } from '../lib/stage';
 
 export interface OpsDeps {
   state(): State;
@@ -31,6 +32,11 @@ export interface OpsDeps {
   /** Always called with stack:false: an agent's add never joins a stack on its own. */
   addUrl: typeof store.addUrl;
   addUrlVersion: typeof store.addUrlVersion;
+  /** Pieces of a build folder wait here until an add or update names them. */
+  staging: Staging;
+  /** A build stored like a dropped folder, with the url kept as its live address. Always stack:false. */
+  addBuild: typeof store.addBuild;
+  addBuildVersion: typeof store.addBuildVersion;
   updateFrame(id: string, patch: Partial<Frame>): Promise<void>;
   /** Sets metadata on every version of the prototype. */
   updateMeta(frameId: string, patch: FrameMeta): Promise<void>;
@@ -55,6 +61,7 @@ const MAX_TITLE = 300;
 const MAX_HEADINGS = 20;
 const MAX_NAMES = 50;
 const DEFAULT_PROJECT = 'My prototypes';
+const DEFAULT_BUILD_NAME = 'Prototype';
 
 type Lookup = 'project' | 'board' | 'moveTo' | 'frame';
 class Ambiguous {
@@ -240,7 +247,8 @@ function summary(deps: OpsDeps, frameId: string, board: Board | null) {
 /* ── add ───────────────────────────────────────────────────────────────── */
 
 async function add(args: Args, deps: OpsDeps) {
-  const url = checkedUrl(args.url, deps.appBase);
+  // With a build, the url is optional: it is the live address.
+  const url = args.url === undefined && args.build !== undefined ? null : checkedUrl(args.url, deps.appBase);
   const width = widthOf(args.width);
   const name = nameText(args.name);
   const s = deps.state();
@@ -301,13 +309,22 @@ async function add(args: Args, deps: OpsDeps) {
     ...(m.starred ? { starred: true } : {}), ...(m.note ? { note: m.note } : {}), ...(m.archived ? { archived: true } : {}),
   };
 
+  // The build's files are checked before anything is written.
+  const build: BuildFile[] | null = args.build === undefined ? null : deps.staging.take(args.build);
+
   // Writes start here.
   const p = 'have' in project ? project.have : await deps.createProject(project.make);
   const b = board === null ? null : 'have' in board ? board.have : await deps.createBoard(p.id, board.make);
   const size = typeof width === 'number' ? { w: width, h: SIZES.find((x) => x.w === width)?.h ?? 800 } : undefined;
-  const frame = await deps.addUrl(p.id, url, { boardId: b?.id, ...(name ? { name } : {}), ...(size ? { size } : {}), stack: false, meta });
+  const frame = build
+    ? await deps.addBuild(p.id, build, {
+      boardId: b?.id, ...(name ? { name } : {}), ...(size ? { size } : {}), meta, ...(url ? { liveUrl: url } : {}),
+      fallbackName: url ? new URL(url).host : DEFAULT_BUILD_NAME,
+    })
+    : await deps.addUrl(p.id, url!, { boardId: b?.id, ...(name ? { name } : {}), ...(size ? { size } : {}), stack: false, meta });
   deps.toast(`${deps.agentName} added ${frame.name}`);
-  return { ...summary(deps, frame.id, b), ...(m.summary ? { summary: m.summary } : {}), tags, names, link: frameLink(deps, frame.id, b) };
+  const stored = build ? { storedFiles: build.length, ...(url ? { liveUrl: url } : {}) } : {};
+  return { ...summary(deps, frame.id, b), ...(m.summary ? { summary: m.summary } : {}), tags, names, ...stored, link: frameLink(deps, frame.id, b) };
 }
 
 /* ── update ────────────────────────────────────────────────────────────── */
@@ -347,7 +364,8 @@ async function update(args: Args, deps: OpsDeps) {
   }
   if (m.starred !== undefined && m.starred !== !!before.starred) patch.starred = m.starred;
   if (m.archived !== undefined && m.archived !== !!before.archived) patch.archived = m.archived;
-  const auto = url !== null && m.page
+  const hasBuild = args.build !== undefined;
+  const auto = (url !== null || hasBuild) && m.page
     ? autoTags({ title: m.page.title, headings: m.page.headings, repo: m.repo ?? before.repo, branch: m.branch ?? before.branch })
     : [];
   const merged = mergeTags({ current: before.tags, removed: before.removedTags, auto, passed: m.tags, projectTags: projectTagsOf(s, project.id) });
@@ -357,10 +375,16 @@ async function update(args: Args, deps: OpsDeps) {
   if (next.removedTags.join('\n') !== (before.removedTags ?? []).join('\n')) patch.removedTags = next.removedTags;
   const metaChanged = Object.keys(patch).length > 0;
 
+  const build: BuildFile[] | null = hasBuild ? deps.staging.take(args.build) : null;
+
   // Writes start here.
   let current = currentOf(stack);
   let newVersion = false;
-  if (url !== null) {
+  if (build) {
+    const r = await deps.addBuildVersion(current.id, build, url ?? undefined);
+    current = r.frame;
+    newVersion = r.added;
+  } else if (url !== null) {
     const r = await deps.addUrlVersion(current.id, url);
     current = r.frame;
     newVersion = r.added;
@@ -386,7 +410,7 @@ async function update(args: Args, deps: OpsDeps) {
   const shown = target ?? linkBoard(after, deps, stackNow(after, current.id), board);
   const result = summary(deps, current.id, shown);
   if (newVersion || renamed || moved || metaChanged) deps.toast(`${deps.agentName} updated ${result.frame}`);
-  return { ...result, newVersion, tags: next.tags, link: frameLink(deps, current.id, shown) };
+  return { ...result, newVersion, tags: next.tags, ...(build ? { storedFiles: build.length } : {}), link: frameLink(deps, current.id, shown) };
 }
 
 /* ── find and status ───────────────────────────────────────────────────── */
@@ -429,6 +453,7 @@ function find(args: Args, deps: OpsDeps) {
       const on = [...new Set(spots.map((pl) => pl.boardId))].map((id) => s.boards.find((b) => b.id === id)?.name).filter((n): n is string => !!n);
       rows.push({
         id: cur.id, name: cur.name, kind: cur.kind, url: cur.kind === 'url' ? cur.url ?? null : null, boards: on, version: versionOf(st, cur.id), versions: st.length,
+        ...(cur.kind !== 'url' && cur.liveUrl ? { liveUrl: cur.liveUrl } : {}),
         ...(meta.summary ? { summary: meta.summary } : {}),
         ...(meta.tags?.length ? { tags: meta.tags } : {}),
         ...(meta.starred ? { starred: true } : {}),
@@ -511,6 +536,9 @@ export async function runOp(op: string, args: unknown, deps: OpsDeps): Promise<O
         return { ok: true, result: await add(a, deps) };
       case 'update':
         return { ok: true, result: await update(a, deps) };
+      case 'stage':
+        deps.staging.part(a);
+        return { ok: true, result: { staged: true } };
       case 'find':
         return { ok: true, result: find(a, deps) };
       case 'status':

@@ -17,6 +17,7 @@ import * as store from '../store';
 import { type Address, parseAddress } from '../lib/address';
 import { sign, verify, newNonce } from './auth';
 import { runOp, type OpsDeps } from './ops';
+import { createStaging } from '../lib/stage';
 
 export const BRIDGE_PORTS = Array.from({ length: 10 }, (_, i) => 47800 + i);
 const AGENT_ID = /^[a-z0-9-]{1,64}$/;
@@ -277,6 +278,9 @@ function warnOnce(port: number) {
 
 const currentAgent = (a: Agent) => agents.find((x) => x.id === a.id && x.secret === a.secret && x.tabId === a.tabId);
 
+/** Pieces of a build wait here between polls, so it outlives each batch of commands. */
+const staging = createStaging();
+
 function opsDeps(ctx: Ctx, agent: Agent): OpsDeps {
   return {
     state: store.getState,
@@ -285,6 +289,9 @@ function opsDeps(ctx: Ctx, agent: Agent): OpsDeps {
     createBoard: (projectId, name) => store.createBoard(projectId, name),
     addUrl: store.addUrl,
     addUrlVersion: store.addUrlVersion,
+    staging,
+    addBuild: store.addBuild,
+    addBuildVersion: store.addBuildVersion,
     updateFrame: (id, patch) => store.updateFrame(id, patch),
     updateMeta: (frameId, patch) => store.updateMeta(frameId, patch),
     placeOnBoard: (boardId, frameId) => store.placeOnBoard(boardId, frameId),

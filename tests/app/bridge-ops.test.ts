@@ -4,6 +4,7 @@ import type { State } from '../../src/app/store';
 import type { Board, Frame, FrameMeta, Placement, Project } from '../../src/app/db';
 import type { Address } from '../../src/app/lib/address';
 import { SIZES } from '../../src/app/lib/sizes';
+import { createStaging } from '../../src/app/lib/stage';
 
 const APP = 'https://example.test/canon/app/';
 
@@ -79,6 +80,9 @@ function fake(seed: Seed = {}) {
       });
       return { frame: state.frames.find((f) => f.id === made.id)!, added: true };
     },
+    staging: createStaging(),
+    addBuild: (async () => { throw new Error('This fake takes no builds.'); }) as OpsDeps['addBuild'],
+    addBuildVersion: (async () => { throw new Error('This fake takes no builds.'); }) as OpsDeps['addBuildVersion'],
     async updateFrame(id: string, patch: Partial<Frame>) {
       writes.push(`updateFrame ${id}`);
       set({ frames: state.frames.map((f) => (f.id === id ? { ...f, ...patch } : f)) });

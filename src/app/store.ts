@@ -252,7 +252,8 @@ async function insertFrame(frame: Frame, boardId?: string, at?: { x: number; y: 
 }
 
 export async function addPrepared(
-  projectId: string, p: Prepared, opts: { boardId?: string; at?: { x: number; y: number }; size?: { w: number; h: number }; stack?: boolean } = {}
+  projectId: string, p: Prepared,
+  opts: { boardId?: string; at?: { x: number; y: number }; size?: { w: number; h: number }; stack?: boolean; meta?: FrameMeta; liveUrl?: string } = {}
 ) {
   const id = uid();
   await db.replaceFiles(id, p.files);
@@ -265,11 +266,44 @@ export async function addPrepared(
   const frame: Frame = {
     id, projectId, name: p.name, kind: p.handle ? 'linked' : 'files', entry: p.entry, fileCount: p.files.length,
     pages: p.pages ?? [p.entry], links: p.links ?? [], handleId, x: 0, y: 0, w: size.w, h: size.h, rev: 0,
-    createdAt: now(), updatedAt: now(),
+    createdAt: now(), updatedAt: now(), ...opts.meta, ...(opts.liveUrl ? { liveUrl: opts.liveUrl } : {}),
   };
   await insertFrame(frame, opts.boardId, opts.at);
   if (opts.stack !== false) await autoStack(frame);
   return frame;
+}
+
+/** The files of a build an agent sent, as a prototype made from code: stored like a dropped folder, with its live address kept beside them. */
+export interface BuildOpts {
+  boardId?: string; name?: string; size?: { w: number; h: number }; meta?: FrameMeta; liveUrl?: string;
+  /** The name when neither the agent nor the page's title gives one. */
+  fallbackName: string;
+}
+export async function addBuild(projectId: string, files: { path: string; bytes: Uint8Array }[], opts: BuildOpts) {
+  const prepared = await prepare({ name: opts.name || opts.fallbackName, files: files.map((f) => ({ path: f.path, blob: new Blob([f.bytes]) })) });
+  if (!prepared) throw new Error('The build has no HTML file, so there is nothing to show.');
+  if (opts.name) prepared.name = opts.name;
+  return addPrepared(projectId, prepared, { boardId: opts.boardId, size: opts.size, stack: false, meta: opts.meta, liveUrl: opts.liveUrl });
+}
+
+/**
+ * Add a build as the next version of a prototype's stack, the way a URL
+ * version is added: it takes the stack's name, size and metadata, becomes
+ * current, and board spots showing the previous current version move to it.
+ * Older versions and their files stay. The live address carries forward; a
+ * prototype that was only a link keeps that link as its live address.
+ */
+export async function addBuildVersion(frameId: string, files: { path: string; bytes: Uint8Array }[], liveUrl?: string): Promise<{ frame: Frame; added: boolean }> {
+  if (!state.frames.some((f) => f.id === frameId)) throw new Error('That prototype is not in the library.');
+  const current = currentOf(stackOf(frameId));
+  const frame = await addBuild(current.projectId, files, {
+    name: current.name, fallbackName: current.name, size: { w: current.w, h: current.h }, meta: inheritedMeta(current),
+    liveUrl: liveUrl ?? current.liveUrl ?? (current.kind === 'url' ? current.url : undefined),
+  });
+  const spots = swapsFor(state.placements, current.id);
+  await joinStack(frame.id, current.id);
+  for (const pl of spots) await swapOnBoard(pl.id, frame.id);
+  return { frame: state.frames.find((f) => f.id === frame.id) ?? frame, added: true };
 }
 
 const projectTagsOf = (projectId: string) => state.frames.filter((f) => f.projectId === projectId).flatMap((f) => f.tags ?? []);
