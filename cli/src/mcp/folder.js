@@ -4,7 +4,8 @@
  * again in the tab (src/app/lib/stage.ts); a test keeps the two in step.
  */
 
-import { readdir, lstat, stat, realpath, readFile } from 'node:fs/promises';
+import { readdir, lstat, stat, realpath, open } from 'node:fs/promises';
+import { constants } from 'node:fs';
 import { isAbsolute, join, sep } from 'node:path';
 
 export const BUILD_LIMITS = { maxBytes: 25 * 1024 * 1024, maxFiles: 2000, maxPath: 500 };
@@ -15,7 +16,8 @@ const refuse = (message) => ({ ok: false, message });
 /** A name that would break a stored path. */
 const odd = (name) => name.includes('\\') || name.includes('\0');
 
-export async function readBuildFolder(folder, limits = BUILD_LIMITS) {
+/** hooks.afterWalk runs between checking the files and reading them; tests use it to change files. */
+export async function readBuildFolder(folder, limits = BUILD_LIMITS, hooks = {}) {
   if (typeof folder !== 'string' || !isAbsolute(folder)) {
     return refuse('folder must be an absolute path. Pass the full path to the build folder, such as /Users/you/app/dist.');
   }
@@ -54,7 +56,7 @@ export async function readBuildFolder(folder, limits = BUILD_LIMITS) {
           skipped++;
           continue;
         }
-        add(prefix + name, full, info.size);
+        add(prefix + name, target, info.size);
       } else if (entry.isDirectory()) {
         if (name.startsWith('.')) continue;
         await walk(full, `${prefix}${name}/`);
@@ -78,14 +80,48 @@ export async function readBuildFolder(folder, limits = BUILD_LIMITS) {
       failure = refuse(`The build is larger than ${limits.maxBytes} bytes. Pass a smaller build folder, or compress large images and videos first.`);
       return;
     }
-    found.push({ path, full });
+    found.push({ path, full, size });
   }
 
   await walk(root, '');
   if (failure) return failure;
 
   found.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+  await hooks.afterWalk?.();
+
+  // Each file is opened without following a link, checked to be a regular file, and read for no more than the budget left.
   const files = [];
-  for (const f of found) files.push({ path: f.path, data: await readFile(f.full) });
-  return { ok: true, files, bytes, skipped };
+  let read = 0;
+  const changed = (path) => refuse(`${path} changed while Canon was reading the build. Finish the build, then pass the folder again.`);
+  const tooBig = () => refuse(`The build is larger than ${limits.maxBytes} bytes. Pass a smaller build folder, or compress large images and videos first.`);
+  for (const f of found) {
+    let handle;
+    try {
+      handle = await open(f.full, constants.O_RDONLY | constants.O_NOFOLLOW);
+    } catch {
+      return changed(f.path);
+    }
+    try {
+      const info = await handle.stat();
+      if (!info.isFile()) return changed(f.path);
+      if (read + info.size > limits.maxBytes) return tooBig();
+      if (info.size !== f.size) return changed(f.path);
+      const data = Buffer.alloc(info.size);
+      let got = 0;
+      while (got < info.size) {
+        const { bytesRead } = await handle.read(data, got, info.size - got, got);
+        if (bytesRead === 0) break;
+        got += bytesRead;
+      }
+      if (got !== info.size) return changed(f.path);
+      // One more byte means the file grew while it was read.
+      const extra = await handle.read(Buffer.alloc(1), 0, 1, info.size);
+      if (extra.bytesRead !== 0) return changed(f.path);
+      read += got;
+      files.push({ path: f.path, data });
+    } finally {
+      await handle.close();
+    }
+  }
+  return { ok: true, files, bytes: read, skipped };
 }

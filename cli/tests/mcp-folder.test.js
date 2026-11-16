@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readBuildFolder, BUILD_LIMITS } from '../src/mcp/folder.js';
@@ -88,5 +88,31 @@ describe('readBuildFolder reads', () => {
     const r = await readBuildFolder(dir);
     expect(r.files.map((f) => f.path)).toEqual(['alias.css', 'index.html', 'real.css']);
     expect(r.skipped).toBe(2);
+  });
+});
+
+describe('readBuildFolder reads what it checked', () => {
+  it('does not read a file that was swapped for a symbolic link after the walk', async () => {
+    const outside = build({ 'secret.txt': 'secret' });
+    const dir = build({ 'index.html': '<p/>', 'app.js': 'x=1' });
+    const r = await readBuildFolder(dir, BUILD_LIMITS, {
+      afterWalk: () => {
+        rmSync(join(dir, 'app.js'));
+        symlinkSync(join(outside, 'secret.txt'), join(dir, 'app.js'));
+      },
+    });
+    expect(r.ok).toBe(false);
+    expect(r.message).toBe('app.js changed while Canon was reading the build. Finish the build, then pass the folder again.');
+  });
+  it('refuses a file that grew past the size limit after the walk', async () => {
+    const dir = build({ 'index.html': '<p/>', 'big.bin': 'x'.repeat(10) });
+    const r = await readBuildFolder(dir, { ...BUILD_LIMITS, maxBytes: 1000 }, { afterWalk: () => writeFileSync(join(dir, 'big.bin'), 'x'.repeat(5000)) });
+    expect(r.ok).toBe(false);
+    expect(r.message).toBe('The build is larger than 1000 bytes. Pass a smaller build folder, or compress large images and videos first.');
+  });
+  it('refuses a file that changed size but stayed under the limit', async () => {
+    const dir = build({ 'index.html': '<p/>', 'a.txt': 'abc' });
+    const r = await readBuildFolder(dir, BUILD_LIMITS, { afterWalk: () => writeFileSync(join(dir, 'a.txt'), 'abcdef') });
+    expect(r.message).toBe('a.txt changed while Canon was reading the build. Finish the build, then pass the folder again.');
   });
 });
