@@ -55,8 +55,13 @@ describe('readBuildFolder refusals', () => {
     const m = await refusal(dir, { ...BUILD_LIMITS, maxBytes: 1000 });
     expect(m).toBe('The build is larger than 1000 bytes. Pass a smaller build folder, or compress large images and videos first.');
   });
+  it('refuses a file path the tab could not store', async () => {
+    const dir = build({ 'index.html': '<p/>', 'a/b/c.txt': '1' });
+    const m = await refusal(dir, { ...BUILD_LIMITS, maxPath: 4 });
+    expect(m).toBe('The build has a file path longer than 4 characters (a/b/c.txt...). Shorten the folder names in the build.');
+  });
   it('states real limits in bytes and files', () => {
-    expect(BUILD_LIMITS).toEqual({ maxBytes: 25 * 1024 * 1024, maxFiles: 2000 });
+    expect(BUILD_LIMITS).toEqual({ maxBytes: 25 * 1024 * 1024, maxFiles: 2000, maxPath: 500 });
   });
 });
 

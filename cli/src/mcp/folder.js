@@ -7,7 +7,7 @@
 import { readdir, lstat, stat, realpath, readFile } from 'node:fs/promises';
 import { isAbsolute, join, sep } from 'node:path';
 
-export const BUILD_LIMITS = { maxBytes: 25 * 1024 * 1024, maxFiles: 2000 };
+export const BUILD_LIMITS = { maxBytes: 25 * 1024 * 1024, maxFiles: 2000, maxPath: 500 };
 
 const SKIPPED_NAMES = new Set(['node_modules', '.DS_Store']);
 const refuse = (message) => ({ ok: false, message });
@@ -65,6 +65,10 @@ export async function readBuildFolder(folder, limits = BUILD_LIMITS) {
   }
 
   function add(path, full, size) {
+    if (path.length > limits.maxPath) {
+      failure = refuse(`The build has a file path longer than ${limits.maxPath} characters (${path.slice(0, 60)}...). Shorten the folder names in the build.`);
+      return;
+    }
     if (found.length + 1 > limits.maxFiles) {
       failure = refuse(`The build has more than ${limits.maxFiles} files. Pass a smaller build folder, without files the prototype does not use.`);
       return;

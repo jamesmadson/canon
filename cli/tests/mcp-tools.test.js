@@ -154,9 +154,9 @@ describe('canon tools', () => {
     it('the canon_add description states the naming rule with its example', () => {
       const add = TOOL_DEFS.find((d) => d.name === 'canon_add');
       expect(add.description).toContain(NAMING_RULE);
-      expect(add.description).toBe(
+      expect(add.description.startsWith(
         `Put a prototype on a board so it can be found again. ${NAMING_RULE} The reply lists the names already in the project: match their style. Add a one-sentence summary. Canon tags the prototype from its page, this agent, the repo and the branch; pass tags only to add your own.`,
-      );
+      )).toBe(true);
     });
     it('no tool description or argument description has an em or en dash', () => {
       const texts = [];

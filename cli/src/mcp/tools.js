@@ -6,6 +6,9 @@
 import { readPairings, rotatePairing, pairLink } from './pairing.js';
 import { readPage as realReadPage } from './page.js';
 import { readSource as realReadSource } from './source.js';
+import { readBuildFolder as realReadBuildFolder, BUILD_LIMITS } from './folder.js';
+import { stageBuild } from './upload.js';
+import { extractPage } from './page.js';
 import { NAMING_RULE, nameWarning } from './naming.js';
 
 const BARE_HOST = /^(localhost|\d{1,3}(\.\d{1,3}){3}|\[[0-9a-f:]+\]|[a-z0-9-]+(\.[a-z0-9-]+)+)(:\d+)?([/?#].*)?$/i;
@@ -23,10 +26,21 @@ export function checkPrototypeUrl(input) {
   }
 }
 
+/** The host and port of an address on this machine (localhost, 127.0.0.1 or [::1]), else null. */
+export function loopbackHost(url) {
+  try {
+    const u = new URL(url);
+    return ['localhost', '127.0.0.1', '[::1]'].includes(u.hostname) ? u.host : null;
+  } catch {
+    return null;
+  }
+}
+
 const str = (description) => ({ type: 'string', description });
 const schema = (properties, required = []) => ({ type: 'object', properties, required });
 const TAGS = (description) => ({ type: 'array', items: { type: 'string' }, description });
 const PROJECT = str('Project name or id. Add uses the project open in Canon when this is left out; other tools search every project.');
+const FOLDER = str(`Absolute path to a build folder: static files with an index.html at its top, such as dist, build or out. Canon keeps a copy of at most ${BUILD_LIMITS.maxFiles} files and ${BUILD_LIMITS.maxBytes / (1024 * 1024)} MB. Folders named node_modules, folders starting with a dot and links that leave the folder are skipped.`);
 const OPEN_PROPS = {
   project: PROJECT,
   board: str('Board name or id.'),
@@ -42,10 +56,11 @@ export const TOOL_DEFS = [
   { name: 'canon_pair', description: 'Make a new pairing link to approve this agent in Canon.', inputSchema: schema({}) },
   {
     name: 'canon_add',
-    description: `Put a prototype on a board so it can be found again. ${NAMING_RULE} The reply lists the names already in the project: match their style. Add a one-sentence summary. Canon tags the prototype from its page, this agent, the repo and the branch; pass tags only to add your own.`,
+    description: `Put a prototype on a board so it can be found again. ${NAMING_RULE} The reply lists the names already in the project: match their style. Add a one-sentence summary. Canon tags the prototype from its page, this agent, the repo and the branch; pass tags only to add your own. For a prototype made from code, build the project first and pass folder, the absolute path of the build output, so Canon keeps a copy that shows without a server. Pass the localhost address as url too, and it becomes the live address: Canon offers a Live switch while that server runs. To add a later round, call canon_update with the same prototype and a new folder; it becomes a new version and the older ones stay. Pass only a url for a page that is already hosted. A localhost address with no folder shows only while its server runs.`,
     inputSchema: schema(
       {
-        url: str('An http or https URL.'),
+        url: str('An http or https URL. With folder, this is the live address, usually the localhost address of the dev server. Without folder it is the prototype itself.'),
+        folder: FOLDER,
         name: str('What it is, then what is different.'),
         summary: str('One sentence on what this prototype shows.'),
         tags: TAGS('Extra tags. Canon adds its own.'),
@@ -57,18 +72,19 @@ export const TOOL_DEFS = [
         board: str('Board name or id. A new board is made if none matches.'),
         width: OPEN_PROPS.width,
       },
-      ['url'],
+      [],
     ),
   },
   {
     name: 'canon_update',
-    description: 'Change a prototype: its URL, name, summary, tags, star, note, archive or place.',
+    description: 'Change a prototype: its URL, name, summary, tags, star, note, archive or place. Pass folder, the absolute path of a new build, to add it as the next version of the prototype; the older versions stay.',
     inputSchema: schema(
       {
         project: PROJECT,
         frame: str('Prototype name or id.'),
         board: str('Board name or id, to narrow the search.'),
-        url: str('A new http or https URL.'),
+        url: str('A new http or https URL. With folder, this is the new live address.'),
+        folder: FOLDER,
         name: str('A new name.'),
         summary: str('One sentence on what this prototype shows.'),
         repo: str('The repo it came from.'),
@@ -113,6 +129,7 @@ function checkArgs(name, args) {
   for (const key of REQUIRED[name]) {
     if (args[key] === undefined) return `${key} is required.`;
   }
+  if (name === 'canon_add' && args.url === undefined && args.folder === undefined) return 'url or folder is required.';
   for (const [key, value] of Object.entries(args)) {
     if (value === undefined) continue;
     if (key === 'full' || key === 'starred' || key === 'archived') {
@@ -170,7 +187,7 @@ function doneText(op, res) {
   return line;
 }
 
-export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, readSource = realReadSource }) {
+export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, readSource = realReadSource, readBuildFolder = realReadBuildFolder }) {
   const link = (secret) => pairLink(appBase, { agentId: pairing.agentId, name: pairing.name, port: bridge.port, secret });
 
   function notConnected() {
@@ -189,14 +206,17 @@ export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, r
     );
   }
 
-  async function forward(op, args) {
+  /** A failed bridge reply, in words for the agent. */
+  function failed(r) {
+    if (r.error === 'not-connected') return notConnected();
+    if (r.error === 'many' || r.error === 'none') return text(candidateText(r.error), true);
+    if (Object.hasOwn(FAILURES, r.error)) return text(FAILURES[r.error], true);
+    return text(String(r.error), true);
+  }
+
+  async function forward(op, args, warnings = []) {
     const r = await bridge.send(op, args);
-    if (!r.ok) {
-      if (r.error === 'not-connected') return notConnected();
-      if (r.error === 'many' || r.error === 'none') return text(candidateText(r.error), true);
-      if (Object.hasOwn(FAILURES, r.error)) return text(FAILURES[r.error], true);
-      return text(String(r.error), true);
-    }
+    if (!r.ok) return failed(r);
     const res = r.result;
     const kind = res && typeof res === 'object' ? (res.status ?? res.error) : null;
     if (kind === 'many' || kind === 'none') return text(candidateText(kind, res.candidates ?? res.names, res.what, res.query), true);
@@ -209,8 +229,9 @@ export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, r
       const { names, ...rest } = res;
       shown = rest;
     }
+    lines.push(...warnings);
     const done = doneText(op, res);
-    return text(done ? [done, ...lines, show(shown)].join('\n') : show(shown ?? 'Done.'));
+    return text(done ? [done, ...lines, show(shown)].join('\n') : [...lines, show(shown ?? 'Done.')].join('\n'));
   }
 
   /** Nothing read is not an error: a reader that throws or finds nothing gives null. */
@@ -244,13 +265,33 @@ export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, r
         return text(`Open this link in Canon to approve this agent: ${link(secret)}`);
       }
       if (name === 'canon_add' || name === 'canon_update') {
-        if (name === 'canon_add' || args.url !== undefined) {
+        if (args.url !== undefined) {
           const checked = checkPrototypeUrl(args.url);
           if (!checked.ok) return text(checked.message, true);
           args = { ...args, url: checked.url };
         }
+        let warnings = [];
+        if (args.folder !== undefined) {
+          const read = await readBuildFolder(args.folder);
+          if (!read.ok) return text(read.message, true);
+          const sent = await stageBuild((op, a) => bridge.send(op, a), read);
+          if (!sent.ok) return failed(sent.reply);
+          const { folder, ...rest } = args;
+          args = { ...rest, build: sent.build };
+          // A folder-only add has no server to read, so the title and headings come from the stored index.html.
+          if (args.url === undefined) {
+            const index = read.files.find((f) => f.path === 'index.html');
+            const page = index ? extractPage(Buffer.from(index.data).toString('utf8')) : null;
+            if (page && (page.title || page.headings.length)) args = { ...args, page };
+          }
+        } else {
+          const host = loopbackHost(args.url);
+          if (host) {
+            warnings = [`Warning: This prototype will only show while the server at ${host} is running. Build the project and pass the build folder as folder, in canon_add or canon_update, so Canon keeps a copy that shows without the server.`];
+          }
+        }
         if (name === 'canon_add') {
-          const [page, source] = await Promise.all([safely(() => readPage(args.url)), safely(() => readSource())]);
+          const [page, source] = await Promise.all([args.url === undefined ? null : safely(() => readPage(args.url)), safely(() => readSource())]);
           if (page) args = { ...args, page };
           if (source && args.repo === undefined && args.branch === undefined) {
             if (source.repo) args = { ...args, repo: source.repo };
@@ -260,7 +301,7 @@ export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, r
           const page = await safely(() => readPage(args.url));
           if (page) args = { ...args, page };
         }
-        return forward(name === 'canon_add' ? 'add' : 'update', args);
+        return forward(name === 'canon_add' ? 'add' : 'update', args, warnings);
       }
       return forward(lists[name], args);
   }
