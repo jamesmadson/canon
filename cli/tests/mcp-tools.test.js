@@ -169,7 +169,7 @@ describe('canon tools', () => {
         for (const prop of Object.values(d.inputSchema.properties)) walk(prop.description);
       }
       expect(texts.length).toBeGreaterThan(20);
-      for (const t of texts) expect(t).not.toMatch(/[–—]/);
+      for (const t of texts) expect(t).not.toMatch(/[\u2013\u2014]/);
     });
     it("add sends the page it read, and the repo and branch of the working directory", async () => {
       const page = { title: 'Pricing', headings: ['Plans'] };
