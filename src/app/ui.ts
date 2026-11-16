@@ -4,6 +4,8 @@ import type { Frame, Note } from './db';
 import { canLinkFolders, groupsFromDrop } from './intake';
 import { BoardView, BundleView, Focus } from './canvas';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
+import { FilterMenu } from './home';
+import { AddMenu, ProtoRow, StarButton, Tags } from './parts';
 import { currentOf, stackKey, stacks as stacksOf, versionOf } from './lib/versions';
 import { checkPrototypeUrl, safeFrameUrl } from './lib/resolve';
 import { type Address, buildAddress, parseAddress } from './lib/address';
@@ -11,7 +13,7 @@ import { type PairLink, pairNotice, parsePairLink, saveAgent } from './bridge/cl
 import { Home } from './home';
 import { SearchHost } from './palette';
 import { Sidebar, useBridge } from './sidebar';
-import { type Card, type Scope, cardsOf } from './lib/home';
+import { type Card, type Scope, cardOf, cardsOf, scopeCards, tagCounts } from './lib/home';
 import { Avatar } from './comments';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, KIND, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
@@ -155,15 +157,25 @@ function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boa
   </div>`;
 }
 
-/* The library: every prototype in the project, searchable, sortable, in a grid or a table. */
-function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promise<string | null> }) {
+/* The library: every prototype in the project, searchable, sortable by update or star, filterable by tag, in a grid or a list. */
+const VIEW_KEY = 'canon-project-view';
+function useProjectView(): ['grid' | 'list', (v: 'grid' | 'list') => void] {
+  const [view, set] = useState<'grid' | 'list'>(() => {
+    try { return localStorage.getItem(VIEW_KEY) === 'list' ? 'list' : 'grid'; } catch { return 'grid'; }
+  });
+  return [view, (v) => {
+    set(v);
+    try { localStorage.setItem(VIEW_KEY, v); } catch { /* private mode: the choice lasts this visit */ }
+  }];
+}
+
+export function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promise<string | null> }) {
   useStore();
-  const [view, setView] = useState<'grid' | 'table'>('grid');
-  const [filter, setFilter] = useState<LibraryFilter>({ source: 'all' });
-  const [sort, setSort] = useState<LibrarySort>('added');
+  const [view, setView] = useProjectView();
+  const [filter, setFilter] = useState<LibraryFilter>({ source: 'all', tags: [] });
+  const [sort, setSort] = useState<LibrarySort>('updated');
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [focus, setFocus] = useState<string | null>(null);
-  const [menu, setMenu] = useState(false);
   const all = store.libraryItems(projectId);
   const matched = sortPrototypes(filterPrototypes(all, filter), sort);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -210,93 +222,88 @@ function Library({ projectId, askUrl }: { projectId: string; askUrl: () => Promi
     for (const fid of picked) await store.deleteFrame(fid);
     setPicked(new Set());
   };
-  const way = async (w: Way) => {
-    setMenu(false);
-    await runWay(w, projectId, undefined, askUrl);
-  };
+  const way = (w: Way) => runWay(w, projectId, undefined, askUrl);
   const chip = (key: keyof LibraryFilter, label: string) =>
-    html`<button class="chip-toggle" aria-pressed=${!!filter[key]} onClick=${() => setFilter({ ...filter, [key]: !filter[key] })}>${label}</button>`;
+    html`<button type="button" class="chip-toggle" aria-pressed=${!!filter[key]} onClick=${() => setFilter({ ...filter, [key]: !filter[key] })}>${label}</button>`;
   const focused = all.find((i) => i.id === focus)?.frame;
+  const clear = () => setFilter({ source: 'all', tags: [] });
+  const tagList = tagCounts(scopeCards(cardsOf(all.map((i) => i.frame)), { kind: filter.archived ? 'archive' : 'home' }));
+  const cardFor = (i: (typeof items)[number]) => ({ ...cardOf(i.frame), versions: i.versions });
+  const filtering = !!(filter.query || filter.tags?.length || filter.multiPage || filter.hasComments || filter.unplaced || filter.archived || (filter.source && filter.source !== 'all'));
+
+  const versionsSlot = (i: (typeof items)[number]) =>
+    i.extra
+      ? html`<span class="ver"><span class="ver-chip old">v${i.v}</span>${!i.isCurrent && html` <button type="button" class="link" onClick=${() => store.makeCurrent(i.id)}>Make current</button>`}</span>`
+      : i.versions > 1
+        ? html`<span class="ver"><button type="button" class="ver-chip ver-btn" onClick=${() => toggleStack(i.stack)} aria-expanded=${expanded.has(i.stack)} aria-label=${`${i.versions} versions of ${i.name}`}>${i.versions} versions ${expanded.has(i.stack) ? '▴' : '▾'}</button></span>`
+        : html`<span class="ver"></span>`;
 
   return html`<div class="page library">
     <div class="lib-bar">
-      <label class="search small"><${Icon} name="search" /><input placeholder="Search prototypes" value=${filter.query ?? ''} onInput=${(e: Event) => setFilter({ ...filter, query: (e.target as HTMLInputElement).value })} /></label>
+      <label class="search small"><${Icon} name="search" /><span class="sr">Search prototypes</span><input placeholder="Search prototypes" value=${filter.query ?? ''} onInput=${(e: Event) => setFilter({ ...filter, query: (e.target as HTMLInputElement).value })} /></label>
+      <${FilterMenu} tags=${tagList} chosen=${filter.tags ?? []} onChange=${(t: string[]) => setFilter({ ...filter, tags: t })} />
       <select class="select" value=${filter.source} onChange=${(e: Event) => setFilter({ ...filter, source: (e.target as HTMLSelectElement).value as LibraryFilter['source'] })} aria-label="Source">
         <option value="all">All sources</option><option value="files">Files</option><option value="linked">Linked folders</option><option value="url">URLs</option>
       </select>
-      ${chip('multiPage', 'Multi-page')}${chip('hasComments', 'Open notes')}${chip('unplaced', 'Not on a board')}
+      ${chip('multiPage', 'Multi-page')}${chip('hasComments', 'Open notes')}${chip('unplaced', 'Not on a board')}${chip('archived', 'Archived')}
       <span class="spacer"></span>
       <select class="select" value=${sort} onChange=${(e: Event) => setSort((e.target as HTMLSelectElement).value as LibrarySort)} aria-label="Sort">
-        <option value="added">Newest</option><option value="name">Name</option><option value="comments">Most notes</option><option value="updated">Last changed</option>
+        <option value="updated">Updated</option><option value="starred">Starred first</option><option value="added">Newest</option><option value="name">Name</option><option value="comments">Most notes</option>
       </select>
-      <div class="seg"><button aria-pressed=${view === 'grid'} onClick=${() => setView('grid')} title="Grid"><${Icon} name="grid" /></button><button aria-pressed=${view === 'table'} onClick=${() => setView('table')} title="Table"><${Icon} name="table" /></button></div>
-      <div style="position:relative">
-        <button class="btn primary" onClick=${() => setMenu(!menu)}><${Icon} name="plus" />Add</button>
-        ${menu && html`<div class="menu" style="top:40px;bottom:auto;right:0;left:auto">
-          <button onClick=${() => way('files')}><${Icon} name="file" />HTML or zip files…</button>
-          <button onClick=${() => way('folder')}><${Icon} name="folder" />A folder…</button>
-          <button onClick=${() => way('link')} disabled=${!canLinkFolders()}><${Icon} name="link" />Link a folder on your machine…</button>
-          <button onClick=${() => way('url')}><${Icon} name="globe" />A running URL…</button>
-        </div>`}
-      </div>
+      <div class="seg" role="group" aria-label="View"><button type="button" aria-pressed=${view === 'grid'} onClick=${() => setView('grid')}>Grid</button><button type="button" aria-pressed=${view === 'list'} onClick=${() => setView('list')}>List</button></div>
+      <${AddMenu} primary label="Add" onWay=${way} />
     </div>
 
     ${picked.size > 0 && html`<div class="selection-bar">
       <b>${picked.size} selected</b>
       <span class="faint">Add to</span>
-      ${boards.map((b) => html`<button class="btn" onClick=${() => addTo(b.id)}>${b.name}</button>`)}
-      <button class="btn" onClick=${() => addTo('new')}><${Icon} name="plus" />New board</button>
+      ${boards.map((b) => html`<button type="button" class="btn" key=${b.id} onClick=${() => addTo(b.id)}>${b.name}</button>`)}
+      <button type="button" class="btn" onClick=${() => addTo('new')}><${Icon} name="plus" />New board</button>
       <span class="spacer"></span>
-      <button class="btn ghost danger" onClick=${remove}><${Icon} name="trash" />Delete</button>
-      <button class="btn ghost" onClick=${() => setPicked(new Set())}>Clear</button>
+      <button type="button" class="btn ghost danger" onClick=${remove}><${Icon} name="trash" />Delete</button>
+      <button type="button" class="btn ghost" onClick=${() => setPicked(new Set())}>Clear</button>
     </div>`}
 
     <div class="drop-hint" data-drop-hint><b>Drop a prototype here:</b> HTML, a zip or a folder</div>
     ${all.length === 0 && html`<div class="empty-board" style="position:static;padding:40px 0"><div>
       <h2>No prototypes yet</h2><p>Or use Add, above, to pick files or link a folder.</p>
     </div></div>`}
-    ${all.length > 0 && items.length === 0 && html`<div class="empty">Nothing matches. <button class="btn ghost" onClick=${() => setFilter({ source: 'all' })}>Clear filters</button></div>`}
+    ${all.length > 0 && items.length === 0 && html`<div class="empty">${filter.archived && !filtering ? 'Nothing is archived.' : 'Nothing matches.'} <button type="button" class="btn ghost" onClick=${clear}>Clear filters</button></div>`}
 
     ${view === 'grid'
       ? html`<div class="lib-grid">
           ${items.map((i) => {
             const f = i.frame;
+            const card = cardFor(i);
             const s = Math.min(240 / f.w, 160 / f.h);
-            return html`<div class=${`lib-card${picked.has(i.id) ? ' picked' : ''}${i.extra ? ' older' : ''}`}>
-              <button class="lib-thumb" onClick=${() => open(i.id)} title="Open">
+            return html`<div class=${`lib-card${picked.has(i.id) ? ' picked' : ''}${i.extra ? ' older' : ''}`} key=${i.id} data-card=${i.id}>
+              <button type="button" class="lib-thumb" onClick=${() => open(i.id)} aria-label=${`Open ${f.name}`}>
                 ${(pageCount(f) > 1 || (i.versions > 1 && !i.extra)) && html`<span class="lib-sheet"></span>`}
                 <span class="lib-frame" style=${{ width: f.w * s, height: f.h * s }}>
                   ${showsCover(f)
                     ? html`<img class="frame-cover" src=${coverSrc(f)} alt="" />`
-                    : html`<iframe src=${frameSrc(f)} tabindex="-1" loading="lazy" sandbox=${SANDBOX} style=${{ width: f.w, height: f.h, transform: `scale(${s})` }}></iframe>`}
+                    : html`<iframe src=${frameSrc(f)} tabindex="-1" loading="lazy" sandbox=${SANDBOX} aria-hidden="true" style=${{ width: f.w, height: f.h, transform: `scale(${s})` }}></iframe>`}
                 </span>
               </button>
-              <label class="lib-check"><input type="checkbox" checked=${picked.has(i.id)} onChange=${() => toggle(i.id)} /></label>
+              <label class="lib-check"><input type="checkbox" checked=${picked.has(i.id)} onChange=${() => toggle(i.id)} aria-label=${`Select ${f.name}`} /></label>
+              <${StarButton} card=${card} />
               <div class="meta">
                 <b>${f.name}</b>
+                ${f.summary && html`<span class="lib-sum">${f.summary}</span>`}
                 <small>${i.pages > 1 ? `${i.pages} pages · ` : ''}${i.boards ? `${i.boards} board${i.boards > 1 ? 's' : ''}` : 'Not on a board'}${i.comments ? ` · ${i.comments} open` : ''}</small>
+                ${card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
                 ${i.versions > 1 && html`<div class="lib-ver">
                   ${i.extra
-                    ? html`<span class="ver-chip old">v${i.v}</span>${!i.isCurrent && html`<button class="link" onClick=${() => store.makeCurrent(i.id)}>Make current</button>`}`
-                    : html`<button class="ver-chip" onClick=${() => toggleStack(i.stack)} aria-expanded=${expanded.has(i.stack)}>v${i.v} · ${i.versions} versions ${expanded.has(i.stack) ? '▴' : '▾'}</button>`}
+                    ? html`<span class="ver-chip old">v${i.v}</span>${!i.isCurrent && html`<button type="button" class="link" onClick=${() => store.makeCurrent(i.id)}>Make current</button>`}`
+                    : html`<button type="button" class="ver-chip" onClick=${() => toggleStack(i.stack)} aria-expanded=${expanded.has(i.stack)}>v${i.v} · ${i.versions} versions ${expanded.has(i.stack) ? '▴' : '▾'}</button>`}
                 </div>`}
               </div>
             </div>`;
           })}
         </div>`
-      : html`<table class="lib-table">
-          <thead><tr><th style="width:32px"></th><th>Name</th><th>Pages</th><th>Source</th><th>Boards</th><th>Open notes</th><th>Added</th><th>Changed</th></tr></thead>
-          <tbody>${items.map((i) => html`<tr class=${picked.has(i.id) ? 'picked' : ''}>
-            <td><input type="checkbox" checked=${picked.has(i.id)} onChange=${() => toggle(i.id)} /></td>
-            <td><button class="link-btn" onClick=${() => open(i.id)}>${i.extra ? html`<span class="faint">↳ </span>` : ''}${i.name}</button>${i.versions > 1 && html` <button class="ver-chip${i.extra ? ' old' : ''}" onClick=${() => !i.extra && toggleStack(i.stack)}>v${i.v}${i.extra ? '' : ` · ${i.versions}`}</button>`}</td>
-            <td class="mono">${i.pages}</td>
-            <td>${KIND[i.kind]}</td>
-            <td>${store.boardsHolding(i.id).map((b) => b.name).join(', ') || html`<span class="faint">None</span>`}</td>
-            <td class="mono">${i.comments || ''}</td>
-            <td>${ago(i.createdAt)}</td>
-            <td>${ago(i.updatedAt)}</td>
-          </tr>`)}</tbody>
-        </table>`}
+      : html`<ul class="rows lib-rows">
+          ${items.map((i) => html`<${ProtoRow} key=${i.id} card=${cardFor(i)} older=${i.extra} onOpen=${() => open(i.id)} versions=${versionsSlot(i)} pick=${{ checked: picked.has(i.id), onChange: () => toggle(i.id) }} />`)}
+        </ul>`}
     ${focused && html`<${Focus} frame=${focused} onClose=${() => setFocus(null)} />`}
   </div>`;
 }

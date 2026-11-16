@@ -157,7 +157,7 @@ export function libraryItems(projectId: string): (LibraryItem & { frame: Frame }
     id: f.id, name: f.name, kind: f.kind, pages: f.pages?.length ?? 1,
     boards: state.placements.filter((p) => p.frameId === f.id).length,
     comments: allNotesOf(f.id).filter((n) => !n.resolved).length,
-    createdAt: f.createdAt, updatedAt: f.updatedAt, frame: f,
+    createdAt: f.createdAt, updatedAt: f.updatedAt, summary: f.summary, tags: f.tags, starred: f.starred, archived: f.archived, frame: f,
   }));
 }
 

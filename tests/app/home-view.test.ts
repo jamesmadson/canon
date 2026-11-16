@@ -154,7 +154,7 @@ describe('home paints quickly with 50 prototypes', () => {
 
 describe('first run', () => {
   it('shows the setup line and a drop target and nothing else', async () => {
-    const box = await mount(Home, { scope: { kind: 'home' }, askUrl: async () => null, onOpen: () => {} });
+    const box = await mount(Home, { scope: { kind: 'home' as const }, askUrl: async () => null, onOpen: () => {} });
     expect(box.textContent).toContain(SETUP_COMMAND);
     const controls = Array.from(box.querySelectorAll('button, a, input, select')).map((c) => nameOf(c));
     expect(controls).toEqual(['Copy', 'Drop a link or a zip here or choose files']);

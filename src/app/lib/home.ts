@@ -37,17 +37,17 @@ export function sourceOf(f: Pick<Frame, 'tool' | 'kind' | 'url'>): string {
   }
 }
 
-export function cardsOf(frames: Frame[]): Card[] {
-  return stacks(frames).map((stack) => {
-    const f = currentOf(stack);
-    return {
-      id: f.id, stack: stackKey(f), projectId: f.projectId, name: f.name,
-      summary: f.summary ?? '', tags: f.tags ?? [], versions: stack.length, source: sourceOf(f), kind: f.kind,
-      starred: !!f.starred, archived: !!f.archived, note: f.note ?? '',
-      createdAt: Math.min(...stack.map((x) => x.createdAt)), updatedAt: Math.max(...stack.map((x) => x.updatedAt)), frame: f,
-    };
-  });
+/** One card for a prototype: the version shown, and how many versions stand behind it. */
+export function cardOf(f: Frame, stack: Frame[] = [f]): Card {
+  return {
+    id: f.id, stack: stackKey(f), projectId: f.projectId, name: f.name,
+    summary: f.summary ?? '', tags: f.tags ?? [], versions: stack.length, source: sourceOf(f), kind: f.kind,
+    starred: !!f.starred, archived: !!f.archived, note: f.note ?? '',
+    createdAt: Math.min(...stack.map((x) => x.createdAt)), updatedAt: Math.max(...stack.map((x) => x.updatedAt)), frame: f,
+  };
 }
+
+export const cardsOf = (frames: Frame[]): Card[] => stacks(frames).map((stack) => cardOf(currentOf(stack), stack));
 
 export function scopeCards(cards: Card[], scope: Scope): Card[] {
   switch (scope.kind) {
