@@ -11,6 +11,7 @@ import { safeFrameUrl } from './lib/resolve';
 import { type Address, buildAddress, joinPath } from './lib/address';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
 import { PrototypeActions, ZoomControls } from './bar';
+import { FrameBody, LiveSwitch, ServerOff, useShown } from './live';
 import {
   html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES, showsCover, coverSrc,
   addGroups, runWay, NoteItem, type Way,
@@ -384,7 +385,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
               <div class="frame-body">
                 ${showsCover(f)
                   ? html`<img class="frame-cover" src=${coverSrc(f)} alt=${`Screenshot of ${f.name}`} draggable=${false} />`
-                  : html`<iframe src=${frameSrc(f)} title=${f.name} loading="lazy" sandbox=${f.kind === 'url' ? 'allow-scripts allow-same-origin allow-forms allow-popups' : SANDBOX}></iframe>`}
+                  : html`<${FrameBody} frame=${f} />`}
                 <div class="frame-shield"></div>
               </div>
               ${notes.map((n, i) => html`<${Pin} key=${n.id} n=${i + 1} note=${n} left=${(n.fx ?? 0) * f.w} top=${Math.min(store.noteY(n, f.h), f.h)} active=${openThread === n.id} onOpen=${() => setOpenThread(n.id)} />`)}
@@ -540,7 +541,7 @@ function Inspector({ frame, askUrl, onFocus, onEnter, onRemove, onComment, onOpe
       <input class="insp-name" value=${frame.name} key=${frame.id} onChange=${(e: Event) => store.updateFrame(frame.id, { name: (e.target as HTMLInputElement).value || frame.name })} />
       <dl class="kv">
         <dt>Source</dt><dd>${KIND[frame.kind]}</dd>
-        ${frame.kind === 'url' ? html`<dt>URL</dt><dd title=${frame.url}>${frame.url}</dd>` : html`<dt>Opens</dt><dd class="mono" title=${frame.entry}>${frame.entry}</dd><dt>Files</dt><dd>${frame.fileCount}</dd>`}
+        ${frame.kind === 'url' ? html`<dt>URL</dt><dd title=${frame.url}>${frame.url}</dd>` : html`<dt>Opens</dt><dd class="mono" title=${frame.entry}>${frame.entry}</dd><dt>Files</dt><dd>${frame.fileCount}</dd>${frame.liveUrl ? html`<dt>Live address</dt><dd class="mono" title=${frame.liveUrl}>${frame.liveUrl}</dd>` : null}`}
         ${multi && html`<dt>Pages</dt><dd>${pageCount(frame)} · ${frame.links?.length ?? 0} links</dd>`}
         <dt>On boards</dt><dd title=${onBoards.map((b) => b.name).join(', ')}>${onBoards.map((b) => b.name).join(', ')}</dd>
         <dt>Added</dt><dd>${ago(frame.createdAt)}</dd>
@@ -558,6 +559,7 @@ function Inspector({ frame, askUrl, onFocus, onEnter, onRemove, onComment, onOpe
       ${frame.kind === 'files' && canLinkFolders() && html`<p class="hint insp-hint">A copy, so it won't change. <button class="link" onClick=${() => store.relocate(frame.id)}>Link it to its folder</button> to refresh from disk.</p>`}
     </div>
     <${Versions} frame=${frame} askUrl=${askUrl} />
+    <${LiveSwitch} frame=${frame} />
     ${frame.kind === 'url' && html`<${LinkDisplay} frame=${frame} />`}
     <div class="insp-sec">
       <div class="label">Size</div>
@@ -830,7 +832,8 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
   const stack = address ? store.stackOf(frame.id) : [];
   const v = versionOf(stack, frame.id);
   const isCurrent = stack.length < 2 || currentOf(stack).id === frame.id;
-  const src = address && frame.kind === 'url' ? joinPath(safeFrameUrl(frame.url), address.path) : frameSrc(frame, page);
+  const shown = useShown(frame);
+  const src = shown.show === 'live' ? shown.url : address && frame.kind === 'url' ? joinPath(safeFrameUrl(frame.url), address.path) : frameSrc(frame, page);
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     addEventListener('keydown', k);
@@ -862,7 +865,9 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
     </div>
     ${address && frame.kind === 'url' && !isCurrent && isLocal(frame.url ?? '') && html`<p class="hint" role="status" style="margin:8px 16px 0">This is localhost, so it shows what's running now, not v${v}.</p>`}
     <div class="focus-stage">
-      <iframe src=${src} title=${frame.name} style=${{ width: width ? `${width}px` : '100%' }} sandbox=${SANDBOX}></iframe>
+      ${shown.show === 'off'
+        ? html`<${ServerOff} url=${shown.url} />`
+        : shown.show === 'wait' ? null : html`<iframe src=${src} title=${frame.name} style=${{ width: width ? `${width}px` : '100%' }} sandbox=${SANDBOX}></iframe>`}
     </div>
   </div>`;
 }

@@ -590,6 +590,12 @@ button.install:hover { background: var(--raised); }
 button.link { background: none; border: 0; padding: 0; color: var(--soft); text-decoration: underline; text-underline-offset: 2px; font: inherit; }
 button.link:hover { color: var(--text); }
 
+/* A link whose server is not running, in place of its frame. */
+.server-off { position: absolute; inset: 0; display: grid; place-items: center; padding: 6%; background: var(--panel); color: var(--text); }
+.server-off p { margin: 0; max-width: 28ch; font: 400 28px/1.4 var(--sans); text-align: center; text-wrap: balance; }
+.focus-stage .server-off { position: static; width: min(100%, 720px); height: 100%; border-radius: 10px; box-shadow: 0 0 0 1px var(--line-strong); }
+.focus-stage .server-off p { font-size: 16px; }
+
 /* A link shown as its screenshot. */
 .frame-cover { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; background: #fff; }
 .insp-hint { margin: 10px 0 0; line-height: 1.5; }
