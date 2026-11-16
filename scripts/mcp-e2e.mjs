@@ -64,7 +64,7 @@ try {
   const tool = await a.rpc('tools/list', {});
   check('tools/list has seven tools', tool.result.tools.length === 7, tool.result.tools.map((t) => t.name).join(','));
 
-  const addArgs = { url: PROTO, project: 'MCP e2e', board: 'MCP test', name: 'Canon home' };
+  const addArgs = { url: PROTO, project: 'MCP e2e', board: 'MCP test', name: 'Canon home', summary: 'The pricing page with yearly billing on by default.', tags: ['e2e'] };
   const first = await a.call('canon_add', addArgs);
   const pairUrl = linkOf(first.text);
   check('unpaired add returns a pairing link', first.error && Boolean(pairUrl), first.text.replace(/\n/g, ' | '));
@@ -87,6 +87,13 @@ try {
   check('URL change: first line ends "It is version 2 now."', !upd.error && upd.text.split('\n')[0].endsWith('It is version 2 now.'), upd.text.replace(/\s+/g, ' ').slice(0, 200));
   const found = await a.call('canon_find', { query: 'Home' });
   check('find shows "versions": 2', /"versions": 2/.test(found.text), found.text.replace(/\s+/g, ' ').slice(0, 240));
+  const byQuery = await a.call('canon_find', { query: 'pricing' });
+  check('find by summary word returns the prototype', !byQuery.error && byQuery.text.includes('Home page'), byQuery.text.replace(/\s+/g, ' ').slice(0, 240));
+  const byTag = await a.call('canon_find', { tag: 'e2e' });
+  check('find by tag returns the prototype', !byTag.error && byTag.text.includes('Home page'), byTag.text.replace(/\s+/g, ' ').slice(0, 240));
+  const star = await a.call('canon_update', { frame: 'Home page', starred: true });
+  const byStar = await a.call('canon_find', { starred: true });
+  check('star then find starred returns the prototype', !star.error && !byStar.error && byStar.text.includes('Home page'), byStar.text.replace(/\s+/g, ' ').slice(0, 240));
   const boardId = /"boardId": "([^"]+)"/.exec(add.text)?.[1];
   check('add names its boardId', Boolean(boardId), String(boardId));
   if (boardId) await page.ev(`location.hash = '#/b/${boardId}'`);

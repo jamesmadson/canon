@@ -59,9 +59,9 @@ After upgrading, reload any Canon tabs that were open, so they run the new versi
 
 - `canon_status`: says whether Canon is connected and which board is open.
 - `canon_pair`: makes a new pairing link for this agent.
-- `canon_add`: puts a prototype URL on a board as a frame.
-- `canon_update`: changes a frame's URL, name or board. A new URL keeps the old one as a version.
-- `canon_find`: lists boards and frames, or searches them.
+- `canon_add`: puts a prototype URL on a board. It takes a name, a summary, tags, a star and a note, and tags the prototype from its page, the agent, the repo and the branch. It warns when the name reads like a web address, a file name or a placeholder.
+- `canon_update`: changes a prototype's URL, name, summary, tags, star, note, archive flag or board. A new URL keeps the old one as a version.
+- `canon_find`: lists projects, boards and prototypes, or searches them by name, summary and tag.
 - `canon_open`: shows a board or frame in your Canon tab.
 - `canon_link`: gives you a link to a board, a frame, a full-screen view or a version.
 

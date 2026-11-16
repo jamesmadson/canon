@@ -2,16 +2,17 @@ import { describe, it, expect } from 'vitest';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { makeTools, checkPrototypeUrl } from '../src/mcp/tools.js';
+import { makeTools, checkPrototypeUrl, TOOL_DEFS } from '../src/mcp/tools.js';
 import { ensurePairing, claimPairing } from '../src/mcp/pairing.js';
+import { NAMING_RULE } from '../src/mcp/naming.js';
 
-function setup(reply, { claimed = false } = {}) {
+function setup(reply, { claimed = false, readPage = async () => null, readSource = () => ({}) } = {}) {
   const file = join(mkdtempSync(join(tmpdir(), 'canon-tools-')), 'mcp.json');
   const { secret } = ensurePairing(file, 'agent', 'Agent');
   if (claimed) claimPairing(file, 'agent', '0123456789abcdef');
   const calls = [];
   const bridge = { port: 47800, send: async (op, args) => (calls.push([op, args]), reply ?? { ok: true, result: 'ok' }) };
-  const tools = makeTools({ bridge, appBase: 'https://app/', pairing: { file, agentId: 'agent', name: 'Agent' } });
+  const tools = makeTools({ bridge, appBase: 'https://app/', pairing: { file, agentId: 'agent', name: 'Agent' }, readPage, readSource });
   return { tools, calls, file, secret };
 }
 
@@ -144,6 +145,123 @@ describe('canon tools', () => {
       const { tools, calls } = setup();
       await tools.call('canon_open', { board: 'b', width: 'phone', full: true, version: 2 });
       expect(calls).toHaveLength(1);
+    });
+  });
+
+  describe('names, summary, tags and source', () => {
+    const added = (frame) => ({ ok: true, result: { frameId: 'f1', frame, boardId: 'b1', board: 'Main', project: 'Shop', link: 'L', tags: [] } });
+
+    it('the canon_add description states the naming rule with its example', () => {
+      const add = TOOL_DEFS.find((d) => d.name === 'canon_add');
+      expect(add.description).toContain(NAMING_RULE);
+      expect(add.description).toBe(
+        `Put a prototype on a board so it can be found again. ${NAMING_RULE} The reply lists the names already in the project: match their style. Add a one-sentence summary. Canon tags the prototype from its page, this agent, the repo and the branch; pass tags only to add your own.`,
+      );
+    });
+    it('no tool description or argument description has an em or en dash', () => {
+      const texts = [];
+      const walk = (v) => {
+        if (typeof v === 'string') texts.push(v);
+        else if (v && typeof v === 'object') Object.values(v).forEach(walk);
+      };
+      for (const d of TOOL_DEFS) {
+        texts.push(d.description);
+        for (const prop of Object.values(d.inputSchema.properties)) walk(prop.description);
+      }
+      expect(texts.length).toBeGreaterThan(20);
+      for (const t of texts) expect(t).not.toMatch(/[–—]/);
+    });
+    it("add sends the page it read, and the repo and branch of the working directory", async () => {
+      const page = { title: 'Pricing', headings: ['Plans'] };
+      const { tools, calls } = setup(undefined, { readPage: async () => page, readSource: () => ({ repo: 'acme-web', branch: 'pricing' }) });
+      await tools.call('canon_add', { url: 'http://a.b', summary: 'S.', tags: ['x'], starred: true, note: 'n' });
+      expect(calls[0][1]).toMatchObject({ url: 'http://a.b/', page, repo: 'acme-web', branch: 'pricing', summary: 'S.', tags: ['x'], starred: true, note: 'n' });
+    });
+    it("add keeps the agent's repo and branch over the working directory's", async () => {
+      for (const given of [{ repo: 'mine' }, { branch: 'mine' }, { repo: 'r', branch: 'b' }]) {
+        const { tools, calls } = setup(undefined, { readSource: () => ({ repo: 'acme-web', branch: 'pricing' }) });
+        await tools.call('canon_add', { url: 'http://a.b', ...given });
+        expect(calls[0][1].repo).toBe(given.repo);
+        expect(calls[0][1].branch).toBe(given.branch);
+      }
+    });
+    it('add still adds when the page cannot be read, and sends no page', async () => {
+      const { tools, calls } = setup(added('Cart'), { readPage: async () => null });
+      const r = await tools.call('canon_add', { url: 'http://a.b' });
+      expect(r.isError).toBeUndefined();
+      expect(calls).toHaveLength(1);
+      expect('page' in calls[0][1]).toBe(false);
+    });
+    it('add still adds when a reader throws', async () => {
+      const boom = () => {
+        throw new Error('boom');
+      };
+      const { tools, calls } = setup(added('Cart'), { readPage: async () => boom(), readSource: boom });
+      const r = await tools.call('canon_add', { url: 'http://a.b' });
+      expect(r.isError).toBeUndefined();
+      expect(calls).toHaveLength(1);
+      expect('page' in calls[0][1]).toBe(false);
+      expect('repo' in calls[0][1]).toBe(false);
+    });
+    it('add warns on a bare URL name, a file name and test 2, and still adds', async () => {
+      for (const name of ['http://localhost:3000/pricing', 'index.html', 'test 2']) {
+        const { tools, calls } = setup(added(name));
+        const r = await tools.call('canon_add', { url: 'http://a.b', name });
+        expect(r.isError).toBeUndefined();
+        expect(calls).toHaveLength(1);
+        const lines = r.content[0].text.split('\n');
+        expect(lines[0]).toBe(`Added ${name} to board Main in project Shop.`);
+        expect(lines[1]).toBe(`Warning: "${name}" reads like ${name.startsWith('http') ? 'a web address' : name === 'index.html' ? 'a file name' : 'a placeholder'}. ${NAMING_RULE} Rename it with canon_update.`);
+      }
+    });
+    it('add with no name warns about the host name Canon gave it', async () => {
+      const { tools } = setup(added('localhost:3000'));
+      const r = await tools.call('canon_add', { url: 'http://localhost:3000' });
+      expect(r.content[0].text.split('\n')[1]).toContain('Warning: "localhost:3000" reads like a web address.');
+    });
+    it('add lists the names already in the project', async () => {
+      const reply = { ok: true, result: { ...added('Pricing page, annual toggle').result, names: ['Home', 'Checkout, guest'] } };
+      const { tools } = setup(reply);
+      const r = await tools.call('canon_add', { url: 'http://a.b', name: 'Pricing page, annual toggle' });
+      const lines = r.content[0].text.split('\n');
+      expect(lines[1]).toBe('Names already in this project: "Home", "Checkout, guest".');
+      expect(r.content[0].text).not.toContain('Warning');
+      expect(r.content[0].text).not.toContain('"names"');
+      expect(r.content[0].text).toContain('"frameId": "f1"');
+    });
+    it('add refuses tags that are not a list of text without calling the bridge', async () => {
+      const cases = [
+        [{ tags: 'a' }, 'tags must be a list of text.'],
+        [{ tags: [1] }, 'tags must be a list of text.'],
+        [{ tags: Array.from({ length: 500 }, (_, i) => `t${i}`) }, 'tags can hold at most 20.'],
+        [{ starred: 'yes' }, 'starred must be true or false.'],
+        [{ page: { title: 'x', headings: [] } }, 'page is not an option for canon_add.'],
+      ];
+      for (const [extra, message] of cases) {
+        const { tools, calls } = setup();
+        const r = await tools.call('canon_add', { url: 'http://a.b', ...extra });
+        expect(r.isError).toBe(true);
+        expect(r.content[0].text).toBe(message);
+        expect(calls).toHaveLength(0);
+      }
+    });
+    it('update reads the page only when the URL changes', async () => {
+      const reads = [];
+      const page = { title: 'T', headings: [] };
+      const readPage = async (url) => (reads.push(url), page);
+      const a = setup(undefined, { readPage });
+      await a.tools.call('canon_update', { frame: 'x', starred: true, removeTags: ['y'], archived: false });
+      expect(reads).toHaveLength(0);
+      expect('page' in a.calls[0][1]).toBe(false);
+      expect(a.calls[0][1]).toMatchObject({ starred: true, removeTags: ['y'], archived: false });
+      await a.tools.call('canon_update', { frame: 'x', url: 'http://c.d' });
+      expect(reads).toEqual(['http://c.d/']);
+      expect(a.calls[1][1].page).toEqual(page);
+    });
+    it('find passes tag, starred and archived through', async () => {
+      const { tools, calls } = setup();
+      await tools.call('canon_find', { query: 'q', tag: 'pricing', starred: true, archived: true });
+      expect(calls[0]).toEqual(['find', { query: 'q', tag: 'pricing', starred: true, archived: true }]);
     });
   });
 

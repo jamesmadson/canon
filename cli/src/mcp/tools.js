@@ -4,6 +4,9 @@
  */
 
 import { readPairings, rotatePairing, pairLink } from './pairing.js';
+import { readPage as realReadPage } from './page.js';
+import { readSource as realReadSource } from './source.js';
+import { NAMING_RULE, nameWarning } from './naming.js';
 
 const BARE_HOST = /^(localhost|\d{1,3}(\.\d{1,3}){3}|\[[0-9a-f:]+\]|[a-z0-9-]+(\.[a-z0-9-]+)+)(:\d+)?([/?#].*)?$/i;
 const REFUSAL = 'Only http and https URLs can go on a board.';
@@ -22,6 +25,7 @@ export function checkPrototypeUrl(input) {
 
 const str = (description) => ({ type: 'string', description });
 const schema = (properties, required = []) => ({ type: 'object', properties, required });
+const TAGS = (description) => ({ type: 'array', items: { type: 'string' }, description });
 const PROJECT = str('Project name or id. Add uses the project open in Canon when this is left out; other tools search every project.');
 const OPEN_PROPS = {
   project: PROJECT,
@@ -38,11 +42,17 @@ export const TOOL_DEFS = [
   { name: 'canon_pair', description: 'Make a new pairing link to approve this agent in Canon.', inputSchema: schema({}) },
   {
     name: 'canon_add',
-    description: 'Put a prototype URL on a board as a frame.',
+    description: `Put a prototype on a board so it can be found again. ${NAMING_RULE} The reply lists the names already in the project: match their style. Add a one-sentence summary. Canon tags the prototype from its page, this agent, the repo and the branch; pass tags only to add your own.`,
     inputSchema: schema(
       {
         url: str('An http or https URL.'),
-        name: str('Frame name.'),
+        name: str('What it is, then what is different.'),
+        summary: str('One sentence on what this prototype shows.'),
+        tags: TAGS('Extra tags. Canon adds its own.'),
+        repo: str('Read from the working directory when left out.'),
+        branch: str('Read from the working directory when left out.'),
+        starred: { type: 'boolean', description: 'Star the prototype.' },
+        note: str('A note to the person, kept with the prototype.'),
         project: PROJECT,
         board: str('Board name or id. A new board is made if none matches.'),
         width: OPEN_PROPS.width,
@@ -52,7 +62,7 @@ export const TOOL_DEFS = [
   },
   {
     name: 'canon_update',
-    description: 'Change a frame: its URL, name or place.',
+    description: 'Change a prototype: its URL, name, summary, tags, star, note, archive or place.',
     inputSchema: schema(
       {
         project: PROJECT,
@@ -60,17 +70,36 @@ export const TOOL_DEFS = [
         board: str('Board name or id, to narrow the search.'),
         url: str('A new http or https URL.'),
         name: str('A new name.'),
-        moveTo: str('Board name or id to move the frame to.'),
+        summary: str('One sentence on what this prototype shows.'),
+        repo: str('The repo it came from.'),
+        branch: str('The branch it came from.'),
+        starred: { type: 'boolean', description: 'Star or unstar the prototype.' },
+        note: str('A note to the person, kept with the prototype.'),
+        archived: { type: 'boolean', description: 'Archive or restore the prototype.' },
+        tags: TAGS('Tags to add.'),
+        removeTags: TAGS('Tags to remove. They stay removed.'),
+        moveTo: str('Board name or id to move the prototype to.'),
       },
       ['frame'],
     ),
   },
-  { name: 'canon_find', description: 'List boards and frames, or search them.', inputSchema: schema({ project: PROJECT, query: str('Text to look for.') }) },
+  {
+    name: 'canon_find',
+    description: 'List projects, boards and prototypes, or search them by name, summary and tag.',
+    inputSchema: schema({
+      project: PROJECT,
+      query: str('Text to look for.'),
+      tag: str('Only prototypes with this tag.'),
+      starred: { type: 'boolean', description: 'Only starred prototypes.' },
+      archived: { type: 'boolean', description: 'Show archived prototypes instead of live ones.' },
+    }),
+  },
   { name: 'canon_open', description: 'Show a board or frame in Canon.', inputSchema: schema(OPEN_PROPS) },
   { name: 'canon_link', description: 'Get a link to a board or frame.', inputSchema: schema(OPEN_PROPS) },
 ];
 
 const MAX_STRING = 2000;
+const MAX_TAGS = 20;
 const WIDTHS = ['phone', 'tablet', 'desktop', 'fill'];
 const ALLOWED = Object.fromEntries(TOOL_DEFS.map((d) => [d.name, Object.keys(d.inputSchema.properties)]));
 const REQUIRED = Object.fromEntries(TOOL_DEFS.map((d) => [d.name, d.inputSchema.required]));
@@ -86,8 +115,12 @@ function checkArgs(name, args) {
   }
   for (const [key, value] of Object.entries(args)) {
     if (value === undefined) continue;
-    if (key === 'full') {
-      if (typeof value !== 'boolean') return 'full must be true or false.';
+    if (key === 'full' || key === 'starred' || key === 'archived') {
+      if (typeof value !== 'boolean') return `${key} must be true or false.`;
+    } else if (key === 'tags' || key === 'removeTags') {
+      if (!Array.isArray(value) || value.some((t) => typeof t !== 'string')) return `${key} must be a list of text.`;
+      if (value.length > MAX_TAGS) return `${key} can hold at most ${MAX_TAGS}.`;
+      if (value.some((t) => t.length > MAX_STRING)) return `${key} has an entry that is too long.`;
     } else if (key === 'version') {
       if (!Number.isInteger(value) || value < 1) return 'version must be a positive whole number.';
     } else if (key === 'width') {
@@ -137,7 +170,7 @@ function doneText(op, res) {
   return line;
 }
 
-export function makeTools({ bridge, appBase, pairing }) {
+export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, readSource = realReadSource }) {
   const link = (secret) => pairLink(appBase, { agentId: pairing.agentId, name: pairing.name, port: bridge.port, secret });
 
   function notConnected() {
@@ -167,8 +200,26 @@ export function makeTools({ bridge, appBase, pairing }) {
     const res = r.result;
     const kind = res && typeof res === 'object' ? (res.status ?? res.error) : null;
     if (kind === 'many' || kind === 'none') return text(candidateText(kind, res.candidates ?? res.names, res.what, res.query), true);
+    let shown = res;
+    const lines = [];
+    if (op === 'add' && res && typeof res === 'object' && !Array.isArray(res)) {
+      const warning = nameWarning(res.frame);
+      if (warning) lines.push(`Warning: ${warning}`);
+      if (Array.isArray(res.names) && res.names.length) lines.push(`Names already in this project: ${res.names.map((n) => `"${n}"`).join(', ')}.`);
+      const { names, ...rest } = res;
+      shown = rest;
+    }
     const done = doneText(op, res);
-    return text(done ? `${done}\n${show(res)}` : show(res ?? 'Done.'));
+    return text(done ? [done, ...lines, show(shown)].join('\n') : show(shown ?? 'Done.'));
+  }
+
+  /** Nothing read is not an error: a reader that throws or finds nothing gives null. */
+  async function safely(read) {
+    try {
+      return (await read()) ?? null;
+    } catch {
+      return null;
+    }
   }
 
   const lists = { canon_status: 'status', canon_find: 'find', canon_open: 'open', canon_link: 'link' };
@@ -197,6 +248,17 @@ export function makeTools({ bridge, appBase, pairing }) {
           const checked = checkPrototypeUrl(args.url);
           if (!checked.ok) return text(checked.message, true);
           args = { ...args, url: checked.url };
+        }
+        if (name === 'canon_add') {
+          const [page, source] = await Promise.all([safely(() => readPage(args.url)), safely(() => readSource())]);
+          if (page) args = { ...args, page };
+          if (source && args.repo === undefined && args.branch === undefined) {
+            if (source.repo) args = { ...args, repo: source.repo };
+            if (source.branch) args = { ...args, branch: source.branch };
+          }
+        } else if (args.url !== undefined) {
+          const page = await safely(() => readPage(args.url));
+          if (page) args = { ...args, page };
         }
         return forward(name === 'canon_add' ? 'add' : 'update', args);
       }
