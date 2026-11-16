@@ -4,6 +4,7 @@ import { addTag, hostTag, mergeTags, removeTag } from './lib/tags';
 import type { Prepared } from './intake';
 import { walkHandle, prepare } from './intake';
 import type { LibraryItem } from './lib/library';
+import { inheritedMeta, metaOf } from './lib/meta';
 import { SAMPLES, SAMPLE_SITE } from './samples';
 import { stackFor, stackKey, swapsFor, versionOf, currentOf } from './lib/versions';
 
@@ -271,15 +272,6 @@ export async function addPrepared(
   return frame;
 }
 
-const META_KEYS = ['summary', 'repo', 'branch', 'tool', 'tags', 'removedTags', 'starred', 'note', 'archived'] as const;
-
-/** The metadata a frame actually carries: keys it never had stay absent. */
-function metaOf(f: Frame): FrameMeta {
-  const out: FrameMeta = {};
-  for (const k of META_KEYS) if (f[k] !== undefined) (out as Record<string, unknown>)[k] = f[k];
-  return out;
-}
-
 const projectTagsOf = (projectId: string) => state.frames.filter((f) => f.projectId === projectId).flatMap((f) => f.tags ?? []);
 
 async function makeUrlFrame(
@@ -323,7 +315,7 @@ export async function addUrlVersion(frameId: string, url: string): Promise<{ fra
   if (!base) throw new Error('That prototype is not in the library.');
   const current = currentOf(stackOf(frameId));
   if (current.kind === 'url' && current.url && sameUrl(current.url, url)) return { frame: current, added: false };
-  const frame = await makeUrlFrame(current.projectId, url, { name: current.name, size: { w: current.w, h: current.h }, stack: false, meta: metaOf(current) }, false);
+  const frame = await makeUrlFrame(current.projectId, url, { name: current.name, size: { w: current.w, h: current.h }, stack: false, meta: inheritedMeta(current) }, false);
   const spots = swapsFor(state.placements, current.id);
   await joinStack(frame.id, current.id);
   for (const pl of spots) await swapOnBoard(pl.id, frame.id);
@@ -451,7 +443,10 @@ async function autoStack(frame: Frame) {
   const peers = state.frames.filter((f) => f.projectId === frame.projectId);
   const match = stackFor(peers, frame);
   if (!match) return;
+  // The prototype's star, note, tags and archive flag carry onto the version that now shows.
+  const kept = inheritedMeta(currentOf(stackOf(match.id)));
   await joinStack(frame.id, match.id);
+  if (Object.keys(kept).length) await updateFrame(frame.id, kept, true, false);
   const stack = stackOf(frame.id);
   const first = stack[0];
   toast(`Stacked as version ${versionOf(stack, frame.id)} of ${first.name}. Unstack it from its panel if it is something else.`);

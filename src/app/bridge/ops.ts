@@ -17,6 +17,7 @@ import type { State } from '../store';
 import type { Board, Frame, FrameMeta, Placement, Project } from '../db';
 import { type Address, buildAddress, safePath } from '../lib/address';
 import { checkPrototypeUrl, parseWidth, resolveByName, resolveStack } from '../lib/resolve';
+import { metaOf } from '../lib/meta';
 import { SIZES } from '../lib/sizes';
 import { autoTags, mergeTags, normalizeTag, removeTag, reuseTag } from '../lib/tags';
 import { currentOf, stacks, versionOf } from '../lib/versions';
@@ -86,15 +87,6 @@ function checkedUrl(v: unknown, appBase: string): string {
 }
 
 /* ── Metadata ──────────────────────────────────────────────────────────── */
-
-const META_KEYS = ['summary', 'repo', 'branch', 'tool', 'tags', 'removedTags', 'starred', 'note', 'archived'] as const;
-
-/** The metadata a frame carries. A frame saved before these fields has none, and reads as empty. */
-function metaOf(f: Frame): FrameMeta {
-  const out: Record<string, unknown> = {};
-  for (const k of META_KEYS) if (f[k] !== undefined) out[k] = f[k];
-  return out as FrameMeta;
-}
 
 const projectTagsOf = (s: State, projectId: string) => s.frames.filter((f) => f.projectId === projectId).flatMap((f) => f.tags ?? []);
 
