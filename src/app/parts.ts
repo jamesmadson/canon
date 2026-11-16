@@ -8,17 +8,18 @@ import { canLinkFolders } from './intake';
 import { html, Icon, frameSrc, SANDBOX, showsCover, coverSrc, type Way } from './shared';
 
 /* ── Thumbnails: the cover if there is one, a live page for files kept here, else a neutral drawing ── */
-function LiveThumb({ frame }: { frame: Frame }) {
+function LiveThumb({ frame, big }: { frame: Frame; big: boolean }) {
   const box = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.2);
+  const [scale, setScale] = useState(big ? 0.2 : 0.03);
   useEffect(() => {
     const el = box.current;
     if (!el || typeof ResizeObserver === 'undefined') return;
-    const ro = new ResizeObserver(() => el.clientWidth && setScale(el.clientWidth / frame.w));
+    // Fill the box, cropping from the top: the page's width sets the scale unless the box is taller than it.
+    const ro = new ResizeObserver(() => el.clientWidth && setScale(Math.max(el.clientWidth / frame.w, el.clientHeight / frame.h)));
     ro.observe(el);
     return () => ro.disconnect();
-  }, [frame.w]);
-  return html`<div class="th big live" ref=${box} aria-hidden="true">
+  }, [frame.w, frame.h]);
+  return html`<div class=${`th${big ? ' big' : ''} live`} ref=${box} aria-hidden="true">
     <iframe src=${frameSrc(frame)} tabindex="-1" loading="lazy" sandbox=${SANDBOX} style=${{ width: frame.w, height: frame.h, transform: `scale(${scale})` }}></iframe>
   </div>`;
 }
@@ -26,7 +27,7 @@ function LiveThumb({ frame }: { frame: Frame }) {
 export function Thumb({ card, big = false }: { card: Card; big?: boolean }) {
   const f = card.frame;
   if (showsCover(f)) return html`<div class=${`th${big ? ' big' : ''}`} aria-hidden="true"><img src=${coverSrc(f)} alt="" loading="lazy" /></div>`;
-  if (big && f.kind !== 'url') return html`<${LiveThumb} frame=${f} />`;
+  if (f.kind !== 'url') return html`<${LiveThumb} frame=${f} big=${big} />`;
   return html`<div class=${`th${big ? ' big' : ''}`} aria-hidden="true"><i class="hd"></i><i class="ln"></i><i class="ln s"></i><i class="bt"></i></div>`;
 }
 

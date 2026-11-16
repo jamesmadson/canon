@@ -753,8 +753,8 @@ button.ver-chip:hover { color: var(--text); }
 .th.big .ln { height: 7px; }
 .th.big .bt { height: 14px; border-radius: 999px; }
 .th.big img { position: absolute; inset: 0; margin: 0; width: 100%; height: 100%; }
-.th.big.live { padding: 0; display: block; background: #fff; box-shadow: 0 0 0 1px var(--line-strong); }
-.th.big.live iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; pointer-events: none; background: #fff; }
+.th.live { position: relative; padding: 0; display: block; background: #fff; box-shadow: 0 0 0 1px var(--line-strong); }
+.th.live iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; pointer-events: none; background: #fff; }
 
 /* shelf */
 .srow { padding: 14px 20px 16px; border-bottom: 1px solid var(--line); }

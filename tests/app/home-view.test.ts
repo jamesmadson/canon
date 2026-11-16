@@ -234,6 +234,21 @@ describe('the list and the shelf', () => {
     expect(box.querySelector('.scard iframe')).toBeNull();
   });
 
+  it('shows the real page in list rows at the small size, and keeps the drawing only for a link with no preview', async () => {
+    const cards = cardsOf([
+      frame({ id: 'k', name: 'Kept here' }),
+      frame({ id: 'u', kind: 'url', url: 'https://example.com', name: 'A link' }),
+      frame({ id: 'c', kind: 'url', url: 'https://example.com/2', name: 'A cover', display: 'cover', cover: 'cover.png' }),
+    ]);
+    const box = await mount(HomeBody, props({ cards, projects: [project('p1', 'One')], view: 'list' }));
+    const kept = box.querySelector('[data-card="k"] .th')!;
+    expect(kept.classList.contains('live')).toBe(true);
+    expect(kept.classList.contains('big')).toBe(false);
+    expect(kept.querySelector('iframe')!.getAttribute('src')).toContain('/app/p/k/');
+    expect(box.querySelector('[data-card="u"] .th .hd')).toBeTruthy();
+    expect(box.querySelector('[data-card="c"] .th img')!.getAttribute('src')).toContain('/app/p/c/cover.png');
+  });
+
   it('shows the stored cover for a link that has a screenshot', async () => {
     const cards = cardsOf([frame({ id: 'u', kind: 'url', url: 'https://example.com', name: 'A link', display: 'cover', cover: 'cover.png' })]);
     const box = await mount(HomeBody, props({ cards, projects: [project('p1', 'One')], view: 'shelf' }));
