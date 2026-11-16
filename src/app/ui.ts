@@ -1,21 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import * as store from './store';
 import type { Frame, Note } from './db';
-import { canLinkFolders, groupsFromDrop } from './intake';
+import { groupsFromDrop } from './intake';
 import { BoardView, BundleView, Focus } from './canvas';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
-import { FilterMenu } from './home';
+import { FilterMenu, Home } from './home';
 import { AddMenu, ProtoRow, StarButton, Tags } from './parts';
-import { currentOf, stackKey, stacks as stacksOf, versionOf } from './lib/versions';
+import { currentOf, stackKey, versionOf } from './lib/versions';
 import { checkPrototypeUrl, safeFrameUrl } from './lib/resolve';
 import { type Address, buildAddress, parseAddress } from './lib/address';
 import { type PairLink, pairNotice, parsePairLink, saveAgent } from './bridge/client';
-import { Home } from './home';
 import { SearchHost } from './palette';
 import { Sidebar, useBridge } from './sidebar';
 import { type Card, type Scope, cardOf, cardsOf, scopeCards, tagCounts } from './lib/home';
 import { Avatar } from './comments';
-import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, KIND, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
+import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
 export { BASE } from './shared';
 
