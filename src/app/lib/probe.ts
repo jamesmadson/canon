@@ -24,21 +24,30 @@ export function loopbackHost(url: string | null | undefined): string | null {
 
 /**
  * One GET of the server's root: no body, no cookies, no headers, and the
- * answer is never read. 'skipped' means the address is not on this machine
- * and nothing was requested.
+ * answer is never read. A browser cannot ask with mode no-cors and also
+ * refuse redirects, so the first ask is a cors one that stops at a redirect
+ * (an opaque redirect counts as up, and the redirect is never followed). A
+ * server that sends no CORS headers fails that ask just as a stopped one
+ * does, so it is asked once more with no-cors. A redirect would already have
+ * been caught by the first ask. 'skipped' means the address is not on this
+ * machine and nothing was requested.
  */
 export async function probeLoopback(url: string, fetchImpl: typeof fetch = fetch, timeoutMs = 2500): Promise<'up' | 'down' | 'skipped'> {
   if (!loopbackHost(url)) return 'skipped';
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    await fetchImpl(`${new URL(url).origin}/`, { method: 'GET', mode: 'no-cors', credentials: 'omit', cache: 'no-store', redirect: 'manual', referrerPolicy: 'no-referrer', signal: controller.signal });
-    return 'up';
-  } catch {
-    return 'down';
-  } finally {
-    clearTimeout(timer);
-  }
+  const root = `${new URL(url).origin}/`;
+  const ask = async (mode: RequestMode, redirect?: RequestRedirect) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      await fetchImpl(root, { method: 'GET', mode, credentials: 'omit', cache: 'no-store', referrerPolicy: 'no-referrer', ...(redirect ? { redirect } : {}), signal: controller.signal });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+  return (await ask('cors', 'manual')) || (await ask('no-cors')) ? 'up' : 'down';
 }
 
 export const serverOffMessage = (url: string) =>

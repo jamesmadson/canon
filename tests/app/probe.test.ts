@@ -36,17 +36,26 @@ describe('probeLoopback only ever asks this machine', () => {
     expect(f).toHaveBeenCalledTimes(1);
     const [url, init] = f.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe('http://localhost:5173/');
-    expect(init).toMatchObject({ method: 'GET', mode: 'no-cors', credentials: 'omit', cache: 'no-store' });
+    expect(init).toMatchObject({ method: 'GET', mode: 'cors', credentials: 'omit', cache: 'no-store' });
     expect(init).not.toHaveProperty('body');
     expect(init.headers).toBeUndefined();
   });
 
-  it('never follows a redirect and sends no referrer, and an opaque redirect still counts as up', async () => {
+  it('does not follow a redirect and sends no referrer: an opaque redirect counts as up after one request', async () => {
     const f = vi.fn(async () => ({ type: 'opaqueredirect', status: 0 }) as unknown as Response);
     expect(await probeLoopback('http://localhost:5173/', f)).toBe('up');
     const init = (f.mock.calls[0] as unknown as [string, RequestInit])[1];
     expect(init).toMatchObject({ redirect: 'manual', referrerPolicy: 'no-referrer' });
     expect(f).toHaveBeenCalledTimes(1);
+  });
+
+  it('a server with no CORS headers is asked a second time without reading the answer, still with no referrer', async () => {
+    const f = vi.fn()
+      .mockRejectedValueOnce(new TypeError('blocked'))
+      .mockResolvedValueOnce({ type: 'opaque' });
+    expect(await probeLoopback('http://localhost:5173/', f as unknown as typeof fetch)).toBe('up');
+    expect(f).toHaveBeenCalledTimes(2);
+    expect((f.mock.calls[1] as unknown as [string, RequestInit])[1]).toMatchObject({ mode: 'no-cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
   });
 
   it('says down when the server refuses, and when it does not answer in time', async () => {
