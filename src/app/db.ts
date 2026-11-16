@@ -30,8 +30,12 @@ export interface Frame {
   cover?: string; display?: 'live' | 'cover';
   /** Versions of one prototype share a stackId. current marks the one to show; else the newest shows. */
   stackId?: string; current?: boolean;
+  /** These belong to the prototype across its versions, so every version of a stack carries the same values. */
+  summary?: string; repo?: string; branch?: string; tool?: string;
+  tags?: string[]; removedTags?: string[]; starred?: boolean; note?: string; archived?: boolean;
   x: number; y: number; w: number; h: number; rev: number; createdAt: number; updatedAt: number;
 }
+export type FrameMeta = Pick<Frame, 'summary' | 'repo' | 'branch' | 'tool' | 'tags' | 'removedTags' | 'starred' | 'note' | 'archived'>;
 /**
  * A note sits on a page of a prototype (frameId, page, fx across, py down in
  * CSS px from the top of the page), or on the open canvas (wx, wy). Older
