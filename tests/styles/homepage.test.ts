@@ -105,6 +105,20 @@ describe('the pictures', () => {
   });
 });
 
+describe('the shared container', () => {
+  // Mutation: give a page or the layout its own max-width and side padding again.
+  it('uses one .wrap for the header, footer and every page, with no padding of its own', () => {
+    expect(read('src/components/home/SiteHeader.astro')).toContain('class="wrap top"');
+    expect(read('src/components/home/SiteFooter.astro')).toContain('class="wrap foot"');
+    const layout = read('src/layouts/BaseLayout.astro');
+    expect(layout).toContain("'wrap pt-8 pb-24 sm:pt-12'");
+    expect(layout).not.toMatch(/max-w-6xl|px-6/);
+    const css = read('src/components/home/HomeStyles.astro');
+    expect(css).toMatch(/\n  \.wrap \{\s*max-width: 1240px;\s*margin-inline: auto;\s*padding-inline: 40px;/);
+    expect(css).toMatch(/\.foot \{\s*padding-block: 72px 40px;/);
+  });
+});
+
 describe('the waitlist', () => {
   it('is empty by default, in one obvious place', () => {
     expect(read('src/lib/site.ts')).toMatch(/export const WAITLIST_URL = '';/);

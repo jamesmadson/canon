@@ -94,10 +94,11 @@
     font-family: var(--font-mono);
     font-size: 13px;
   }
-  .home .wrap {
+  /* The one container: header, footer and every page's content share it. */
+  .wrap {
     max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 40px;
+    margin-inline: auto;
+    padding-inline: 40px;
   }
   .home a:focus-visible,
   .home button:focus-visible,
@@ -1630,7 +1631,7 @@
 
   /* Footer */
   .foot {
-    padding: 72px 0 40px;
+    padding-block: 72px 40px;
   }
   .mark {
     position: relative;
@@ -1792,8 +1793,8 @@
 
   /* Narrower screens */
   @media (max-width: 960px) {
-    .home .wrap {
-      padding: 0 16px;
+    .wrap {
+      padding-inline: 16px;
     }
     .stage {
       -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 62%, transparent 98%);

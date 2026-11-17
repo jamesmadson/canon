@@ -9,7 +9,8 @@ interface Props {
   title: string;
   description?: string;
   /**
-   * Let the page draw its own width rather than sitting in the shared well.
+   * Let the page draw its own sections, each in the shared `.wrap` container,
+   * rather than the layout wrapping the whole page in it.
    * The homepage is the only thing that needs it.
    */
   wide?: boolean;
@@ -64,7 +65,7 @@ const {
     <main
       id="main"
       class:list={[
-        wide ? 'pb-0' : 'mx-auto max-w-6xl px-6 pt-8 pb-24 sm:pt-12',
+        wide ? 'pb-0' : 'wrap pt-8 pb-24 sm:pt-12',
       ]}
     >
       <slot />
