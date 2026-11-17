@@ -121,3 +121,31 @@ My calls, for James to correct.
    prototype's panel on a board. The canvas tile and the full-size view follow
    it. Home thumbnails and the project list always show the stored copy, and a
    link to a localhost server keeps its drawing there.
+
+## The homepage
+
+### My calls, for James to correct
+
+1. **What bare `npx usecanon` does.** In this branch the `usecanon` package
+   only has the `mcp` command, so running it with no arguments prints usage.
+   The homepage shows `npx usecanon` as the start command, as asked, and
+   makes no claim about what it opens. The mockup line “Canon is open in its
+   own window” is gone. Should the bare command open Canon in the browser?
+2. **The waitlist address.** `WAITLIST_URL` in `src/lib/site.ts` is empty. Until
+   it is set the page shows no form and no waitlist button, and the hosted card
+   says “The waitlist opens soon.” When it is set, the form posts to it, and
+   the page script sends the same fields with `fetch` in no-cors mode, so it
+   cannot read the answer and says only that it was sent. Where should answers
+   go?
+3. **Hosted card wording.** The mockup said “Paid”. Nothing in the decision log
+   says the hosted version is paid, so the card says “Not built yet.” and lists
+   what it is for.
+4. **Tag editing.** The mockup said tags can be added or removed any time. The
+   app has no tag controls yet, only the agent does, so the copy says “Your
+   agent can add or remove tags.”
+5. **The orange dot.** The site header no longer has the dot. The small dot
+   beside each skill name on the skills pages is still there. Should it go too?
+6. **Site wide look.** The D-133 colours and Geist now apply to the skills pages
+   too. The skills section left the homepage, so `/skills/` is reached from the
+   top bar. The old header logo animation, closing strip, hero board and skill
+   step component are removed with their tests.
