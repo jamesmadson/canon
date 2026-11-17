@@ -1,17 +1,16 @@
 ---
 import '../styles/global.css';
-import { getCollection } from 'astro:content';
-import Wordmark from '../components/Wordmark.astro';
+import HomeStyles from '../components/home/HomeStyles.astro';
+import SiteHeader from '../components/home/SiteHeader.astro';
+import SiteFooter from '../components/home/SiteFooter.astro';
 import { withBase } from '../lib/withBase';
-import { spellNumber } from '../lib/spellNumber';
 
 interface Props {
   title: string;
   description?: string;
   /**
-   * Let the page draw to the edge of the viewport rather than sitting in the
-   * shared six-column well. The homepage is the only thing that needs it: the
-   * cover hero and the closing strip are full-bleed by construction.
+   * Let the page draw its own width rather than sitting in the shared well.
+   * The homepage is the only thing that needs it.
    */
   wide?: boolean;
 }
@@ -22,20 +21,6 @@ const {
   wide = false,
 } = Astro.props;
 
-// Derived, not written down: hiding a skill must not leave the footer
-// claiming a count the gallery no longer shows.
-const publishedSkills = await getCollection('skills', ({ data }) => data.status === 'active');
-const skillCount = spellNumber(publishedSkills.length);
-
-const NAV = [
-  { label: 'Try it', href: '/app/' },
-  { label: 'Skills', href: '/skills/' },
-  { label: 'Contact', href: '/#signup' },
-];
-
-const path = Astro.url.pathname;
-const isCurrent = (href: string) =>
-  href.startsWith('/#') ? false : path.startsWith(withBase(href));
 ---
 
 <!doctype html>
@@ -56,9 +41,17 @@ const isCurrent = (href: string) =>
     <link rel="icon" href={withBase('/icons/canon.svg')} type="image/svg+xml" />
     <link rel="icon" href={withBase('/icons/favicon-32.png')} sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href={withBase('/icons/apple-touch-icon.png')} />
-    <meta name="theme-color" content="#E9E7E2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#151413" media="(prefers-color-scheme: dark)" />
-    <link rel="preload" href={withBase('/fonts/public-sans/PublicSans-Variable.woff2')} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={withBase('/fonts/geist/Geist-Regular.woff2')} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={withBase('/fonts/geist/Geist-Medium.woff2')} as="font" type="font/woff2" crossorigin />
+    <script is:inline>
+      // Lets the page start its demos from their first frame. Without this, or
+      // with reduced motion, every demo is already on its last frame.
+      document.documentElement.classList.add('js');
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('motion');
+    </script>
+    <HomeStyles />
   </head>
   <body class="bg-ground font-sans text-ink antialiased">
     <a
@@ -67,84 +60,16 @@ const isCurrent = (href: string) =>
     >
       Skip to content
     </a>
-    <header class="rise">
-      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 py-5">
-        <a
-          href={withBase('/')}
-          aria-label="Canon, home"
-          class="home-mark flex min-h-11 min-w-11 items-center gap-2.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink"
-        >
-          <Wordmark size={16} />
-          <span aria-hidden="true" class="home-mark-name text-[15px] text-ink">
-            <span class="home-mark-word">Canon</span>
-            <span class="home-mark-flow">
-              <i class="fn" style="--i:0">c</i><b class="fc" style="--i:1"></b><i class="fn" style="--i:2">a</i><b class="fc" style="--i:3"></b><i class="fn" style="--i:4">n</i><b class="fc" style="--i:5"></b><i class="fn hub" style="--i:6"></i><b class="fc" style="--i:7"></b><i class="fn" style="--i:8">n</i>
-            </span>
-          </span>
-        </a>
-        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <nav aria-label="Sections" class="-mx-2 flex flex-wrap items-center text-sm">
-            {NAV.map((item) => (
-              <a
-                href={withBase(item.href)}
-                aria-current={isCurrent(item.href) ? 'page' : undefined}
-                class="tick-bar rounded-sm aria-[current=page]:text-ink"
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </div>
-    </header>
+    <SiteHeader />
     <main
       id="main"
       class:list={[
-        'rise rise-2',
         wide ? 'pb-0' : 'mx-auto max-w-6xl px-6 pt-8 pb-24 sm:pt-12',
       ]}
     >
       <slot />
     </main>
-    <footer class="mx-auto max-w-6xl px-6">
-      <div class="flex flex-col gap-6 py-12 text-sm text-ink-soft sm:flex-row sm:items-end sm:justify-between">
-        <p class="max-w-md">
-          Every skill here is Canon's own, written by James Madson.
-          {` ${skillCount.charAt(0).toUpperCase()}${skillCount.slice(1)} of them, MIT\u00a0licensed.`}
-        </p>
-        <nav aria-label="More" class="-mx-2 flex flex-wrap items-center text-sm">
-          <a
-            href="https://github.com/jamesmadson/canon"
-            target="_blank"
-            rel="noopener"
-            class="tick-bar rounded-sm"
-          >
-            GitHub
-          </a>
-        </nav>
-      </div>
-    </footer>
+    <SiteFooter />
     <slot name="after-footer" />
-    <script>
-      // The logo answers a fine pointer in turns: the first hover of the page
-      // session plays the selection, the next lays out the letters as a
-      // flowchart, and so on. Pointing back in before the last one has
-      // finished leaving keeps the same one, so it carries on from where it is.
-      const mark = document.querySelector<HTMLElement>('.home-mark');
-      if (mark) {
-        let count = 0;
-        let left = 0;
-        let last = 'select';
-        mark.addEventListener('pointerenter', (e) => {
-          if (e.pointerType !== 'mouse') return;
-          if (performance.now() - left > 600) last = count++ % 2 === 0 ? 'select' : 'flow';
-          mark.dataset.show = last;
-        });
-        mark.addEventListener('pointerleave', () => {
-          left = performance.now();
-          delete mark.dataset.show;
-        });
-      }
-    </script>
-  </body>
+</body>
 </html>

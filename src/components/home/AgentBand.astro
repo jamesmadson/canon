@@ -1,0 +1,56 @@
+---
+import CopyField from './CopyField.astro';
+import Thumb from './Thumb.astro';
+import { REPO_URL, SETUP_COMMAND } from '../../lib/site';
+import { tie } from '../../lib/words';
+import type { ThumbKey } from '../../lib/thumbs';
+
+const PROMPT = 'Gather every pricing prototype into one project.';
+
+const CARDS: Array<[ThumbKey, string, string]> = [
+  ['p1', 'Pricing page, annual toggle', 'Claude Code'],
+  ['p2', 'Pricing page, three tiers', 'v0'],
+  ['p3', 'Pricing page, single plan', 'Figma'],
+  ['p4', 'Pricing page, comparison table', 'Lovable'],
+  ['p5', 'Pricing, upgrade prompt', 'zip'],
+];
+// Where each card sits in the loose pile: x, y, rotation.
+const LOOSE = [
+  [196, 26, -9],
+  [84, -8, 7],
+  [-6, 34, -4],
+  [-112, -4, 11],
+  [-204, 30, -7],
+];
+---
+
+<section class="band" id="agents" aria-labelledby="h-agents">
+  <h2 id="h-agents">Say it once.<br />{tie('Your agent does the filing.')}</h2>
+  <p class="lede">{tie('Your agent can add, name, tag and move prototypes for you. Ask in plain words and they land in one project.')}</p>
+  <div class="tint" data-demo="agents">
+    <p class="say">{tie('You, to your agent')}</p>
+    <p class="big"><span data-type={PROMPT} data-type-start="0">{PROMPT}</span><span class="caret" data-caret="30" style="opacity:0" aria-hidden="true"></span></p>
+    <div class="plabel" data-step="38"><b>Pricing</b><span class="muted">5 prototypes, newest first</span></div>
+    <div class="pile" role="img" aria-label="Five pricing prototypes from five tools, first in a loose pile, then lined up in one row.">
+      {
+        CARDS.map(([k, name, from], i) => (
+          <div
+            class="kcard"
+            data-tidy="32"
+            style={`left:${i * 218}px;z-index:${i + 1};--stagger:${i * 40}ms;--loose:translate(${LOOSE[i][0]}px,${LOOSE[i][1]}px) rotate(${LOOSE[i][2]}deg)`}
+          >
+            <Thumb k={k} />
+            <div class="pname">{name}</div>
+            <div class="pmeta">{from}</div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <div class="after">
+    <CopyField command={SETUP_COMMAND} name="the setup command" />
+    <p class="fine">
+      One line connects Claude Code. Codex and Cursor take a few lines in their config, <a href={`${REPO_URL}#connect-your-agent`}>written up in the README</a>. Canon works without it, so add it when you want the filing done for&nbsp;you.
+    </p>
+  </div>
+</section>

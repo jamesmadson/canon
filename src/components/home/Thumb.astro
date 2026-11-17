@@ -1,0 +1,10 @@
+---
+import { thumbAccent, thumbHtml, type ThumbKey } from '../../lib/thumbs';
+
+interface Props {
+  k: ThumbKey;
+}
+const { k } = Astro.props;
+---
+
+<div class={`thumb a-${thumbAccent(k)}`} aria-hidden="true" set:html={thumbHtml(k)} />

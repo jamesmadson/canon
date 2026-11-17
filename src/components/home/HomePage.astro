@@ -1,0 +1,28 @@
+---
+import Hero from './Hero.astro';
+import WaysIn from './WaysIn.astro';
+import AgentBand from './AgentBand.astro';
+import FindBand from './FindBand.astro';
+import OpenBand from './OpenBand.astro';
+import Plans from './Plans.astro';
+
+interface Props {
+  waitlistUrl?: string;
+}
+const { waitlistUrl = '' } = Astro.props;
+---
+
+<div class="home">
+  <div class="wrap">
+    <Hero waitlistUrl={waitlistUrl} />
+    <WaysIn />
+    <AgentBand />
+    <FindBand />
+    <OpenBand />
+    <Plans waitlistUrl={waitlistUrl} />
+  </div>
+</div>
+
+<script>
+  import '../../scripts/home';
+</script>

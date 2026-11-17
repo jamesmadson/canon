@@ -1,0 +1,25 @@
+---
+/**
+ * A command in a box with a Copy button. The button copies the command; the
+ * page script turns its label to "Copied" for a moment.
+ */
+interface Props {
+  command: string;
+  /** The hero's button is the one solid primary on the page. */
+  primary?: boolean;
+  name: string;
+}
+const { command, primary = false, name } = Astro.props;
+---
+
+<div class="setup">
+  <code>{command}</code>
+  <button
+    type="button"
+    class:list={[primary ? 'hbtn hbtn-primary' : 'util']}
+    data-copy={command}
+    aria-label={`Copy ${name}`}
+  >
+    Copy
+  </button>
+</div>

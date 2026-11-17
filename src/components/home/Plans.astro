@@ -1,0 +1,88 @@
+---
+import { waitlistOpen } from '../../lib/waitlist';
+import { tie } from '../../lib/words';
+
+interface Props {
+  waitlistUrl?: string;
+}
+const { waitlistUrl = '' } = Astro.props;
+const open = waitlistOpen(waitlistUrl);
+
+const GROUPS: Array<{ name: string; legend: string; options: string[] }> = [
+  { name: 'role', legend: 'What you do', options: ['Designer', 'Engineer', 'Product', 'Founder', 'Other'] },
+  { name: 'company_size', legend: 'Company size', options: ['Just me', '2 to 10', '11 to 50', '51 to 200', 'Over 200'] },
+  { name: 'used_canon', legend: 'Have you used Canon?', options: ['Yes', 'Not yet'] },
+];
+---
+
+<section class="band" id="hosted" aria-labelledby="h-hosted">
+  <h2 id="h-hosted">Free on your machine.<br />{tie('Hosted when you need to share.')}</h2>
+  <div class="plans">
+    <div class="panel">
+      <div class="shot dark" role="img" aria-label="Canon’s install button, which opens Canon in its own window.">
+        <div><span class="dim">Install Canon</span></div>
+        <div class="dim">{tie('Its own window, in your Dock or taskbar')}</div>
+      </div>
+      <div class="tx2">
+        <h3>{tie('Canon, local')}</h3>
+        <p>{tie('Free and open source under MIT. Available now.')}</p>
+        <ul>
+          <li>Every project and prototype, stored on your machine</li>
+          <li>Claude Code, Codex and Cursor, with as many projects as you like</li>
+          <li>{tie('Its own window, installed from your browser')}</li>
+        </ul>
+      </div>
+    </div>
+    <div class:list={['panel', 'hosted-card', open && 'with-form']}>
+      <div>
+        <div class="shot" role="img" aria-label="A sketch of a share link, and a comment from someone who opened it.">
+          <div class="q"><span>Anyone with the link can comment</span><span class="mini">Copy link</span></div>
+          <div class="bub"><span class="av">P</span><span><b>Priya</b> {tie('Try the yearly price first?')}</span></div>
+        </div>
+        <div class="tx2">
+          <h3>{tie('Canon, hosted')}</h3>
+          <p>{tie('Not built yet. This is what it is for.')}</p>
+          <ul>
+            <li>Share a project with a link</li>
+            <li>{tie('Comments from people who don’t have Canon')}</li>
+            <li>{tie('The same projects on every machine, and for a team')}</li>
+          </ul>
+          {!open && <p class="soon">{tie('The waitlist opens soon.')}</p>}
+        </div>
+      </div>
+      {
+        open && (
+          <form class="form" aria-labelledby="h-form" method="post" action={waitlistUrl} data-waitlist>
+            <div>
+              <h3 id="h-form">{tie('Join the waitlist')}</h3>
+              <p class="muted" style="margin-top:2px">{tie('About 20 seconds.')}</p>
+            </div>
+            <div class="field">
+              <label for="wl-email">Email</label>
+              <input id="wl-email" name="email" type="email" autocomplete="email" placeholder="you@studio.com" required />
+            </div>
+            <div class="field">
+              <label for="wl-name">Name</label>
+              <input id="wl-name" name="name" type="text" autocomplete="name" />
+            </div>
+            {GROUPS.map((g) => (
+              <fieldset class="group">
+                <legend>{g.legend}</legend>
+                <div class="opts">
+                  {g.options.map((o, i) => (
+                    <>
+                      <input class="opt-input" type="radio" name={g.name} id={`wl-${g.name}-${i}`} value={o} />
+                      <label class="opt" for={`wl-${g.name}-${i}`}>{o}</label>
+                    </>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
+            <button class="hbtn hbtn-primary hbtn-wide" type="submit">Join the waitlist</button>
+            <p class="fine form-note" role="status" data-waitlist-note style="margin-top:-6px">{tie('One email when hosting opens, and nothing else.')}</p>
+          </form>
+        )
+      }
+    </div>
+  </div>
+</section>

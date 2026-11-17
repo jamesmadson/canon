@@ -1,0 +1,101 @@
+---
+import CopyField from './CopyField.astro';
+import Thumb from './Thumb.astro';
+import { START_COMMAND } from '../../lib/site';
+import { waitlistOpen } from '../../lib/waitlist';
+import { tie } from '../../lib/words';
+
+interface Props {
+  waitlistUrl?: string;
+}
+const { waitlistUrl = '' } = Astro.props;
+
+const PROMPT = 'Add the annual toggle version of the pricing page';
+---
+
+<section class="hero" aria-labelledby="h-hero">
+  <div class="htext">
+    <h1 id="h-hero" class="rise">{tie('One place for every prototype.')}</h1>
+    <p class="lede rise rise-2">
+      {tie('Ask your agent, paste a link or drop a zip. Canon keeps them by project, whatever tool made them.')}
+    </p>
+    <div class="cta rise rise-3">
+      <CopyField command={START_COMMAND} name="the start command" primary />
+      {waitlistOpen(waitlistUrl) && <a class="hbtn" href="#hosted">Join the hosted waitlist</a>}
+    </div>
+    <p class="fine rise rise-3">{tie('Free and open source. No account, and nothing leaves your machine.')}</p>
+  </div>
+
+  <div
+    class="stage rise rise-4"
+    data-demo="hero"
+    role="img"
+    aria-label="Canon’s home screen and a terminal. In the terminal you ask Claude Code to add a pricing page. It appears first in the Pricing and checkout row in Canon."
+  >
+    <div class="app" aria-hidden="true">
+      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>Canon</b></div>
+      <div class="cols2">
+        <div class="side">
+          <div class="sitem on">Home</div>
+          <div class="sitem">Starred<span>3</span></div>
+          <div class="sitem">Archive</div>
+          <div class="shead">Projects</div>
+          <div class="sitem">Pricing and checkout<span><span data-count data-from="3" data-to="4" data-at="46">4</span></span></div>
+          <div class="sitem">Onboarding<span>4</span></div>
+          <div class="sitem">Mobile navigation<span>6</span></div>
+          <div class="sitem">Settings<span>2</span></div>
+        </div>
+        <div class="main">
+          <div class="tools">
+            <span class="find">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
+              Find a prototype
+            </span>
+            <span class="chip"><i></i>Claude Code connected</span>
+            <span class="add">Add prototype</span>
+          </div>
+          <div class="prow">
+            <div class="phead"><b>Pricing and checkout</b><span class="muted"><span data-count data-from="3" data-to="4" data-at="46">4</span> prototypes</span></div>
+            <div class="shelf">
+              <div class="slot">
+                <div class="landing">New prototypes land here</div>
+                <div class="pcard sel" data-step="46">
+                  <Thumb k="p1" />
+                  <div class="pname">Pricing page, annual toggle</div>
+                  <div class="pmeta">Claude Code · just now</div>
+                </div>
+              </div>
+              <div class="slot">
+                <div class="pcard">
+                  <Thumb k="p2" />
+                  <span class="star"><svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="m8 1.6 1.9 4 4.4.6-3.2 3 .8 4.3L8 11.4l-3.9 2.1.8-4.3-3.2-3 4.4-.6z"></path></svg></span>
+                  <div class="pname">Pricing page, three tiers</div>
+                  <div class="pmeta">v0 · Tuesday</div>
+                </div>
+              </div>
+              <div class="slot"><div class="pcard"><Thumb k="p3" /><div class="pname">Pricing page, single plan</div><div class="pmeta">Figma · Monday</div></div></div>
+              <div class="slot"><div class="pcard"><Thumb k="c1" /><div class="pname">Checkout, one page</div><div class="pmeta">Figma · last week</div></div></div>
+            </div>
+          </div>
+          <div class="prow">
+            <div class="phead"><b>Onboarding</b><span class="muted">4 prototypes</span></div>
+            <div class="shelf">
+              <div class="slot"><div class="pcard"><Thumb k="o1" /><div class="pname">Welcome, three steps</div><div class="pmeta">Lovable · 2 Nov</div></div></div>
+              <div class="slot"><div class="pcard"><Thumb k="o2" /><div class="pname">Welcome, single screen</div><div class="pmeta">Lovable · 2 Nov</div></div></div>
+              <div class="slot"><div class="pcard"><Thumb k="o3" /><div class="pname">Invite a teammate, inline</div><div class="pmeta">zip · 30 Oct</div></div></div>
+              <div class="slot"><div class="pcard"><Thumb k="o4" /><div class="pname">Empty state, with sample</div><div class="pmeta">Codex · 28 Oct</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="term" aria-hidden="true">
+      <div class="tbar"><span class="lights"><i></i><i></i><i></i></span><span>claude · shop-web</span></div>
+      <div class="tbody">
+        <div><span class="dim">&gt; </span><span data-type={PROMPT} data-type-start="4">{PROMPT}</span><span class="caret" data-caret="34" style="opacity:0"></span></div>
+        <div data-step="36"><span class="dim">⏺ canon_add</span> “Pricing page, annual toggle”</div>
+        <div data-step="56">{tie('Added to Pricing and checkout, beside the two earlier versions.')}</div>
+      </div>
+    </div>
+  </div>
+</section>
