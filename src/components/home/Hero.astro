@@ -1,7 +1,8 @@
 ---
 import CopyField from './CopyField.astro';
 import Thumb from './Thumb.astro';
-import { START_COMMAND } from '../../lib/site';
+import { SETUP_COMMAND } from '../../lib/site';
+import { withBase } from '../../lib/withBase';
 import { waitlistOpen } from '../../lib/waitlist';
 import { tie } from '../../lib/words';
 
@@ -15,13 +16,17 @@ const PROMPT = 'Add the annual toggle version of the pricing page';
 
 <section class="hero" aria-labelledby="h-hero">
   <div class="htext">
-    <h1 id="h-hero" class="rise">{tie('One place for every prototype.')}</h1>
+    <h1 id="h-hero" class="rise">Prototypes pile up everywhere.<br />{tie('Canon keeps them in one place.')}</h1>
     <p class="lede rise rise-2">
-      {tie('Ask your agent, paste a link or drop a zip. Canon keeps them by project, whatever tool made them.')}
+      {tie('Designers now juggle links from one tool, zips from another and whatever an agent built this morning. Canon files every prototype by project on your machine, named, tagged and easy to find.')}
     </p>
     <div class="cta rise rise-3">
-      <CopyField command={START_COMMAND} name="the start command" primary />
+      <a class="hbtn hbtn-primary" href={withBase('/app/')}>Open the app</a>
       {waitlistOpen(waitlistUrl) && <a class="hbtn" href="#hosted">Join the hosted waitlist</a>}
+    </div>
+    <p class="fine connect rise rise-3">{tie('Connect your agent')}</p>
+    <div class="rise rise-3">
+      <CopyField command={SETUP_COMMAND} name="the setup command" />
     </div>
     <p class="fine rise rise-3">{tie('Free and open source. No account, and nothing leaves your machine.')}</p>
   </div>

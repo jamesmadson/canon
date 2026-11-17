@@ -31,13 +31,23 @@ beforeAll(() => {
 }, 120_000);
 
 describe('the commands and feedback link', () => {
-  // Mutation: change a character of either command.
-  it('shows the start command and the setup line exactly, each with a Copy button', () => {
+  // Mutation: change a character of the setup line.
+  it('shows the setup line exactly, with a Copy button that has a name', () => {
     for (const html of [closed, open]) {
-      expect(html).toContain('<code>npx usecanon</code>');
       expect(html).toContain('<code>claude mcp add canon -- npx -y usecanon mcp</code>');
-      expect(html).toContain('data-copy="npx usecanon"');
       expect(html).toContain('data-copy="claude mcp add canon -- npx -y usecanon mcp"');
+      expect(html).toContain('aria-label="Copy the setup command"');
+    }
+  });
+
+  // Mutation: bring back the bare command or point the hero link elsewhere.
+  it('has an Open the app link in the hero and no bare npx usecanon command', () => {
+    for (const html of [closed, open]) {
+      const hero = html.slice(html.indexOf('class="hero"'), html.indexOf('class="stage'));
+      expect(hero).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/">Open the app<\/a>/);
+      expect(hero).toContain('claude mcp add canon -- npx -y usecanon mcp');
+      expect(text(html).replaceAll('npx -y usecanon mcp', '')).not.toMatch(/npx\s+usecanon/);
+      expect(html).not.toContain('data-copy="npx usecanon"');
     }
   });
 
