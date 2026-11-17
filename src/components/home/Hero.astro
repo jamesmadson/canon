@@ -1,6 +1,7 @@
 ---
 import CopyField from './CopyField.astro';
 import Thumb from './Thumb.astro';
+import type { ThumbKey } from '../../lib/thumbs';
 import { SETUP_COMMAND } from '../../lib/site';
 import { withBase } from '../../lib/withBase';
 import { waitlistOpen } from '../../lib/waitlist';
@@ -11,7 +12,21 @@ interface Props {
 }
 const { waitlistUrl = '' } = Astro.props;
 
-const PROMPT = 'Add the annual toggle version of the pricing page';
+const PROMPT = 'Add the single screen version of the welcome flow';
+
+type Card = [ThumbKey, string, string];
+const ONBOARDING: Card[] = [
+  ['w2', 'Welcome, single screen', 'Lovable · just now'],
+  ['w1', 'Welcome, three steps', 'Claude Code · Tuesday'],
+  ['w3', 'Invite a teammate', 'Figma Make · Monday'],
+  ['w4', 'Empty dashboard, with sample data', 'v0 · last week'],
+];
+const DASHBOARD: Card[] = [
+  ['d1', 'Overview, this week', 'Claude Code · 2 Nov'],
+  ['d2', 'People table', 'v0 · 30 Oct'],
+  ['d3', 'Notes by month', 'Figma Make · 28 Oct'],
+  ['w4', 'Empty state, first run', 'Lovable · 26 Oct'],
+];
 ---
 
 <section class="hero" aria-labelledby="h-hero">
@@ -35,71 +50,75 @@ const PROMPT = 'Add the annual toggle version of the pricing page';
     class="stage rise rise-4"
     data-demo="hero"
     role="img"
-    aria-label="Canon’s home screen and a terminal. In the terminal you ask Claude Code to add a pricing page. It appears first in the Pricing and checkout row in Canon."
+    aria-label="Canon’s home screen and a terminal. In the terminal you ask Claude Code to add a welcome screen. It appears first in the Onboarding row in Canon."
   >
-    <div class="app" aria-hidden="true">
-      <div class="bar"><span class="lights"><i></i><i></i><i></i></span><b>Canon</b></div>
-      <div class="cols2">
-        <div class="side">
-          <div class="sitem on">Home</div>
-          <div class="sitem">Starred<span>3</span></div>
-          <div class="sitem">Archive</div>
-          <div class="shead">Projects</div>
-          <div class="sitem">Pricing and checkout<span><span data-count data-from="3" data-to="4" data-at="46">4</span></span></div>
-          <div class="sitem">Onboarding<span>4</span></div>
-          <div class="sitem">Mobile navigation<span>6</span></div>
-          <div class="sitem">Settings<span>2</span></div>
-        </div>
-        <div class="main">
-          <div class="tools">
-            <span class="find">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
-              Find a prototype
-            </span>
-            <span class="chip"><i></i>Claude Code connected</span>
-            <span class="add">Add prototype</span>
+    <div class="fade" aria-hidden="true">
+      <div class="app">
+        <div class="wn-rail">
+          <div class="wn-ws"><span class="wn-mark"></span><b>Canon</b></div>
+          <div class="wn-search">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
+            Find a prototype<kbd>⌘K</kbd>
           </div>
-          <div class="prow">
-            <div class="phead"><b>Pricing and checkout</b><span class="muted"><span data-count data-from="3" data-to="4" data-at="46">4</span> prototypes</span></div>
+          <div class="wn-nav on"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 7.5 8 3l5.5 4.5V13h-11z"></path></svg>Home</div>
+          <div class="wn-nav"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m8 1.8 1.9 4 4.4.6-3.2 3 .8 4.3L8 11.6l-3.9 2.1.8-4.3-3.2-3 4.4-.6z"></path></svg>Starred<small>3</small></div>
+          <div class="wn-nav"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 4h11v2.5h-11zM3.5 6.5V13h9V6.5M6.5 9h3"></path></svg>Archive</div>
+          <div class="wn-sec">Projects</div>
+          <div class="wn-nav">Onboarding<small><span data-count data-from="4" data-to="5" data-at="46">5</span></small></div>
+          <div class="wn-nav">Dashboard<small>4</small></div>
+          <div class="wn-nav">Mobile navigation<small>6</small></div>
+          <div class="wn-nav">Settings<small>2</small></div>
+          <div class="wn-foot"><i></i>Claude Code connected</div>
+        </div>
+        <div class="wn-main">
+          <div class="wn-bar">
+            <div class="wn-title">Home<small><span data-count data-from="16" data-to="17" data-at="46">17</span> prototypes in 4 projects</small></div>
+            <span class="wn-util"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 4h11M5 8h6M7 12h2"></path></svg>Filter</span>
+            <span class="wn-seg"><span>List</span><span class="on">Shelf</span></span>
+            <span class="add"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v10M3 8h10"></path></svg>Add prototype</span>
+          </div>
+          <div class="srow">
+            <div class="shead"><b>Onboarding</b><span class="muted"><span data-count data-from="4" data-to="5" data-at="46">5</span> prototypes</span><span class="muted">Open project</span></div>
             <div class="shelf">
-              <div class="slot">
-                <div class="landing">New prototypes land here</div>
-                <div class="pcard sel" data-step="46">
-                  <Thumb k="p1" />
-                  <div class="pname">Pricing page, annual toggle</div>
-                  <div class="pmeta">Claude Code · just now</div>
-                </div>
-              </div>
-              <div class="slot">
-                <div class="pcard">
-                  <Thumb k="p2" />
-                  <span class="star"><svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="m8 1.6 1.9 4 4.4.6-3.2 3 .8 4.3L8 11.4l-3.9 2.1.8-4.3-3.2-3 4.4-.6z"></path></svg></span>
-                  <div class="pname">Pricing page, three tiers</div>
-                  <div class="pmeta">v0 · Tuesday</div>
-                </div>
-              </div>
-              <div class="slot"><div class="pcard"><Thumb k="p3" /><div class="pname">Pricing page, single plan</div><div class="pmeta">Figma · Monday</div></div></div>
-              <div class="slot"><div class="pcard"><Thumb k="c1" /><div class="pname">Checkout, one page</div><div class="pmeta">Figma · last week</div></div></div>
+              {
+                ONBOARDING.map(([k, name, meta], i) => (
+                  <div class="slot">
+                    {i === 0 && <div class="landing">New prototypes land here</div>}
+                    <div class:list={['scard', i === 0 && 'sel']} data-step={i === 0 ? 46 : undefined}>
+                      <Thumb k={k} />
+                      <div class="pname">{name}</div>
+                      <div class="pmeta">{meta}</div>
+                    </div>
+                  </div>
+                ))
+              }
             </div>
           </div>
-          <div class="prow">
-            <div class="phead"><b>Onboarding</b><span class="muted">4 prototypes</span></div>
+          <div class="srow">
+            <div class="shead"><b>Dashboard</b><span class="muted">4 prototypes</span><span class="muted">Open project</span></div>
             <div class="shelf">
-              <div class="slot"><div class="pcard"><Thumb k="o1" /><div class="pname">Welcome, three steps</div><div class="pmeta">Lovable · 2 Nov</div></div></div>
-              <div class="slot"><div class="pcard"><Thumb k="o2" /><div class="pname">Welcome, single screen</div><div class="pmeta">Lovable · 2 Nov</div></div></div>
-              <div class="slot"><div class="pcard"><Thumb k="o3" /><div class="pname">Invite a teammate, inline</div><div class="pmeta">zip · 30 Oct</div></div></div>
-              <div class="slot"><div class="pcard"><Thumb k="o4" /><div class="pname">Empty state, with sample</div><div class="pmeta">Codex · 28 Oct</div></div></div>
+              {
+                DASHBOARD.map(([k, name, meta]) => (
+                  <div class="slot">
+                    <div class="scard">
+                      <Thumb k={k} />
+                      <div class="pname">{name}</div>
+                      <div class="pmeta">{meta}</div>
+                    </div>
+                  </div>
+                ))
+              }
             </div>
           </div>
         </div>
       </div>
     </div>
     <div class="term" aria-hidden="true">
-      <div class="tbar"><span class="lights"><i></i><i></i><i></i></span><span>claude · shop-web</span></div>
+      <div class="tbar">claude · fieldnote-web</div>
       <div class="tbody">
         <div><span class="dim">&gt; </span><span data-type={PROMPT} data-type-start="4">{PROMPT}</span><span class="caret" data-caret="34" style="opacity:0"></span></div>
-        <div data-step="36"><span class="dim">⏺ canon_add</span> “Pricing page, annual toggle”</div>
-        <div data-step="56">{tie('Added to Pricing and checkout, beside the two earlier versions.')}</div>
+        <div data-step="36"><span class="dim">⏺ canon_add</span> “Welcome, single screen”</div>
+        <div data-step="56">{tie('Added to Onboarding, beside the four earlier versions.')}</div>
       </div>
     </div>
   </div>

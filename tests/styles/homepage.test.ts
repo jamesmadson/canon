@@ -62,6 +62,49 @@ describe('the commands and feedback link', () => {
   });
 });
 
+describe('the pictures', () => {
+  // Mutation: bring the pricing example back, or change the prompt or the new card's name.
+  it('tells the onboarding story in every picture', () => {
+    for (const html of [closed, open]) {
+      const t = text(html);
+      expect(t).not.toMatch(/pricing|checkout/i);
+      expect(t).toContain('Welcome, single screen');
+      expect(html).toContain('data-type="Add the single screen version of the welcome flow"');
+      expect(html).toContain('data-type="Gather every onboarding prototype into one project."');
+      expect(t).toContain('canon_add');
+      expect(t).toContain('“Welcome, single screen”');
+      expect(t).toContain('Welcome, three steps');
+      expect(t).toContain('Invite a teammate');
+      expect(t).toContain('Empty dashboard, with sample data');
+      expect(t).toContain('Mobile sign-up');
+      expect(t).toContain('v0.app/t/welcome-single-screen');
+      expect(t).toContain('mobile-sign-up.zip');
+      expect(t).toContain('Cut this to two steps.');
+      expect(t).toContain('Priya');
+      expect(t).toContain('Try the single screen first?');
+    }
+  });
+
+  it('searches for onboarding', () => {
+    expect(closed).toMatch(/<span>onboarding<\/span>/);
+    expect(closed).toContain('Search results for the word onboarding.');
+  });
+
+  // Mutation: drop the mask from the hero window, or put orange in a thumbnail.
+  it('fades the hero window out and keeps thumbnails free of orange', () => {
+    const css = read('src/components/home/HomeStyles.astro');
+    expect(css).toMatch(/\.fade \{[^}]*overflow: hidden;[^}]*mask-image: linear-gradient\(to bottom/);
+    expect(css).toMatch(/\.canvas|\.cmask \{[^}]*mask-image/);
+    const thumbs = css.slice(css.indexOf('A prototype thumbnail'), css.indexOf('The terminal, a second window'));
+    expect(thumbs).not.toMatch(/ff4f00|b83a00|var\(--color-orange\)/i);
+    expect(read('src/lib/thumbs.ts')).not.toMatch(/ff4f00|orange/i);
+  });
+
+  it('keeps the terminal text at 13px or larger', () => {
+    expect(read('src/components/home/HomeStyles.astro')).toMatch(/\.term \{[^}]*font-size: 13px/);
+  });
+});
+
 describe('the waitlist', () => {
   it('is empty by default, in one obvious place', () => {
     expect(read('src/lib/site.ts')).toMatch(/export const WAITLIST_URL = '';/);

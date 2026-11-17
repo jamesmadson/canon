@@ -1,5 +1,6 @@
 ---
 import { waitlistOpen } from '../../lib/waitlist';
+import Thumb from './Thumb.astro';
 import { tie } from '../../lib/words';
 
 interface Props {
@@ -19,9 +20,23 @@ const GROUPS: Array<{ name: string; legend: string; options: string[] }> = [
   <h2 id="h-hosted"><span class="sent">Free on your machine.</span><span class="sent">{tie('Hosted when you need to share.')}</span></h2>
   <div class="plans">
     <div class="panel">
-      <div class="shot dark" role="img" aria-label="Canon’s install button, which opens Canon in its own window.">
-        <div><span class="dim">Install Canon</span></div>
-        <div class="dim">{tie('Its own window, in your Dock or taskbar')}</div>
+      <div class="shot win" role="img" aria-label="Canon in its own window, showing the Onboarding project with two prototypes in a list.">
+        <div class="wtitle" aria-hidden="true">Canon</div>
+        <div class="wbody" aria-hidden="true">
+          <div class="wside">
+            <div class="wn-nav on">Home</div>
+            <div class="wn-nav">Starred<small>3</small></div>
+            <div class="wn-sec">Projects</div>
+            <div class="wn-nav">Onboarding<small>5</small></div>
+            <div class="wn-nav">Dashboard<small>4</small></div>
+          </div>
+          <div class="wlist">
+            <div class="wgrp"><b>Onboarding</b><span class="muted">5</span></div>
+            <div class="wrow"><span class="mini-t"><Thumb k="w2" /></span><b>Welcome, single screen</b><span class="muted">Lovable</span></div>
+            <div class="wrow"><span class="mini-t"><Thumb k="w1" /></span><b>Welcome, three steps</b><span class="muted">Claude Code</span></div>
+            <div class="wrow"><span class="mini-t"><Thumb k="w3" /></span><b>Invite a teammate</b><span class="muted">Figma Make</span></div>
+          </div>
+        </div>
       </div>
       <div class="tx2">
         <h3>{tie('Canon, local')}</h3>
@@ -37,7 +52,7 @@ const GROUPS: Array<{ name: string; legend: string; options: string[] }> = [
       <div>
         <div class="shot" role="img" aria-label="A sketch of a share link, and a comment from someone who opened it.">
           <div class="q"><span>Anyone with the link can comment</span><span class="mini">Copy link</span></div>
-          <div class="bub"><span class="av">P</span><span><b>Priya</b> {tie('Try the yearly price first?')}</span></div>
+          <div class="bub"><span class="av">P</span><span><b>Priya</b>{' '}{tie('Try the single screen first?')}</span></div>
         </div>
         <div class="tx2">
           <h3>{tie('Canon, hosted')}</h3>

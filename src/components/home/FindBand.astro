@@ -4,9 +4,9 @@ import { tie } from '../../lib/words';
 import type { ThumbKey } from '../../lib/thumbs';
 
 const RESULTS: Array<[ThumbKey, string, string, string[], string, boolean]> = [
-  ['p1', 'Pricing page, annual toggle', 'Monthly and yearly prices side by side, with the saving shown.', ['Pricing', 'Annual toggle', 'Claude Code'], 'Today', true],
-  ['p2', 'Pricing page, three tiers', 'Team tier in the middle, as tested.', ['Pricing', 'Three tiers', 'Starred'], 'Tuesday', false],
-  ['c1', 'Checkout, one page', 'Shows the plan’s pricing above the card form.', ['Checkout', 'Payment', 'Figma'], 'Last week', false],
+  ['w1', 'Welcome, three steps', 'Name, workspace and first notebook, one step at a time.', ['Onboarding', 'Three steps', 'Claude Code'], 'Today', true],
+  ['w2', 'Welcome, single screen', 'Everything on one screen, with starter templates.', ['Onboarding', 'Single screen', 'Lovable'], 'Tuesday', false],
+  ['w3', 'Invite a teammate', 'Shows the invite list under the welcome message.', ['Onboarding', 'Invite', 'Figma Make'], 'Last week', false],
 ];
 ---
 
@@ -15,20 +15,20 @@ const RESULTS: Array<[ThumbKey, string, string, string[], string, boolean]> = [
     <div>
       <h2 id="h-find">{tie('Search every prototype by what’s in it.')}</h2>
       <p class="lede">{tie('Canon reads a linked prototype’s title and headings, then tags it for you. Search by name, tag, summary, source or note. Your agent can add or remove tags.')}</p>
-      <div class="read" role="img" aria-label="A pricing prototype and the five tags Canon gave it.">
-        <Thumb k="p1" />
+      <div class="read" role="img" aria-label="A welcome prototype and the five tags Canon gave it.">
+        <Thumb k="w1" />
         <div>
           <small>Tagged when it was added</small>
           <div class="tags" aria-hidden="true">
-            {['Pricing', 'Annual toggle', 'Two tiers', 'Claude Code', 'shop-web'].map((t) => <span class="tag">{t}</span>)}
+            {['Onboarding', 'Welcome', 'Three steps', 'Claude Code', 'fieldnote-web'].map((t) => <span class="tag">{t}</span>)}
           </div>
         </div>
       </div>
     </div>
-    <div class="results" role="img" aria-label="Search results for the word pricing. Three prototypes, each with its tags.">
+    <div class="results" role="img" aria-label="Search results for the word onboarding. Three prototypes, each with its tags.">
       <div class="q">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
-        <span>pricing</span><span class="caret" style="margin-left:-6px"></span>
+        <span>onboarding</span><span class="caret" style="margin-left:-6px"></span>
       </div>
       {
         RESULTS.map(([k, name, sub, tags, when, on]) => (
