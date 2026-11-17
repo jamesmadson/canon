@@ -77,14 +77,15 @@ export const TOOL_DEFS = [
   },
   {
     name: 'canon_update',
-    description: 'Change a prototype: its URL, name, summary, tags, star, note, archive or place. Pass folder, the absolute path of a new build, to add it as the next version of the prototype; the older versions stay.',
+    description: 'Change a prototype: its URL, name, summary, tags, star, note, archive or place. Pass folder, the absolute path of a new build, to add it as the next version of the prototype; the older versions stay. For a prototype that is a link, pass url for the next version: a new address becomes the next version and the older ones stay. Pass newVersion: true with url to add that address as the next version even when it is the same as the current one, for example a dev server that now shows new work. A stack can mix link versions and stored copies.',
     inputSchema: schema(
       {
         project: PROJECT,
         frame: str('Prototype name or id.'),
         board: str('Board name or id, to narrow the search.'),
-        url: str('A new http or https URL. With folder, this is the new live address.'),
+        url: str('An http or https URL. A new address is added as the next version. With folder, this is the new live address.'),
         folder: FOLDER,
+        newVersion: { type: 'boolean', description: 'With url: add it as the next version even when it matches the current address.' },
         name: str('A new name.'),
         summary: str('One sentence on what this prototype shows.'),
         repo: str('The repo it came from.'),
@@ -132,7 +133,7 @@ function checkArgs(name, args) {
   if (name === 'canon_add' && args.url === undefined && args.folder === undefined) return 'url or folder is required.';
   for (const [key, value] of Object.entries(args)) {
     if (value === undefined) continue;
-    if (key === 'full' || key === 'starred' || key === 'archived') {
+    if (key === 'full' || key === 'starred' || key === 'archived' || key === 'newVersion') {
       if (typeof value !== 'boolean') return `${key} must be true or false.`;
     } else if (key === 'tags' || key === 'removeTags') {
       if (!Array.isArray(value) || value.some((t) => typeof t !== 'string')) return `${key} must be a list of text.`;

@@ -365,6 +365,10 @@ async function update(args: Args, deps: OpsDeps) {
   if (m.starred !== undefined && m.starred !== !!before.starred) patch.starred = m.starred;
   if (m.archived !== undefined && m.archived !== !!before.archived) patch.archived = m.archived;
   const hasBuild = args.build !== undefined;
+  const forceVersion = flag(args.newVersion, 'newVersion') === true;
+  if (forceVersion && url === null && !hasBuild) {
+    throw new Refused('newVersion needs url. Pass the address of the new version, or pass folder to add a build.');
+  }
   const auto = (url !== null || hasBuild) && m.page
     ? autoTags({ title: m.page.title, headings: m.page.headings, repo: m.repo ?? before.repo, branch: m.branch ?? before.branch })
     : [];
@@ -385,7 +389,7 @@ async function update(args: Args, deps: OpsDeps) {
     current = r.frame;
     newVersion = r.added;
   } else if (url !== null) {
-    const r = await deps.addUrlVersion(current.id, url);
+    const r = await deps.addUrlVersion(current.id, url, forceVersion ? { force: true } : undefined);
     current = r.frame;
     newVersion = r.added;
   }

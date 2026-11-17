@@ -150,6 +150,23 @@ describe('a build folder through the tools into what the tab stores', () => {
     expect(cur).toMatchObject({ kind: 'files', liveUrl: 'http://localhost:4000/' });
   });
 
+  it('a link version can be added with newVersion, and a stack can mix links and stored copies', async () => {
+    const { tools } = agent();
+    await tools.call('canon_add', { url: 'https://proto.test/a', name: 'Pricing', board: 'Checkout' });
+    const r2 = await tools.call('canon_update', { frame: 'Pricing', url: 'https://proto.test/a', newVersion: true });
+    expect(r2.content[0].text).toContain('It is version 2 now.');
+    expect(r2.isError).toBeUndefined();
+    const r3 = await tools.call('canon_update', { frame: 'Pricing', folder: build({ 'index.html': '<p>stored</p>' }) });
+    expect(r3.content[0].text).toContain('It is version 3 now.');
+    const r4 = await tools.call('canon_update', { frame: 'Pricing', url: 'https://proto.test/b', newVersion: true });
+    expect(r4.content[0].text).toContain('It is version 4 now.');
+    const st = stacks(store.getState().frames);
+    expect(st).toHaveLength(1);
+    expect(st[0].map((f) => f.kind)).toEqual(['url', 'url', 'files', 'url']);
+    expect(currentOf(st[0]).url).toBe('https://proto.test/b');
+    expect(store.getState().placements.map((p) => p.frameId)).toEqual([currentOf(st[0]).id]);
+  });
+
   it('writes nothing when the pieces are missing', async () => {
     const { tools } = agent();
     const bad = await runOpDirect({ build: { upload: '0123456789abcdef', count: 1, bytes: 1 } });

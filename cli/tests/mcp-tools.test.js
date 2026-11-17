@@ -236,6 +236,7 @@ describe('canon tools', () => {
         [{ tags: Array.from({ length: 500 }, (_, i) => `t${i}`) }, 'tags can hold at most 20.'],
         [{ starred: 'yes' }, 'starred must be true or false.'],
         [{ page: { title: 'x', headings: [] } }, 'page is not an option for canon_add.'],
+        [{ newVersion: true }, 'newVersion is not an option for canon_add.'],
       ];
       for (const [extra, message] of cases) {
         const { tools, calls } = setup();
