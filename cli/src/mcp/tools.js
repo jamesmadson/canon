@@ -181,11 +181,13 @@ const listOf = (items) => (items.length > 5 ? `${items.slice(0, 5).join(', ')} a
 
 /** What was kept from a page of a site, and what was left out. Said after the add or update line. */
 function keptLines(read) {
-  const { missing, external, runtime, rewritten } = read.report;
+  const { missing, external, runtime, unparsed, unrewritten, rewritten } = read.report;
   const lines = [`Kept the page ${read.entry} and what it needs: ${count(read.files.length, 'file', 'files')}, ${sizeOf(read.bytes)}. ${count(rewritten, 'reference', 'references')} to the site root became relative so they load from the copy.`];
   if (missing.length) lines.push(`Warning: ${count(missing.length, 'file the page asks for was', 'files the page asks for were')} not in the build and left out: ${listOf(missing)}.`);
   if (external.length) lines.push(`Left as written, so they need a connection to load (${count(external.length, 'external address', 'external addresses')}): ${listOf(external)}.`);
   if (runtime.length) lines.push(`Warning: the scripts ask for ${count(runtime.length, 'path', 'paths')} from the site root while they run (${listOf(runtime)}). Canon does not keep those and they will not load from the copy.`);
+  if (unparsed.length) lines.push(`Warning: ${count(unparsed.length, 'file is', 'files are')} too large for Canon to read for the files it uses, so what it asks for may be missing (${listOf(unparsed)}).`);
+  if (unrewritten.length) lines.push(`Warning: ${count(unrewritten.length, 'file has', 'files have')} bytes that are not UTF-8, so its paths from the site root were not made relative (${listOf(unrewritten)}).`);
   return lines;
 }
 

@@ -250,7 +250,7 @@ function takeBuild(deps: OpsDeps, raw: unknown): { files: BuildFile[] | null; en
   const files = deps.staging.take(raw);
   const entry = (raw as { entry?: unknown }).entry;
   if (entry === undefined) return { files };
-  if (typeof entry !== 'string' || !files.some((f) => f.path === entry)) throw new Refused('build.entry must be the path of a file in the build.');
+  if (typeof entry !== 'string' || !/\.html?$/i.test(entry) || !files.some((f) => f.path === entry)) throw new Refused('build.entry must be the path of an HTML file in the build.');
   return { files, entry };
 }
 

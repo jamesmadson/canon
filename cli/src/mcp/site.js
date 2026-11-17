@@ -17,7 +17,7 @@ import { isAbsolute, join, sep, posix } from 'node:path';
 import { BUILD_LIMITS, readCollected } from './folder.js';
 
 /** The crawl stops here, so a build that links to itself endlessly cannot hang it. */
-export const CRAWL_LIMITS = { maxRefs: 5000, maxParsedBytes: 64 * 1024 * 1024 };
+export const CRAWL_LIMITS = { maxRefs: 5000, maxParsedBytes: 64 * 1024 * 1024, maxFileBytes: 4 * 1024 * 1024 };
 
 const refuse = (message) => ({ ok: false, message });
 const extOf = (path) => path.slice(path.lastIndexOf('.') + 1).toLowerCase();
@@ -28,33 +28,98 @@ const kindOf = (path) => {
   if (ext === 'js' || ext === 'mjs') return 'js';
   return null;
 };
+/** A reference as it is reported: cut, so a huge one cannot make a huge reply. */
+const clip = (text) => (text.length > 120 ? `${text.slice(0, 117)}...` : text);
 const mb = (n) => `${(n / (1024 * 1024)).toFixed(1)} MB`;
 
 /* ── Finding references in text ─────────────────────────────────────────── */
 
-const TAG = /<\x21--[\s\S]*?-->|<(script|style)\b((?:\x22[^\x22]*\x22|\x27[^\x27]*\x27|[^>\x22\x27])*)>([\s\S]*?)<\/\1\s*>|<([a-zA-Z][\w:-]*)((?:\x22[^\x22]*\x22|\x27[^\x27]*\x27|[^>\x22\x27])*)>/gi;
 const ATTR = /([^\s\x22\x27<>/=]+)(?:\s*=\s*(?:\x22([^\x22]*)\x22|\x27([^\x27]*)\x27|([^\s\x22\x27=<>\x60]+)))?/g;
 /** Only links that load something. A canonical or alternate link names another page, which is not part of this one. */
 const LINK_RELS = new Set(['stylesheet', 'icon', 'preload', 'modulepreload', 'apple-touch-icon', 'apple-touch-icon-precomposed', 'mask-icon', 'manifest']);
+
+const TAG_NAME = /[a-zA-Z][\w:-]*/y;
+const CLOSERS = { script: /<\/script\s*>/gi, style: /<\/style\s*>/gi };
+const COMMENT_OPEN = `<${String.fromCharCode(33)}--`;
+
+/**
+ * The tags of an HTML text, found by scanning, one pass. Each search for a
+ * closing quote, tag or comment is made once at most when it finds nothing,
+ * so a file of unclosed tags costs no more than a file of closed ones.
+ * Yields { name, attrs, attrsAt, body?, bodyAt? }.
+ */
+function* tagsOf(text) {
+  const noClose = new Set();
+  const noQuote = new Set();
+  let i = 0;
+  while ((i = text.indexOf('<', i)) !== -1) {
+    if (text.startsWith(COMMENT_OPEN, i)) {
+      const end = text.indexOf('-->', i + 4);
+      if (end < 0) return; // an unclosed comment runs to the end of the file
+      i = end + 3;
+      continue;
+    }
+    TAG_NAME.lastIndex = i + 1;
+    const named = TAG_NAME.exec(text);
+    if (!named) {
+      i++;
+      continue;
+    }
+    const attrsAt = i + 1 + named[0].length;
+    let j = attrsAt;
+    let ok = false;
+    while (j < text.length) {
+      const c = text[j];
+      if (c === '>') {
+        ok = true;
+        break;
+      }
+      if (c === '<') break; // a new tag starts first, so this one never ended
+      if (c === '"' || c === "'") {
+        const close = noQuote.has(c) ? -1 : text.indexOf(c, j + 1);
+        if (close < 0) {
+          noQuote.add(c);
+          break;
+        }
+        j = close + 1;
+        continue;
+      }
+      j++;
+    }
+    if (!ok) {
+      i = Math.max(j, i + 1);
+      continue;
+    }
+    const name = named[0].toLowerCase();
+    const item = { name, attrs: text.slice(attrsAt, j), attrsAt };
+    i = j + 1;
+    const closer = CLOSERS[name];
+    if (closer && !noClose.has(name)) {
+      closer.lastIndex = i;
+      const end = closer.exec(text);
+      if (end) {
+        item.body = text.slice(i, end.index);
+        item.bodyAt = i;
+        i = end.index + end[0].length;
+      } else {
+        noClose.add(name); // no closing tag anywhere after this: the tag is read as a plain one
+      }
+    }
+    yield item;
+  }
+}
 
 /** Each reference is { raw, start, end }: the text, and where it sits in the file. */
 function htmlRefs(text) {
   const refs = [];
   const nested = []; // inline style and script bodies: { kind, text, offset }
-  for (const m of text.matchAll(TAG)) {
-    if (m[0][1] === String.fromCharCode(33)) continue; // a comment
-    if (m[1]) {
-      const tag = m[1].toLowerCase();
-      const attrsAt = m.index + 1 + m[1].length;
-      const list = attributes(m[2], attrsAt, tag, refs);
-      const bodyAt = attrsAt + m[2].length + 1;
-      const type = (list.find((a) => a.name === 'type')?.value ?? '').toLowerCase();
-      if (tag === 'style') nested.push({ kind: 'css', text: m[3], offset: bodyAt });
-      else if (!list.some((a) => a.name === 'src') && (type === '' || type === 'module' || type.includes('javascript'))) {
-        nested.push({ kind: 'js', text: m[3], offset: bodyAt });
-      }
-    } else {
-      attributes(m[5], m.index + 1 + m[4].length, m[4].toLowerCase(), refs);
+  for (const t of tagsOf(text)) {
+    const list = attributes(t.attrs, t.attrsAt, t.name, refs);
+    if (t.body === undefined) continue;
+    const type = (list.find((a) => a.name === 'type')?.value ?? '').toLowerCase();
+    if (t.name === 'style') nested.push({ kind: 'css', text: t.body, offset: t.bodyAt });
+    else if (!list.some((a) => a.name === 'src') && (type === '' || type === 'module' || type.includes('javascript'))) {
+      nested.push({ kind: 'js', text: t.body, offset: t.bodyAt });
     }
   }
   return { refs, nested };
@@ -212,6 +277,8 @@ export async function readBuildPage(folder, page, limits = BUILD_LIMITS, crawl =
   const missing = new Set();
   const external = new Set();
   const runtime = new Set();
+  const unparsed = []; // kept, but over the size Canon reads for references
+  const unrewritten = []; // read as text, but not valid UTF-8, so left as they are
   const edits = new Map(); // path -> [{ start, end, text }]
   const texts = new Map(); // path -> text, for the files that were read
   let examined = 0;
@@ -266,16 +333,16 @@ export async function readBuildPage(folder, page, limits = BUILD_LIMITS, crawl =
       const r = resolveRef(ref.raw, file.path);
       if (r.skip) continue;
       if (r.external) {
-        external.add(r.external);
+        external.add(clip(r.external));
         continue;
       }
       if (r.outside) {
-        missing.add(r.outside);
+        missing.add(clip(r.outside));
         continue;
       }
       const hit = await keep(r.target);
       if (!hit.path) {
-        if (hit.why !== 'skipped') missing.add(r.target || '/');
+        if (hit.why !== 'skipped') missing.add(clip(r.target || '/'));
         continue;
       }
       if (r.rootAbsolute) {
@@ -293,6 +360,10 @@ export async function readBuildPage(folder, page, limits = BUILD_LIMITS, crawl =
 
   while (queue.length) {
     const file = queue.shift();
+    if (file.size > crawl.maxFileBytes) {
+      unparsed.push(clip(file.path));
+      continue;
+    }
     parsedBytes += file.size;
     if (parsedBytes > crawl.maxParsedBytes) {
       return refuse(`The page pulls in more than ${Math.round(crawl.maxParsedBytes / (1024 * 1024))} MB of HTML, CSS and JavaScript to read, so Canon stopped. Pass a simpler page.`);
@@ -316,7 +387,7 @@ export async function readBuildPage(folder, page, limits = BUILD_LIMITS, crawl =
     } else {
       const refs = jsRefs(text);
       failure = await visit(file, refs);
-      for (const p of jsRuntimePaths(text, refs)) runtime.add(p);
+      for (const p of jsRuntimePaths(text, refs)) runtime.add(clip(p));
     }
     if (failure) return failure;
   }
@@ -338,7 +409,9 @@ export async function readBuildPage(folder, page, limits = BUILD_LIMITS, crawl =
   const found = all.map((f) => {
     const list = edits.get(f.path);
     const text = texts.get(f.path);
-    if (!list || text === undefined || text.includes('�')) return { path: f.path, full: f.full, size: f.size };
+    const broken = list && text !== undefined && text.includes('�');
+    if (broken) unrewritten.push(clip(f.path));
+    if (!list || text === undefined || broken) return { path: f.path, full: f.full, size: f.size };
     let out = text;
     for (const e of [...list].sort((a, b) => b.start - a.start)) out = out.slice(0, e.start) + e.text + out.slice(e.end);
     const data = Buffer.from(out, 'utf8');
@@ -353,6 +426,6 @@ export async function readBuildPage(folder, page, limits = BUILD_LIMITS, crawl =
     files: done.files,
     bytes: done.bytes,
     entry: entry.path,
-    report: { missing: [...missing].sort(), external: [...external].sort(), runtime: [...runtime].sort(), rewritten },
+    report: { missing: [...missing].sort(), external: [...external].sort(), runtime: [...runtime].sort(), unparsed, unrewritten, rewritten },
   };
 }

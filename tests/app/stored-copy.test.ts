@@ -199,6 +199,19 @@ describe('a build folder through the tools into what the tab stores', () => {
     expect(currentOf(stacks(store.getState().frames)[0]).entry).toBe('lab/home-d/index.html');
   });
 
+  it('refuses an entry that is not an HTML file in the build, before writing anything', async () => {
+    const UP = '0123456789abcdef';
+    const b64 = (s: string) => Buffer.from(s).toString('base64');
+    for (const entry of ['img/a.png', 'x.js', 'missing.html']) {
+      const staging = createStaging();
+      staging.part({ upload: UP, parts: [{ path: 'index.html', at: 0, size: 1, data: b64('x') }, { path: 'img/a.png', at: 0, size: 1, data: b64('a') }, { path: 'x.js', at: 0, size: 1, data: b64('j') }] });
+      const deps = { state: store.getState, route: () => ({ name: 'home' }), staging, appBase: APP, agentName: 'Claude', toast: () => {} } as unknown as OpsDeps;
+      const r = await runOp('add', { url: 'https://p.test/', build: { upload: UP, count: 3, bytes: 3, entry } }, deps);
+      expect(r).toEqual({ ok: false, error: 'build.entry must be the path of an HTML file in the build.' });
+    }
+    expect(store.getState().frames).toHaveLength(0);
+  });
+
   it('writes nothing when the page is not in the build', async () => {
     const { tools } = agent();
     const r = await tools.call('canon_add', { folder: build({ 'index.html': 'x' }), page: 'nope/' });
