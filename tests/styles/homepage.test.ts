@@ -287,6 +287,16 @@ describe('motion', () => {
     }
   });
 
+  // Mutation: drop the pause when the hero is off screen, or the fade before the reset.
+  it('loops the hero demo, fading before the reset and pausing when unseen', () => {
+    expect(script).toMatch(/function loop\(/);
+    expect(script).toContain("root.classList.add('fading')");
+    expect(script).toContain("root.classList.remove('fading')");
+    expect(script).toContain("document.addEventListener('visibilitychange'");
+    expect(script).toContain('new IntersectionObserver');
+    expect(styles).toMatch(/\.motion \.fading \[data-step\][\s\S]*?opacity: 0 !important;\s*transition: opacity 360ms var\(--ease\)/);
+  });
+
   it('uses the one curve and moves only by transform and opacity', () => {
     expect(styles).not.toMatch(/ease-in|ease-out/);
     expect(styles).toContain('--ease: cubic-bezier(0.2, 0, 0, 1)');

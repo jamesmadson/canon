@@ -1,6 +1,6 @@
 /**
- * The homepage's small scripts: copy buttons, two demos that play once and
- * rest on their last frame, and the waitlist form. The page is complete
+ * The homepage's small scripts: copy buttons, the hero demo that loops, the
+ * agent demo that plays once and rests on its last frame, and the waitlist form. The page is complete
  * without any of it: the markup is the last frame of each demo.
  */
 
@@ -80,11 +80,57 @@ function play(root: HTMLElement) {
   }, 100);
 }
 
+/**
+ * The hero demo is a cycle: play, hold the finished frame, fade the changed
+ * parts out, reset while they are invisible, play again. It pauses when the
+ * hero is off screen or the tab is hidden.
+ */
+function loop(root: HTMLElement) {
+  const PLAY = 70; // the last step lands at 56
+  const HOLD = 40; // 4 seconds on the finished frame
+  const FADE = 4; // 400ms, matching the fade in the styles
+  let t = 0;
+  let visible = true;
+  let timer = 0;
+  const tick = () => {
+    t += 1;
+    if (t <= PLAY) frame(root, t);
+    else if (t === PLAY + HOLD) root.classList.add('fading');
+    else if (t === PLAY + HOLD + FADE) {
+      prepare(root);
+      frame(root, 0);
+    } else if (t === PLAY + HOLD + FADE + 1) {
+      root.classList.remove('fading');
+      t = 0;
+    }
+  };
+  const sync = () => {
+    const go = visible && !document.hidden;
+    if (go && !timer) timer = window.setInterval(tick, 100);
+    if (!go && timer) {
+      clearInterval(timer);
+      timer = 0;
+    }
+  };
+  document.addEventListener('visibilitychange', sync);
+  if (typeof IntersectionObserver !== 'undefined') {
+    new IntersectionObserver((entries) => {
+      visible = entries.some((e) => e.isIntersecting);
+      sync();
+    }).observe(root);
+  }
+  sync();
+}
+
 if (!still) {
   document.querySelectorAll<HTMLElement>('[data-demo]').forEach((root) => {
     prepare(root);
     frame(root, 0);
-    if (root.dataset.demo === 'hero' || typeof IntersectionObserver === 'undefined') {
+    if (root.dataset.demo === 'hero') {
+      loop(root);
+      return;
+    }
+    if (typeof IntersectionObserver === 'undefined') {
       play(root);
       return;
     }

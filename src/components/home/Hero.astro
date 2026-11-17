@@ -29,7 +29,7 @@ const DASHBOARD: Card[] = [
 ];
 ---
 
-<section class="hero" aria-labelledby="h-hero">
+<section class="hero" aria-labelledby="h-hero" data-demo="hero">
   <div class="htext">
     <h1 id="h-hero" class="rise"><span class="sent">Your prototypes are everywhere.</span><span class="sent">{tie('Canon keeps them in one place.')}</span></h1>
     <p class="lede rise rise-2">
@@ -46,11 +46,19 @@ const DASHBOARD: Card[] = [
     <p class="fine rise rise-3">{tie('Free and open source. No account, and nothing leaves your machine.')}</p>
   </div>
 
+  <div class="term rise rise-3" role="img" aria-label="A terminal where you ask Claude Code to add a welcome screen to Canon. It answers that it added it to Onboarding.">
+    <div class="tbar">claude · fieldnote-web</div>
+    <div class="tbody">
+      <div><span class="dim">&gt; </span><span data-type={PROMPT} data-type-start="4">{PROMPT}</span><span class="caret" data-caret="34" style="opacity:0"></span></div>
+      <div data-step="36"><span class="dim">⏺ canon_add</span> “Welcome, single screen”</div>
+      <div data-step="56">{tie('Added to Onboarding, beside the four earlier versions.')}</div>
+    </div>
+  </div>
+
   <div
     class="stage rise rise-4"
-    data-demo="hero"
     role="img"
-    aria-label="Canon’s home screen and a terminal. In the terminal you ask Claude Code to add a welcome screen. It appears first in the Onboarding row in Canon."
+    aria-label="Canon’s home screen. The welcome screen your agent added appears first in the Onboarding row."
   >
     <div class="fade" aria-hidden="true">
       <div class="app">
@@ -111,14 +119,6 @@ const DASHBOARD: Card[] = [
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="term" aria-hidden="true">
-      <div class="tbar">claude · fieldnote-web</div>
-      <div class="tbody">
-        <div><span class="dim">&gt; </span><span data-type={PROMPT} data-type-start="4">{PROMPT}</span><span class="caret" data-caret="34" style="opacity:0"></span></div>
-        <div data-step="36"><span class="dim">⏺ canon_add</span> “Welcome, single screen”</div>
-        <div data-step="56">{tie('Added to Onboarding, beside the four earlier versions.')}</div>
       </div>
     </div>
   </div>

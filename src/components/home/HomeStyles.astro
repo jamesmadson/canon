@@ -212,11 +212,38 @@
 
   /* Hero */
   .hero {
-    padding: 40px 0 72px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'text'
+      'term'
+      'stage';
+    gap: 40px 0;
+    padding: 56px 0 72px;
+  }
+  .htext {
+    grid-area: text;
+  }
+  .term {
+    grid-area: term;
+  }
+  .stage {
+    grid-area: stage;
+  }
+  /* Wide enough for two columns: the text on the left, the agent prompt on the right. */
+  @media (min-width: 1100px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
+      grid-template-areas:
+        'text term'
+        'stage stage';
+      gap: 72px 40px;
+      align-items: center;
+    }
   }
   .htext {
     max-width: none;
-    margin: 0 0 40px;
+    margin: 0;
   }
   .htext .lede {
     margin-top: 14px;
@@ -225,7 +252,7 @@
   .cta {
     display: flex;
     gap: 12px;
-    margin-top: 28px;
+    margin-top: 32px;
     flex-wrap: wrap;
     align-items: center;
   }
@@ -236,8 +263,8 @@
     color: var(--color-ink-soft);
   }
   .fine.connect {
-    margin-top: 20px;
-    margin-bottom: 8px;
+    margin-top: 28px;
+    margin-bottom: 10px;
   }
   .setup {
     display: flex;
@@ -273,7 +300,6 @@
      bottom and right edges. The terminal is a second window in front. */
   .stage {
     position: relative;
-    margin-top: 8px;
   }
   .stage::before {
     content: '';
@@ -960,11 +986,8 @@
 
   /* The terminal, a second window in front of the app */
   .term {
-    position: absolute;
-    right: 24px;
-    top: 168px;
-    z-index: 2;
-    width: min(500px, calc(100% - 48px));
+    position: relative;
+    width: 100%;
     border-radius: 11px;
     background: #151413;
     color: #edebe6;
@@ -991,7 +1014,7 @@
     display: grid;
     gap: 4px;
     align-content: start;
-    min-height: 112px;
+    min-height: 136px;
     padding: 12px 14px 16px;
   }
   .dim {
@@ -1727,6 +1750,21 @@
     transition-delay: var(--stagger);
   }
 
+  /* The hero demo loops: the parts it changed fade out together, reset while
+     invisible, and play again. Only opacity changes. */
+  .motion [data-type],
+  .motion [data-count],
+  .motion [data-caret] {
+    transition: opacity 240ms var(--ease);
+  }
+  .motion .fading [data-type],
+  .motion .fading [data-count],
+  .motion .fading [data-caret],
+  .motion .fading [data-step] {
+    opacity: 0 !important;
+    transition: opacity 360ms var(--ease);
+  }
+
   /* Reduced motion keeps fades and drops movement. */
   @media (prefers-reduced-motion: reduce) {
     .hbtn:active,
@@ -1758,9 +1796,6 @@
       padding: 0 16px;
     }
     .stage {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
       -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 62%, transparent 98%);
       mask-image: linear-gradient(to bottom, #000 0, #000 62%, transparent 98%);
     }
@@ -1768,12 +1803,8 @@
       left: -16px;
       right: -16px;
     }
-    .term {
-      position: relative;
-      right: auto;
-      top: auto;
-      order: -1;
-      width: 100%;
+    .hero {
+      gap: 32px 0;
     }
     .fade {
       height: 420px;
