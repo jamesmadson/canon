@@ -16,17 +16,25 @@
    so the "/canon" deploy base is hardcoded here. If the deploy path ever changes,
    update these alongside astro.config.mjs (site/base) and buildInstallScript.ts. */
 
-/* The two faces, and now the only two. Public Sans ships as one variable file
-   covering the whole axis, so the 200 used for display and the 400 used for
-   body are the same download. IBM Plex Mono is two static cuts: 400 for data,
-   500 for the silkscreened control labels.
-
-   These used to be asked for only inside the product, with the gallery kept on
-   Archivo. One site, one language, so Archivo and Geist Mono are gone. */
+/* Geist for everything, IBM Plex Mono for commands (D-132). Geist ships as
+   three static cuts: 400 for text and headings, 500 for emphasis and buttons,
+   600 for the rare strong label. IBM Plex Mono is two static cuts. */
 @font-face {
-  font-family: "Public Sans";
-  font-weight: 100 900;
-  src: url("/canon/fonts/public-sans/PublicSans-Variable.woff2") format("woff2");
+  font-family: "Geist";
+  font-weight: 400;
+  src: url("/canon/fonts/geist/Geist-Regular.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist";
+  font-weight: 500;
+  src: url("/canon/fonts/geist/Geist-Medium.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist";
+  font-weight: 600;
+  src: url("/canon/fonts/geist/Geist-SemiBold.woff2") format("woff2");
   font-display: swap;
 }
 @font-face {
@@ -44,22 +52,22 @@
 
 /* Fallbacks sized to the real faces, so the swap moves nothing. Each one is a
    system face stretched and lined up to the metrics of the font that replaces
-   it. Measured from the font files in public/fonts with fontkitten, as
-   hhea ascent and descent over unitsPerEm and the average advance of the
-   lowercase letters and space weighted by English frequency, against Arial
-   and Courier New read from macOS. size-adjust is the ratio of the two
-   averages; each override is the metric divided by size-adjust.
-     Public Sans: 2000 upm, ascent 0.95, descent 0.225, line gap 0, average
-       0.4662 em; Arial averages 0.4514 em, so size-adjust is 103.29%.
+   it. Measured from the font files in public/fonts as hhea ascent and descent
+   over unitsPerEm and the average advance of the lowercase letters and space
+   weighted by English frequency, against Arial and Courier New read from
+   macOS. size-adjust is the ratio of the two averages; each override is the
+   metric divided by size-adjust.
+     Geist: 1000 upm, ascent 1.005, descent 0.295, line gap 0, average
+       0.4732 em; Arial averages 0.4471 em, so size-adjust is 105.86%.
      IBM Plex Mono: 1000 upm, ascent 1.025, descent 0.275, line gap 0, every
        advance 0.6 em; Courier New averages 0.6001 em, so 99.98%. */
 @font-face {
-  font-family: "Public Sans Fallback";
+  font-family: "Geist Fallback";
   src: local("Arial");
   font-weight: 100 900;
-  size-adjust: 103.29%;
-  ascent-override: 91.97%;
-  descent-override: 21.78%;
+  size-adjust: 105.86%;
+  ascent-override: 94.94%;
+  descent-override: 27.87%;
   line-gap-override: 0%;
 }
 @font-face {
@@ -81,15 +89,15 @@
    opinion in the palette: it is why the grey reads as chosen rather than
    defaulted. Colour lives only inside RamsMark and the orange dot. */
 @theme {
-  --font-sans: "Public Sans", "Public Sans Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", "IBM Plex Mono Fallback", ui-monospace, monospace;
-  --font-app: "Public Sans", "Public Sans Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-app: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-app-mono: "IBM Plex Mono", "IBM Plex Mono Fallback", ui-monospace, monospace;
 
-  --color-ground: #E9E7E2;
-  --color-panel: #F5F4F1;
-  --color-recess: #DEDBD5;
-  --color-fill-2: #E4E2DD;
+  --color-ground: #FFFFFF;
+  --color-panel: #F6F3F0;
+  --color-recess: #EAE6E2;
+  --color-fill-2: #F0ECE9;
   --color-rule: #D3D0CA;
   --color-ink-soft: #5C5954;
   --color-ink: #1A1918;
@@ -108,8 +116,7 @@
   --radius-md: 11px;
   --radius-lg: 14px;
 
-  /* Public Sans at 200 for display and 400 for body, with one step of emphasis
-     between. The markup keeps its old class names and lands on the new ladder. */
+  /* Geist at 400 for display and body, with one step of emphasis between. The markup keeps its old class names and lands on the new ladder. */
   --font-weight-normal: 400;
   --font-weight-medium: 400;
   --font-weight-semibold: 500;
@@ -216,33 +223,43 @@ html {
 }
 
 /* Entrance motion. A visitor sees the first paint once, so the frequency gate
-   allows it — but only transform and opacity, and only when motion is welcome.
-   The whole block lives inside the media query so reduced-motion users never
-   get an opacity:0 starting state to be stranded in. */
-@media (prefers-reduced-motion: no-preference) {
-  @keyframes rise {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
+   allows it, with transform and opacity only. Elements rise 12px over 400ms,
+   staggered with .rise-2 to .rise-4. With reduced motion they fade and do not
+   move. The animation is never the only thing that shows the content: it
+   starts from the authored state and ends on it. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
-
-  /* The one-time reveal (D-81), so it keeps 450ms, under its 640ms ceiling. */
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.rise {
+  animation: rise 0.4s cubic-bezier(0.2, 0, 0, 1) both;
+}
+.rise-2 {
+  animation-delay: 80ms;
+}
+.rise-3 {
+  animation-delay: 160ms;
+}
+.rise-4 {
+  animation-delay: 260ms;
+}
+@media (prefers-reduced-motion: reduce) {
   .rise {
-    animation: rise 0.45s cubic-bezier(0.2, 0, 0, 1) both;
-  }
-  .rise-2 {
-    animation-delay: 60ms;
-  }
-  .rise-3 {
-    animation-delay: 120ms;
-  }
-  .rise-4 {
-    animation-delay: 180ms;
+    animation-name: fade;
   }
 }
 
@@ -257,7 +274,7 @@ summary,
 }
 
 /* Two shapes, four values. Pill for the two that carry a decision, rounded
-   rect for the two that carry a tool. No borders on any of them — the fill is
+   rect for the two that carry a tool. No borders on any of them, the fill is
    the control. One height, one press, one focus ring, written here rather than
    spelled out per screen so a fifth variant cannot quietly appear.
 
@@ -337,7 +354,7 @@ summary,
 }
 
 /* One field shape. The recess fill defines the edge, so there is no border to
-   thicken on focus — the ring does that job on its own. */
+   thicken on focus, the ring does that job on its own. */
 .field {
   display: block;
   width: 100%;
@@ -388,26 +405,25 @@ summary,
     font-variant-numeric: tabular-nums;
   }
 
-  /* Display sizes. Weight 200 only lives up here — at 28px and above the thin
-     axis has enough stem to hold, and below it the body weight takes over. */
+  /* Display sizes, in Geist 400 (D-133). */
   .display {
     font-size: 30px;
-    font-weight: 200;
-    line-height: 1.05;
+    font-weight: 400;
+    line-height: 1.1;
     letter-spacing: -0.03em;
     text-wrap: balance;
   }
   .display-lg {
     font-size: 34px;
-    font-weight: 200;
-    line-height: 1.05;
+    font-weight: 400;
+    line-height: 1.1;
     letter-spacing: -0.03em;
     text-wrap: balance;
   }
   /* The homepage claim: 40px at phone width, about 72px at 1440. */
   .display-xl {
     font-size: clamp(2.5rem, 2.1rem + 3.3vw, 4.5rem);
-    font-weight: 200;
+    font-weight: 400;
     line-height: 1;
     letter-spacing: -0.035em;
     text-wrap: balance;
@@ -588,172 +604,10 @@ summary,
   background: var(--brand-orange);
 }
 
-/* The name beside the dot answers the pointer in two ways, taking turns.
-   Odd hovers play a selection, the way a frame is selected on the board: the
-   dot presses, a hairline box drags out from its top left corner, then the
-   corner handles and the name settle. Even hovers lay the five letters of
-   canon out as a small flowchart, nodes drawn in one after another and joined
-   by thin connectors, the o as the orange dot. Keyboard focus plays the
-   selection only.
-
-   Everything here is a transition on transform and opacity, on Canon's one
-   curve, with the same duration in both directions. Leaving runs the same
-   moves backwards with the delays mirrored, and because a transition always
-   continues from where the value is, pointing back in mid-exit carries on
-   from there instead of restarting. The script only sets data-show on the
-   link (select or flow) while a fine pointer is over it. The name and the
-   flowchart are hidden from the accessibility tree, since the link already
-   carries "Canon, home". */
-.home-mark-name {
-  position: relative;
-  padding: 1px 6px;
-}
-.home-mark-name .home-mark-word {
-  display: block;
-  opacity: 0;
-  transform: translateX(-4px);
-  transition:
-    opacity 200ms cubic-bezier(0.2, 0, 0, 1) 0ms,
-    transform 280ms cubic-bezier(0.2, 0, 0, 1) 0ms;
-}
-.home-mark-name::before,
-.home-mark-name::after {
-  content: '';
-  position: absolute;
-  pointer-events: none;
-  opacity: 0;
-}
-/* The box. */
-.home-mark-name::before {
-  inset: 0;
-  border: 1px solid var(--brand-orange);
-  transform-origin: top left;
-  transform: scale(0.08, 0.2);
-  transition:
-    opacity 200ms cubic-bezier(0.2, 0, 0, 1) 80ms,
-    transform 320ms cubic-bezier(0.2, 0, 0, 1) 80ms;
-}
-/* Four 5px handles, one on each corner of the box. */
-.home-mark-name::after {
-  inset: -2px;
-  --h: linear-gradient(var(--brand-orange), var(--brand-orange));
-  background:
-    var(--h) top left / 5px 5px no-repeat,
-    var(--h) top right / 5px 5px no-repeat,
-    var(--h) bottom left / 5px 5px no-repeat,
-    var(--h) bottom right / 5px 5px no-repeat;
-  transform: scale(0.9);
-  transition:
-    opacity 200ms cubic-bezier(0.2, 0, 0, 1) 40ms,
-    transform 280ms cubic-bezier(0.2, 0, 0, 1) 40ms;
-}
-.home-mark .wordmark-dot {
-  transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
-}
-
-/* The flowchart: nine pieces, indexed in drawing order by --i, five nodes and
-   the four connectors between them. */
-.home-mark-flow {
-  position: absolute;
-  left: 6px;
-  top: 50%;
-  display: flex;
-  align-items: center;
-  translate: 0 -50%;
-  pointer-events: none;
-}
-.home-mark-flow > * {
-  flex: none;
-  opacity: 0;
-  transition:
-    opacity 200ms cubic-bezier(0.2, 0, 0, 1) calc((8 - var(--i)) * 24ms),
-    transform 280ms cubic-bezier(0.2, 0, 0, 1) calc((8 - var(--i)) * 24ms);
-}
-.home-mark-flow .fn {
-  display: grid;
-  place-items: center;
-  min-width: 22px;
-  height: 22px;
-  padding-inline: 5px;
-  border-radius: 6px;
-  background-color: var(--color-panel);
-  box-shadow: inset 0 0 0 1px var(--color-input-border);
-  color: var(--color-ink);
-  font-size: 12px;
-  font-style: normal;
-  line-height: 1;
-  transform: scale(0.7);
-}
-.home-mark-flow .fn.hub {
-  min-width: 0;
-  width: 22px;
-  padding: 0;
-  background: none;
-  box-shadow: none;
-}
-.home-mark-flow .fn.hub::before {
-  content: '';
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--brand-orange);
-}
-.home-mark-flow .fc {
-  width: 10px;
-  height: 1px;
-  background-color: var(--color-input-border);
-  transform: scaleX(0);
-  transform-origin: left center;
-}
-
-/* Settled: selection, by keyboard focus or an odd hover. The order it settles
-   in is click, drag, handles, name. */
-.home-mark:focus-visible .wordmark-dot,
-.home-mark[data-show='select'] .wordmark-dot {
-  transform: scale(0.86);
-}
-.home-mark:focus-visible .home-mark-name::before,
-.home-mark[data-show='select'] .home-mark-name::before {
-  opacity: 1;
-  transform: none;
-  transition-delay: 0ms;
-}
-.home-mark:focus-visible .home-mark-name::after,
-.home-mark[data-show='select'] .home-mark-name::after {
-  opacity: 1;
-  transform: none;
-  transition-delay: 200ms;
-}
-.home-mark:focus-visible .home-mark-word,
-.home-mark[data-show='select'] .home-mark-word {
-  opacity: 1;
-  transform: none;
-  transition-delay: 240ms;
-}
-/* Settled: the flowchart, on an even hover. */
-.home-mark[data-show='flow'] .home-mark-flow > * {
-  opacity: 1;
-  transform: none;
-  transition-delay: calc(var(--i) * 45ms);
-}
-
-/* Reduced motion keeps the fades and drops every movement. */
-@media (prefers-reduced-motion: reduce) {
-  .home-mark .wordmark-dot,
-  .home-mark-name::before,
-  .home-mark-name::after,
-  .home-mark-word,
-  .home-mark-flow > * {
-    transform: none !important;
-    transition-duration: 160ms !important;
-    transition-delay: 0ms !important;
-  }
-}
-
 /* ── The rail ─────────────────────────────────────────────────────────────
    Oversized thin numerals, from the principles poster, carrying the product. */
 .rail-num {
-  font-weight: 200;
+  font-weight: 400;
   font-size: 4.4rem;
   line-height: 0.9;
   letter-spacing: -0.045em;
@@ -763,7 +617,7 @@ summary,
 
 .price {
   margin-top: 8px;
-  font-weight: 200;
+  font-weight: 400;
   font-size: 26px;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -789,129 +643,4 @@ summary,
   :root[data-app-theme="system"] .shot-dark {
     display: block;
   }
-}
-
-/* ── The closing strip ────────────────────────────────────────────────────
-   The name giant, paper on near-black, drifting on scroll. Transform and
-   opacity only, and the whole drift is applied by script that never runs when
-   motion is unwelcome, so the static state is the authored one. */
-.closing-strip {
-  overflow: hidden;
-  background-color: #151413;
-  padding: clamp(30px, 5vw, 56px) clamp(20px, 4vw, 44px) clamp(18px, 3vw, 34px);
-}
-.closing-strip .giant {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  font-weight: 200;
-  /* Sized so "canon" runs edge to edge inside the strip's padding. */
-  font-size: 37vw;
-  line-height: 0.8;
-  letter-spacing: -0.045em;
-  color: #EDEBE6;
-  will-change: transform;
-}
-/* The dot takes you back to the top, and says so. On hover with a fine pointer
-   or on keyboard focus it lifts a little, an up arrow in ink fades in inside
-   it and one soft ring leaves the dot and fades. Pressing scales it to 0.97.
-   On click the dot rises a short way while the page starts to scroll (the
-   script adds .rising). Transform and opacity only; reduced motion keeps the
-   arrow's fade and moves nothing. */
-.closing-strip .giant-dot {
-  position: relative;
-  flex: none;
-  display: inline-block;
-  width: 0.5em;
-  height: 0.5em;
-  margin: 0 0.02em 0 0.04em;
-  border-radius: 50%;
-  background: var(--brand-orange);
-  transition: transform 240ms cubic-bezier(0.2, 0, 0, 1);
-}
-.closing-strip .giant-arrow {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 34%;
-  height: 34%;
-  fill: none;
-  stroke: #1A1918;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0;
-  transition: opacity 200ms cubic-bezier(0.2, 0, 0, 1);
-  pointer-events: none;
-}
-.closing-strip .giant-dot::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 0.012em solid var(--brand-orange);
-  opacity: 0;
-  pointer-events: none;
-}
-@keyframes giant-ring {
-  from {
-    opacity: 0.55;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(1.32);
-  }
-}
-.closing-strip .giant-dot:focus-visible .giant-arrow {
-  opacity: 1;
-}
-.closing-strip .giant-dot:focus-visible {
-  transform: translateY(-0.04em);
-}
-.closing-strip .giant-dot:active {
-  transform: translateY(-0.04em) scale(0.97);
-}
-@media (hover: hover) and (pointer: fine) {
-  .closing-strip .giant-dot:hover {
-    transform: translateY(-0.04em);
-  }
-  .closing-strip .giant-dot:hover .giant-arrow {
-    opacity: 1;
-  }
-  .closing-strip .giant-dot:hover::after {
-    animation: giant-ring 380ms cubic-bezier(0.2, 0, 0, 1) both;
-  }
-  .closing-strip .giant-dot:active:hover {
-    transform: translateY(-0.04em) scale(0.97);
-  }
-}
-/* After the hover rules and one class heavier, so with a mouse still over the
-   dot the rise is what shows. */
-.closing-strip .giant-dot[data-to-top].rising {
-  transform: translateY(-0.16em);
-  transition-duration: 360ms;
-}
-.closing-strip .giant-dot:focus-visible {
-  outline: 2px solid #EDEBE6;
-  outline-offset: 0.06em;
-}
-@media (prefers-reduced-motion: reduce) {
-  .closing-strip .giant-dot {
-    transform: none !important;
-    transition-duration: 0s !important;
-  }
-  .closing-strip .giant-dot::after {
-    animation: none !important;
-  }
-  .closing-strip .giant-arrow {
-    transition-duration: 160ms;
-  }
-}
-.closing-strip .meta {
-  margin-top: 18px;
-  text-align: center;
-  font-family: var(--font-app-mono);
-  font-size: 13px;
-  color: #A29E96;
 }

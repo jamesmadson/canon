@@ -6,12 +6,12 @@ const root = join(__dirname, '..', '..');
 const css = readFileSync(join(root, 'src/styles/global.css'), 'utf8');
 const layout = readFileSync(join(root, 'src/layouts/BaseLayout.astro'), 'utf8');
 
-// The CLAUDE.md colour table: token, light, dark. Orange and pin are the same in both.
+// The site's colours (D-133 replaces the CLAUDE.md table for the site): token, light, dark. Orange and pin are the same in both.
 const TABLE: Array<[string, string, string]> = [
-  ['--color-ground', '#E9E7E2', '#151413'],
-  ['--color-panel', '#F5F4F1', '#1F1E1C'],
-  ['--color-recess', '#DEDBD5', '#2E2D2A'],
-  ['--color-fill-2', '#E4E2DD', '#262522'],
+  ['--color-ground', '#FFFFFF', '#151413'],
+  ['--color-panel', '#F6F3F0', '#1F1E1C'],
+  ['--color-recess', '#EAE6E2', '#2E2D2A'],
+  ['--color-fill-2', '#F0ECE9', '#262522'],
   ['--color-ink', '#1A1918', '#EDEBE6'],
   ['--color-ink-soft', '#5C5954', '#A29E96'],
   ['--color-input-border', '#85817A', '#77736B'],
@@ -63,7 +63,7 @@ describe('BaseLayout theme', () => {
 
   it('sets the theme-color per scheme', () => {
     // Mutation: change either meta content or drop its media attribute.
-    expect(layout).toMatch(/name="theme-color" content="#E9E7E2" media="\(prefers-color-scheme: light\)"/);
+    expect(layout).toMatch(/name="theme-color" content="#FFFFFF" media="\(prefers-color-scheme: light\)"/);
     expect(layout).toMatch(/name="theme-color" content="#151413" media="\(prefers-color-scheme: dark\)"/);
   });
 });

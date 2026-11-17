@@ -171,7 +171,7 @@ describe('rise', () => {
 describe('fonts', () => {
   // Mutation: remove a fallback face, one of its overrides, or the fallback from a font stack.
   it('carry metric-matched fallbacks so swapping does not shift layout', () => {
-    for (const family of ['Public Sans Fallback', 'IBM Plex Mono Fallback']) {
+    for (const family of ['Geist Fallback', 'IBM Plex Mono Fallback']) {
       const face = blocks(css.replace(/\/\*[\s\S]*?\*\//g, '')).find(([p, b]) => p === '@font-face' && b.includes(`"${family}"`));
       expect(face, family).toBeTruthy();
       for (const d of ['size-adjust', 'ascent-override', 'descent-override', 'line-gap-override']) {
