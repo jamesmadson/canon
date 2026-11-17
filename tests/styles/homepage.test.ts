@@ -167,6 +167,19 @@ describe('words', () => {
     expect(bad).toEqual([]);
   });
 
+  // Mutation: go back to a line break, or drop the tie on a sentence's last two words.
+  it('sets each sentence of a two-sentence heading in its own block span, tied at the end', () => {
+    const heads = [...closed.matchAll(/<h([12])\b[^>]*>((?:<span class="sent">[^<]*<\/span>)+)<\/h\1>/g)];
+    expect(heads).toHaveLength(3);
+    for (const h of heads) {
+      const spans = [...h[2].matchAll(/<span class="sent">([^<]*)<\/span>/g)].map((m) => m[1]);
+      expect(spans).toHaveLength(2);
+      for (const t of spans) expect(/\S[\u00a0\s]\S+$/.test(t.replace(/&nbsp;/g, '\u00a0')) || !t.includes(' ')).toBe(true);
+    }
+    expect(closed).not.toMatch(/<h[12]\b[^>]*>[^<]*<br/);
+    expect(read('src/components/home/HomeStyles.astro')).toMatch(/\.home \.sent \{\s*display: block;\s*text-wrap: balance/);
+  });
+
   it('sets headings balanced and paragraphs pretty', () => {
     const css = read('src/components/home/HomeStyles.astro');
     expect(css).toMatch(/\.home h1,?[\s\S]*?text-wrap: balance/);

@@ -51,6 +51,11 @@
   .home p {
     text-wrap: pretty;
   }
+  /* One sentence per line when it fits; balanced within itself when it does not. */
+  .home .sent {
+    display: block;
+    text-wrap: balance;
+  }
   .home .lede {
     font-size: 16px;
     line-height: 26px;
@@ -184,7 +189,7 @@
     padding: 40px 0 72px;
   }
   .htext {
-    max-width: 640px;
+    max-width: none;
     margin: 0 0 40px;
   }
   .htext .lede {
