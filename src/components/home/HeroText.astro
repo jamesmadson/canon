@@ -1,0 +1,29 @@
+---
+import CopyField from './CopyField.astro';
+import { SETUP_COMMAND } from '../../lib/site';
+import { withBase } from '../../lib/withBase';
+import { waitlistOpen } from '../../lib/waitlist';
+import { tie } from '../../lib/words';
+
+/** The hero's words and actions, shared by both hero variants. */
+interface Props {
+  waitlistUrl?: string;
+}
+const { waitlistUrl = '' } = Astro.props;
+---
+
+<div class="htext">
+  <h1 id="h-hero" class="rise"><span class="sent">Your prototypes are everywhere.</span><span class="sent">{tie('Canon keeps them in one place.')}</span></h1>
+  <p class="lede rise rise-2">
+    {tie('You and your team juggle Figma Make links, v0 previews, Lovable apps, zips and whatever an agent built this morning. Canon files every one by project on your machine, named, tagged and easy to find.')}
+  </p>
+  <div class="cta rise rise-3">
+    <a class="hbtn hbtn-primary" href={withBase('/app/')}>Open the app</a>
+    {waitlistOpen(waitlistUrl) && <a class="hbtn" href="#hosted">Join the hosted waitlist</a>}
+  </div>
+  <p class="fine connect rise rise-3">{tie('Connect your agent')}</p>
+  <div class="rise rise-3">
+    <CopyField command={SETUP_COMMAND} name="the setup command" />
+  </div>
+  <p class="fine rise rise-3">{tie('Free and open source. No account, and nothing leaves your machine.')}</p>
+</div>

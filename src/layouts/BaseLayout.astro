@@ -14,12 +14,15 @@ interface Props {
    * The homepage is the only thing that needs it.
    */
   wide?: boolean;
+  /** Keeps the page out of search results, for pages that are only for comparing. */
+  noindex?: boolean;
 }
 
 const {
   title,
   description = 'Every prototype, from any tool, in one place.',
   wide = false,
+  noindex = false,
 } = Astro.props;
 
 ---
@@ -31,6 +34,7 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} · Canon</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:title" content={`${title} · Canon`} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />

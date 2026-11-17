@@ -1,5 +1,6 @@
 ---
 import Hero from './Hero.astro';
+import HeroScatter from './HeroScatter.astro';
 import WaysIn from './WaysIn.astro';
 import AgentBand from './AgentBand.astro';
 import FindBand from './FindBand.astro';
@@ -8,13 +9,15 @@ import Plans from './Plans.astro';
 
 interface Props {
   waitlistUrl?: string;
+  /** Which hero opens the page. The scatter one is the alternate at /hero-b/. */
+  hero?: 'terminal' | 'scatter';
 }
-const { waitlistUrl = '' } = Astro.props;
+const { waitlistUrl = '', hero = 'terminal' } = Astro.props;
 ---
 
 <div class="home">
   <div class="wrap">
-    <Hero waitlistUrl={waitlistUrl} />
+    {hero === 'scatter' ? <HeroScatter waitlistUrl={waitlistUrl} /> : <Hero waitlistUrl={waitlistUrl} />}
     <WaysIn />
     <AgentBand />
     <FindBand />

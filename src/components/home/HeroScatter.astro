@@ -1,0 +1,421 @@
+---
+import HeroText from './HeroText.astro';
+import Thumb from './Thumb.astro';
+import type { ThumbKey } from '../../lib/thumbs';
+
+/**
+ * The alternate hero. Nine prototypes sit loose, each with a chip naming where
+ * it lives, then line up in the Home shelf of Canon's window, where the chip
+ * becomes the source line. The cards are laid out in their final grid places;
+ * the loose state is only a transform per card, set by the script.
+ * Without the script, or with reduced motion, the filed state is what shows.
+ */
+interface Props {
+  waitlistUrl?: string;
+}
+const { waitlistUrl = '' } = Astro.props;
+
+interface Card {
+  k: ThumbKey;
+  name: string;
+  /** Where it lives. Shown as a chip while loose and as the source line once filed. */
+  source: string;
+  when: string;
+  mono?: boolean;
+}
+interface Project {
+  name: string;
+  cards: Card[];
+}
+const PROJECTS: Project[] = [
+  {
+    name: 'Onboarding',
+    cards: [
+      { k: 'w2', name: 'Welcome, single screen', source: 'Lovable', when: 'just now' },
+      { k: 'w1', name: 'Welcome, three steps', source: 'Claude Code', when: 'Tuesday' },
+      { k: 'w3', name: 'Invite a teammate', source: 'Figma Make', when: 'Monday' },
+      { k: 'w4', name: 'Empty dashboard, with sample data', source: 'v0', when: 'last week' },
+    ],
+  },
+  {
+    name: 'Dashboard',
+    cards: [
+      { k: 'd1', name: 'Overview, this week', source: 'Codex', when: '2 Nov' },
+      { k: 'd2', name: 'People table', source: 'Bolt', when: '30 Oct' },
+      { k: 'd3', name: 'Notes by month', source: 'localhost:3000', when: '28 Oct', mono: true },
+    ],
+  },
+  {
+    name: 'Mobile navigation',
+    cards: [
+      { k: 'w5', name: 'Mobile sign-up', source: 'mobile-sign-up.zip', when: '26 Oct', mono: true },
+      { k: 'm1', name: 'Bottom tab bar', source: 'Slack link', when: '24 Oct' },
+    ],
+  },
+];
+const total = PROJECTS.reduce((n, p) => n + p.cards.length, 0);
+let index = 0;
+---
+
+<section class="hero hero-b" aria-labelledby="h-hero">
+  <HeroText waitlistUrl={waitlistUrl} />
+
+  <div class="sstage" aria-hidden="true" data-scatter>
+    <div class="sclip">
+      <div class="sapp">
+        <div class="sbg fx"><div class="sbg-main"></div></div>
+        <div class="wn-rail fx">
+          <div class="wn-ws"><span class="wn-mark"></span><b>Canon</b></div>
+          <div class="wn-search">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
+            Find a prototype<kbd>⌘K</kbd>
+          </div>
+          <div class="wn-nav on"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 7.5 8 3l5.5 4.5V13h-11z"></path></svg>Home</div>
+          <div class="wn-nav"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m8 1.8 1.9 4 4.4.6-3.2 3 .8 4.3L8 11.6l-3.9 2.1.8-4.3-3.2-3 4.4-.6z"></path></svg>Starred<small>3</small></div>
+          <div class="wn-nav"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 4h11v2.5h-11zM3.5 6.5V13h9V6.5M6.5 9h3"></path></svg>Archive</div>
+          <div class="wn-sec">Projects</div>
+          {PROJECTS.map((p) => <div class="wn-nav">{p.name}<small>{p.cards.length}</small></div>)}
+          <div class="wn-foot"><i></i>Claude Code connected</div>
+        </div>
+        <div class="wn-main">
+          <div class="wn-bar fx">
+            <div class="wn-title">Home<small>{total} prototypes in {PROJECTS.length} projects</small></div>
+            <span class="wn-util"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 4h11M5 8h6M7 12h2"></path></svg>Filter</span>
+            <span class="wn-seg"><span>List</span><span class="on">Shelf</span></span>
+            <span class="add"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 3v10M3 8h10"></path></svg>Add prototype</span>
+          </div>
+          {
+            PROJECTS.map((p) => (
+              <div class="srow">
+                <div class="shead fx"><b>{p.name}</b><span class="muted">{p.cards.length} prototypes</span><span class="muted">Open project</span></div>
+                <div class="shelf">
+                  {p.cards.map((c) => {
+                    const i = index++;
+                    return (
+                      <div class="slot">
+                        <div class="scard" data-card style={`--i:${i}`}>
+                          <div class="sh"></div>
+                          <Thumb k={c.k} />
+                          {i === 0 && <div class="sring fx"></div>}
+                          <span class:list={['chip', c.mono && 'mono']}>{c.source}</span>
+                          <div class="pname fxn">{c.name}</div>
+                          <div class="pmeta fxn"><span class:list={[c.mono && 'mono']}>{c.source}</span> · {c.when}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <i class="rline fx"></i>
+              </div>
+            ))
+          }
+        </div>
+        <div class="sovl fx"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../../scripts/scatter';
+</script>
+
+<style is:global>
+  /* One column, text above the stage, on every width. */
+  .hero.hero-b {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'text'
+      'stage';
+    gap: 0;
+    align-items: start;
+  }
+  .hero-b .htext {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* The stage is as wide as the page container. The window inside is clipped
+     only along its bottom edge, so loose cards can drift up beside the text. */
+  .sstage {
+    grid-area: stage;
+    position: relative;
+    height: 660px;
+    margin-top: 40px;
+    pointer-events: none;
+  }
+  .sclip {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(-700px -120px 0 -120px);
+  }
+  .sapp {
+    position: relative;
+    display: grid;
+    grid-template-columns: 216px minmax(0, 1fr);
+    align-items: start;
+    height: 100%;
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--color-ink);
+  }
+  .sbg {
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background: var(--wn-rail);
+    box-shadow:
+      0 0 0 1px var(--edge),
+      inset 0 1px 0 var(--hi),
+      0 40px 100px -24px var(--shadow);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 78%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0, #000 78%, transparent 100%);
+  }
+  .sbg-main {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    bottom: 0;
+    left: 216px;
+    border-radius: 11px;
+    background: var(--wn-main);
+    box-shadow:
+      0 0 0 1px var(--wn-line),
+      0 1px 2px var(--shadow);
+  }
+  .sapp .wn-rail,
+  .sapp .wn-main {
+    position: relative;
+  }
+  .sapp .wn-main {
+    margin: 8px 8px 0 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .sapp .wn-bar {
+    position: relative;
+    border-bottom: 0;
+  }
+  .sapp .wn-bar::after,
+  .rline {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--wn-line);
+  }
+  .sapp .srow {
+    position: relative;
+    padding: 10px 20px 12px;
+    border-bottom: 0;
+  }
+  .sapp .shead {
+    margin-bottom: 8px;
+  }
+  .sapp .shelf {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+  }
+  /* The same fade as the app window's bottom, laid over the cards. */
+  .sovl {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 24%;
+    background: linear-gradient(to bottom, transparent, var(--color-ground) 92%);
+    pointer-events: none;
+  }
+
+  /* The slot is a size container so the chip can sit on the thumbnail's lower
+     left whatever the card's width. */
+  .sapp .slot {
+    container-type: inline-size;
+  }
+  .scard {
+    transform-origin: 50% var(--oy, 66px);
+  }
+  .sh {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    aspect-ratio: 16 / 10;
+    border-radius: 9px;
+    box-shadow:
+      0 24px 44px -12px var(--shadow),
+      0 6px 14px -4px var(--shadow);
+    opacity: 0;
+  }
+  .sring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    aspect-ratio: 16 / 10;
+    border-radius: 9px;
+    box-shadow:
+      0 0 0 2px var(--wn-main),
+      0 0 0 4px var(--sel);
+  }
+  .chip {
+    position: absolute;
+    left: 8px;
+    top: calc(62.5cqw - 30px);
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 9px;
+    border-radius: 9px;
+    background: var(--wn-main);
+    color: var(--color-ink);
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow:
+      0 0 0 1px var(--wn-line-strong),
+      0 1px 2px var(--shadow);
+    opacity: 0;
+  }
+  .chip.mono {
+    font-size: 12px;
+    font-weight: 400;
+  }
+  .pmeta .mono {
+    font-size: 12px;
+  }
+  .thumb:has(.tp-tabbed) {
+    background: #e3e6ea;
+  }
+  .thumb .tp-tabs {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 2cqw;
+    box-shadow: inset 0 0.3cqw 0 #efece6;
+  }
+  .thumb .tp-tabs i {
+    width: 3.4cqw;
+    height: 3.4cqw;
+    border-radius: 1cqw;
+    background: #e2ded6;
+  }
+  .thumb .tp-tabs i.on {
+    background: #2a2826;
+  }
+
+  /* With the script running: the stage starts hidden until the cards are
+     placed, then shows the loose state; .is-filed is the grid. */
+  .motion .sstage {
+    opacity: 0;
+  }
+  .motion .sstage.ready {
+    opacity: 1;
+    transition: opacity 300ms var(--ease);
+  }
+  .sstage.live .fx,
+  .sstage.live .fxn,
+  .sstage.live .chip,
+  .sstage.live .sh {
+    transition: opacity 300ms var(--ease);
+  }
+  .sstage.live .scard {
+    transition:
+      transform 400ms var(--ease-glide),
+      opacity 300ms var(--ease);
+  }
+  .sstage.live:not(.is-filed) .scard {
+    transform: translate(var(--tx, 0px), var(--ty, 0px)) rotate(var(--rot, 0deg)) scale(var(--sc, 1));
+  }
+  .sstage.live:not(.is-filed) .fx,
+  .sstage.live:not(.is-filed) .fxn {
+    opacity: 0;
+  }
+  .sstage.live:not(.is-filed) .chip,
+  .sstage.live:not(.is-filed) .sh {
+    opacity: 1;
+  }
+  /* Landing: cards glide in turn, then the window and names fade in and the
+     chips fade out as each card arrives. */
+  .sstage.live.is-filed .scard {
+    transition-delay: calc(var(--i) * 0.05s), 0s;
+  }
+  .sstage.live.is-filed .fx {
+    transition-delay: 0.3s;
+  }
+  .sstage.live.is-filed .fxn,
+  .sstage.live.is-filed .chip,
+  .sstage.live.is-filed .sh {
+    transition-delay: calc(0.25s + var(--i) * 0.05s);
+  }
+  /* Leaving: everything fades, resets while invisible, and fades back in loose. */
+  .sstage.live.out .scard,
+  .sstage.live.out .fx,
+  .sstage.live.out .fxn {
+    opacity: 0;
+    transition-delay: 0s;
+  }
+  .sstage.snap *,
+  .sstage.snap *::before,
+  .sstage.snap *::after {
+    transition: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sstage {
+      opacity: 1;
+    }
+    .sstage * {
+      transition: none !important;
+    }
+    .sstage .scard {
+      transform: none !important;
+      opacity: 1 !important;
+    }
+    .sstage .fx,
+    .sstage .fxn {
+      opacity: 1 !important;
+    }
+    .sstage .chip,
+    .sstage .sh {
+      opacity: 0 !important;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .sstage {
+      height: 690px;
+      margin-top: 40px;
+    }
+    .sapp {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .sbg-main {
+      top: 6px;
+      right: 6px;
+      left: 6px;
+    }
+    .sapp .wn-main {
+      margin: 6px 6px 0;
+    }
+    .sapp .srow {
+      padding: 12px 12px 14px;
+    }
+    .sapp .shelf {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .sapp .shelf .slot:nth-child(n + 3) {
+      display: none;
+    }
+    .sapp .wn-bar {
+      padding: 0 12px;
+    }
+  }
+</style>

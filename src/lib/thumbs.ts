@@ -4,7 +4,7 @@
  * at 600px. Nothing in them is read out: the cards that hold them carry the
  * names. Near monochrome warm greys, and at most one muted tint each.
  */
-export type ThumbKey = 'w1' | 'w2' | 'w3' | 'w4' | 'w5' | 'd1' | 'd2' | 'd3';
+export type ThumbKey = 'w1' | 'w2' | 'w3' | 'w4' | 'w5' | 'd1' | 'd2' | 'd3' | 'm1';
 
 const nav = (...links: string[]) =>
   `<div class="tp-nav"><b>Fieldnote</b>${links.map((l) => `<span>${l}</span>`).join('')}</div>`;
@@ -44,6 +44,11 @@ const T: Record<ThumbKey, [string, string]> = {
   w5: [
     'clay',
     `<div class="tp-phone"><div class="tp-pn"><b>Fieldnote</b></div><div class="tp-h">Create your account</div>${field('Email')}${field('Password')}${btn('Continue')}<div class="tp-cap c">Already a member?</div></div>`,
+  ],
+  // Bottom tab bar: a phone with a list and a bar of four tabs.
+  m1: [
+    'sand',
+    `<div class="tp-phone tp-tabbed"><div class="tp-pn"><b>Fieldnote</b></div><div class="tp-h">Notebooks</div>${lines('Research', 'Meetings', 'Ideas')}<div class="tp-tabs"><i class="on"></i><i></i><i></i><i></i></div></div>`,
   ],
   d1: [
     'slate',
