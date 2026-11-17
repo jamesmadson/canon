@@ -121,3 +121,30 @@ My calls, for James to correct.
    prototype's panel on a board. The canvas tile and the full-size view follow
    it. Home thumbnails and the project list always show the stored copy, and a
    link to a localhost server keeps its drawing there.
+
+## One page of a built site, and link versions
+
+1. **`canon_update` with a `url` already adds a version.** The brief said a
+   link could not get a version through an agent and that `url` alone changes
+   the current address. In the code, `url` alone has always added the next
+   version (and adds nothing when the address matches the current one), and
+   there is no way to change an address in place. I kept that. `newVersion:
+   true` only adds the one thing missing: a version even when the address is
+   the same. Should `url` without `newVersion` change the address in place
+   instead? That would change item 6 above.
+2. **Root-absolute paths are rewritten, not served.** The stored copy is
+   served from `p/<id>/`, and a path such as `/_astro/x.css` would reach the
+   app's own files, so the collector rewrites `/x` to a relative path in the
+   kept HTML, CSS and JavaScript. Those files are not byte-identical to the
+   build. Is that fine?
+3. **What counts as a reference.** Links to other pages (`<a href>`,
+   canonical, alternate) are not followed, so one page stays one page. Paths
+   that scripts build or fetch at run time are not kept, and the reply lists
+   the quoted root paths it noticed. Should the page option follow `<a>`
+   links one level?
+4. **The page the agent names opens first.** The build reference now carries
+   an `entry`, so a page with no `index.html` at the top of the copy opens
+   correctly. A build with no HTML file at all is still refused.
+5. **The page's own outside requests still happen.** An external script on a
+   kept page, such as analytics, runs when the copy is shown. Canon does not
+   remove them. Should it?
