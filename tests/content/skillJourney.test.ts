@@ -28,7 +28,7 @@ describe('skill stories', () => {
     it(`${slug} has a story with no em or en dash`, () => {
       expect(typeof data.story).toBe('string');
       expect(data.story.length).toBeGreaterThan(100);
-      expect(data.story).not.toMatch(/[–—]/);
+      expect(data.story).not.toMatch(/[\u2013\u2014]/);
     });
   }
 
