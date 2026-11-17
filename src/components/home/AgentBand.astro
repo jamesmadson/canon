@@ -7,20 +7,16 @@ import type { ThumbKey } from '../../lib/thumbs';
 
 const PROMPT = 'Gather every onboarding prototype into one project.';
 
-const CARDS: Array<[ThumbKey, string, string]> = [
-  ['w1', 'Welcome, three steps', 'Claude Code'],
+type Row = [ThumbKey, string, string];
+// Three prototypes that start loose, and the two already filed under Onboarding.
+const LOOSE: Row[] = [
   ['w2', 'Welcome, single screen', 'Lovable'],
-  ['w3', 'Invite a teammate', 'Figma Make'],
   ['w4', 'Empty dashboard, with sample data', 'v0'],
   ['w5', 'Mobile sign-up', 'zip'],
 ];
-// Where each card sits in the loose pile: x, y, rotation.
-const LOOSE = [
-  [196, 26, -9],
-  [84, -8, 7],
-  [-6, 34, -4],
-  [-112, -4, 11],
-  [-204, 30, -7],
+const FILED: Row[] = [
+  ['w1', 'Welcome, three steps', 'Claude Code'],
+  ['w3', 'Invite a teammate', 'Figma Make'],
 ];
 ---
 
@@ -30,21 +26,46 @@ const LOOSE = [
   <div class="tint" data-demo="agents">
     <p class="say">{tie('You, to your agent')}</p>
     <p class="big"><span data-type={PROMPT} data-type-start="0">{PROMPT}</span><span class="caret" data-caret="30" style="opacity:0" aria-hidden="true"></span></p>
-    <div class="plabel" data-step="38"><b>Onboarding</b><span class="muted">5 prototypes, newest first</span></div>
-    <div class="pile" role="img" aria-label="Five onboarding prototypes from five tools, first in a loose pile, then lined up in one row.">
-      {
-        CARDS.map(([k, name, from], i) => (
-          <div
-            class="kcard"
-            data-tidy="32"
-            style={`left:${i * 218}px;z-index:${i + 1};--stagger:${i * 40}ms;--loose:translate(${LOOSE[i][0]}px,${LOOSE[i][1]}px) rotate(${LOOSE[i][2]}deg)`}
-          >
-            <Thumb k={k} />
-            <div class="pname">{name}</div>
-            <div class="pmeta">{from}</div>
-          </div>
-        ))
-      }
+    <div class="moves" role="img" aria-label="Three loose prototypes under No project move into the Onboarding project, which grows from two prototypes to five.">
+      <div class="mvbox" aria-hidden="true">
+        <div class="mvhead"><b>No project</b><span><span data-count data-from="3" data-to="0" data-at="38">0</span></span></div>
+        <div class="mvbody">
+          {
+            LOOSE.map(([k, name, from]) => (
+              <div class="mvrow mv-loose" data-tidy="38">
+                <Thumb k={k} />
+                <b>{name}</b>
+                <span>{from}</span>
+              </div>
+            ))
+          }
+          <div class="mvempty" data-tidy="38">Nothing loose</div>
+        </div>
+      </div>
+      <svg class="mvarrow" width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
+      <div class="mvbox" aria-hidden="true">
+        <div class="mvhead"><b>Onboarding</b><span><span data-count data-from="2" data-to="5" data-at="38">5</span></span></div>
+        <div class="mvbody">
+          {
+            LOOSE.map(([k, name, from], i) => (
+              <div class="mvrow" data-step={38 + i * 2}>
+                <Thumb k={k} />
+                <b>{name}</b>
+                <span>{from}</span>
+              </div>
+            ))
+          }
+          {
+            FILED.map(([k, name, from]) => (
+              <div class="mvrow">
+                <Thumb k={k} />
+                <b>{name}</b>
+                <span>{from}</span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
     </div>
   </div>
   <div class="after">

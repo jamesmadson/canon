@@ -1174,6 +1174,9 @@
     white-space: nowrap;
     overflow: hidden;
   }
+  .q .mono {
+    font-size: 12px;
+  }
   .q > span:first-child {
     min-width: 0;
     overflow: hidden;
@@ -1260,30 +1263,90 @@
     vertical-align: -7px;
     margin-left: 3px;
   }
-  .plabel {
+  .moves {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.25fr);
+    gap: 20px;
+    align-items: start;
+    margin-top: 40px;
+  }
+  .mvarrow {
+    margin-top: 8px;
+    color: var(--pmuted);
+  }
+  .mvbox {
+    border-radius: 11px;
+    background: #211f1e;
+    box-shadow: 0 0 0 1px rgba(237, 235, 230, 0.1);
+    overflow: hidden;
+  }
+  .mvhead {
     display: flex;
     gap: 8px;
     align-items: baseline;
-    margin-top: 36px;
+    height: 36px;
+    padding: 0 14px;
+    align-items: center;
+    background: #282624;
+    box-shadow: inset 0 -1px 0 rgba(237, 235, 230, 0.08);
+    font-size: 13px;
   }
-  .plabel b {
+  .mvhead b {
     font-weight: 500;
   }
-  .pile {
+  .mvhead span {
+    margin-left: auto;
+    color: var(--pmuted);
+  }
+  .mvbody {
     position: relative;
-    height: 178px;
-    margin-top: 12px;
+    min-height: 132px;
   }
-  .kcard {
-    position: absolute;
-    top: 0;
-    width: 176px;
+  .mvrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 44px;
+    padding: 0 14px;
+    box-shadow: inset 0 -1px 0 rgba(237, 235, 230, 0.08);
     font-size: 13px;
-    line-height: 18px;
-    transition: transform 400ms var(--ease);
+    white-space: nowrap;
   }
-  .kcard .thumb {
-    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+  .mvrow .thumb {
+    flex: none;
+    width: 40px;
+    border-radius: 4px;
+    box-shadow: none;
+  }
+  .mvrow b {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+  .mvrow span {
+    margin-left: auto;
+    color: var(--pmuted);
+  }
+  /* The loose rows are gone in the finished frame, and shown before the move. */
+  .mv-loose {
+    opacity: 0;
+    transition: opacity 320ms var(--ease);
+  }
+  .mvempty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--pmuted);
+    font-size: 13px;
+    transition: opacity 320ms var(--ease);
+  }
+  .motion .mv-loose:not(.tidy) {
+    opacity: 1;
+  }
+  .motion .mvempty:not(.tidy) {
+    opacity: 0;
   }
   .after {
     display: flex;
@@ -1298,6 +1361,26 @@
   }
   .fine a {
     color: var(--color-ink);
+  }
+
+  /* The project the three sources feed: one header and a row of prototypes */
+  .proj {
+    margin-top: 20px;
+    padding: 18px 22px 36px;
+    border-radius: 14px;
+    background: var(--wn-main);
+    box-shadow:
+      0 0 0 1px var(--edge),
+      inset 0 1px 0 var(--hi),
+      0 30px 70px -30px var(--shadow);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 80%, transparent 100%), linear-gradient(to right, #000 0, #000 95%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to bottom, #000 0, #000 80%, transparent 100%), linear-gradient(to right, #000 0, #000 95%, transparent 100%);
+    mask-composite: intersect;
+  }
+  .proj .shelf {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 
   /* Search and open */
@@ -1533,6 +1616,25 @@
   .wrow .muted {
     display: none;
   }
+  .hshot {
+    position: relative;
+    width: 62%;
+    margin: 0 auto;
+  }
+  .hpin {
+    position: absolute;
+    left: 16%;
+    top: 52%;
+    width: 22px;
+    height: 22px;
+    border-radius: 50% 50% 50% 4px;
+    background: var(--color-ink);
+    color: var(--color-ground);
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 500;
+  }
   .bub {
     display: flex;
     gap: 10px;
@@ -1633,14 +1735,10 @@
   .foot {
     padding-block: 72px 40px;
   }
-  .mark {
+.mark {
     position: relative;
     container-type: inline-size;
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 16px;
     border-radius: 14px;
-    padding: 48px 16px 20px;
   }
   .mark::before {
     content: '';
@@ -1653,44 +1751,22 @@
     opacity: 0;
     transition: opacity 400ms var(--ease);
   }
-  .glyph {
+  /* The wordmark is one piece of text, set like the header's and sized to the
+     container's width. The grid behind it is independent of the letters. */
+  .word {
     position: relative;
-    display: grid;
-    place-items: center;
-    height: min(300px, 25cqw);
-    transition: transform 400ms var(--ease);
-  }
-  .glyph::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 11px;
-    background: var(--color-ground);
-    box-shadow:
-      0 0 0 1px var(--edge),
-      0 12px 32px var(--shadow);
-    opacity: 0;
-    transition: opacity 400ms var(--ease);
-  }
-  .glyph b {
-    position: relative;
-    font-size: min(300px, 25cqw);
-    line-height: 1;
-    font-weight: 500;
+    display: block;
+    margin-left: -0.045em;
+    font-size: 37.4cqw;
+    line-height: 0.95;
+    font-weight: 400;
+    font-kerning: normal;
     letter-spacing: -0.04em;
-    opacity: 0.1;
-    transition: opacity 400ms var(--ease);
-  }
-  .glyph .lab {
-    position: absolute;
-    left: 2px;
-    top: -28px;
-    font-size: 13px;
-    line-height: 20px;
-    color: var(--color-ink-soft);
     white-space: nowrap;
-    opacity: 0;
-    transition: opacity 320ms var(--ease);
+    color: var(--color-ink);
+    opacity: 0.1;
+    user-select: none;
+    transition: opacity 400ms var(--ease);
   }
   .links {
     display: flex;
@@ -1711,19 +1787,11 @@
     margin-left: auto;
   }
   @media (hover: hover) and (pointer: fine) {
-    .mark:hover::before,
-    .mark:hover .glyph::before,
-    .mark:hover .lab,
-    .mark:hover .glyph b {
+    .mark:hover::before {
       opacity: 1;
     }
-  }
-  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .mark:hover .glyph:nth-child(odd) {
-      transform: translateY(-8px);
-    }
-    .mark:hover .glyph:nth-child(even) {
-      transform: translateY(8px);
+    .mark:hover .word {
+      opacity: 0.35;
     }
   }
 
@@ -1743,12 +1811,6 @@
   }
   .motion .scard[data-step]:not(.on) {
     transform: translateY(14px) scale(0.96);
-  }
-  .motion .kcard:not(.tidy) {
-    transform: var(--loose);
-  }
-  .motion .kcard {
-    transition-delay: var(--stagger);
   }
 
   /* The hero demo loops: the parts it changed fade out together, reset while
@@ -1773,7 +1835,7 @@
     .opt:active {
       transform: none;
     }
-    .glyph {
+    .word {
       transition-duration: 0s;
     }
   }
@@ -1859,19 +1921,15 @@
       height: 26px;
       vertical-align: -4px;
     }
-    .pile {
-      display: flex;
-      gap: 14px;
-      overflow-x: auto;
-      height: auto;
-      padding-bottom: 8px;
+    .moves {
+      grid-template-columns: minmax(0, 1fr);
     }
-    .kcard {
-      position: static;
-      flex: 0 0 176px;
+    .mvarrow {
+      transform: rotate(90deg);
+      margin: 0;
     }
-    .motion .kcard:not(.tidy) {
-      transform: none;
+    .proj .shelf {
+      grid-template-columns: repeat(5, 150px);
     }
     .canvas {
       height: 400px;
@@ -1919,10 +1977,6 @@
     }
     .links .by {
       margin-left: 0;
-    }
-    .mark {
-      gap: 4px;
-      padding: 32px 8px 12px;
     }
     .top nav {
       width: 100%;

@@ -1,21 +1,11 @@
 ---
 import { ISSUES_URL, REPO_URL } from '../../lib/site';
-
-// Each letter carries the name of a tool a prototype might come from. They are
-// decoration and show on hover with a fine pointer.
-const GLYPHS: Array<[string, string]> = [
-  ['C', 'Claude Code · v3'],
-  ['a', 'v0'],
-  ['n', 'Figma'],
-  ['o', 'Lovable'],
-  ['n', 'zip'],
-];
 ---
 
 <div class="home">
   <footer class="wrap foot">
     <div class="mark" role="img" aria-label="Canon">
-      {GLYPHS.map(([letter, label]) => <div class="glyph" aria-hidden="true"><span class="lab">{label}</span><b>{letter}</b></div>)}
+      <span class="word" aria-hidden="true">Canon</span>
     </div>
     <div class="links">
       <span>MIT licence</span>

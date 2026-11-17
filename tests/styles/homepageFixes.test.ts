@@ -36,7 +36,10 @@ describe('text on the ink panel', () => {
     const panel = agent.slice(agent.indexOf('class="tint"'), agent.indexOf('<div class="after">'));
     const used = new Set([...panel.matchAll(/class="([^"]+)"/g)].flatMap((m) => m[1].split(' ')));
     const mutedClasses = ['muted', 'pmeta', 'say', 'dim'].filter((c) => used.has(c));
-    expect(mutedClasses).toEqual(expect.arrayContaining(['muted', 'pmeta', 'say']));
+    expect(mutedClasses).toEqual(expect.arrayContaining(['say']));
+    for (const sel of ['\\.mvhead span', '\\.mvrow span', '\\.mvempty']) {
+      expect(css.match(new RegExp(`${sel} \\{[^}]*color: var\\(--pmuted\\)`)), sel).toBeTruthy();
+    }
     for (const cls of mutedClasses) {
       const rule = css.match(new RegExp(`\\.tint \\.${cls} \\{[^}]*color: var\\(--pmuted\\)`)) ?? (cls === 'say' ? css.match(/\.say \{[^}]*color: var\(--pmuted\)/) : null);
       expect(rule, `.${cls} inside .tint`).toBeTruthy();

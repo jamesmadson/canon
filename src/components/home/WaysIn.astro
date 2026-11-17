@@ -3,9 +3,9 @@ import Thumb from './Thumb.astro';
 import { tie } from '../../lib/words';
 ---
 
-<section class="band" id="ways" aria-labelledby="h-ways">
-  <h2 id="h-ways">{tie('Three ways in.')}</h2>
-  <p class="lede">{tie('A link, a zip or whatever your agent just built. However a prototype was made, it lands in the same place.')}</p>
+<section class="band" id="projects" aria-labelledby="h-projects">
+  <h2 id="h-projects">{tie('Every prototype lands in a project.')}</h2>
+  <p class="lede">{tie('A link, a zip or whatever your agent just built. However it was made, it is filed under the project it belongs to, beside its earlier versions.')}</p>
   <div class="three">
     <div class="panel">
       <div class="shot dark" role="img" aria-label="A terminal where you ask your agent to add a page to Canon.">
@@ -21,10 +21,10 @@ import { tie } from '../../lib/words';
     </div>
     <div class="panel">
       <div class="shot" role="img" aria-label="A link pasted into Canon becomes a card.">
-        <div class="q"><span class="mono">v0.app/t/welcome-single-screen</span><span class="mini">Add</span></div>
+        <div class="q"><span class="mono">welcome-single-screen.lovable.app</span><span class="mini">Add</span></div>
         <div class="lrow">
           <div class="mini-t"><Thumb k="w2" /></div>
-          <div><b>Welcome, single screen</b><span class="muted">v0 · added just now</span></div>
+          <div><b>Welcome, single screen</b><span class="muted">Lovable · added just now</span></div>
         </div>
       </div>
       <div class="tx2">
@@ -42,6 +42,46 @@ import { tie } from '../../lib/words';
         <p>{tie('Drag a zip of built pages onto a project. Canon keeps a copy on your machine and opens it from there.')}</p>
         <div class="srcs"><span class="chip">.zip</span><span class="chip">A folder</span></div>
       </div>
+    </div>
+  </div>
+  <div class="proj" role="img" aria-label="The Onboarding project with five prototypes in a row, one from each source: Claude Code, Lovable, Figma Make, v0 and a zip.">
+    <div class="shead" aria-hidden="true"><b>Onboarding</b><span class="muted">5 prototypes</span></div>
+    <div class="shelf" aria-hidden="true">
+        <div class="slot">
+          <div class="scard">
+            <Thumb k="w1" />
+            <div class="pname">Welcome, three steps</div>
+            <div class="pmeta">Claude Code</div>
+          </div>
+        </div>
+        <div class="slot">
+          <div class="scard">
+            <Thumb k="w2" />
+            <div class="pname">Welcome, single screen</div>
+            <div class="pmeta">Lovable</div>
+          </div>
+        </div>
+        <div class="slot">
+          <div class="scard">
+            <Thumb k="w3" />
+            <div class="pname">Invite a teammate</div>
+            <div class="pmeta">Figma Make</div>
+          </div>
+        </div>
+        <div class="slot">
+          <div class="scard">
+            <Thumb k="w4" />
+            <div class="pname">Empty dashboard, with sample data</div>
+            <div class="pmeta">v0</div>
+          </div>
+        </div>
+        <div class="slot">
+          <div class="scard">
+            <Thumb k="w5" />
+            <div class="pname">Mobile sign-up</div>
+            <div class="pmeta">zip</div>
+          </div>
+        </div>
     </div>
   </div>
 </section>

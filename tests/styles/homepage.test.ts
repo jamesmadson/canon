@@ -77,12 +77,39 @@ describe('the pictures', () => {
       expect(t).toContain('Invite a teammate');
       expect(t).toContain('Empty dashboard, with sample data');
       expect(t).toContain('Mobile sign-up');
-      expect(t).toContain('v0.app/t/welcome-single-screen');
+      expect(t).toContain('welcome-single-screen.lovable.app');
+      expect(t).toContain('Lovable · added just now');
+      expect(t).not.toContain('v0.app');
       expect(t).toContain('mobile-sign-up.zip');
       expect(t).toContain('Cut this to two steps.');
       expect(t).toContain('Priya');
       expect(t).toContain('Try the single screen first?');
     }
+  });
+
+  // Mutation: rename the section back, or drop the project row under the three cards.
+  it('labels the nav Projects', () => {
+    expect(read('src/components/home/SiteHeader.astro')).toContain("{ label: 'Projects', href: '/#projects' }");
+  });
+
+  it('opens with projects: the heading, the nav label, and one project fed by three sources', () => {
+    for (const html of [closed, open]) {
+      const t = text(html);
+      expect(t).toContain('Every prototype lands in a project.');
+      expect(t).toContain('it is filed under the project it belongs to, beside its earlier versions.');
+      expect(html).toContain('id="projects"');
+      expect(t).not.toContain('Three ways in');
+      const ways = html.slice(html.indexOf('id="projects"'), html.indexOf('id="agents"'));
+      expect(ways).toContain('aria-label="The Onboarding project with five prototypes in a row');
+      for (const src of ['Claude Code', 'Lovable', 'Figma Make', 'v0', 'zip']) expect(text(ways)).toContain(src);
+    }
+  });
+
+  it('shows the agent filing prototypes as a move from No project to Onboarding', () => {
+    const agents = closed.slice(closed.indexOf('id="agents"'), closed.indexOf('id="find"'));
+    expect(agents).toContain('aria-label="Three loose prototypes under No project move into the Onboarding project');
+    expect(text(agents)).toContain('No project');
+    expect(text(agents)).toContain('Nothing loose');
   });
 
   it('searches for onboarding', () => {
@@ -116,6 +143,23 @@ describe('the shared container', () => {
     const css = read('src/components/home/HomeStyles.astro');
     expect(css).toMatch(/\n  \.wrap \{\s*max-width: 1240px;\s*margin-inline: auto;\s*padding-inline: 40px;/);
     expect(css).toMatch(/\.foot \{\s*padding-block: 72px 40px;/);
+  });
+});
+
+describe('the footer wordmark', () => {
+  // Mutation: go back to one letter per column, or loosen the tracking.
+  it('sets Canon as one piece of text, sized to the container, with display tracking', () => {
+    const footer = read('src/components/home/SiteFooter.astro');
+    expect(footer).toContain('<span class="word" aria-hidden="true">Canon</span>');
+    expect(footer).not.toContain('glyph');
+    const css = read('src/components/home/HomeStyles.astro');
+    const rule = css.match(/\n  \.word \{([^}]*)\}/)![1];
+    expect(rule).toMatch(/font-size: [\d.]+cqw/);
+    expect(rule).toMatch(/font-weight: 400/);
+    expect(rule).toMatch(/font-kerning: normal/);
+    const tracking = Number(rule.match(/letter-spacing: (-[\d.]+)em/)![1]);
+    expect(tracking).toBeGreaterThanOrEqual(-0.05);
+    expect(tracking).toBeLessThanOrEqual(-0.03);
   });
 });
 
