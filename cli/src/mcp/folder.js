@@ -88,13 +88,28 @@ export async function readBuildFolder(folder, limits = BUILD_LIMITS, hooks = {})
 
   found.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
   await hooks.afterWalk?.();
+  const done = await readCollected(found, limits);
+  return done.ok ? { ...done, skipped } : done;
+}
 
-  // Each file is opened without following a link, checked to be a regular file, and read for no more than the budget left.
+/**
+ * Reads files already found: [{ path, full, size, data? }]. A file with data
+ * is already in memory and is passed through. Each other file is opened
+ * without following a link, checked to be a regular file, and read for no
+ * more than the budget left.
+ */
+export async function readCollected(found, limits = BUILD_LIMITS) {
   const files = [];
   let read = 0;
   const changed = (path) => refuse(`${path} changed while Canon was reading the build. Finish the build, then pass the folder again.`);
   const tooBig = () => refuse(`The build is larger than ${limits.maxBytes} bytes. Pass a smaller build folder, or compress large images and videos first.`);
   for (const f of found) {
+    if (f.data) {
+      read += f.data.length;
+      if (read > limits.maxBytes) return tooBig();
+      files.push({ path: f.path, data: f.data });
+      continue;
+    }
     let handle;
     try {
       handle = await open(f.full, constants.O_RDONLY | constants.O_NOFOLLOW);
@@ -123,5 +138,5 @@ export async function readBuildFolder(folder, limits = BUILD_LIMITS, hooks = {})
       await handle.close();
     }
   }
-  return { ok: true, files, bytes: read, skipped };
+  return { ok: true, files, bytes: read };
 }
