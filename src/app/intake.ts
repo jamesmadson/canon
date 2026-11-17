@@ -112,13 +112,15 @@ export async function linkFolder(): Promise<Group | null> {
   }
 }
 
-export async function prepare(group: Group): Promise<Prepared | null> {
+/** entryHint is the path, as it was sent, of the page to open. Without it the shallowest index.html opens. */
+export async function prepare(group: Group, entryHint?: string): Promise<Prepared | null> {
   const stripped = stripCommonRoot(group.files.map((f) => f.path));
   const files = group.files
     .map((f, i) => ({ path: stripped[i], blob: f.blob }))
     .filter((f) => !f.path.startsWith('__MACOSX/'))
     .map((f) => ({ ...f, type: mimeFor(f.path) }));
-  const entry = pickEntry(files.map((f) => f.path));
+  const hinted = entryHint === undefined ? undefined : stripped[group.files.findIndex((f) => f.path === entryHint)];
+  const entry = hinted && files.some((f) => f.path === hinted) ? hinted : pickEntry(files.map((f) => f.path));
   if (!entry) return null;
   const html = await files.find((f) => f.path === entry)!.blob.text();
   // Every page, read once for its links, so a multi-page build can show its IA.

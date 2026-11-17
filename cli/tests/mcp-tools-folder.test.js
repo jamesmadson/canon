@@ -182,3 +182,43 @@ describe('canon_add description', () => {
     }
   });
 });
+
+describe('canon_add with a page of a site', () => {
+  const site = () => build({
+    'index.html': '<p>Home</p>',
+    'lab/a/index.html': '<title>A</title><link rel=stylesheet href=/s.css><img src=/missing.png><img src=https://x.test/p.png>',
+    's.css': 'a{}',
+    'big.bin': Buffer.alloc(200_000),
+  });
+
+  it('stages only the page and what it needs, names the page as the entry, and says what was left out', async () => {
+    const { tools, calls } = setup();
+    const r = await tools.call('canon_add', { folder: site(), page: 'lab/a/' });
+    expect(r.isError).toBeUndefined();
+    expect([...reassemble(calls).keys()].sort()).toEqual(['lab/a/index.html', 's.css']);
+    const add = calls.find(([op]) => op === 'add')[1];
+    expect(add.build).toMatchObject({ count: 2, entry: 'lab/a/index.html' });
+    expect(add).not.toHaveProperty('page', 'lab/a/');
+    expect(add.page).toMatchObject({ title: 'A' });
+    const t = r.content[0].text;
+    expect(t).toContain('Kept the page lab/a/index.html and what it needs: 2 files');
+    expect(t).toContain('1 reference to the site root became relative');
+    expect(t).toContain('Warning: 1 file the page asks for was not in the build and left out: missing.png.');
+    expect(t).toContain('(1 external address): https://x.test/p.png.');
+  });
+
+  it('refuses a page without a folder and a missing page, without calling the bridge', async () => {
+    const { tools, calls } = setup();
+    const a = await tools.call('canon_add', { url: 'http://a.b', page: 'x/' });
+    expect(a.content[0].text).toContain('page needs folder');
+    const b = await tools.call('canon_update', { frame: 'x', folder: site(), page: 'nope/' });
+    expect(b.isError).toBe(true);
+    expect(calls).toHaveLength(0);
+  });
+
+  it('tells an agent how to use page', () => {
+    const add = TOOL_DEFS.find((d) => d.name === 'canon_add');
+    expect(add.description).toContain('pass the build root as folder and the path of the page inside it as page');
+    expect(TOOL_DEFS.find((d) => d.name === 'canon_update').description).toContain('pass the build root as folder and the page path as page');
+  });
+});

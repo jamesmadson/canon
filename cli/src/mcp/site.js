@@ -32,8 +32,8 @@ const mb = (n) => `${(n / (1024 * 1024)).toFixed(1)} MB`;
 
 /* ── Finding references in text ─────────────────────────────────────────── */
 
-const TAG = /<!--[\s\S]*?-->|<(script|style)\b((?:"[^"]*"|'[^']*'|[^>"'])*)>([\s\S]*?)<\/\1\s*>|<([a-zA-Z][\w:-]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
-const ATTR = /([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
+const TAG = /<\x21--[\s\S]*?-->|<(script|style)\b((?:\x22[^\x22]*\x22|\x27[^\x27]*\x27|[^>\x22\x27])*)>([\s\S]*?)<\/\1\s*>|<([a-zA-Z][\w:-]*)((?:\x22[^\x22]*\x22|\x27[^\x27]*\x27|[^>\x22\x27])*)>/gi;
+const ATTR = /([^\s\x22\x27<>/=]+)(?:\s*=\s*(?:\x22([^\x22]*)\x22|\x27([^\x27]*)\x27|([^\s\x22\x27=<>\x60]+)))?/g;
 /** Only links that load something. A canonical or alternate link names another page, which is not part of this one. */
 const LINK_RELS = new Set(['stylesheet', 'icon', 'preload', 'modulepreload', 'apple-touch-icon', 'apple-touch-icon-precomposed', 'mask-icon', 'manifest']);
 
@@ -42,7 +42,7 @@ function htmlRefs(text) {
   const refs = [];
   const nested = []; // inline style and script bodies: { kind, text, offset }
   for (const m of text.matchAll(TAG)) {
-    if (m[0].startsWith('<!--')) continue;
+    if (m[0][1] === String.fromCharCode(33)) continue; // a comment
     if (m[1]) {
       const tag = m[1].toLowerCase();
       const attrsAt = m.index + 1 + m[1].length;
@@ -101,7 +101,7 @@ function srcsetUrls(value) {
   return out;
 }
 
-const CSS_URL = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)\s"']+))\s*\)|@import\s+(?:"([^"]*)"|'([^']*)')/dgi;
+const CSS_URL = /url\(\s*(?:\x22([^\x22]*)\x22|\x27([^\x27]*)\x27|([^)\s\x22\x27]+))\s*\)|@import\s+(?:\x22([^\x22]*)\x22|\x27([^\x27]*)\x27)/dgi;
 
 function cssRefs(text) {
   const blank = text.replace(/\/\*[\s\S]*?\*\//g, (c) => ' '.repeat(c.length));
@@ -117,13 +117,13 @@ function cssRefs(text) {
 }
 
 const JS_PATTERNS = [
-  /\bimport\s*["']([^"'\n]+)["']/dg,
-  /(?<![.\w$])from\s*["']([^"'\n]+)["']/dg,
-  /\bimport\s*\(\s*(?:\/\*[\s\S]*?\*\/\s*)?["']([^"'\n]+)["']/dg,
+  /\bimport\s*[\x22\x27]([^\x22\x27\n]+)[\x22\x27]/dg,
+  /(?<![.\w$])from\s*[\x22\x27]([^\x22\x27\n]+)[\x22\x27]/dg,
+  /\bimport\s*\(\s*(?:\/\*[\s\S]*?\*\/\s*)?[\x22\x27]([^\x22\x27\n]+)[\x22\x27]/dg,
 ];
-const JS_URL = /new\s+URL\(\s*["']([^"'\n]+)["']\s*,\s*import\.meta\.url\s*\)/dg;
+const JS_URL = /new\s+URL\(\s*[\x22\x27]([^\x22\x27\n]+)[\x22\x27]\s*,\s*import\.meta\.url\s*\)/dg;
 /** A quoted path that starts with a slash and ends in a file extension: what code asks for at run time. */
-const JS_LITERAL = /["'`](\/[\w\-./%@]+\.(?:png|jpe?g|gif|webp|avif|svg|ico|woff2?|ttf|otf|json|css|m?js|mp4|webm|mp3|wav|txt|csv|wasm))["'`]/g;
+const JS_LITERAL = /[\x22\x27\x60](\/[\w\-./%@]+\.(?:png|jpe?g|gif|webp|avif|svg|ico|woff2?|ttf|otf|json|css|m?js|mp4|webm|mp3|wav|txt|csv|wasm))[\x22\x27\x60]/g;
 
 function jsRefs(text) {
   const out = [];

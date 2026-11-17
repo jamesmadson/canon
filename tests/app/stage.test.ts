@@ -50,10 +50,16 @@ describe('staging a build', () => {
     expect(() => u.take({ upload: UP, count: 1, bytes: 9 })).toThrow('Some of the files did not arrive. Add the build again.');
   });
 
-  it('refuses a build with no index.html at its top', () => {
+  it('accepts a page of a site with no index.html at its top', () => {
     const s = createStaging();
     s.part({ upload: UP, parts: [part('pages/index.html', 'x')] });
-    expect(() => s.take({ upload: UP, count: 1, bytes: 1 })).toThrow('The build has no index.html at its top.');
+    expect(s.take({ upload: UP, count: 1, bytes: 1 }).map((f) => f.path)).toEqual(['pages/index.html']);
+  });
+
+  it('refuses a build with no HTML page', () => {
+    const s = createStaging();
+    s.part({ upload: UP, parts: [part('app.js', 'x')] });
+    expect(() => s.take({ upload: UP, count: 1, bytes: 1 })).toThrow('The build has no HTML page.');
   });
 
   it('refuses a build reference that is not shaped right', () => {

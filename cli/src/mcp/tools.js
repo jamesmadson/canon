@@ -7,6 +7,7 @@ import { readPairings, rotatePairing, pairLink } from './pairing.js';
 import { readPage as realReadPage } from './page.js';
 import { readSource as realReadSource } from './source.js';
 import { readBuildFolder as realReadBuildFolder, BUILD_LIMITS } from './folder.js';
+import { readBuildPage as realReadBuildPage } from './site.js';
 import { stageBuild } from './upload.js';
 import { extractPage } from './page.js';
 import { NAMING_RULE, nameWarning } from './naming.js';
@@ -40,7 +41,8 @@ const str = (description) => ({ type: 'string', description });
 const schema = (properties, required = []) => ({ type: 'object', properties, required });
 const TAGS = (description) => ({ type: 'array', items: { type: 'string' }, description });
 const PROJECT = str('Project name or id. Add uses the project open in Canon when this is left out; other tools search every project.');
-const FOLDER = str(`Absolute path to a build folder: static files with an index.html at its top, such as dist, build or out. Canon keeps a copy of at most ${BUILD_LIMITS.maxFiles} files and ${BUILD_LIMITS.maxBytes / (1024 * 1024)} MB. Folders named node_modules, folders starting with a dot and links that leave the folder are skipped.`);
+const FOLDER = str(`Absolute path to a build folder: static files with an index.html at its top, such as dist, build or out. With page, the build root of a whole site, with no index.html needed at its top. Canon keeps a copy of at most ${BUILD_LIMITS.maxFiles} files and ${BUILD_LIMITS.maxBytes / (1024 * 1024)} MB. Folders named node_modules, folders starting with a dot and links that leave the folder are skipped.`);
+const PAGE = str('Path of one page inside the build, such as lab/home-d/ or prototypes/thesis-home/index.html. Use it when the prototype is one page of a built site: pass the build root as folder and Canon keeps only that page and the files it needs.');
 const OPEN_PROPS = {
   project: PROJECT,
   board: str('Board name or id.'),
@@ -56,11 +58,12 @@ export const TOOL_DEFS = [
   { name: 'canon_pair', description: 'Make a new pairing link to approve this agent in Canon.', inputSchema: schema({}) },
   {
     name: 'canon_add',
-    description: `Put a prototype on a board so it can be found again. ${NAMING_RULE} The reply lists the names already in the project: match their style. Add a one-sentence summary. Canon tags the prototype from its page, this agent, the repo and the branch; pass tags only to add your own. For a prototype made from code, build the project first and pass folder, the absolute path of the build output, so Canon keeps a copy that shows without a server. Pass the localhost address as url too, and it becomes the live address: Canon offers a Live switch while that server runs. To add a later round, call canon_update with the same prototype and a new folder; it becomes a new version and the older ones stay. Pass only a url for a page that is already hosted. A localhost address with no folder shows only while its server runs.`,
+    description: `Put a prototype on a board so it can be found again. ${NAMING_RULE} The reply lists the names already in the project: match their style. Add a one-sentence summary. Canon tags the prototype from its page, this agent, the repo and the branch; pass tags only to add your own. For a prototype made from code, build the project first and pass folder, the absolute path of the build output, so Canon keeps a copy that shows without a server. For a page inside a site (Astro, Eleventy, Next export), build the whole site, pass the build root as folder and the path of the page inside it as page, such as lab/home-d/. Canon keeps only that page and the files it needs, so a 120 MB site is fine. Pass the localhost address as url too, and it becomes the live address: Canon offers a Live switch while that server runs. To add a later round, call canon_update with the same prototype and a new folder; it becomes a new version and the older ones stay. Pass only a url for a page that is already hosted. A localhost address with no folder shows only while its server runs.`,
     inputSchema: schema(
       {
         url: str('An http or https URL. With folder, this is the live address, usually the localhost address of the dev server. Without folder it is the prototype itself.'),
         folder: FOLDER,
+        page: PAGE,
         name: str('What it is, then what is different.'),
         summary: str('One sentence on what this prototype shows.'),
         tags: TAGS('Extra tags. Canon adds its own.'),
@@ -77,7 +80,7 @@ export const TOOL_DEFS = [
   },
   {
     name: 'canon_update',
-    description: 'Change a prototype: its URL, name, summary, tags, star, note, archive or place. Pass folder, the absolute path of a new build, to add it as the next version of the prototype; the older versions stay. For a prototype that is a link, pass url for the next version: a new address becomes the next version and the older ones stay. Pass newVersion: true with url to add that address as the next version even when it is the same as the current one, for example a dev server that now shows new work. A stack can mix link versions and stored copies.',
+    description: 'Change a prototype: its URL, name, summary, tags, star, note, archive or place. Pass folder, the absolute path of a new build, to add it as the next version of the prototype; the older versions stay. For a page inside a built site, pass the build root as folder and the page path as page. For a prototype that is a link, pass url for the next version: a new address becomes the next version and the older ones stay. Pass newVersion: true with url to add that address as the next version even when it is the same as the current one, for example a dev server that now shows new work. A stack can mix link versions and stored copies.',
     inputSchema: schema(
       {
         project: PROJECT,
@@ -85,6 +88,7 @@ export const TOOL_DEFS = [
         board: str('Board name or id, to narrow the search.'),
         url: str('An http or https URL. A new address is added as the next version. With folder, this is the new live address.'),
         folder: FOLDER,
+        page: PAGE,
         newVersion: { type: 'boolean', description: 'With url: add it as the next version even when it matches the current address.' },
         name: str('A new name.'),
         summary: str('One sentence on what this prototype shows.'),
@@ -148,6 +152,7 @@ function checkArgs(name, args) {
     } else if (typeof value !== 'string') return `${key} must be text.`;
     else if (value.length > MAX_STRING) return `${key} is too long.`;
   }
+  if (args.page !== undefined && args.folder === undefined) return 'page needs folder. Pass the build root as folder and the page path inside it as page.';
   return null;
 }
 
@@ -170,6 +175,20 @@ const FAILURES = {
   lost: 'Canon closed before it answered. It may have done it anyway, so check with canon_find.',
 };
 
+const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+const sizeOf = (n) => (n < 1024 * 1024 ? `${Math.max(1, Math.round(n / 1024))} KB` : `${(n / (1024 * 1024)).toFixed(1)} MB`);
+const listOf = (items) => (items.length > 5 ? `${items.slice(0, 5).join(', ')} and ${items.length - 5} more` : items.join(', '));
+
+/** What was kept from a page of a site, and what was left out. Said after the add or update line. */
+function keptLines(read) {
+  const { missing, external, runtime, rewritten } = read.report;
+  const lines = [`Kept the page ${read.entry} and what it needs: ${count(read.files.length, 'file', 'files')}, ${sizeOf(read.bytes)}. ${count(rewritten, 'reference', 'references')} to the site root became relative so they load from the copy.`];
+  if (missing.length) lines.push(`Warning: ${count(missing.length, 'file the page asks for was', 'files the page asks for were')} not in the build and left out: ${listOf(missing)}.`);
+  if (external.length) lines.push(`Left as written, so they need a connection to load (${count(external.length, 'external address', 'external addresses')}): ${listOf(external)}.`);
+  if (runtime.length) lines.push(`Warning: the scripts ask for ${count(runtime.length, 'path', 'paths')} from the site root while they run (${listOf(runtime)}). Canon does not keep those and they will not load from the copy.`);
+  return lines;
+}
+
 /** The first line of an add or update result: what was done, and on which board. */
 function doneText(op, res) {
   if (!res || typeof res !== 'object' || typeof res.frame !== 'string') return null;
@@ -188,7 +207,7 @@ function doneText(op, res) {
   return line;
 }
 
-export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, readSource = realReadSource, readBuildFolder = realReadBuildFolder }) {
+export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, readSource = realReadSource, readBuildFolder = realReadBuildFolder, readBuildPage = realReadBuildPage }) {
   const link = (secret) => pairLink(appBase, { agentId: pairing.agentId, name: pairing.name, port: bridge.port, secret });
 
   function notConnected() {
@@ -273,15 +292,16 @@ export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, r
         }
         let warnings = [];
         if (args.folder !== undefined) {
-          const read = await readBuildFolder(args.folder);
+          const read = args.page === undefined ? await readBuildFolder(args.folder) : await readBuildPage(args.folder, args.page);
           if (!read.ok) return text(read.message, true);
           const sent = await stageBuild((op, a) => bridge.send(op, a), read);
           if (!sent.ok) return failed(sent.reply);
-          const { folder, ...rest } = args;
-          args = { ...rest, build: sent.build };
+          const { folder, page: _page, ...rest } = args;
+          args = { ...rest, build: { ...sent.build, ...(read.entry ? { entry: read.entry } : {}) } };
+          if (read.report) warnings = keptLines(read);
           // A folder-only add has no server to read, so the title and headings come from the stored index.html.
           if (args.url === undefined) {
-            const index = read.files.find((f) => f.path === 'index.html');
+            const index = read.files.find((f) => f.path === (read.entry ?? 'index.html'));
             const page = index ? extractPage(Buffer.from(index.data).toString('utf8')) : null;
             if (page && (page.title || page.headings.length)) args = { ...args, page };
           }
