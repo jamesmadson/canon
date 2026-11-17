@@ -4,6 +4,8 @@
  * without any of it: the markup is the last frame of each demo.
  */
 
+import { submitWaitlist } from '../lib/waitlist';
+
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* Copy buttons */
@@ -108,12 +110,11 @@ if (form) {
     if (!form.reportValidity()) return;
     const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     if (submit) submit.disabled = true;
-    try {
-      await fetch(form.action, { method: 'POST', body: new FormData(form), mode: 'no-cors' });
-      if (note) note.textContent = 'You are on the list. One email when hosting opens, and nothing else.';
-    } catch {
+    const result = await submitWaitlist(form.action, new FormData(form));
+    if (note) note.textContent = result.message;
+    // A failure leaves what the person typed and lets them send again.
+    if (!result.ok) {
       if (submit) submit.disabled = false;
-      if (note) note.textContent = 'That did not send. Check your connection and try again.';
     }
   });
 }
