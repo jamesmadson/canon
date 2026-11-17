@@ -40,9 +40,8 @@ describe('one orange mark, and no skill colours', () => {
 describe('the hover preview', () => {
   const list = read('src/components/SkillList.astro');
   const FINE = '@media (hover: hover) and (pointer: fine)';
-  // Mutation: replace SkillPreview in SkillStep.astro with inline markup.
-  it('the homepage and /skills/ both use SkillPreview', () => {
-    expect(read('src/components/SkillStep.astro')).toContain('<SkillPreview slug={slug} />');
+  // Mutation: replace SkillPreview in SkillList.astro with inline markup.
+  it('/skills/ uses SkillPreview', () => {
     expect(list).toContain('<SkillPreview slug={s.data.slug} variant="hover" />');
   });
   // Mutation: move the .skill-preview display:block rule outside the media query.

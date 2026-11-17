@@ -16,14 +16,10 @@ describe('the skills index', () => {
     for (const slug of ORDER) expect(SKILL_LINES[slug]).toBeTruthy();
   });
 
-  // Mutation: paste a local SKILL_LINES back into src/pages/index.astro; this fails.
-  it('the index is the list component, the homepage walks the same order, and neither owns a table of lines', () => {
-    const home = read('pages/index.astro');
+  // Mutation: paste a local SKILL_LINES back into src/pages/skills/index.astro; this fails.
+  it('the index is the list component and does not own a table of lines', () => {
     const index = read('pages/skills/index.astro');
-    expect(home).toContain('<SkillStep');
-    expect(home).toContain('ORDER.indexOf');
     expect(index).toContain('<SkillList />');
-    expect(home).not.toMatch(/SKILL_LINES\s*[:=]/);
     expect(index).not.toMatch(/SKILL_LINES\s*[:=]/);
   });
 

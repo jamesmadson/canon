@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 import { parseStrataEntry, parsePruneCut } from '../../src/lib/previewParse';
-import { ORDER, SKILL_STEPS } from '../../src/lib/skillLines';
+import { ORDER } from '../../src/lib/skillLines';
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p: string) => readFileSync(path.join(root, p), 'utf-8');
@@ -17,8 +17,6 @@ const STORIES: Record<string, string> = {
   lath: 'Show a polished mockup too early and the review becomes a talk about colour and type while the structure goes unquestioned. Lath sketches the screen from a small kit of plain parts, with real words and every state listed. The first review is about what the screen holds and why.',
   prune: 'Every round of feedback adds something to a screen, and nobody asks what should come out. Prune reads the screen against its job and tells you what to cut, one thing at a time, with the reason and how often people actually meet that part. It changes nothing until you ask.',
 };
-const home = read('src/pages/index.astro');
-const step = read('src/components/SkillStep.astro');
 const preview = read('src/components/SkillPreview.astro');
 const page = read('src/pages/skills/[slug].astro');
 
@@ -49,24 +47,7 @@ describe('skill stories', () => {
   });
 });
 
-describe('the homepage skills section', () => {
-  // Mutation: rename the heading in index.astro fails this.
-  it('has the heading and intro', () => {
-    const text = plain(home);
-    expect(text).toContain('Skills for each step of the work.');
-    expect(text).toContain('Canon installs four skills your agent can follow. They go in the order the work does, from what people told you to the turn you want back.');
-  });
-
-  // Mutation: swap two labels in SKILL_STEPS fails this.
-  it('has the four step labels in order', () => {
-    expect(ORDER.map((s) => plain(SKILL_STEPS[s]))).toEqual([
-      'When people tell you something',
-      'Before you design',
-      'Before a review',
-      'When you lose your way',
-    ]);
-  });
-
+describe('the skill previews', () => {
   // Mutation: remove the sandbox attribute from the Graft frame fails this.
   it('frames Lath and Graft from the real files with the shared sandbox values, inert and lazy', () => {
     expect(preview).toContain('/previews/lath/checkout-payment.html');
@@ -80,7 +61,7 @@ describe('the homepage skills section', () => {
     expect(existsSync(path.join(root, 'public/previews/graft/demo-session.html'))).toBe(true);
   });
 
-  // Mutation: retype the Said quote in SkillStep.astro instead of using strata.said fails this.
+  // Mutation: retype the Said quote in SkillPreview.astro instead of using strata.said fails this.
   it('Strata card carries words read from its file, with Said and Meant apart', () => {
     const raw = read('public/previews/strata/2026-10-06-annual-card-form-total.md');
     const entry = parseStrataEntry(raw, 'f.md');
@@ -135,12 +116,5 @@ describe('the homepage skills section', () => {
   it('reads a file with Windows line endings', () => {
     const raw = read('public/previews/strata/2026-10-06-annual-card-form-total.md').replace(/\n/g, '\r\n');
     expect(parseStrataEntry(raw, 'f.md').date).toBe('2026-10-06');
-  });
-
-  // Mutation: set the step labels back to class="label" in SkillStep.astro fails this.
-  it('step labels are Public Sans, and the link follows the preview in reading order', () => {
-    expect(step).toContain('<p class="small text-balance" set:html={step} />');
-    expect(step).not.toContain('class="label');
-    expect(step.indexOf('<SkillPreview slug={slug} />')).toBeLessThan(step.indexOf('See what it made'));
   });
 });
