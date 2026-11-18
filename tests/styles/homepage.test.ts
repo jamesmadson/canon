@@ -169,8 +169,8 @@ describe('the footer wordmark', () => {
 });
 
 describe('the waitlist', () => {
-  it('is empty by default, in one obvious place', () => {
-    expect(read('src/lib/site.ts')).toMatch(/export const WAITLIST_URL = '';/);
+  it('is set to the Formspree form, in one obvious place', () => {
+    expect(read('src/lib/site.ts')).toMatch(/export const WAITLIST_URL = 'https:\/\/formspree\.io\/f\/xrpqqjqb';/);
   });
 
   // Mutation: render the form or the hero button while the address is empty.
@@ -189,10 +189,18 @@ describe('the waitlist', () => {
     const form = open.match(/<form[^>]*>/)![0];
     expect(form).toContain(`action="${WAITLIST}"`);
     expect(form).toContain('method="post"');
-    for (const name of ['email', 'name', 'role', 'company_size', 'used_canon']) {
+    for (const name of ['email', '_gotcha']) {
       expect(open, name).toMatch(new RegExp(`<input[^>]*name="${name}"`));
     }
-    expect(open).toMatch(/<input[^>]*name="email"[^>]*required|<input[^>]*required[^>]*name="email"/);
+    const email = open.match(/<input[^>]*name="email"[^>]*>/)![0];
+    expect(email).toContain('type="email"');
+    expect(email).toContain('autocomplete="email"');
+    expect(email).toMatch(/\brequired\b/);
+    expect(open).toMatch(/<label for="wl-email">Email<\/label>/);
+    expect(open).toMatch(/<[^>]*aria-live="polite"[^>]*data-waitlist-note|<[^>]*data-waitlist-note[^>]*aria-live="polite"/);
+    expect(text(open)).toContain('Only your email address is sent, to Formspree, so we can tell you when hosting opens.');
+    // The honeypot is hidden from people and from screen readers, and cannot be tabbed to.
+    expect(open).toMatch(/<input[^>]*name="_gotcha"[^>]*tabindex="-1"/);
   });
 
   it('only treats an http or https address as open', async () => {
@@ -319,9 +327,10 @@ describe('structure and names', () => {
     }
   });
 
-  it('puts the radio groups in fieldsets with legends', () => {
-    expect(open.match(/<fieldset/g)).toHaveLength(3);
-    expect(open.match(/<legend>/g)).toHaveLength(3);
+  it('asks for an email address only, with no extra fields', () => {
+    const form = open.slice(open.indexOf('<form'), open.indexOf('</form>'));
+    expect(form).not.toContain('<fieldset');
+    expect(form).not.toContain('type="radio"');
   });
 });
 

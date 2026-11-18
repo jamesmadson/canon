@@ -158,12 +158,8 @@
     transform: scale(0.97);
   }
   @media (hover: hover) and (pointer: fine) {
-    .util:hover,
-    .opt:hover {
+    .util:hover {
       background: var(--color-recess);
-    }
-    .opt-input:checked + .opt:hover {
-      background: var(--color-ink);
     }
   }
 
@@ -1714,51 +1710,19 @@
     font: inherit;
     padding: 0 12px;
   }
-  .group {
-    border: 0;
-    padding: 0;
-    margin: 0;
-    min-width: 0;
-  }
-  .opts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .opt-input {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-    pointer-events: none;
-  }
-  .opt {
-    display: inline-flex;
-    align-items: center;
-    height: 34px;
-    padding: 0 12px;
-    border-radius: 9px;
-    border: 1px solid var(--color-input-border);
-    background: transparent;
-    color: var(--color-ink);
-    font-size: 14px;
-    cursor: pointer;
-    transition: transform 160ms var(--ease);
-  }
-  .opt:active {
-    transform: scale(0.97);
-  }
-  .opt-input:checked + .opt {
-    background: var(--color-ink);
-    color: var(--color-ground);
-    border-color: var(--color-ink);
-  }
-  .opt-input:focus-visible + .opt {
-    outline: 2px solid var(--color-ink);
-    outline-offset: 2px;
+  .form-status {
+    min-height: 20px;
+    margin-top: -6px;
   }
   .form-note {
-    min-height: 20px;
+    margin-top: -10px;
+  }
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
   }
 
   /* Footer */
@@ -1861,8 +1825,7 @@
   /* Reduced motion keeps fades and drops movement. */
   @media (prefers-reduced-motion: reduce) {
     .hbtn:active,
-    .util:active,
-    .opt:active {
+    .util:active {
       transform: none;
     }
     .word {
