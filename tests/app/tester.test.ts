@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act } from 'preact/test-utils';
-import { CAP, CODES, cleanDetails, describeEvent, listEvents, record, resetTester, setTester, stopAndDelete, testerOn } from '../../src/app/lib/tester';
+import { CAP, CODES, cleanDetails, describeEvent, listEvents, record, resetTester, setTester, stopAndDelete, subscribeTester, testerOn } from '../../src/app/lib/tester';
 import { TesterPanel } from '../../src/app/feedback';
 import { clear, click, mount, nameOf } from './helpers/dom';
 
@@ -110,5 +110,42 @@ describe('the Help test Canon panel', () => {
     const labels = Array.from(box.querySelectorAll('.row button')).map((b) => b.textContent);
     expect(labels).toEqual(['Stop and delete the list', 'Download as a file', 'Copy', 'Close']);
     expect(box.querySelectorAll('.session-list li')[0].textContent).toMatch(/Archived a prototype/);
+  });
+});
+
+describe('two tabs sharing one storage', () => {
+  it('does not write an old list back after another tab stopped and deleted', () => {
+    setTester(true);
+    record('star', { on: true });
+    // Another tab pressed "Stop and delete the list": storage changes, this tab hears nothing.
+    localStorage.setItem('canon-tester-on', 'false');
+    localStorage.removeItem('canon-tester-events');
+    record('archive', { on: true });
+    expect(localStorage.getItem('canon-tester-events')).toBeNull();
+  });
+  it('keeps events another tab recorded', () => {
+    setTester(true);
+    record('star', { on: true });
+    const stored = JSON.parse(localStorage.getItem('canon-tester-events')!);
+    localStorage.setItem('canon-tester-events', JSON.stringify([...stored, { t: 5, e: 'search', d: { length: 3 } }]));
+    record('archive', { on: true });
+    expect(JSON.parse(localStorage.getItem('canon-tester-events')!).map((x: { e: string }) => x.e)).toEqual(['star', 'search', 'archive']);
+  });
+  it('follows a storage event: off and empty when deleted elsewhere', () => {
+    setTester(true);
+    record('star', { on: true });
+    const seen = vi.fn();
+    subscribeTester(seen);
+    localStorage.setItem('canon-tester-on', 'false');
+    localStorage.removeItem('canon-tester-events');
+    window.dispatchEvent(new StorageEvent('storage', { key: 'canon-tester-on' }));
+    expect(testerOn()).toBe(false);
+    expect(listEvents()).toEqual([]);
+    expect(seen).toHaveBeenCalled();
+  });
+  it('runs stored events through the allowlist when loading', () => {
+    localStorage.setItem('canon-tester-on', 'true');
+    localStorage.setItem('canon-tester-events', JSON.stringify([{ t: 1, e: 'view', d: { view: 'home', name: 'secret', free: 'my private text', length: 4 } }]));
+    expect(listEvents()[0].d).toEqual({ view: 'home', length: 4 });
   });
 });

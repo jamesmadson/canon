@@ -60,7 +60,12 @@ export function FeedbackDialog({ onClose, returnTo, onSeeList, url = FEEDBACK_UR
       return;
     }
     if (!url) {
-      window.open(issueUrl(f), '_blank', 'noopener');
+      try {
+        setProblem('');
+        window.open(issueUrl(f), '_blank', 'noopener');
+      } catch {
+        setProblem('Canon could not build the GitHub issue from what you typed. Remove any unusual characters and press the button again. What you typed is still here.');
+      }
       return;
     }
     setBusy(true);
@@ -84,7 +89,7 @@ export function FeedbackDialog({ onClose, returnTo, onSeeList, url = FEEDBACK_UR
       ${url && html`<label class="fb-label" for="fb-email">Email, if you want a reply</label>
       <input id="fb-email" class="field" type="email" autocomplete="email" value=${f.email} onInput=${set('email')} />`}
       <p class="soft fb-line">This sends only what you typed here, plus Canon's version.</p>
-      ${on && html`<div class="fb-session">
+      ${on && url && html`<div class="fb-session">
         <label class="fb-check"><input type="checkbox" checked=${withSession} onChange=${(e: Event) => setWithSession((e.target as HTMLInputElement).checked)} />Include my session list</label>
         <button type="button" class="link" onClick=${onSeeList}>See what is in it</button>
       </div>`}

@@ -27,6 +27,21 @@ describe('the GitHub issue fallback', () => {
   });
 });
 
+describe('the GitHub issue fallback and emoji', () => {
+  it('does not cut a surrogate pair in the title', () => {
+    const url = issueUrl({ tried: `${'a'.repeat(79)}😀 and more`, happened: '', email: '' });
+    expect(() => decodeURIComponent(url)).not.toThrow();
+    expect(url.length).toBeLessThan(6000);
+  });
+  it('does not cut a surrogate pair in a long body', () => {
+    for (const pad of ['', 'a']) {
+      const url = issueUrl({ tried: 'x', happened: pad + '😀'.repeat(5000), email: '' });
+      expect(() => decodeURIComponent(url)).not.toThrow();
+      expect(url.length).toBeLessThan(6000);
+    }
+  });
+});
+
 describe('posting feedback', () => {
   const answer = (status: number) => vi.fn(async () => new Response('{}', { status }));
   it('sends JSON with an accept header, a subject and an empty honeypot', async () => {
@@ -94,6 +109,22 @@ describe('the feedback dialog', () => {
     expect(open).toHaveBeenCalledTimes(1);
     expect((open.mock.calls[0][0] as string).startsWith(ISSUES_URL)).toBe(true);
     expect(open.mock.calls[0][1]).toBe('_blank');
+  });
+
+  it('hides the session checkbox when it falls back to a public GitHub issue', async () => {
+    setTester(true);
+    const box = await mount(FeedbackDialog, { onClose: () => {}, returnTo: null, onSeeList: () => {}, url: '' });
+    expect(box.textContent).not.toContain('Include my session list');
+  });
+
+  it('shows the error when the issue address cannot be built', async () => {
+    vi.stubGlobal('open', vi.fn());
+    const box = await mount(FeedbackDialog, { onClose: () => {}, returnTo: null, onSeeList: () => {}, url: '' });
+    await type(field(box, 'What were you trying to do?'), 'x');
+    const spy = vi.spyOn(globalThis, 'encodeURIComponent').mockImplementation(() => { throw new URIError('bad'); });
+    await submit(box);
+    spy.mockRestore();
+    expect(box.querySelector('[role="alert"]')!.textContent).toMatch(/could not build/);
   });
 
   it('offers the session list only in tester mode, and sends it only when ticked', async () => {

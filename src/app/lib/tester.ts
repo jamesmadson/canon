@@ -42,14 +42,33 @@ function read<T>(key: string, fallback: T): T {
 function write(key: string, value: unknown) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* storage full or blocked: the list stays in memory */ }
 }
+/** Read both keys again. Every stored event goes through the same allowlist as a new one, so edited storage cannot add free text. */
+function refresh() {
+  on = read<boolean>(MODE_KEY, false) === true;
+  const stored = read<unknown>(LIST_KEY, []);
+  events = Array.isArray(stored)
+    ? (stored as TesterEvent[])
+      .filter((x) => x && typeof x.t === 'number' && Number.isFinite(x.t) && names.has(x.e))
+      .map((x) => { const d = cleanDetails(x.d); return { t: x.t, e: x.e, ...(d ? { d } : {}) }; })
+      .slice(-CAP)
+    : [];
+}
 function load() {
   if (loaded) return;
   loaded = true;
-  on = read<boolean>(MODE_KEY, false) === true;
-  const stored = read<unknown>(LIST_KEY, []);
-  events = Array.isArray(stored) ? (stored as TesterEvent[]).filter((x) => x && names.has(x.e)).slice(-CAP) : [];
+  refresh();
 }
 const tell = () => listeners.forEach((f) => f());
+
+/** Another tab changed the mode or the list: follow it. */
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (e) => {
+    if (e.key !== null && e.key !== MODE_KEY && e.key !== LIST_KEY) return;
+    loaded = true;
+    refresh();
+    tell();
+  });
+}
 
 /** Keep only numbers, booleans and fixed codes under plain keys. */
 export function cleanDetails(d: Record<string, unknown> | undefined): TesterEvent['d'] {
@@ -66,7 +85,10 @@ export function cleanDetails(d: Record<string, unknown> | undefined): TesterEven
 /** Note that something happened. Does nothing while tester mode is off. */
 export function record(name: EventName, details?: Record<string, unknown>) {
   load();
-  if (!on || !names.has(name)) return;
+  if (!names.has(name)) return;
+  // Read storage again, so another tab's stop, delete or new events are not overwritten.
+  refresh();
+  if (!on) { tell(); return; }
   const d = cleanDetails(details);
   events.push({ t: Date.now(), e: name, ...(d ? { d } : {}) });
   if (events.length > CAP) events = events.slice(-CAP);

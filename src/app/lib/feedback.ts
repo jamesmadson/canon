@@ -43,11 +43,13 @@ const URL_LIMIT = 6000;
 
 /** A prefilled GitHub issue. The email is left out because issues are public. The body is cut so the whole address stays under the limit. */
 export function issueUrl(f: Fields): string {
-  const title = (f.tried.trim().split('\n')[0] || 'Feedback').slice(0, 80);
+  // Cut by code point, so an emoji is never split into a half that encodeURIComponent refuses.
+  const cut = (s: string, n: number) => Array.from(s).slice(0, n).join('');
+  const title = cut(f.tried.trim().split('\n')[0] || 'Feedback', 80);
   const build = (body: string) => `${ISSUES_URL}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
   const full = `### What were you trying to do?\n${f.tried.trim()}\n\n### What happened?\n${f.happened.trim() || 'Not said.'}\n\nCanon ${CANON_VERSION}`;
   if (build(full).length < URL_LIMIT) return build(full);
   let body = full;
-  while (body.length > 0 && build(`${body}…`).length >= URL_LIMIT) body = body.slice(0, Math.floor(body.length * 0.9));
+  while (body.length > 0 && build(`${body}…`).length >= URL_LIMIT) body = cut(body, Math.floor(Array.from(body).length * 0.9));
   return build(`${body}…`);
 }
