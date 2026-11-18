@@ -1683,39 +1683,58 @@
     margin-top: 16px;
     font-weight: 500;
   }
+
+  /* The waitlist form sits straight on the hosted card. The card has 12px of
+     padding, so 12px more here makes 24px on every side (20px on phones). */
   .form {
-    border-radius: 9px;
-    background: var(--color-ground);
-    padding: 24px;
-    display: grid;
-    gap: 18px;
-    align-content: start;
+    container-type: inline-size;
+    padding: 12px;
+    align-self: start;
   }
-  .field label,
-  .group legend {
+  .form-hint {
+    margin-top: 4px;
+    font-size: 16px;
+    line-height: 26px;
+  }
+  .frow {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .wl-field label {
     display: block;
+    margin-bottom: 8px;
     font-size: 13px;
     line-height: 20px;
     font-weight: 500;
-    margin-bottom: 6px;
-    padding: 0;
   }
-  .field input {
+  .wl-field input {
+    display: block;
     width: 100%;
     height: 44px;
-    border-radius: 9px;
+    border-radius: 11px;
     border: 1px solid var(--color-input-border);
     background: var(--color-ground);
     color: var(--color-ink);
     font: inherit;
     padding: 0 12px;
   }
-  .form-status {
-    min-height: 20px;
-    margin-top: -6px;
+  .frow .hbtn {
+    height: 44px;
+    padding: 0 20px;
+  }
+  @container (min-width: 340px) {
+    .frow {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+    }
   }
   .form-note {
-    margin-top: -10px;
+    margin-top: 12px;
+  }
+  .form-status {
+    min-height: 20px;
+    margin-top: 8px;
   }
   .hp {
     position: absolute;
@@ -1945,7 +1964,10 @@
       width: min(232px, calc(100% - 32px));
     }
     .band {
-      padding: 20px 0 64px;
+      padding: 20px 0 88px;
+    }
+    .form {
+      padding: 8px;
     }
     .band > .bhead {
       grid-column: 1 / -1;

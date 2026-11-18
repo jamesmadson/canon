@@ -65,21 +65,21 @@ const open = waitlistOpen(waitlistUrl);
       {
         open && (
           <form class="form" aria-labelledby="h-form" method="post" action={waitlistUrl} data-waitlist>
-            <div>
-              <h3 id="h-form">{tie('Join the waitlist')}</h3>
-              <p class="muted" style="margin-top:2px">{tie('Your email address is all we need.')}</p>
-            </div>
-            <div class="field">
-              <label for="wl-email">Email</label>
-              <input id="wl-email" name="email" type="email" autocomplete="email" placeholder="you@studio.com" required />
+            <h3 id="h-form">{tie('Join the waitlist')}</h3>
+            <p class="muted form-hint">{tie('Your email address is all we need.')}</p>
+            <div class="frow">
+              <div class="wl-field">
+                <label for="wl-email">Email</label>
+                <input id="wl-email" name="email" type="email" autocomplete="email" required />
+              </div>
+              <button class="hbtn hbtn-primary" type="submit">Join the waitlist</button>
             </div>
             <div class="hp" aria-hidden="true">
               <label for="wl-gotcha">Leave this field empty</label>
               <input id="wl-gotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
             </div>
-            <button class="hbtn hbtn-primary hbtn-wide" type="submit">Join the waitlist</button>
-            <p class="fine form-status" role="status" aria-live="polite" data-waitlist-note></p>
             <p class="fine form-note">{tie('Only your email address is sent, to Formspree, so we can tell you when hosting opens.')}</p>
+            <p class="fine form-status" role="status" aria-live="polite" data-waitlist-note></p>
           </form>
         )
       }
