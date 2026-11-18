@@ -72,6 +72,9 @@ function init(stage: HTMLElement) {
     const phone = matchMedia('(max-width: 960px)').matches;
     const wide = matchMedia('(min-width: 1100px)').matches;
     const width = stage.clientWidth;
+    const panel = document.querySelector<HTMLElement>('.hpanel');
+    // Layout offsets, so a glide in flight does not skew them.
+    const panelTop = panel ? panel.offsetTop - stage.offsetTop : -Infinity;
     cards.forEach((card, i) => {
       const spot = (phone ? PHONE : WIDE)[i];
       const thumb = card.querySelector<HTMLElement>('.thumb');
@@ -89,7 +92,9 @@ function init(stage: HTMLElement) {
       const margin = 10;
       const goalX = Math.min(Math.max(fx * width, halfW + margin), width - halfW - margin);
       // Below 1100px the text spans the width, so nothing drifts above the stage.
-      const goalY = wide ? fy : Math.max(fy, halfH + margin);
+      // Beside the text, no card may rise above the grey panel: the text column
+      // is shorter or taller as the hero's lines change, and the stage moves with it.
+      const goalY = wide ? Math.max(fy, panelTop + halfH + 24) : Math.max(fy, halfH + margin);
       card.style.setProperty('--tx', `${(goalX - (x + thumb.offsetWidth / 2)).toFixed(1)}px`);
       card.style.setProperty('--ty', `${(goalY - (y + thumb.offsetHeight / 2)).toFixed(1)}px`);
       card.style.setProperty('--rot', `${rot}deg`);
@@ -117,6 +122,9 @@ function init(stage: HTMLElement) {
   requestAnimationFrame(() => parts.forEach((p) => p.classList.add('ready')));
   if (typeof ResizeObserver !== 'undefined') {
     new ResizeObserver(() => snap(place)).observe(stage);
+    // The hero text opening or closing its panel resizes the backdrop; the cards follow it smoothly.
+    const backdrop = document.querySelector<HTMLElement>('.hpanel');
+    if (backdrop) new ResizeObserver(() => place()).observe(backdrop);
   }
   if (forced === 'filed' || forced === 'scattered') return;
 
