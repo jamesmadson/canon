@@ -386,13 +386,13 @@ input, textarea { caret-color: var(--accent); }
 .view-note.slow { margin: 0 24px 6px; }
 .focus .toolbar.viewer-bar { position: static; transform: none; align-self: center; margin: 10px 0 16px; flex: none; }
 .viewer-bar .btn .count { margin-left: 6px; font: 500 11.5px var(--mono); color: var(--soft); }
-.versions-pop { width: 320px; padding: 6px; }
+.bar-pop.versions-pop { width: 380px; max-width: calc(100vw - 32px); padding: 6px; }
 .versions-pop ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; max-height: 260px; overflow: auto; }
-.versions-pop .vrow { width: 100%; text-align: left; height: 32px; padding: 0 10px; border: 0; border-radius: 6px; background: none; font-size: 13px; color: var(--text); }
+.versions-pop .vrow { width: 100%; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 32px; padding: 0 10px; border: 0; border-radius: 6px; background: none; font-size: 13px; color: var(--text); }
 .versions-pop .vrow:hover { background: var(--hover); }
 .versions-pop .vrow[aria-current="true"] { background: var(--raised); font-weight: 500; }
 .versions-pop .hint, .versions-pop > .btn { margin: 6px 6px 2px; }
-.versions-pop > .btn { align-self: stretch; }
+.versions-pop > .btn { align-self: stretch; justify-content: center; box-shadow: inset 0 0 0 1px var(--input-border); }
 .live-wrap { position: relative; display: flex; }
 .live-btn[aria-pressed="true"] { background: var(--raised); color: var(--text); }
 .live-wrap .tip {
