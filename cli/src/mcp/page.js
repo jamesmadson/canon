@@ -1,6 +1,7 @@
 /**
  * Reads a prototype's own page, once, to get a title and headings for
- * automatic tags. Nothing is sent but a GET with an accept header.
+ * automatic tags, and whether it refuses to be framed. Nothing is sent but a
+ * GET with an accept header.
  */
 
 const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", nbsp: ' ' };
@@ -70,6 +71,34 @@ export function extractPage(html) {
   return { title, headings };
 }
 
+/** The directive's sources in one Content-Security-Policy header value, or null when it has no frame-ancestors. */
+function frameAncestors(policy) {
+  for (const part of String(policy).split(';')) {
+    const [name, ...sources] = part.trim().split(/\s+/);
+    if (name && name.toLowerCase() === 'frame-ancestors') return sources;
+  }
+  return null;
+}
+
+/**
+ * Whether the response says the page may not be shown inside other pages:
+ * X-Frame-Options DENY or SAMEORIGIN, or a frame-ancestors directive that
+ * lets no origin through. A wildcard, a scheme wildcard or a localhost origin
+ * lets Canon's own address through, so those do not count.
+ */
+export function frameBlockedBy(headers) {
+  const xfo = String(headers.get('x-frame-options') || '').trim().toUpperCase();
+  if (xfo === 'DENY' || xfo === 'SAMEORIGIN') return true;
+  const csp = headers.get('content-security-policy');
+  if (!csp) return false;
+  // Several policies arrive joined with a comma, and each one applies.
+  return csp.split(',').some((policy) => {
+    const sources = frameAncestors(policy);
+    if (!sources) return false;
+    return !sources.some((s) => s === '*' || /^[a-z][a-z0-9+.-]*:$/i.test(s) || /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(s));
+  });
+}
+
 export async function readPage(url, { fetchImpl = globalThis.fetch, timeoutMs = 3000, maxBytes = 512 * 1024 } = {}) {
   const controller = new AbortController();
   let timer;
@@ -88,8 +117,10 @@ export async function readPage(url, { fetchImpl = globalThis.fetch, timeoutMs = 
       signal: controller.signal,
     });
     if (!response.ok) return null;
+    const blocked = frameBlockedBy(response.headers);
+    const flagged = (page) => (blocked ? { ...page, frameBlocked: true } : page);
     const type = String(response.headers.get('content-type') || '').toLowerCase();
-    if (!type.includes('text/html') || !response.body) return null;
+    if (!type.includes('text/html') || !response.body) return blocked ? flagged({ title: '', headings: [] }) : null;
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let text = '';
@@ -101,7 +132,7 @@ export async function readPage(url, { fetchImpl = globalThis.fetch, timeoutMs = 
       text += decoder.decode(value, { stream: true });
     }
     reader.cancel().catch(() => {});
-    return extractPage(text);
+    return flagged(extractPage(text));
   })().catch(() => null);
   try {
     return await Promise.race([work, timedOut]);

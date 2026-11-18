@@ -156,6 +156,8 @@ function checkArgs(name, args) {
   return null;
 }
 
+const FRAME_BLOCKED_REPLY = 'This site does not allow itself to be shown inside other pages, so Canon will show a link to open it in a new tab. Add a build folder or a zip to keep a copy that shows here.';
+
 const text = (t, isError = false) => ({ content: [{ type: 'text', text: t }], ...(isError ? { isError: true } : {}) });
 const show = (v) => (typeof v === 'string' ? v : JSON.stringify(v, null, 2));
 
@@ -316,6 +318,7 @@ export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, r
         if (name === 'canon_add') {
           const [page, source] = await Promise.all([args.url === undefined ? null : safely(() => readPage(args.url)), safely(() => readSource())]);
           if (page) args = { ...args, page };
+          if (page?.frameBlocked && args.build === undefined) warnings = [...warnings, FRAME_BLOCKED_REPLY];
           if (source && args.repo === undefined && args.branch === undefined) {
             if (source.repo) args = { ...args, repo: source.repo };
             if (source.branch) args = { ...args, branch: source.branch };
@@ -323,6 +326,7 @@ export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, r
         } else if (args.url !== undefined) {
           const page = await safely(() => readPage(args.url));
           if (page) args = { ...args, page };
+          if (page?.frameBlocked && args.build === undefined) warnings = [...warnings, FRAME_BLOCKED_REPLY];
         }
         return forward(name === 'canon_add' ? 'add' : 'update', args, warnings);
       }

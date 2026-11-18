@@ -594,6 +594,26 @@ describe('names, summaries, tags, star, note and archive', () => {
     expect(t.writes).toEqual([]);
   });
 
+  it('add records that a linked page refuses to be framed, and says nothing for one that allows it', async () => {
+    const t = fake({ projects: proj() });
+    await runOp('add', { url: 'https://membership-one.webflow.io/', project: 'Alpha', page: { title: 'Members', headings: [], frameBlocked: true } }, t.deps);
+    await runOp('add', { url: 'https://open.test/', project: 'Alpha', page: { title: 'Open', headings: [] } }, t.deps);
+    const [blocked, open] = t.state().frames;
+    expect(blocked.frameBlocked).toBe(true);
+    expect(open.frameBlocked).toBeUndefined();
+  });
+
+  it('update records and clears the finding on the version it adds, and ignores anything but true', async () => {
+    const t = fake({ projects: proj(), frames: [frame('f1', 'a', 'Cart', { url: 'https://cart.test/1', createdAt: 1 })] });
+    await runOp('update', { frame: 'Cart', url: 'https://cart.test/2', page: { title: 'Cart', headings: [], frameBlocked: true } }, t.deps);
+    const v2 = () => t.state().frames.find((f) => f.url === 'https://cart.test/2')!;
+    expect(v2().frameBlocked).toBe(true);
+    await runOp('update', { frame: 'Cart', url: 'https://cart.test/2', page: { title: 'Cart', headings: [] } }, t.deps);
+    expect(v2().frameBlocked).toBeFalsy();
+    await runOp('update', { frame: 'Cart', url: 'https://cart.test/2', page: { title: 'Cart', headings: [], frameBlocked: 'yes' } }, t.deps);
+    expect(v2().frameBlocked).toBeFalsy();
+  });
+
   it('add ignores a malformed page and cuts long text', async () => {
     const t = fake({ projects: proj(), agentName: 'Agent' });
     const r = await runOp('add', { url: 'https://proto.test/', project: 'Alpha', page: 'nope', summary: 'x'.repeat(900), note: 'n'.repeat(5000) }, t.deps);

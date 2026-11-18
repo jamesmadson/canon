@@ -112,10 +112,11 @@ function flag(v: unknown, field: string): boolean | undefined {
 }
 
 /** What the MCP process read from the page. A page that is not shaped right is ignored, never refused. */
-function pageOf(v: unknown): { title?: string; headings: string[] } | null {
+function pageOf(v: unknown): { title?: string; headings: string[]; frameBlocked?: boolean } | null {
   if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
-  const { title, headings } = v as { title?: unknown; headings?: unknown };
+  const { title, headings, frameBlocked } = v as { title?: unknown; headings?: unknown; frameBlocked?: unknown };
   return {
+    ...(frameBlocked === true ? { frameBlocked: true } : {}),
     ...(typeof title === 'string' ? { title: title.slice(0, MAX_TITLE) } : {}),
     headings: Array.isArray(headings) ? headings.filter((h): h is string => typeof h === 'string').slice(0, MAX_HEADINGS).map((h) => h.slice(0, MAX_SHORT)) : [],
   };
@@ -332,6 +333,8 @@ async function add(args: Args, deps: OpsDeps) {
       fallbackName: url ? new URL(url).host : DEFAULT_BUILD_NAME,
     })
     : await deps.addUrl(p.id, url!, { boardId: b?.id, ...(name ? { name } : {}), ...(size ? { size } : {}), stack: false, meta });
+  // The page said, in its headers, that it cannot be shown inside another page. Only a link needs to know.
+  if (!build && m.page?.frameBlocked) await deps.updateFrame(frame.id, { frameBlocked: true });
   deps.toast(`${deps.agentName} added ${frame.name}`);
   const stored = build ? { storedFiles: build.length, ...(url ? { liveUrl: url } : {}) } : {};
   return { ...summary(deps, frame.id, b), ...(m.summary ? { summary: m.summary } : {}), tags, names, ...stored, link: frameLink(deps, frame.id, b) };
@@ -402,6 +405,10 @@ async function update(args: Args, deps: OpsDeps) {
     const r = await deps.addUrlVersion(current.id, url, forceVersion ? { force: true } : undefined);
     current = r.frame;
     newVersion = r.added;
+  }
+  // A link read again says whether it still refuses to be framed. A stored copy shows either way.
+  if (!build && url !== null && m.page && current.kind === 'url' && !!current.frameBlocked !== !!m.page.frameBlocked) {
+    await deps.updateFrame(current.id, { frameBlocked: m.page.frameBlocked ? true : undefined });
   }
   let renamed = false;
   if (name && name !== current.name) {

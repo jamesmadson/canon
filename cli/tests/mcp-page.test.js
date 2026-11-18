@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { createServer } from 'node:http';
-import { extractPage, readPage } from '../src/mcp/page.js';
+import { extractPage, frameBlockedBy, readPage } from '../src/mcp/page.js';
 
 describe('extractPage', () => {
   it('reads the title and h1 and h2 text, ignoring scripts and other headings', () => {
@@ -120,6 +120,43 @@ describe('readPage', () => {
     expect(await readPage(url, { maxBytes: 1000 })).toEqual({ title: 'Big', headings: [] });
   });
 
+  it('records that a page refuses to be framed, from the response headers', async () => {
+    const refusing = [
+      { 'x-frame-options': 'DENY' },
+      { 'x-frame-options': 'sameorigin' },
+      { 'content-security-policy': "default-src 'self'; frame-ancestors 'none'" },
+      { 'content-security-policy': "frame-ancestors 'self' https://app.example.com" },
+    ];
+    for (const headers of refusing) {
+      const url = await serve((req, res) => {
+        res.writeHead(200, { 'content-type': 'text/html', ...headers });
+        res.end('<title>Members</title>');
+      });
+      expect(await readPage(url), JSON.stringify(headers)).toEqual({ title: 'Members', headings: [], frameBlocked: true });
+      await new Promise((resolve) => server.close(resolve));
+      server = undefined;
+    }
+  });
+
+  it('records nothing for a page that allows framing', async () => {
+    const url = await serve((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html', 'content-security-policy': 'frame-ancestors *', 'x-frame-options': 'ALLOWALL' });
+      res.end('<title>Open</title>');
+    });
+    expect(await readPage(url)).toEqual({ title: 'Open', headings: [] });
+  });
+
+  it('reads the headers with GET, since some hosts refuse HEAD', async () => {
+    let method;
+    const url = await serve((req, res) => {
+      method = req.method;
+      res.writeHead(200, { 'content-type': 'text/html', 'x-frame-options': 'DENY' });
+      res.end('<title>x</title>');
+    });
+    await readPage(url);
+    expect(method).toBe('GET');
+  });
+
   it('gives null when fetch throws', async () => {
     const fetchImpl = async () => {
       throw new Error('boom');
@@ -144,5 +181,24 @@ describe('extractPage on hostile HTML', () => {
   }
   it('keeps headings in page order across h1 and h2', () => {
     expect(extractPage('<h2>One</h2><H1 class="x">Two</H1><h2>Three</h2>').headings).toEqual(['One', 'Two', 'Three']);
+  });
+});
+
+describe('frameBlockedBy', () => {
+  const h = (o) => new Headers(o);
+  it('reads X-Frame-Options', () => {
+    expect(frameBlockedBy(h({ 'x-frame-options': 'DENY' }))).toBe(true);
+    expect(frameBlockedBy(h({ 'x-frame-options': ' SameOrigin ' }))).toBe(true);
+    expect(frameBlockedBy(h({ 'x-frame-options': 'ALLOW-FROM https://a.example' }))).toBe(false);
+  });
+  it('reads frame-ancestors, and lets a wildcard or a scheme wildcard through', () => {
+    expect(frameBlockedBy(h({ 'content-security-policy': "frame-ancestors 'none'" }))).toBe(true);
+    expect(frameBlockedBy(h({ 'content-security-policy': 'frame-ancestors *' }))).toBe(false);
+    expect(frameBlockedBy(h({ 'content-security-policy': 'frame-ancestors https:' }))).toBe(false);
+    expect(frameBlockedBy(h({ 'content-security-policy': "script-src 'self'" }))).toBe(false);
+    expect(frameBlockedBy(h({}))).toBe(false);
+  });
+  it('lets a localhost origin through, since that is where Canon runs', () => {
+    expect(frameBlockedBy(h({ 'content-security-policy': 'frame-ancestors http://localhost:*' }))).toBe(false);
   });
 });
