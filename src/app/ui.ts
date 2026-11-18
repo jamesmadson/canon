@@ -12,7 +12,7 @@ import { type Address, buildAddress, parseAddress } from './lib/address';
 import { type PairLink, pairNotice, parsePairLink, saveAgent } from './bridge/client';
 import { SearchHost } from './palette';
 import { Sidebar, useBridge } from './sidebar';
-import { type Card, type Scope, cardOf, cardsOf, scopeCards, tagCounts } from './lib/home';
+import { type Card, type Scope, cardOf, cardsOf, countPrototypes, scopeCards, tagCounts } from './lib/home';
 import { Avatar } from './comments';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
@@ -136,7 +136,7 @@ function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boa
         <input value=${project.name} onChange=${(e: Event) => store.renameProject(id, (e.target as HTMLInputElement).value)} onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} aria-label="Project name" />
       </div>
       <div class="tabs">
-        <a href=${`#/p/${id}`} aria-current=${tab === 'prototypes' ? 'page' : undefined}>Prototypes <span>${store.prototypesOf(id).length}</span></a>
+        <a href=${`#/p/${id}`} aria-current=${tab === 'prototypes' ? 'page' : undefined}>Prototypes <span>${countPrototypes(store.getState().frames, { projectId: id })}</span></a>
         <a href=${`#/p/${id}/boards`} aria-current=${tab === 'boards' ? 'page' : undefined}>Boards <span>${store.boardsOf(id).length}</span></a>
         <a href=${`#/p/${id}/comments`} aria-current=${tab === 'comments' ? 'page' : undefined}>Notes <span>${store.notesInProject(id).filter((n) => !n.resolved).length}</span></a>
       </div>
@@ -147,7 +147,7 @@ function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boa
     ${tab === 'boards' && html`<div class="page"><div class="grid">
       ${store.boardsOf(id).map((b) => html`<a class="card" href=${`#/b/${b.id}`}>
         <${BoardThumb} rects=${boardRects(b.id)} />
-        <div class="meta"><b>${b.name}</b><small>${store.placementsOf(b.id).length} prototypes · edited ${ago(b.updatedAt)}</small></div>
+        <div class="meta"><b>${b.name}</b><small>${countPrototypes(store.framesOf(b.id), { archived: 'any' })} prototypes · edited ${ago(b.updatedAt)}</small></div>
       </a>`)}
       <button class="card new" onClick=${newBoard}><span><${Icon} name="plus" /> New board</span></button>
     </div></div>`}

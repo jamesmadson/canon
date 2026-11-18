@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import * as store from './store';
 import * as vault from './vault';
 import type { Address } from './lib/address';
-import { cardsOf, scopeCards, tagCounts } from './lib/home';
+import { cardsOf, countPrototypes, scopeCards, tagCounts } from './lib/home';
 import { bridgeView, removeAgent, subscribeBridge } from './bridge/client';
 import { Avatar } from './comments';
 import { html, Icon, go, ago, useStore } from './shared';
@@ -85,7 +85,7 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
   const starred = scopeCards(cards, { kind: 'starred' }).length;
   const tags = tagCounts(live).slice(0, 8);
   const projects = [...s.projects].sort((a, b) => b.updatedAt - a.updatedAt);
-  const countIn = (id: string) => live.filter((c) => c.projectId === id).length;
+  const countIn = (id: string) => countPrototypes(s.frames, { projectId: id });
   const me = store.myName();
   const sample = async () => {
     const { project } = await store.createSampleProject();
@@ -99,7 +99,7 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
     </button>
     <div class="rail-scroll">
       <nav aria-label="Library">
-        <a class="ni" href="#/" aria-current=${here(route.name === 'home')}><${Icon} name="home" size=${14} /><span>Home</span><em>${live.length}</em></a>
+        <a class="ni" href="#/" aria-current=${here(route.name === 'home')}><${Icon} name="home" size=${14} /><span>Home</span><em>${countPrototypes(s.frames)}</em></a>
         <a class="ni" href="#/starred" aria-current=${here(route.name === 'starred')}><${Icon} name="star" size=${14} /><span>Starred</span><em>${starred}</em></a>
         <a class="ni" href="#/archive" aria-current=${here(route.name === 'archive')}><${Icon} name="archive" size=${14} /><span>Archive</span></a>
       </nav>

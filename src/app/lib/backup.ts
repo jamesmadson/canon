@@ -4,6 +4,7 @@
  * one can rebuild the app after the browser's storage is cleared.
  */
 import type { Board, Frame, Note, Placement, Project } from '../db';
+import { countPrototypes } from './home';
 
 export const LIBRARY_FORMAT = 'canon-library';
 export const LIBRARY_VERSION = 1;
@@ -107,7 +108,7 @@ export function parseLibrary(text: string): Parsed {
 /** What a restore adds or updates, for the confirmation line. */
 export function summarize(lib: Library) {
   const n = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
-  return `${n(lib.projects.length, 'project')}, ${n(lib.frames.length, 'prototype')}, ${n(lib.notes.length, 'note')}`;
+  return `${n(lib.projects.length, 'project')}, ${n(countPrototypes(lib.frames as Frame[], { archived: 'any' }), 'prototype')}, ${n(lib.notes.length, 'note')}`;
 }
 
 /** A dated file name for a backup download. */

@@ -49,6 +49,18 @@ export function cardOf(f: Frame, stack: Frame[] = [f]): Card {
 
 export const cardsOf = (frames: Frame[]): Card[] => stacks(frames).map((stack) => cardOf(currentOf(stack), stack));
 
+/**
+ * How many prototypes there are, the one count every screen uses. A stack of
+ * versions is one prototype. By default archived prototypes are left out;
+ * archived: true counts only them, 'any' counts both.
+ */
+export function countPrototypes(frames: Frame[], opts: { projectId?: string; archived?: boolean | 'any' } = {}): number {
+  const mine = opts.projectId === undefined ? frames : frames.filter((f) => f.projectId === opts.projectId);
+  const cards = cardsOf(mine);
+  if (opts.archived === 'any') return cards.length;
+  return scopeCards(cards, { kind: opts.archived ? 'archive' : 'home' }).length;
+}
+
 export function scopeCards(cards: Card[], scope: Scope): Card[] {
   switch (scope.kind) {
     case 'archive': return cards.filter((c) => c.archived);
