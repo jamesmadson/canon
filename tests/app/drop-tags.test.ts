@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { dropTags, extractPage } from '../../src/app/lib/page';
 import { prepare } from '../../src/app/intake';
-// @ts-expect-error: plain JavaScript, no declarations
 import { extractPage as cliExtractPage } from '../../cli/src/mcp/page.js';
 
 const HTML = '<!doctype html><title>Pricing page | Acme</title><script>var h="<h1>no</h1>"</script><h1>Annual plans</h1><h2>Team seats &amp; billing</h2><h2>   </h2>';
