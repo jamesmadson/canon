@@ -125,7 +125,7 @@ export function describeEvent(ev: TesterEvent): string {
     add_done: `Added a ${d.kind ?? ''}${ms}`,
     add_error: `Adding failed (${d.code ?? 'failed'})`,
     prototype_open: `Opened a ${d.kind ?? ''} prototype${d.blocked ? ', refuses framing' : ''}${typeof d.ms === 'number' ? `, loaded in ${d.ms} ms` : ''}`,
-    version_step: `Stepped to the ${d.dir ?? ''} version`,
+    version_step: `Stepped to the ${d.dir === 'prev' ? 'previous' : 'next'} version`,
     versions_menu: 'Opened the versions menu',
     make_current: 'Made a version the current one',
     note_save: `Saved a note, ${n(d.length ?? 0, 'character')}`,
