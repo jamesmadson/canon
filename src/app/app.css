@@ -908,3 +908,5 @@ button.ver-chip:hover { color: var(--text); }
 /* A board drawn as outlines. */
 .thumb .page { fill: var(--ground); }
 .thumb .sheet { fill: var(--hover); }
+
+.scard .cver { display: block; color: var(--soft); font-size: 12px; }

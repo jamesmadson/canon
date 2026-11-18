@@ -227,6 +227,17 @@ describe('the list and the shelf', () => {
     expect(box.querySelector('.srow .shead .muted')!.textContent).toMatch(/prototypes?$/);
   });
 
+  it('shows a prototype with five versions as one item with a count, in the list and the shelf', async () => {
+    const frames = [1, 2, 3, 4, 5].map((n) => frame({ id: `v${n}`, name: `Checkout v${n}`, stackId: 'v1', createdAt: n, updatedAt: n }));
+    const cards = cardsOf(frames);
+    for (const view of ['list', 'shelf'] as const) {
+      const box = await mount(HomeBody, props({ cards, projects: [project('p1', 'One')], view }));
+      expect(box.querySelectorAll('[data-card]').length).toBe(1);
+      expect(box.querySelector('[data-card]')!.textContent).toContain('5 versions');
+      clear();
+    }
+  });
+
   it('draws a neutral placeholder when a prototype has no preview', async () => {
     const cards = cardsOf([frame({ id: 'u', kind: 'url', url: 'https://example.com', name: 'A link' })]);
     const box = await mount(HomeBody, props({ cards, projects: [project('p1', 'One')], view: 'shelf' }));

@@ -7,7 +7,7 @@ import { PrototypeView, openPrototype } from './prototype';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
 import { FilterMenu, Home } from './home';
 import { AddMenu, ProtoRow, StarButton, Tags } from './parts';
-import { currentOf, stackKey, versionOf } from './lib/versions';
+import { currentOf, stackKey } from './lib/versions';
 import { checkPrototypeUrl } from './lib/resolve';
 import { type Address, buildAddress, parseAddress } from './lib/address';
 import { type PairLink, pairNotice, parsePairLink, saveAgent } from './bridge/client';
@@ -177,9 +177,8 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const all = store.libraryItems(projectId);
   const matched = sortPrototypes(filterPrototypes(all, filter), sort);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  // One card per stack, showing its current version; expand a stack to see the rest.
-  const items: ((typeof matched)[number] & { versions: number; v: number; isCurrent: boolean; stack: string; extra?: boolean })[] = [];
+  // One item per prototype, showing its current version. Its versions are opened from the prototype view.
+  const items: ((typeof matched)[number] & { versions: number })[] = [];
   const seen = new Set<string>();
   for (const i of matched) {
     const key = stackKey(i.frame);
@@ -187,17 +186,9 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
     seen.add(key);
     const stack = store.stackOf(i.id);
     const cur = stack.length ? currentOf(stack) : i.frame;
-    const members = matched.filter((m) => stackKey(m.frame) === key);
-    const lead = members.find((m) => m.id === cur.id) ?? members[0];
-    const info = (m: typeof lead, extra?: boolean) => ({ ...m, versions: stack.length, v: versionOf(stack, m.id), isCurrent: m.id === cur.id, stack: key, extra });
-    items.push(info(lead));
-    if (expanded.has(key)) for (const m of [...members].reverse()) if (m.id !== lead.id) items.push(info(m, true));
+    const lead = matched.find((m) => stackKey(m.frame) === key && m.id === cur.id) ?? i;
+    items.push({ ...lead, versions: stack.length });
   }
-  const toggleStack = (key: string) => {
-    const next = new Set(expanded);
-    next.has(key) ? next.delete(key) : next.add(key);
-    setExpanded(next);
-  };
   const boards = store.boardsOf(projectId);
   const toggle = (fid: string) => {
     const next = new Set(picked);
@@ -226,11 +217,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
   const filtering = !!(filter.query || filter.tags?.length || filter.multiPage || filter.hasComments || filter.unplaced || filter.archived || (filter.source && filter.source !== 'all'));
 
   const versionsSlot = (i: (typeof items)[number]) =>
-    i.extra
-      ? html`<span class="ver"><span class="ver-chip old">v${i.v}</span>${!i.isCurrent && html` <button type="button" class="link" onClick=${() => store.makeCurrent(i.id)}>Make current</button>`}</span>`
-      : i.versions > 1
-        ? html`<span class="ver"><button type="button" class="ver-chip ver-btn" onClick=${() => toggleStack(i.stack)} aria-expanded=${expanded.has(i.stack)} aria-label=${`${i.versions} versions of ${i.name}`}>${i.versions} versions ${expanded.has(i.stack) ? '▴' : '▾'}</button></span>`
-        : html`<span class="ver"></span>`;
+    html`<span class="ver">${i.versions > 1 ? `${i.versions} versions` : ''}</span>`;
 
   return html`<div class="page library">
     <div class="lib-bar">
@@ -270,9 +257,9 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
             const f = i.frame;
             const card = cardFor(i);
             const s = Math.min(240 / f.w, 160 / f.h);
-            return html`<div class=${`lib-card${picked.has(i.id) ? ' picked' : ''}${i.extra ? ' older' : ''}`} key=${i.id} data-card=${i.id}>
+            return html`<div class=${`lib-card${picked.has(i.id) ? ' picked' : ''}`} key=${i.id} data-card=${i.id}>
               <button type="button" class="lib-thumb" onClick=${() => open(i.id)} aria-label=${`Open ${f.name}`}>
-                ${(pageCount(f) > 1 || (i.versions > 1 && !i.extra)) && html`<span class="lib-sheet"></span>`}
+                ${(pageCount(f) > 1 || i.versions > 1) && html`<span class="lib-sheet"></span>`}
                 <span class="lib-frame" style=${{ width: f.w * s, height: f.h * s }}>
                   ${showsCover(f)
                     ? html`<img class="frame-cover" src=${coverSrc(f)} alt="" />`
@@ -286,17 +273,13 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
                 ${f.summary && html`<span class="lib-sum">${f.summary}</span>`}
                 <small>${i.pages > 1 ? `${i.pages} pages · ` : ''}${i.boards ? `${i.boards} board${i.boards > 1 ? 's' : ''}` : 'Not on a board'}${i.comments ? ` · ${i.comments} open` : ''}</small>
                 ${card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
-                ${i.versions > 1 && html`<div class="lib-ver">
-                  ${i.extra
-                    ? html`<span class="ver-chip old">v${i.v}</span>${!i.isCurrent && html`<button type="button" class="link" onClick=${() => store.makeCurrent(i.id)}>Make current</button>`}`
-                    : html`<button type="button" class="ver-chip" onClick=${() => toggleStack(i.stack)} aria-expanded=${expanded.has(i.stack)}>v${i.v} · ${i.versions} versions ${expanded.has(i.stack) ? '▴' : '▾'}</button>`}
-                </div>`}
+                ${i.versions > 1 && html`<div class="lib-ver"><span class="ver-chip">${i.versions} versions</span></div>`}
               </div>
             </div>`;
           })}
         </div>`
       : html`<ul class="rows lib-rows">
-          ${items.map((i) => html`<${ProtoRow} key=${i.id} card=${cardFor(i)} older=${i.extra} onOpen=${() => open(i.id)} versions=${versionsSlot(i)} pick=${{ checked: picked.has(i.id), onChange: () => toggle(i.id) }} />`)}
+          ${items.map((i) => html`<${ProtoRow} key=${i.id} card=${cardFor(i)} onOpen=${() => open(i.id)} versions=${versionsSlot(i)} pick=${{ checked: picked.has(i.id), onChange: () => toggle(i.id) }} />`)}
         </ul>`}
   </div>`;
 }
