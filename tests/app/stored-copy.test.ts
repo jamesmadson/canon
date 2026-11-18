@@ -150,6 +150,76 @@ describe('a build folder through the tools into what the tab stores', () => {
     expect(cur).toMatchObject({ kind: 'files', liveUrl: 'http://localhost:4000/' });
   });
 
+  it('a link version can be added with newVersion, and a stack can mix links and stored copies', async () => {
+    const { tools } = agent();
+    await tools.call('canon_add', { url: 'https://proto.test/a', name: 'Pricing', board: 'Checkout' });
+    const r2 = await tools.call('canon_update', { frame: 'Pricing', url: 'https://proto.test/a', newVersion: true });
+    expect(r2.content[0].text).toContain('It is version 2 now.');
+    expect(r2.isError).toBeUndefined();
+    const r3 = await tools.call('canon_update', { frame: 'Pricing', folder: build({ 'index.html': '<p>stored</p>' }) });
+    expect(r3.content[0].text).toContain('It is version 3 now.');
+    const r4 = await tools.call('canon_update', { frame: 'Pricing', url: 'https://proto.test/b', newVersion: true });
+    expect(r4.content[0].text).toContain('It is version 4 now.');
+    const st = stacks(store.getState().frames);
+    expect(st).toHaveLength(1);
+    expect(st[0].map((f) => f.kind)).toEqual(['url', 'url', 'files', 'url']);
+    expect(currentOf(st[0]).url).toBe('https://proto.test/b');
+    expect(store.getState().placements.map((p) => p.frameId)).toEqual([currentOf(st[0]).id]);
+  });
+
+  it('keeps one page of a built site, opens that page, and its root-absolute files load from the copy', async () => {
+    const dir = build({
+      'index.html': '<title>Site home</title>',
+      'lab/home-d/index.html': '<title>Home D</title><h1>Home D</h1><link rel="stylesheet" href="/_astro/x.css"><img src="/img/a.jpg">',
+      '_astro/x.css': '.a{background:url(/img/b.jpg)}',
+      'img/a.jpg': 'a', 'img/b.jpg': 'b', 'img/unused.jpg': 'u',
+    });
+    const { tools } = agent();
+    const r = await tools.call('canon_add', { folder: dir, page: 'lab/home-d/', board: 'Labs' });
+    expect(r.isError).toBeUndefined();
+    expect(r.content[0].text).toContain('Kept the page lab/home-d/index.html and what it needs: 4 files');
+    const f = store.getState().frames[0];
+    expect(f).toMatchObject({ kind: 'files', name: 'Home D', entry: 'lab/home-d/index.html', fileCount: 4 });
+    expect(files(f.id).map((x) => x.path).sort()).toEqual(['_astro/x.css', 'img/a.jpg', 'img/b.jpg', 'lab/home-d/index.html']);
+    expect(await textOf(f.id, 'lab/home-d/index.html')).toContain('href="../../_astro/x.css"');
+    expect(await textOf(f.id, '_astro/x.css')).toBe('.a{background:url(../img/b.jpg)}');
+    expect((await import('../../src/app/shared')).frameSrc(f)).toContain(`app/p/${f.id}/lab/home-d/index.html`);
+  });
+
+  it('opens the page the agent named even when a shallower index.html is in the copy', async () => {
+    const dir = build({
+      'index.html': '<title>Site home</title>',
+      'lab/home-d/index.html': '<title>Home D</title><iframe src="/"></iframe>',
+    });
+    const { tools } = agent();
+    await tools.call('canon_add', { folder: dir, page: 'lab/home-d/' });
+    expect(store.getState().frames[0].entry).toBe('lab/home-d/index.html');
+    // A later round of the same page keeps opening that page.
+    await tools.call('canon_update', { frame: 'Home D', folder: dir, page: 'lab/home-d/' });
+    expect(currentOf(stacks(store.getState().frames)[0]).entry).toBe('lab/home-d/index.html');
+  });
+
+  it('refuses an entry that is not an HTML file in the build, before writing anything', async () => {
+    const UP = '0123456789abcdef';
+    const b64 = (s: string) => Buffer.from(s).toString('base64');
+    for (const entry of ['img/a.png', 'x.js', 'missing.html']) {
+      const staging = createStaging();
+      staging.part({ upload: UP, parts: [{ path: 'index.html', at: 0, size: 1, data: b64('x') }, { path: 'img/a.png', at: 0, size: 1, data: b64('a') }, { path: 'x.js', at: 0, size: 1, data: b64('j') }] });
+      const deps = { state: store.getState, route: () => ({ name: 'home' }), staging, appBase: APP, agentName: 'Claude', toast: () => {} } as unknown as OpsDeps;
+      const r = await runOp('add', { url: 'https://p.test/', build: { upload: UP, count: 3, bytes: 3, entry } }, deps);
+      expect(r).toEqual({ ok: false, error: 'build.entry must be the path of an HTML file in the build.' });
+    }
+    expect(store.getState().frames).toHaveLength(0);
+  });
+
+  it('writes nothing when the page is not in the build', async () => {
+    const { tools } = agent();
+    const r = await tools.call('canon_add', { folder: build({ 'index.html': 'x' }), page: 'nope/' });
+    expect(r.isError).toBe(true);
+    expect(r.content[0].text).toContain('There is no page at nope/');
+    expect(store.getState().frames).toHaveLength(0);
+  });
+
   it('writes nothing when the pieces are missing', async () => {
     const { tools } = agent();
     const bad = await runOpDirect({ build: { upload: '0123456789abcdef', count: 1, bytes: 1 } });

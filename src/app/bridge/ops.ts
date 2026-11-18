@@ -244,6 +244,16 @@ function summary(deps: OpsDeps, frameId: string, board: Board | null) {
   };
 }
 
+/** The files of an upload, and the page to open when the agent named one (a page of a built site). */
+function takeBuild(deps: OpsDeps, raw: unknown): { files: BuildFile[] | null; entry?: string } {
+  if (raw === undefined) return { files: null };
+  const files = deps.staging.take(raw);
+  const entry = (raw as { entry?: unknown }).entry;
+  if (entry === undefined) return { files };
+  if (typeof entry !== 'string' || !/\.html?$/i.test(entry) || !files.some((f) => f.path === entry)) throw new Refused('build.entry must be the path of an HTML file in the build.');
+  return { files, entry };
+}
+
 /* ── add ───────────────────────────────────────────────────────────────── */
 
 async function add(args: Args, deps: OpsDeps) {
@@ -310,7 +320,7 @@ async function add(args: Args, deps: OpsDeps) {
   };
 
   // The build's files are checked before anything is written.
-  const build: BuildFile[] | null = args.build === undefined ? null : deps.staging.take(args.build);
+  const { files: build, entry } = takeBuild(deps, args.build);
 
   // Writes start here.
   const p = 'have' in project ? project.have : await deps.createProject(project.make);
@@ -318,7 +328,7 @@ async function add(args: Args, deps: OpsDeps) {
   const size = typeof width === 'number' ? { w: width, h: SIZES.find((x) => x.w === width)?.h ?? 800 } : undefined;
   const frame = build
     ? await deps.addBuild(p.id, build, {
-      boardId: b?.id, ...(name ? { name } : {}), ...(size ? { size } : {}), meta, ...(url ? { liveUrl: url } : {}),
+      boardId: b?.id, ...(name ? { name } : {}), ...(size ? { size } : {}), meta, ...(url ? { liveUrl: url } : {}), ...(entry ? { entry } : {}),
       fallbackName: url ? new URL(url).host : DEFAULT_BUILD_NAME,
     })
     : await deps.addUrl(p.id, url!, { boardId: b?.id, ...(name ? { name } : {}), ...(size ? { size } : {}), stack: false, meta });
@@ -365,6 +375,10 @@ async function update(args: Args, deps: OpsDeps) {
   if (m.starred !== undefined && m.starred !== !!before.starred) patch.starred = m.starred;
   if (m.archived !== undefined && m.archived !== !!before.archived) patch.archived = m.archived;
   const hasBuild = args.build !== undefined;
+  const forceVersion = flag(args.newVersion, 'newVersion') === true;
+  if (forceVersion && url === null && !hasBuild) {
+    throw new Refused('newVersion needs url. Pass the address of the new version, or pass folder to add a build.');
+  }
   const auto = (url !== null || hasBuild) && m.page
     ? autoTags({ title: m.page.title, headings: m.page.headings, repo: m.repo ?? before.repo, branch: m.branch ?? before.branch })
     : [];
@@ -375,17 +389,17 @@ async function update(args: Args, deps: OpsDeps) {
   if (next.removedTags.join('\n') !== (before.removedTags ?? []).join('\n')) patch.removedTags = next.removedTags;
   const metaChanged = Object.keys(patch).length > 0;
 
-  const build: BuildFile[] | null = hasBuild ? deps.staging.take(args.build) : null;
+  const { files: build, entry } = takeBuild(deps, args.build);
 
   // Writes start here.
   let current = currentOf(stack);
   let newVersion = false;
   if (build) {
-    const r = await deps.addBuildVersion(current.id, build, url ?? undefined);
+    const r = await deps.addBuildVersion(current.id, build, url ?? undefined, entry);
     current = r.frame;
     newVersion = r.added;
   } else if (url !== null) {
-    const r = await deps.addUrlVersion(current.id, url);
+    const r = await deps.addUrlVersion(current.id, url, forceVersion ? { force: true } : undefined);
     current = r.frame;
     newVersion = r.added;
   }

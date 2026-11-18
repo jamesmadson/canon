@@ -66,10 +66,10 @@ function fake(seed: Seed = {}) {
       return b;
     },
     addUrl: addUrl as OpsDeps['addUrl'],
-    async addUrlVersion(frameId: string, url: string) {
-      versionCalls.push([frameId, url]);
+    async addUrlVersion(frameId: string, url: string, opts: { force?: boolean } = {}) {
+      versionCalls.push(opts.force ? [frameId, url, 'force'] : [frameId, url]);
       const current = currentOf(stackOf(frameId));
-      if (current.url === url) return { frame: current, added: false };
+      if (current.url === url && !opts.force) return { frame: current, added: false };
       const meta: FrameMeta = {};
       for (const k of ['summary', 'repo', 'branch', 'tool', 'tags', 'removedTags', 'starred', 'note', 'archived'] as const) if (current[k] !== undefined) (meta as any)[k] = current[k];
       const made = await addUrl(current.projectId, url, { name: current.name, size: { w: current.w, h: current.h }, stack: false, meta });
@@ -247,6 +247,21 @@ describe('runOp update', () => {
       result: { frameId: made.id, frame: 'Cart', projectId: 'a', project: 'Alpha', boardId: 'b1', board: 'Checkout', version: 2, versions: 2, newVersion: true, tags: [], link: `${APP}#/b/b1/f/${made.id}` },
     });
     expect(t.toasts).toEqual(['Claude updated Cart']);
+  });
+
+  it('newVersion adds the same URL again as the next version', async () => {
+    const t = twoProjects();
+    const r = await runOp('update', { frame: 'Cart', url: 'https://cart.test/2', newVersion: true }, t.deps);
+    expect(t.versionCalls).toEqual([['f1', 'https://cart.test/2', 'force']]);
+    expect(t.state().frames).toHaveLength(4);
+    expect(r).toMatchObject({ ok: true, result: { version: 3, versions: 3, newVersion: true } });
+  });
+
+  it('newVersion needs a url or a build, and must be true or false, and writes nothing otherwise', async () => {
+    const t = twoProjects();
+    expect(await runOp('update', { frame: 'Cart', newVersion: true }, t.deps)).toEqual({ ok: false, error: 'newVersion needs url. Pass the address of the new version, or pass folder to add a build.' });
+    expect(await runOp('update', { frame: 'Cart', url: 'https://cart.test/3', newVersion: 'yes' }, t.deps)).toEqual({ ok: false, error: 'newVersion must be true or false.' });
+    expect(t.writes).toEqual([]);
   });
 
   it('the same URL adds nothing', async () => {

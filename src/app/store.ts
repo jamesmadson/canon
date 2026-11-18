@@ -278,9 +278,11 @@ export interface BuildOpts {
   boardId?: string; name?: string; size?: { w: number; h: number }; meta?: FrameMeta; liveUrl?: string;
   /** The name when neither the agent nor the page's title gives one. */
   fallbackName: string;
+  /** The page to open, when the build holds one page of a site rather than an index.html at its top. */
+  entry?: string;
 }
 export async function addBuild(projectId: string, files: { path: string; bytes: Uint8Array }[], opts: BuildOpts) {
-  const prepared = await prepare({ name: opts.name || opts.fallbackName, files: files.map((f) => ({ path: f.path, blob: new Blob([f.bytes]) })) });
+  const prepared = await prepare({ name: opts.name || opts.fallbackName, files: files.map((f) => ({ path: f.path, blob: new Blob([f.bytes]) })) }, opts.entry);
   if (!prepared) throw new Error('The build has no HTML file, so there is nothing to show.');
   if (opts.name) prepared.name = opts.name;
   return addPrepared(projectId, prepared, { boardId: opts.boardId, size: opts.size, stack: false, meta: opts.meta, liveUrl: opts.liveUrl });
@@ -293,11 +295,11 @@ export async function addBuild(projectId: string, files: { path: string; bytes: 
  * Older versions and their files stay. The live address carries forward; a
  * prototype that was only a link keeps that link as its live address.
  */
-export async function addBuildVersion(frameId: string, files: { path: string; bytes: Uint8Array }[], liveUrl?: string): Promise<{ frame: Frame; added: boolean }> {
+export async function addBuildVersion(frameId: string, files: { path: string; bytes: Uint8Array }[], liveUrl?: string, entry?: string): Promise<{ frame: Frame; added: boolean }> {
   if (!state.frames.some((f) => f.id === frameId)) throw new Error('That prototype is not in the library.');
   const current = currentOf(stackOf(frameId));
   const frame = await addBuild(current.projectId, files, {
-    name: current.name, fallbackName: current.name, size: { w: current.w, h: current.h }, meta: inheritedMeta(current),
+    name: current.name, fallbackName: current.name, size: { w: current.w, h: current.h }, meta: inheritedMeta(current), entry,
     liveUrl: liveUrl ?? current.liveUrl ?? (current.kind === 'url' ? current.url : undefined),
   });
   const spots = swapsFor(state.placements, current.id);
@@ -343,12 +345,13 @@ function sameUrl(a: string, b: string) {
  * Add a URL as the next version of a prototype's stack. It takes the stack's
  * current name and size, becomes current, and every board spot showing the
  * previous current version moves to it. Spots showing an older version stay.
+ * The same address as the current version adds nothing, unless force is set.
  */
-export async function addUrlVersion(frameId: string, url: string): Promise<{ frame: Frame; added: boolean }> {
+export async function addUrlVersion(frameId: string, url: string, opts: { force?: boolean } = {}): Promise<{ frame: Frame; added: boolean }> {
   const base = state.frames.find((f) => f.id === frameId);
   if (!base) throw new Error('That prototype is not in the library.');
   const current = currentOf(stackOf(frameId));
-  if (current.kind === 'url' && current.url && sameUrl(current.url, url)) return { frame: current, added: false };
+  if (!opts.force && current.kind === 'url' && current.url && sameUrl(current.url, url)) return { frame: current, added: false };
   const frame = await makeUrlFrame(current.projectId, url, { name: current.name, size: { w: current.w, h: current.h }, stack: false, meta: inheritedMeta(current) }, false);
   const spots = swapsFor(state.placements, current.id);
   await joinStack(frame.id, current.id);

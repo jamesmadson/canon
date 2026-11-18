@@ -129,7 +129,7 @@ export function createStaging(now: () => number = Date.now): Staging {
         files.push({ path, bytes });
       }
       if (total !== build.bytes) throw lost;
-      if (!files.some((f) => f.path === 'index.html')) throw new Error('The build has no index.html at its top.');
+      if (!files.some((f) => /\.html?$/i.test(f.path))) throw new Error('The build has no HTML page.');
       return files;
     },
   };

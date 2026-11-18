@@ -235,7 +235,9 @@ describe('canon tools', () => {
         [{ tags: [1] }, 'tags must be a list of text.'],
         [{ tags: Array.from({ length: 500 }, (_, i) => `t${i}`) }, 'tags can hold at most 20.'],
         [{ starred: 'yes' }, 'starred must be true or false.'],
-        [{ page: { title: 'x', headings: [] } }, 'page is not an option for canon_add.'],
+        [{ page: { title: 'x', headings: [] } }, 'page must be text.'],
+        [{ page: 'a/' }, 'page needs folder. Pass the build root as folder and the page path inside it as page.'],
+        [{ newVersion: true }, 'newVersion is not an option for canon_add.'],
       ];
       for (const [extra, message] of cases) {
         const { tools, calls } = setup();
