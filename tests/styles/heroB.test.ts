@@ -69,6 +69,10 @@ describe('the scattered hero at /hero-b/', () => {
     expect(img).toContain('src="/canon/texture/hero-grain.webp"');
     expect(img).toContain('/canon/texture/hero-grain-960.webp 960w');
     expect(img).not.toMatch(/https?:/);
+    expect(panel).toContain('class="hgrain"');
+    expect(panel).toContain('url(/canon/texture/grain.png)');
+    expect(statSync(join(root, 'public/texture/grain.png')).size).toBeGreaterThan(0);
+    expect(statSync(join(root, 'public/texture/hero-grain.webp')).size).toBeLessThan(60 * 1024);
     expect(statSync(join(root, 'public/texture/hero-grain.webp')).size).toBeLessThan(120 * 1024);
     expect(statSync(join(root, 'public/texture/hero-grain-960.webp')).size).toBeLessThan(120 * 1024);
   });

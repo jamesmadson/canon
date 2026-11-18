@@ -77,6 +77,7 @@ const words = PROMPT.split(' ');
       decoding="async"
     />
     <div class="htone"></div>
+    <div class="hgrain" style={`background-image: url(${withBase('/texture/grain.png')})`}></div>
   </div>
 
   <div class="pbox" aria-hidden="true" data-prompt={PROMPT}>
@@ -209,6 +210,23 @@ const words = PROMPT.split(' ');
     inset: 0;
     background: var(--hp-tone);
   }
+  /* The grain: a crisp one-pixel noise tile over the smooth photograph and its
+     wash. Drawn one to one with device pixels (256px on 1x, 128px on 2x and
+     up) so it stays sharp. It is still, and sits under every card. */
+  .hgrain {
+    --hg-opacity: 0.4;
+    position: absolute;
+    inset: 0;
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    mix-blend-mode: overlay;
+    opacity: var(--hg-opacity);
+  }
+  @media (min-resolution: 1.5dppx) {
+    .hgrain {
+      background-size: 128px 128px;
+    }
+  }
   /* Beside the text the panel washes out to its ground colour, so the muted
      lines keep 4.5:1; the texture shows to the right and below. */
   @media (min-width: 1100px) {
@@ -218,12 +236,23 @@ const words = PROMPT.split(' ');
         linear-gradient(var(--hp-tone), var(--hp-tone));
     }
   }
+  @media (min-width: 1100px) {
+    .hgrain {
+      mask-image: radial-gradient(ellipse 800px 400px at 330px 240px, rgb(0 0 0 / 0.3) 0, rgb(0 0 0 / 0.3) 55%, #000 100%);
+    }
+  }
   @media (prefers-color-scheme: dark) {
+    :root[data-app-theme='system'] .hpanel .hgrain {
+      --hg-opacity: 0.5;
+    }
     :root[data-app-theme='system'] .hpanel {
       --hp-ground: #1f1e1c;
       --hp-tone: rgb(31 30 28 / 0.62);
       --hp-solid: rgb(31 30 28 / 0.95);
     }
+  }
+  :root[data-app-theme='dark'] .hpanel .hgrain {
+    --hg-opacity: 0.5;
   }
   :root[data-app-theme='dark'] .hpanel {
     --hp-ground: #1f1e1c;
