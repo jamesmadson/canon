@@ -46,7 +46,7 @@ describe('the commands and feedback link', () => {
   it('has an Open the app link in the hero and no bare npx usecanon command', () => {
     for (const html of [closed, open]) {
       const hero = html.slice(html.indexOf('class="hero'), html.indexOf('id="projects"'));
-      expect(hero).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/">Open the app<\/a>/);
+      expect(hero).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/"[^>]*>Open the app<\/a>/);
       expect(hero).toContain('claude mcp add canon -- npx -y usecanon mcp');
       expect(text(html).replaceAll('npx -y usecanon mcp', '')).not.toMatch(/npx\s+usecanon/);
       expect(html).not.toContain('data-copy="npx usecanon"');

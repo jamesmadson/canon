@@ -8,8 +8,10 @@ interface Props {
   /** The hero's button is the one solid primary on the page. */
   primary?: boolean;
   name: string;
+  /** Where the setup command sits, for the copy_setup event. */
+  location?: 'hero' | 'agents';
 }
-const { command, primary = false, name } = Astro.props;
+const { command, primary = false, name, location } = Astro.props;
 ---
 
 <div class="setup">
@@ -18,6 +20,7 @@ const { command, primary = false, name } = Astro.props;
     type="button"
     class:list={[primary ? 'hbtn hbtn-primary' : 'util']}
     data-copy={command}
+    data-ga-copy={location}
     aria-label={`Copy ${name}`}
   >
     Copy

@@ -28,7 +28,7 @@ const hero = () => html.slice(html.indexOf('class="htext"'), html.indexOf('class
 describe('the Try the MCP reveal markup', () => {
   it('has two buttons in a row: the solid Open the app, and an outlined Try the MCP', () => {
     const cta = hero().match(/<div class="cta[^"]*">([\s\S]*?)<\/div>/)![1];
-    expect(cta).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/">Open the app<\/a>/);
+    expect(cta).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/"[^>]*>Open the app<\/a>/);
     expect(cta).toMatch(/<button type="button" class="hbtn" data-mcp-toggle aria-expanded="false" aria-controls="mcp-panel">Try the MCP<\/button>/);
     expect(cta.match(/hbtn-primary/g)).toHaveLength(1);
   });
@@ -46,7 +46,7 @@ describe('the Try the MCP reveal markup', () => {
     expect(panel).toContain('data-copy="claude mcp add canon -- npx -y usecanon mcp"');
     expect(panel).toContain('aria-label="Copy the setup command"');
     expect(panel).toContain('One line connects Claude Code. Codex and Cursor take a few lines in their config, ');
-    expect(panel).toMatch(/<a href="https:\/\/github\.com\/jamesmadson\/canon#connect-your-agent">written up in the(&nbsp;| )README<\/a>/);
+    expect(panel).toMatch(/<a href="https:\/\/github\.com\/jamesmadson\/canon#connect-your-agent"[^>]*>written up in the(&nbsp;| )README<\/a>/);
   });
 
   it('keeps the free and open source line outside the panel, below it', () => {

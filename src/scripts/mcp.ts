@@ -1,3 +1,5 @@
+import { track } from '../lib/events';
+
 /**
  * "Try the MCP": opens and closes the panel under the hero buttons.
  *
@@ -54,6 +56,7 @@ document.querySelectorAll<HTMLElement>('[data-mcp]').forEach((scope) => {
     const before = items.map((el) => el.getBoundingClientRect());
     items.forEach((el) => el.getAnimations().forEach((a) => a.cancel()));
     box!.classList.toggle('is-open', open);
+    if (open) track(window, 'try_mcp_open');
     button!.setAttribute('aria-expanded', String(open));
     if (!still) glide(items, before, open ? OPEN_MS : CLOSE_MS);
   }

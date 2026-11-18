@@ -15,6 +15,7 @@ function files(dir: string): string[] {
 }
 const text = (p: string) => readFileSync(p, 'utf8');
 const ID = 'G-F4MW70DVD4';
+const EVENT_NAMES = ['open_app', 'try_mcp_open', 'copy_setup', 'waitlist_submit', 'waitlist_done', 'nav_section', 'readme_click', 'github_click', 'consent_choice'];
 
 beforeAll(() => {
   // Built apart from dist, so the owner's dev server and any other build are left alone.
@@ -43,6 +44,7 @@ describe('analytics in the built site', () => {
       const body = text(f);
       expect(body, relative(out, f)).not.toContain(ID);
       expect(body, relative(out, f)).not.toMatch(/googletagmanager|google-analytics|gtag\(/);
+      for (const name of EVENT_NAMES) expect(body, `${relative(out, f)} ${name}`).not.toContain(name);
     }
     const appHtml = text(join(out, 'app/index.html'));
     expect(appHtml).not.toContain('data-ga-');
@@ -51,7 +53,19 @@ describe('analytics in the built site', () => {
     for (const rel of loaded) {
       const body = text(join(out, rel));
       expect(body, rel).not.toMatch(/googletagmanager|G-F4MW70DVD4|gtag\(/);
+      for (const name of EVENT_NAMES) expect(body, `${rel} ${name}`).not.toContain(name);
     }
+  });
+
+  it('marks the homepage links and buttons for the delegated listener', () => {
+    const html = text(join(out, 'index.html'));
+    expect(html).toMatch(/data-ga="open_app" data-ga-location="header"/);
+    expect(html).toMatch(/data-ga="open_app" data-ga-location="hero"/);
+    expect(html).toMatch(/data-ga="nav_section" data-ga-section="agents"/);
+    expect(html).toMatch(/data-ga="github_click"/);
+    expect(html).toMatch(/data-ga="readme_click"/);
+    expect(html).toMatch(/data-ga-copy="hero"/);
+    expect(html).toMatch(/data-ga-copy="agents"/);
   });
 
   it('keeps the app out of the consent code: the service worker and comments script too', () => {

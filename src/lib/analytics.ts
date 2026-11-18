@@ -49,9 +49,11 @@ export type AnalyticsOptions = {
   enabled: boolean;
   /** How long the bar waits before it fades in, in milliseconds. */
   delay?: number;
+  /** Called after a choice is saved and consent is updated. */
+  onChoice?: (choice: Choice) => void;
 };
 
-export function initAnalytics({ doc, win: plainWin, enabled, delay = 600 }: AnalyticsOptions) {
+export function initAnalytics({ doc, win: plainWin, enabled, delay = 600, onChoice }: AnalyticsOptions) {
   const win = plainWin as Win;
   const bar = doc.querySelector<HTMLElement>('[data-ga-bar]');
   if (!bar || !enabled) return null;
@@ -108,6 +110,7 @@ export function initAnalytics({ doc, win: plainWin, enabled, delay = 600 }: Anal
     }
     hide();
     openers[0]?.focus();
+    onChoice?.(choice);
   }
 
   bar.querySelector('[data-ga-allow]')?.addEventListener('click', () => choose('allow'));

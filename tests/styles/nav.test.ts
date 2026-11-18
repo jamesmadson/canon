@@ -26,7 +26,7 @@ describe('the top of the page', () => {
       const header = html.slice(html.indexOf('<header'), html.indexOf('</header>'));
       expect(header.match(/<a\b/g)).toHaveLength(2);
       expect(header).toContain('aria-label="Canon, home"');
-      expect(header).toMatch(/<a class="hbtn hbtn-small" href="\/canon\/app\/">Open the app<\/a>/);
+      expect(header).toMatch(/<a class="hbtn hbtn-small" href="\/canon\/app\/"[^>]*>Open the app<\/a>/);
       expect(header).not.toContain('<nav');
     }
   });

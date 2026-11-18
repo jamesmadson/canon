@@ -28,7 +28,7 @@ const href = (it: (typeof ITEMS)[number]) => (isHome && it.section ? `#${it.sect
     <span class="pill-glide" aria-hidden="true"></span>
     {
       ITEMS.map((it, i) => (
-        <a href={href(it)} data-section={it.section ?? undefined} aria-current={i === current ? 'page' : undefined}>
+        <a href={href(it)} data-section={it.section ?? undefined} data-ga="nav_section" data-ga-section={it.section ?? 'skills'} aria-current={i === current ? 'page' : undefined}>
           {it.label}
         </a>
       ))

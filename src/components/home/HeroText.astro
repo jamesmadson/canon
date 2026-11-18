@@ -19,11 +19,11 @@ const { waitlistUrl = '' } = Astro.props;
 <div class="htext">
   <h1 id="h-hero" class="rise"><span class="sent">Your prototypes are everywhere.</span><span class="sent">{tie('Canon keeps them in one place.')}</span></h1>
   <p class="lede lede-hero rise rise-2">
-    {tie('You and your team juggle Figma Make links, v0 previews, Lovable apps, zips and whatever an agent built this morning. Canon files every one by project on your machine, named, tagged and easy to find.')}
+    {tie('You and your team juggle Figma Make links, v0 deployments, Lovable apps, zips and whatever an agent built this morning. Canon files every one by project on your machine, named, tagged and easy to find.')}
   </p>
   <div class="mcp-scope" data-mcp>
     <div class="cta rise rise-3">
-      <a class="hbtn hbtn-primary" href={withBase('/app/')}>Open the app</a>
+      <a class="hbtn hbtn-primary" href={withBase('/app/')} data-ga="open_app" data-ga-location="hero">Open the app</a>
       <button type="button" class="hbtn" data-mcp-toggle aria-expanded="false" aria-controls="mcp-panel">Try the MCP</button>
       {waitlistOpen(waitlistUrl) && <a class="hbtn" href="#hosted">Join the hosted waitlist</a>}
     </div>
@@ -31,10 +31,10 @@ const { waitlistUrl = '' } = Astro.props;
       <div class="mcp-panel" id="mcp-panel" role="group" aria-labelledby="mcp-label">
         <p class="mcp-label" id="mcp-label">{tie('Connect your agent')}</p>
         <div class="mcp-cmd">
-          <CopyField command={SETUP_COMMAND} name="the setup command" />
+          <CopyField command={SETUP_COMMAND} name="the setup command" location="hero" />
         </div>
         <p class="mcp-note">
-          {'One line connects Claude Code. Codex and Cursor take a few lines in their config, '}<a href={`${REPO_URL}#connect-your-agent`}>written up in the&nbsp;README</a>.
+          {'One line connects Claude Code. Codex and Cursor take a few lines in their config, '}<a href={`${REPO_URL}#connect-your-agent`} data-ga="readme_click">written up in the&nbsp;README</a>.
         </p>
       </div>
     </div>
