@@ -4,10 +4,13 @@ import { tie } from '../../lib/words';
 ---
 
 <section class="band" id="projects" aria-labelledby="h-projects">
-  <h2 id="h-projects">{tie('Every prototype lands in a project.')}</h2>
-  <p class="lede">{tie('A link, a zip or whatever your agent just built. However it was made, it is filed under the project it belongs to, beside its earlier versions.')}</p>
+  <div class="bhead">
+    <h2 id="h-projects">{tie('Every prototype lands in a project.')}</h2>
+    <p class="lede">{tie('A link, a zip or whatever your agent just built. However it was made, it is filed under the project it belongs to, beside its earlier versions.')}</p>
+  </div>
   <div class="three">
     <div class="panel">
+        <span class="num" aria-hidden="true">1</span>
       <div class="shot dark" role="img" aria-label="A terminal where you ask your agent to add a page to Canon.">
         <div><span class="dim">&gt;</span> add this page to Canon</div>
         <div><span class="dim">⏺ canon_add</span> “Invite a teammate”</div>
@@ -16,10 +19,11 @@ import { tie } from '../../lib/words';
       <div class="tx2">
         <h3>{tie('Ask your agent')}</h3>
         <p>{tie('Your coding agent adds what it just built, names it and notes where it came from.')}</p>
-        <div class="srcs"><span class="chip">Claude Code</span><span class="chip">Codex</span><span class="chip">Cursor</span></div>
+        <ul class="srcs"><li>Claude Code</li><li>Codex</li><li>Cursor</li></ul>
       </div>
     </div>
     <div class="panel">
+        <span class="num" aria-hidden="true">2</span>
       <div class="shot" role="img" aria-label="A link pasted into Canon becomes a card.">
         <div class="q"><span class="mono">welcome-single-screen.lovable.app</span><span class="mini">Add</span></div>
         <div class="lrow">
@@ -30,17 +34,18 @@ import { tie } from '../../lib/words';
       <div class="tx2">
         <h3>{tie('Paste a link')}</h3>
         <p>{tie('A share link from any tool becomes a card on your project.')}</p>
-        <div class="srcs"><span class="chip">Figma</span><span class="chip">v0</span><span class="chip">Lovable</span><span class="chip">GitHub Pages</span></div>
+        <ul class="srcs"><li>Figma</li><li>v0</li><li>Lovable</li><li>GitHub Pages</li></ul>
       </div>
     </div>
     <div class="panel">
+        <span class="num" aria-hidden="true">3</span>
       <div class="shot" role="img" aria-label="A zip file dropped onto a project.">
         <div class="dropz"><span class="chip mono">mobile-sign-up.zip</span><span class="muted">Drop it on a project</span></div>
       </div>
       <div class="tx2">
         <h3>{tie('Drop a zip')}</h3>
         <p>{tie('Drag a zip of built pages onto a project. Canon keeps a copy on your machine and opens it from there.')}</p>
-        <div class="srcs"><span class="chip">.zip</span><span class="chip">A folder</span></div>
+        <ul class="srcs"><li>.zip</li><li>A folder</li></ul>
       </div>
     </div>
   </div>

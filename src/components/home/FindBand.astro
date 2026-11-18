@@ -10,39 +10,39 @@ const RESULTS: Array<[ThumbKey, string, string, string[], string, boolean]> = [
 ];
 ---
 
-<section class="band" id="find" aria-labelledby="h-find">
-  <div class="two">
-    <div>
-      <h2 id="h-find">{tie('Search every prototype by what’s in it.')}</h2>
-      <p class="lede">{tie('Canon reads a linked prototype’s title and headings, then tags it for you. Search by name, tag, summary, source or note. Your agent can add or remove tags.')}</p>
-      <div class="read" role="img" aria-label="A welcome prototype and the five tags Canon gave it.">
-        <Thumb k="w1" />
-        <div>
-          <small>Tagged when it was added</small>
-          <div class="tags" aria-hidden="true">
-            {['Onboarding', 'Welcome', 'Three steps', 'Claude Code', 'fieldnote-web'].map((t) => <span class="tag">{t}</span>)}
+<section class="band split" id="find" aria-labelledby="h-find">
+  <div class="bhead">
+    <h2 id="h-find">{tie('Search every prototype by what’s in it.')}</h2>
+    <p class="lede">{tie('Canon reads a linked prototype’s title and headings, then tags it for you. Search by name, tag, summary, source or note. Your agent can add or remove tags.')}</p>
+  </div>
+  <div class="bbody two">
+  <div class="results" role="img" aria-label="Search results for the word onboarding. Three prototypes, each with its tags.">
+    <div class="q">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
+      <span>onboarding</span><span class="caret" style="margin-left:-6px"></span>
+    </div>
+    {
+      RESULTS.map(([k, name, sub, tags, when, on]) => (
+        <div class:list={['res', on && 'on']} aria-hidden="true">
+          <div class="mini-t"><Thumb k={k} /></div>
+          <div>
+            <b>{name}</b>
+            <small>{sub}</small>
+            <div class="tags">{tags.map((t) => <span class="tag">{t}</span>)}</div>
           </div>
+          <span class="muted">{when}</span>
+        </div>
+      ))
+    }
+  </div>
+    <div class="read" role="img" aria-label="A welcome prototype and the five tags Canon gave it.">
+      <Thumb k="w1" />
+      <div>
+        <small>Tagged when it was added</small>
+        <div class="tags" aria-hidden="true">
+          {['Onboarding', 'Welcome', 'Three steps', 'Claude Code', 'fieldnote-web'].map((t) => <span class="tag">{t}</span>)}
         </div>
       </div>
-    </div>
-    <div class="results" role="img" aria-label="Search results for the word onboarding. Three prototypes, each with its tags.">
-      <div class="q">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
-        <span>onboarding</span><span class="caret" style="margin-left:-6px"></span>
-      </div>
-      {
-        RESULTS.map(([k, name, sub, tags, when, on]) => (
-          <div class:list={['res', on && 'on']} aria-hidden="true">
-            <div class="mini-t"><Thumb k={k} /></div>
-            <div>
-              <b>{name}</b>
-              <small>{sub}</small>
-              <div class="tags">{tags.map((t) => <span class="tag">{t}</span>)}</div>
-            </div>
-            <span class="muted">{when}</span>
-          </div>
-        ))
-      }
     </div>
   </div>
 </section>
