@@ -1,5 +1,6 @@
 ---
 import { ISSUES_URL, REPO_URL } from '../../lib/site';
+import { tie } from '../../lib/words';
 ---
 
 <div class="home">
@@ -12,6 +13,10 @@ import { ISSUES_URL, REPO_URL } from '../../lib/site';
       <a href={REPO_URL}>Source on GitHub</a>
       <a href={ISSUES_URL}>Send feedback as an issue</a>
       <span class="by">Made by James&nbsp;Madson</span>
+    </div>
+    <div class="foot-note" data-ga-footer hidden>
+      <p>{tie('This site counts visits with Google Analytics. The app does not.')}</p>
+      <button type="button" data-ga-open>Cookie choice</button>
     </div>
   </footer>
 </div>

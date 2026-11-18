@@ -1,0 +1,116 @@
+---
+import { GA_ID } from '../../lib/site';
+import { tie } from '../../lib/words';
+
+/**
+ * The analytics consent bar. Only the marketing layout includes this. The app
+ * is a separate page that never does, and a test checks the built app for it.
+ * The bar is hidden until the script decides to show it (scripts/analytics.ts).
+ */
+const src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+---
+
+<div class="home ga-wrap">
+  <div class="ga-bar" role="region" aria-label="Analytics choice" data-ga-bar data-ga-id={GA_ID} data-ga-src={src} hidden>
+    <p>{tie('Allow analytics cookies so we can count visits? The app never sends anything.')}</p>
+    <div class="ga-actions">
+      <button class="hbtn hbtn-small" type="button" data-ga-allow>Allow</button>
+      <button class="hbtn hbtn-small" type="button" data-ga-deny>No thanks</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import '../../scripts/analytics';
+</script>
+
+<style is:global>
+  /* Sits above the floating pill: its top edge is 68px up, plus a 12px gap. */
+  .ga-bar {
+    position: fixed;
+    z-index: 39;
+    left: 16px;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    width: min(420px, calc(100vw - 32px));
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 14px;
+    background: var(--color-panel);
+    color: var(--color-ink);
+    box-shadow:
+      0 0 0 1px var(--edge),
+      0 12px 32px -8px var(--shadow);
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 320ms var(--ease),
+      transform 320ms var(--ease);
+  }
+  .ga-bar[hidden] {
+    display: none;
+  }
+  .ga-bar.is-on {
+    opacity: 1;
+    transform: none;
+  }
+  .ga-bar p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    text-wrap: pretty;
+  }
+  .ga-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .ga-actions .hbtn {
+    flex: 1;
+  }
+  @media (min-width: 641px) {
+    .ga-actions .hbtn {
+      flex: 0 0 auto;
+    }
+  }
+  .ga-bar .hbtn:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  /* The footer line and the button that reopens the bar. */
+  .foot-note {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 12px;
+    color: var(--color-ink-soft);
+    font-size: 13px;
+    line-height: 20px;
+  }
+  .foot-note[hidden] {
+    display: none;
+  }
+  .foot-note p {
+    margin: 0;
+  }
+  .foot-note button {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-ink);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .foot-note button:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ga-bar {
+      transform: none;
+    }
+  }
+</style>
