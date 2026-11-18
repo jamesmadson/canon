@@ -1626,8 +1626,50 @@
     grid-template-columns: 1fr;
     gap: 12px;
   }
+  /* With the form, the card is two columns: text, then the form at the foot
+     of the left column, and the picture across the full height on the right.
+     The inner wrapper steps aside so the picture, text and form are grid items. */
   .hosted-card.with-form {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      'text pic'
+      'form pic';
+    gap: 0 12px;
+  }
+  .hosted-card.with-form > div {
+    display: contents;
+  }
+  .hosted-card.with-form .shot {
+    grid-area: pic;
+    height: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  /* The sketch fills the column: link row at the top, the comment at the
+     foot, and the page between them takes whatever height is left. */
+  .hosted-card.with-form .q {
+    flex: none;
+  }
+  .hosted-card.with-form .hshot {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 140px;
+  }
+  .hosted-card.with-form .hshot .thumb {
+    height: 100%;
+    aspect-ratio: auto;
+  }
+  .hosted-card.with-form .bub {
+    flex: none;
+  }
+  .hosted-card.with-form .tx2 {
+    grid-area: text;
   }
   .hosted-card:not(.with-form) > div {
     display: grid;
@@ -1638,6 +1680,19 @@
   .hosted-card:not(.with-form) .shot {
     height: auto;
     min-height: 176px;
+  }
+  /* Below 1180px the two plans stack, so the local one lays its picture beside
+     its text and neither card has blank space under its content. */
+  @media (max-width: 1180px) {
+    .plans {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .plans > .panel:first-child {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0 12px;
+      align-items: center;
+    }
   }
   .wrow .muted {
     display: none;
@@ -1687,9 +1742,12 @@
   /* The waitlist form sits straight on the hosted card. The card has 12px of
      padding, so 12px more here makes 24px on every side (20px on phones). */
   .form {
+    grid-area: form;
     container-type: inline-size;
-    padding: 12px;
-    align-self: start;
+    max-width: 504px;
+    margin: 12px 12px 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--edge);
   }
   .form-hint {
     margin-top: 4px;
@@ -1710,8 +1768,12 @@
   }
   .wl-field input {
     display: block;
+    box-sizing: border-box;
     width: 100%;
     height: 44px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
     border-radius: 11px;
     border: 1px solid var(--color-input-border);
     background: var(--color-ground);
@@ -1720,8 +1782,11 @@
     padding: 0 12px;
   }
   .frow .hbtn {
+    box-sizing: border-box;
     height: 44px;
     padding: 0 20px;
+    font-size: 15px;
+    line-height: 20px;
   }
   @container (min-width: 340px) {
     .frow {
@@ -1911,8 +1976,7 @@
     }
     .three,
     .plans,
-    .two,
-    .hosted-card.with-form {
+    .two {
       grid-template-columns: 1fr;
     }
     .hosted-card:not(.with-form) > div {
@@ -1966,9 +2030,6 @@
     .band {
       padding: 20px 0 88px;
     }
-    .form {
-      padding: 8px;
-    }
     .band > .bhead {
       grid-column: 1 / -1;
       margin-bottom: 24px;
@@ -1992,6 +2053,39 @@
     }
     .links .by {
       margin-left: 0;
+    }
+  }
+
+  /* On phones the hosted card stacks: picture, text, then the form. */
+  @media (max-width: 640px) {
+    .plans > .panel:first-child {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px 0;
+    }
+    .hosted-card.with-form {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto;
+      grid-template-areas:
+        'pic'
+        'text'
+        'form';
+      gap: 0;
+    }
+    .hosted-card.with-form .shot {
+      margin-bottom: 12px;
+    }
+    .hosted-card.with-form .hshot {
+      flex: none;
+      width: 62%;
+      min-height: 0;
+      margin: 0 auto;
+    }
+    .hosted-card.with-form .hshot .thumb {
+      height: auto;
+      aspect-ratio: 16 / 10;
+    }
+    .form {
+      margin: 12px 8px 8px;
     }
   }
 </style>
