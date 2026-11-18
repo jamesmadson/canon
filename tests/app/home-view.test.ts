@@ -70,6 +70,30 @@ describe('every control has a real label', () => {
   });
 });
 
+describe('search is not capped without saying so', () => {
+  it('searching a tag carried by 37 prototypes shows 12 of 37 and a way to show all', async () => {
+    const frames = Array.from({ length: 37 }, (_, i) => frame({ id: `t${i}`, name: `Screen ${i}`, tags: ['claude-code'], createdAt: i, updatedAt: i }));
+    await mount(SearchHost, { cards: cardsOf(frames), projectName: () => 'P', onPick: () => {} });
+    await key(window, 'k', { metaKey: true });
+    const input = document.querySelector<HTMLInputElement>('input[role="combobox"]')!;
+    await type(input, 'claude-code');
+    expect(document.querySelectorAll('[role="option"]').length).toBe(12);
+    expect(document.querySelector('.sw-more')!.textContent).toBe('Showing 12 of 37Show all');
+    await click(document.querySelector('.sw-more button')!);
+    expect(document.querySelectorAll('[role="option"]').length).toBe(37);
+    expect(document.querySelector('.sw-more')).toBeNull();
+  });
+
+  it('shows no count when everything fits', async () => {
+    const frames = Array.from({ length: 5 }, (_, i) => frame({ id: `t${i}`, name: `Screen ${i}`, tags: ['claude-code'] }));
+    await mount(SearchHost, { cards: cardsOf(frames), projectName: () => 'P', onPick: () => {} });
+    await key(window, 'k', { metaKey: true });
+    await type(document.querySelector<HTMLInputElement>('input[role="combobox"]')!, 'claude-code');
+    expect(document.querySelectorAll('[role="option"]').length).toBe(5);
+    expect(document.querySelector('.sw-more')).toBeNull();
+  });
+});
+
 describe('a named prototype is on screen in three actions or fewer', () => {
   const setup = async () => {
     const { frames, projects } = fifty();

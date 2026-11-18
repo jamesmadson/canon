@@ -547,7 +547,7 @@ function Inspector({ frame, askUrl, onFocus, onEnter, onRemove, onComment, onOpe
             ? html`<a class="btn primary" href=${safeFrameUrl(frame.url)} target="_blank" rel="noopener"><${Icon} name="open" />Open</a>`
             : html`<button class="btn primary" onClick=${onFocus}><${Icon} name="open" />Open</button>`}
         ${frame.kind === 'linked' && html`<button class="btn" onClick=${() => store.refreshLinked(frame.id)}><${Icon} name="refresh" />Refresh</button>`}
-        ${frame.kind !== 'url' && html`<a class="btn ghost" href=${previewUrl(frame)} target="_blank" rel="noopener" title="Opens in its own tab, with notes"><${Icon} name="comment" />Preview link</a>`}
+        ${frame.kind !== 'url' && html`<a class="btn ghost" href=${previewUrl(frame)} target="_blank" rel="noopener" title="Opens in its own tab, with notes"><${Icon} name="open" />Open in new tab</a>`}
       </div>
       ${frame.kind === 'linked' && canLinkFolders() && html`<p class="hint insp-hint">Moved or renamed the folder? <button class="link" onClick=${() => store.relocate(frame.id)}>Relocate it</button></p>`}
       ${frame.kind === 'files' && canLinkFolders() && html`<p class="hint insp-hint">A copy, so it won't change. <button class="link" onClick=${() => store.relocate(frame.id)}>Link it to its folder</button> to refresh from disk.</p>`}
@@ -563,7 +563,7 @@ function Inspector({ frame, askUrl, onFocus, onEnter, onRemove, onComment, onOpe
     </div>
     <div class="insp-sec">
       <div class="label">Threads · ${multi ? `${notes.length} here, ${all.length} in all` : notes.length}</div>
-      ${notes.length === 0 && html`<p class="hint" style="margin:0">Press <kbd>N</kbd>, then click the prototype. Or add one from its preview link.</p>`}
+      ${notes.length === 0 && html`<p class="hint" style="margin:0">Press <kbd>N</kbd>, then click the prototype. Or use Note in the prototype view.</p>`}
       ${notes.map((n) => html`<button class="thread-row" onClick=${() => onOpenThread(n)}><${NoteItem} note=${n} /></button>`)}
       ${notes.length > 0 && html`<button class="btn ghost" onClick=${onComment}><${Icon} name="comment" />Add a note</button>`}
     </div>
@@ -706,7 +706,7 @@ export function BundleView({ frameId, fromBoard, startPage }: { frameId: string;
         <button aria-pressed=${!showNav} onClick=${() => setShowNav(false)} title="Links that move someone through the prototype">Flow</button>
         <button aria-pressed=${showNav} onClick=${() => setShowNav(true)} title=${`${navigation.length} links that most pages share, like a top nav`}>+ Nav links · ${navigation.length}</button>
       </div>`}
-      <a class="btn ghost" href=${previewUrl(frame, selected ?? entry)} target="_blank" rel="noopener" title="Opens in its own tab, with notes"><${Icon} name="comment" />Preview link</a>
+      <a class="btn ghost" href=${previewUrl(frame, selected ?? entry)} target="_blank" rel="noopener" title="Opens in its own tab, with notes"><${Icon} name="open" />Open in new tab</a>
     </div>
     <div class="board">
       <div ref=${canvasRef}
@@ -799,14 +799,14 @@ function PageInspector({ frame, page, onFocus, onPick, onComment, onOpenThread }
       <div class="mono faint" style="font-size:11.5px">${page}</div>
       <div class="row">
         <button class="btn primary" onClick=${onFocus}><${Icon} name="open" />Open</button>
-        <a class="btn ghost" href=${previewUrl(frame, page)} target="_blank" rel="noopener"><${Icon} name="comment" />Preview link</a>
+        <a class="btn ghost" href=${previewUrl(frame, page)} target="_blank" rel="noopener"><${Icon} name="open" />Open in new tab</a>
       </div>
     </div>
     <div class="insp-sec"><div class="label">Links to · ${out.length}</div>${list(out, 'No links to other pages.')}</div>
     <div class="insp-sec"><div class="label">Linked from · ${into.length}</div>${list(into, page === frame.entry ? 'The entry page.' : 'Nothing links here. It may be orphaned.')}</div>
     <div class="insp-sec" style="border:0">
       <div class="label">Threads · ${notes.length}</div>
-      ${notes.length === 0 && html`<p class="hint" style="margin:0">Press <kbd>N</kbd> and click this page, or add one from its preview link.</p>`}
+      ${notes.length === 0 && html`<p class="hint" style="margin:0">Press <kbd>N</kbd> and click this page, or use Note in the prototype view.</p>`}
       ${notes.map((n) => html`<button class="thread-row" onClick=${() => onOpenThread(n)}><${NoteItem} note=${n} /></button>`)}
       ${notes.length > 0 && html`<button class="btn ghost" onClick=${onComment}><${Icon} name="comment" />Add a note</button>`}
     </div>

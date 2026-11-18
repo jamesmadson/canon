@@ -60,9 +60,9 @@ function Agents() {
   const { agents, connected, connecting } = useBridge();
   if (!agents.length) return null;
   const disconnect = (id: string, name: string) => {
-    if (confirm(`Disconnect ${name}? It will need a new pairing link to reach Canon again.`)) removeAgent(id).catch(() => store.toast(`Could not disconnect ${name}.`));
+    if (confirm(`Disconnect ${name}? It will stop adding prototypes to Canon, and nothing already here is deleted. To connect it again, ask it to run canon_pair and open the link it gives you.`)) removeAgent(id).catch(() => store.toast(`Could not disconnect ${name}.`));
   };
-  return html`<div class="agents">
+  return html`<div class="agents" role="group" aria-label="Connected agents">
     ${[...agents].sort((a, b) => a.name.localeCompare(b.name)).map((a) => {
       const state = connected.has(a.id) ? 'on' : connecting.has(a.id) ? 'wait' : 'off';
       const label = { on: 'connected', wait: 'connecting', off: 'not connected' }[state];

@@ -910,3 +910,9 @@ button.ver-chip:hover { color: var(--text); }
 .thumb .sheet { fill: var(--hover); }
 
 .scard .cver { display: block; color: var(--soft); font-size: 12px; }
+
+/* The agent sits apart from backup and restore, so Disconnect is never a mis-click away from them. */
+.rail-foot .agents { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+
+.switcher .sw-more { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; border-top: 1px solid var(--line); color: var(--soft); font-size: 12px; }
+.switcher .sw-more button { height: 24px; padding: 0 10px; border: 0; border-radius: var(--r-sm); background: var(--raised); color: var(--text); font-size: 12px; }
