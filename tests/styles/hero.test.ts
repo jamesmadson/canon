@@ -56,6 +56,20 @@ describe('the scattered hero at /', () => {
     expect(box).not.toMatch(/<(a|button|input|select|textarea)\b|tabindex/);
   });
 
+  it('names Claude Code first, and the script cycles Claude Code, Codex, Cursor', () => {
+    const box = html.slice(html.indexOf('class="pbox"'), html.indexOf('data-scatter'));
+    expect(box).toMatch(/<div class="plabel" data-agent-name>Claude Code<\/div>/);
+    // The card the agent filed follows the same name, in its chip and its source line.
+    expect(stage().match(/data-agent-name[^>]*>Claude Code</g)).toHaveLength(2);
+    const script = read('src/scripts/scatter.ts');
+    expect(script).toContain("const AGENTS = ['Claude Code', 'Codex', 'Cursor'];");
+    // The swap happens in the reset, while the stage is faded out.
+    expect(script).toMatch(/snap\(\(\) => \{[^}]*nextAgent\(\);/);
+    expect(script).toMatch(/\(agent \+ 1\) % AGENTS\.length/);
+    // The typed prompt and the reply do not change with the name.
+    expect(box).toContain('canon_add  9 prototypes, 3 projects');
+  });
+
   it('is decorative: hidden from assistive tech, with nothing to focus', () => {
     const s = html.slice(html.indexOf('<div class="sstage"'));
     expect(s.slice(0, 80)).toContain('aria-hidden="true"');

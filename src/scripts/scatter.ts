@@ -40,6 +40,9 @@ const PHONE: (Spot | null)[] = [
   null,
 ];
 
+/** The agents Canon supports, in the order the loop names them. */
+const AGENTS = ['Claude Code', 'Codex', 'Cursor'];
+
 const TICK = 50; // ms
 const TYPE_AT = 30; // 1.5 seconds of loose cards, then the prompt types
 const TYPE_TICKS = 32; // about 1.6 seconds
@@ -128,6 +131,16 @@ function init(stage: HTMLElement) {
   }
   if (forced === 'filed' || forced === 'scattered') return;
 
+  // Each cycle names the next agent, swapped while everything is faded out.
+  // The label is a block, so its width never depends on the name. The markup
+  // says "Claude Code", which is also what reduced motion and ?state= show.
+  const names = [...document.querySelectorAll<HTMLElement>('[data-agent-name]')];
+  let agent = 0;
+  const nextAgent = () => {
+    agent = (agent + 1) % AGENTS.length;
+    names.forEach((n) => (n.textContent = AGENTS[agent]));
+  };
+
   let t = 0;
   let timer = 0;
   let visible = true;
@@ -143,6 +156,7 @@ function init(stage: HTMLElement) {
         stage.classList.remove('is-filed');
         type(0);
         reply?.classList.remove('on');
+        nextAgent();
       });
     } else if (t === outAt + FADE + 1) {
       mark('out', false);

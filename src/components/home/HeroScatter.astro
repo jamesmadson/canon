@@ -23,6 +23,8 @@ interface Card {
   source: string;
   when: string;
   mono?: boolean;
+  /** The card the agent filed: its source follows the agent name in the prompt box. */
+  agent?: boolean;
 }
 interface Project {
   name: string;
@@ -33,7 +35,7 @@ const PROJECTS: Project[] = [
     name: 'Onboarding',
     cards: [
       { k: 'w2', name: 'Welcome, single screen', source: 'Lovable', when: 'just now' },
-      { k: 'w1', name: 'Welcome, three steps', source: 'Claude Code', when: 'Tuesday' },
+      { k: 'w1', name: 'Welcome, three steps', source: 'Claude Code', when: 'Tuesday', agent: true },
       { k: 'w3', name: 'Invite a teammate', source: 'Figma Make', when: 'Monday' },
     ],
   },
@@ -81,7 +83,7 @@ const words = PROMPT.split(' ');
   </div>
 
   <div class="pbox" aria-hidden="true" data-prompt={PROMPT}>
-    <div class="plabel">Claude Code</div>
+    <div class="plabel" data-agent-name>Claude Code</div>
     <div class="ptext"><span class="pdim">&gt;</span>{' '}{
       words.map((w, i) => (
         <>
@@ -130,9 +132,9 @@ const words = PROMPT.split(' ');
                           <div class="sh"></div>
                           <Thumb k={c.k} />
                           {i === 0 && <div class="sring fx"></div>}
-                          <span class:list={['chip', c.mono && 'mono']}>{c.source}</span>
+                          <span class:list={['chip', c.mono && 'mono']} data-agent-name={c.agent ? '' : undefined}>{c.source}</span>
                           <div class="pname fxn">{c.name}</div>
-                          <div class="pmeta fxn"><span class:list={[c.mono && 'mono']}>{c.source}</span> · {c.when}</div>
+                          <div class="pmeta fxn"><span class:list={[c.mono && 'mono']} data-agent-name={c.agent ? '' : undefined}>{c.source}</span> · {c.when}</div>
                         </div>
                       </div>
                     );
