@@ -1788,9 +1788,11 @@
     font-size: 15px;
     line-height: 20px;
   }
-  @container (min-width: 340px) {
+  /* The field keeps at least 260px beside the button. Narrower than that, the
+     button sits below it at full width. */
+  @container (min-width: 460px) {
     .frow {
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(260px, 1fr) auto;
       align-items: end;
     }
   }
