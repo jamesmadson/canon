@@ -31,6 +31,23 @@ describe('the scattered hero at /hero-b/', () => {
     const chips = [...s.matchAll(/<span class="[^"]*chip[^"]*"[^>]*>([^<]+)<\/span>/g)].map((m) => m[1]);
     expect(chips).toEqual(['Lovable', 'Claude Code', 'Figma Make', 'v0', 'Codex', 'Bolt', 'localhost:3000', 'mobile-sign-up.zip', 'Slack link']);
     for (const name of ['Onboarding', 'Dashboard', 'Mobile navigation']) expect(s).toContain(`<b>${name}</b>`);
+    // Three rows of three, and no name long enough to be cut off.
+    expect(s.match(/<div class="shelf">/g)).toHaveLength(3);
+    for (const shelf of s.split('<div class="shelf">').slice(1)) expect(shelf.match(/data-card/g)).toHaveLength(3);
+    expect(s).toContain('>Empty dashboard<');
+    expect(s).not.toContain('with sample data');
+  });
+
+  it('has a decorative prompt that types the request and then shows the reply', () => {
+    const box = html.slice(html.indexOf('class="pbox"'), html.indexOf('data-scatter'));
+    expect(box).toContain('aria-hidden="true"');
+    expect(box).toContain('data-prompt="Put all my prototypes in Canon, by project."');
+    expect(box.replace(/<[^>]+>/g, '').replace(/&gt;/g, '>').replace(/\s/g, '')).toContain('>Putallmyprototypesin Canon,byproject.'.replace(' ', ''));
+    expect(box.match(/class="pc"/g)).toHaveLength('Put all my prototypes in Canon, by project.'.replaceAll(' ', '').length);
+    expect(box).toContain('Claude Code');
+    expect(box).toContain('canon_add  9 prototypes, 3 projects');
+    expect(box).toContain('class="pcaret"');
+    expect(box).not.toMatch(/<(a|button|input|select|textarea)\b|tabindex/);
   });
 
   it('is decorative: hidden from assistive tech, with nothing to focus', () => {
@@ -66,7 +83,14 @@ describe('the scattered hero styles and script', () => {
         expect(curve).toMatch(/^var\(--ease(-glide)?\)$/);
       }
     }
-    expect(css).not.toMatch(/animation:|@keyframes/);
+    // The one animation is the cursor's blink, which changes opacity only.
+    expect([...css.matchAll(/@keyframes (\w+)/g)].map((m) => m[1])).toEqual(['pblink']);
+    expect(css.match(/@keyframes pblink \{([\s\S]*?\n {2}\})/)![1]).not.toMatch(/transform|width|height|left|top|margin/);
+    expect([...css.matchAll(/animation:/g)]).toHaveLength(1);
+    // The prompt is shown whole, without its cursor, under reduced motion.
+    expect(css).toMatch(/prefers-reduced-motion: reduce\) \{[\s\S]*?\.pbox \.pcaret \{\s*display: none !important/);
+    // The cursor is the one place the box uses Canon orange.
+    expect(css).toMatch(/\.pcaret \{[^}]*background: var\(--sel\)/);
     for (const m of css.matchAll(/(\d+)ms/g)) expect(Number(m[1]) >= 100 && Number(m[1]) <= 400, `${m[1]}ms`).toBe(true);
   });
 

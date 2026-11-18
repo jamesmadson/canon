@@ -34,20 +34,20 @@ const PROJECTS: Project[] = [
       { k: 'w2', name: 'Welcome, single screen', source: 'Lovable', when: 'just now' },
       { k: 'w1', name: 'Welcome, three steps', source: 'Claude Code', when: 'Tuesday' },
       { k: 'w3', name: 'Invite a teammate', source: 'Figma Make', when: 'Monday' },
-      { k: 'w4', name: 'Empty dashboard, with sample data', source: 'v0', when: 'last week' },
     ],
   },
   {
     name: 'Dashboard',
     cards: [
+      { k: 'w4', name: 'Empty dashboard', source: 'v0', when: 'last week' },
       { k: 'd1', name: 'Overview, this week', source: 'Codex', when: '2 Nov' },
       { k: 'd2', name: 'People table', source: 'Bolt', when: '30 Oct' },
-      { k: 'd3', name: 'Notes by month', source: 'localhost:3000', when: '28 Oct', mono: true },
     ],
   },
   {
     name: 'Mobile navigation',
     cards: [
+      { k: 'd3', name: 'Navigation, notes view', source: 'localhost:3000', when: '28 Oct', mono: true },
       { k: 'w5', name: 'Mobile sign-up', source: 'mobile-sign-up.zip', when: '26 Oct', mono: true },
       { k: 'm1', name: 'Bottom tab bar', source: 'Slack link', when: '24 Oct' },
     ],
@@ -55,10 +55,27 @@ const PROJECTS: Project[] = [
 ];
 const total = PROJECTS.reduce((n, p) => n + p.cards.length, 0);
 let index = 0;
+
+const PROMPT = 'Put all my prototypes in Canon, by project.';
+const REPLY = `canon_add  ${total} prototypes, ${PROJECTS.length} projects`;
+const words = PROMPT.split(' ');
 ---
 
 <section class="hero hero-b" aria-labelledby="h-hero">
   <HeroText waitlistUrl={waitlistUrl} />
+
+  <div class="pbox" aria-hidden="true" data-prompt={PROMPT}>
+    <div class="plabel">Claude Code</div>
+    <div class="ptext"><span class="pdim">&gt;</span>{' '}{
+      words.map((w, i) => (
+        <>
+          <span class="pw">{[...w].map((ch) => <span class="pc">{ch}</span>)}</span>
+          {i < words.length - 1 ? ' ' : ''}
+        </>
+      ))
+    }<span class="pcaret"></span></div>
+    <div class="preply">{REPLY}</div>
+  </div>
 
   <div class="sstage" aria-hidden="true" data-scatter>
     <div class="sclip">
@@ -121,11 +138,13 @@ let index = 0;
 </script>
 
 <style is:global>
-  /* One column, text above the stage, on every width. */
+  /* Text, then the prompt, then the stage. From 1100px the prompt moves up
+     beside the text, centred on it. */
   .hero.hero-b {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       'text'
+      'prompt'
       'stage';
     gap: 0;
     align-items: start;
@@ -134,14 +153,119 @@ let index = 0;
     position: relative;
     z-index: 2;
   }
+  @media (min-width: 1100px) {
+    .hero.hero-b {
+      grid-template-columns: minmax(0, 1fr) 420px;
+      grid-template-areas:
+        'text prompt'
+        'stage stage';
+      column-gap: 48px;
+      row-gap: 0;
+      align-items: center;
+    }
+  }
+
+  /* The prompt: a decorative agent input that types the request. The whole
+     line is in the layout from the start; characters are only revealed. */
+  .pbox {
+    grid-area: prompt;
+    position: relative;
+    z-index: 3;
+    margin-top: 32px;
+    padding: 14px 18px 16px;
+    border-radius: 14px;
+    background: var(--wn-main);
+    box-shadow:
+      0 0 0 1px var(--wn-line-strong),
+      0 24px 60px -20px var(--shadow);
+    pointer-events: none;
+  }
+  @media (min-width: 1100px) {
+    .pbox {
+      margin-top: 0;
+    }
+  }
+  .plabel {
+    margin-bottom: 10px;
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--color-ink-soft);
+  }
+  .ptext {
+    font-size: 15px;
+    line-height: 24px;
+    color: var(--color-ink);
+  }
+  .pdim {
+    color: var(--color-ink-soft);
+  }
+  .pw {
+    white-space: nowrap;
+  }
+  .preply {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--color-ink-soft);
+    white-space: pre-wrap;
+  }
+  /* The cursor takes no room, so moving it never reflows the line. */
+  .pcaret {
+    display: none;
+    width: 2px;
+    height: 18px;
+    margin-right: -2px;
+    vertical-align: -3px;
+    background: var(--sel);
+    animation: pblink 1.1s steps(1) infinite;
+  }
+  @keyframes pblink {
+    50% {
+      opacity: 0;
+    }
+  }
+  .pbox.live .pcaret {
+    display: inline-block;
+  }
+  .pbox.live .pc:not(.on) {
+    opacity: 0;
+  }
+  .motion .pbox {
+    opacity: 0;
+  }
+  .motion .pbox.ready {
+    opacity: 1;
+    transition: opacity 300ms var(--ease);
+  }
+  .pbox.live .ptext,
+  .pbox.live .preply {
+    transition: opacity 300ms var(--ease);
+  }
+  .pbox.live .preply {
+    opacity: 0;
+  }
+  .pbox.live .preply.on {
+    opacity: 1;
+  }
+  .pbox.live.out .ptext,
+  .pbox.live.out .preply {
+    opacity: 0;
+  }
+  .pbox.snap *,
+  .pbox.snap *::before,
+  .pbox.snap *::after {
+    transition: none !important;
+  }
 
   /* The stage is as wide as the page container. The window inside is clipped
      only along its bottom edge, so loose cards can drift up beside the text. */
   .sstage {
     grid-area: stage;
     position: relative;
-    height: 660px;
-    margin-top: 40px;
+    z-index: 1;
+    height: 740px;
+    margin-top: 24px;
     pointer-events: none;
   }
   .sclip {
@@ -168,8 +292,8 @@ let index = 0;
       0 0 0 1px var(--edge),
       inset 0 1px 0 var(--hi),
       0 40px 100px -24px var(--shadow);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 78%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0, #000 78%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 86%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0, #000 86%, transparent 100%);
   }
   .sbg-main {
     position: absolute;
@@ -210,15 +334,18 @@ let index = 0;
   }
   .sapp .srow {
     position: relative;
-    padding: 10px 20px 12px;
+    padding: 8px 20px 10px;
     border-bottom: 0;
   }
   .sapp .shead {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .sapp .shelf {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .sapp .thumb {
+    aspect-ratio: 16 / 9;
   }
   /* The same fade as the app window's bottom, laid over the cards. */
   .sovl {
@@ -226,7 +353,7 @@ let index = 0;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 24%;
+    height: 18%;
     background: linear-gradient(to bottom, transparent, var(--color-ground) 92%);
     pointer-events: none;
   }
@@ -244,7 +371,7 @@ let index = 0;
     top: 0;
     left: 0;
     right: 0;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
     border-radius: 9px;
     box-shadow:
       0 24px 44px -12px var(--shadow),
@@ -256,7 +383,7 @@ let index = 0;
     top: 0;
     left: 0;
     right: 0;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
     border-radius: 9px;
     box-shadow:
       0 0 0 2px var(--wn-main),
@@ -264,17 +391,17 @@ let index = 0;
   }
   .chip {
     position: absolute;
-    left: 8px;
-    top: calc(62.5cqw - 30px);
+    left: calc(8px / var(--sc, 1));
+    top: calc(56.25cqw - 30px / var(--sc, 1));
     z-index: 3;
     display: inline-flex;
     align-items: center;
-    height: 22px;
-    padding: 0 9px;
-    border-radius: 9px;
+    height: 1.75em;
+    padding: 0 0.7em;
+    border-radius: 0.7em;
     background: var(--wn-main);
     color: var(--color-ink);
-    font-size: 12px;
+    font-size: calc(13px / var(--sc, 1));
     line-height: 1;
     font-weight: 500;
     white-space: nowrap;
@@ -284,7 +411,7 @@ let index = 0;
     opacity: 0;
   }
   .chip.mono {
-    font-size: 12px;
+    font-size: calc(13px / var(--sc, 1));
     font-weight: 400;
   }
   .pmeta .mono {
@@ -386,12 +513,27 @@ let index = 0;
     .sstage .sh {
       opacity: 0 !important;
     }
+    /* The prompt shows whole, with its reply and no cursor. */
+    .pbox {
+      opacity: 1;
+    }
+    .pbox * {
+      transition: none !important;
+    }
+    .pbox .pc,
+    .pbox .ptext,
+    .pbox .preply {
+      opacity: 1 !important;
+    }
+    .pbox .pcaret {
+      display: none !important;
+    }
   }
 
   @media (max-width: 960px) {
     .sstage {
-      height: 690px;
-      margin-top: 40px;
+      height: 640px;
+      margin-top: 24px;
     }
     .sapp {
       grid-template-columns: minmax(0, 1fr);
