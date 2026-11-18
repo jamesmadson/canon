@@ -3,6 +3,7 @@ import '../styles/global.css';
 import HomeStyles from '../components/home/HomeStyles.astro';
 import SiteHeader from '../components/home/SiteHeader.astro';
 import SiteFooter from '../components/home/SiteFooter.astro';
+import SectionNav from '../components/home/SectionNav.astro';
 import { withBase } from '../lib/withBase';
 
 interface Props {
@@ -75,6 +76,7 @@ const {
       <slot />
     </main>
     <SiteFooter />
+    <SectionNav />
     <slot name="after-footer" />
 </body>
 </html>

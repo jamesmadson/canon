@@ -94,7 +94,7 @@ describe('the pictures', () => {
 
   // Mutation: rename the section back, or drop the project row under the three cards.
   it('labels the nav Projects', () => {
-    expect(read('src/components/home/SiteHeader.astro')).toContain("{ label: 'Projects', href: '/#projects' }");
+    expect(read('src/components/home/SectionNav.astro')).toContain("{ label: 'Projects', section: 'projects', href: '/#projects' }");
   });
 
   it('opens with projects: the heading, the nav label, and one project fed by three sources', () => {
