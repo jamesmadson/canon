@@ -1,22 +1,28 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 const root = join(__dirname, '..', '..');
 const read = (p: string) => readFileSync(join(root, p), 'utf8');
 
+const page = (name: string) => {
+  const out = execFileSync('node', ['tests/helpers/renderPage.mjs', name], { cwd: root, encoding: 'utf8', maxBuffer: 20_000_000 });
+  return out.slice(out.indexOf('\u0001') + 1);
+};
+
 let html = '';
+let heroA = '';
 beforeAll(() => {
-  const out = execFileSync('node', ['tests/helpers/renderHeroB.mjs'], { cwd: root, encoding: 'utf8', maxBuffer: 20_000_000 });
-  html = out.slice(out.indexOf('\u0001') + 1);
+  html = page('index');
+  heroA = page('hero-a');
 }, 120_000);
 
 const stage = () => html.slice(html.indexOf('data-scatter'), html.indexOf('</section>', html.indexOf('data-scatter')));
 
-describe('the scattered hero at /hero-b/', () => {
-  it('is kept out of search results and carries the heading and both actions', () => {
-    expect(html).toContain('<meta name="robots" content="noindex">');
+describe('the scattered hero at /', () => {
+  it('is in search results and carries the heading and the action', () => {
+    expect(html).not.toContain('noindex');
     expect(html).toContain('Your prototypes are everywhere.');
     expect(html).toMatch(/Canon keeps them in one[\s\u00a0]place\./);
     expect(html).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/">Open the app<\/a>/);
@@ -77,9 +83,26 @@ describe('the scattered hero at /hero-b/', () => {
     expect(statSync(join(root, 'public/texture/hero-grain-960.webp')).size).toBeLessThan(120 * 1024);
   });
 
-  it('leaves the original hero as it was', () => {
+  it('is the default hero of the homepage', () => {
     expect(read('src/pages/index.astro')).not.toContain('hero=');
-    expect(read('src/components/home/HomePage.astro')).toContain("hero = 'terminal'");
+    expect(read('src/components/home/HomePage.astro')).toContain("hero = 'scatter'");
+    expect(html).toContain('class="hero hero-b"');
+  });
+});
+
+describe('the earlier terminal hero at /hero-a/', () => {
+  it('is kept out of search results and still draws the terminal and the app window', () => {
+    expect(heroA).toContain('<meta name="robots" content="noindex">');
+    expect(heroA).toContain('class="term');
+    expect(heroA).toContain('class="stage');
+    expect(heroA).not.toContain('data-scatter');
+    expect(read('src/pages/hero-a.astro')).toContain('hero="terminal"');
+  });
+
+  it('is its own page, and the old /hero-b/ address lands on the homepage', () => {
+    expect(existsSync(join(root, 'src/pages/hero-a.astro'))).toBe(true);
+    expect(existsSync(join(root, 'src/pages/hero-b.astro'))).toBe(false);
+    expect(read('astro.config.mjs')).toContain("'/hero-b': '/canon/'");
   });
 });
 

@@ -9,8 +9,9 @@ export default defineConfig({
   // so parallel worktrees don't fight over 4321. No effect on builds.
   server: process.env.PORT ? { port: Number(process.env.PORT) } : undefined,
   integrations: [mdx()],
-  // The skill briefly shipped as "dieter"; keep the old URL landing somewhere.
-  redirects: { '/skills/dieter': '/canon/skills/deter/' },
+  // The skill briefly shipped as "dieter", and the scattered hero lived at
+  // /hero-b/ before it became the homepage; keep the old URLs landing somewhere.
+  redirects: { '/skills/dieter': '/canon/skills/deter/', '/hero-b': '/canon/' },
   vite: {
     plugins: [tailwindcss()],
   },

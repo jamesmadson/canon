@@ -7,8 +7,8 @@ const root = join(__dirname, '..', '..');
 const read = (p: string) => readFileSync(join(root, p), 'utf8');
 
 /** The homepage as HTML, rendered by Astro in a child process. */
-function render(waitlistUrl = ''): string {
-  const out = execFileSync('node', ['tests/helpers/renderHome.mjs', waitlistUrl], { cwd: root, encoding: 'utf8', maxBuffer: 20_000_000 });
+function render(waitlistUrl = '', hero = 'scatter'): string {
+  const out = execFileSync('node', ['tests/helpers/renderHome.mjs', waitlistUrl, hero], { cwd: root, encoding: 'utf8', maxBuffer: 20_000_000 });
   return out.slice(out.indexOf('\u0001') + 1);
 }
 
@@ -25,9 +25,11 @@ const text = (html: string) =>
 const WAITLIST = 'https://example.test/join';
 let closed = '';
 let open = '';
+let terminal = '';
 beforeAll(() => {
   closed = render('');
   open = render(WAITLIST);
+  terminal = render('', 'terminal');
 }, 120_000);
 
 describe('the commands and feedback link', () => {
@@ -43,7 +45,7 @@ describe('the commands and feedback link', () => {
   // Mutation: bring back the bare command or point the hero link elsewhere.
   it('has an Open the app link in the hero and no bare npx usecanon command', () => {
     for (const html of [closed, open]) {
-      const hero = html.slice(html.indexOf('class="hero"'), html.indexOf('class="stage'));
+      const hero = html.slice(html.indexOf('class="hero'), html.indexOf('id="projects"'));
       expect(hero).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/">Open the app<\/a>/);
       expect(hero).toContain('claude mcp add canon -- npx -y usecanon mcp');
       expect(text(html).replaceAll('npx -y usecanon mcp', '')).not.toMatch(/npx\s+usecanon/);
@@ -69,10 +71,8 @@ describe('the pictures', () => {
       const t = text(html);
       expect(t).not.toMatch(/pricing|checkout/i);
       expect(t).toContain('Welcome, single screen');
-      expect(html).toContain('data-type="Add the single screen version of the welcome flow"');
       expect(html).toContain('data-type="Gather every onboarding prototype into one project."');
       expect(t).toContain('canon_add');
-      expect(t).toContain('“Welcome, single screen”');
       expect(t).toContain('Welcome, three steps');
       expect(t).toContain('Invite a teammate');
       expect(t).toContain('Empty dashboard, with sample data');
@@ -85,6 +85,11 @@ describe('the pictures', () => {
       expect(t).toContain('Priya');
       expect(t).toContain('Try the single screen first?');
     }
+  });
+
+  it('keeps the terminal hero prompt on the earlier hero', () => {
+    expect(terminal).toContain('data-type="Add the single screen version of the welcome flow"');
+    expect(text(terminal)).toContain('“Welcome, single screen”');
   });
 
   // Mutation: rename the section back, or drop the project row under the three cards.

@@ -4,12 +4,12 @@ import HomePage from '../components/home/HomePage.astro';
 import { WAITLIST_URL } from '../lib/site';
 ---
 
-<!-- The homepage with the scattered hero, for comparing with the one at /. -->
+<!-- The homepage with the earlier terminal hero, kept for comparing with the one at /. -->
 <BaseLayout
   wide
   noindex
   title="One place for every prototype"
   description="Your prototypes are spread across tools. Canon keeps every link, zip and agent build in one place, by project, on your machine."
 >
-  <HomePage waitlistUrl={WAITLIST_URL} hero="scatter" />
+  <HomePage waitlistUrl={WAITLIST_URL} hero="terminal" />
 </BaseLayout>
