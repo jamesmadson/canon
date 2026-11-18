@@ -8,6 +8,7 @@ import { bridgeView, removeAgent, subscribeBridge } from './bridge/client';
 import { Avatar } from './comments';
 import { html, Icon, go, ago, useStore } from './shared';
 import { isMac, openSearch } from './palette';
+import { FeedbackFoot } from './feedback';
 
 export function useBridge(): ReturnType<typeof bridgeView> {
   const [, force] = useState(0);
@@ -127,6 +128,7 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
       ${me ? html`<div class="me"><${Avatar} name=${me} /><span>${me}</span></div>` : null}
       <${Storage} />
       <${Agents} />
+      <${FeedbackFoot} />
     </div>
   </aside>`;
 }
