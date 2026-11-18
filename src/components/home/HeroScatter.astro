@@ -2,6 +2,7 @@
 import HeroText from './HeroText.astro';
 import Thumb from './Thumb.astro';
 import type { ThumbKey } from '../../lib/thumbs';
+import { withBase } from '../../lib/withBase';
 
 /**
  * The alternate hero. Nine prototypes sit loose, each with a chip naming where
@@ -63,6 +64,20 @@ const words = PROMPT.split(' ');
 
 <section class="hero hero-b" aria-labelledby="h-hero">
   <HeroText waitlistUrl={waitlistUrl} />
+
+  <div class="hpanel" aria-hidden="true">
+    <img
+      src={withBase('/texture/hero-grain.webp')}
+      srcset={`${withBase('/texture/hero-grain-960.webp')} 960w, ${withBase('/texture/hero-grain.webp')} 1920w`}
+      sizes="100vw"
+      alt=""
+      width="1920"
+      height="1080"
+      loading="eager"
+      decoding="async"
+    />
+    <div class="htone"></div>
+  </div>
 
   <div class="pbox" aria-hidden="true" data-prompt={PROMPT}>
     <div class="plabel">Claude Code</div>
@@ -127,7 +142,6 @@ const words = PROMPT.split(' ');
             ))
           }
         </div>
-        <div class="sovl fx"></div>
       </div>
     </div>
   </div>
@@ -162,6 +176,64 @@ const words = PROMPT.split(' ');
       column-gap: 48px;
       row-gap: 0;
       align-items: center;
+    }
+  }
+
+  /* The texture panel: a blurred grey photograph behind the product. From
+     1100px it spans the container behind the text, the prompt and the whole
+     stage, and ends where the window is cut off. Below that it wraps only the
+     stage. The photo is already blurred, so nothing here blurs or animates. */
+  .hpanel {
+    --hp-ground: #eae6e2;
+    --hp-tone: rgb(234 230 226 / 0.58);
+    --hp-solid: rgb(234 230 226 / 0.95);
+    grid-area: stage;
+    position: relative;
+    z-index: 0;
+    align-self: stretch;
+    margin: 28px -12px 0;
+    border-radius: 14px;
+    background: var(--hp-ground);
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .hpanel img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .htone {
+    position: absolute;
+    inset: 0;
+    background: var(--hp-tone);
+  }
+  /* Beside the text the panel washes out to its ground colour, so the muted
+     lines keep 4.5:1; the texture shows to the right and below. */
+  @media (min-width: 1100px) {
+    .htone {
+      background:
+        radial-gradient(ellipse 800px 400px at 330px 240px, var(--hp-solid) 0, var(--hp-solid) 55%, transparent 100%),
+        linear-gradient(var(--hp-tone), var(--hp-tone));
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-app-theme='system'] .hpanel {
+      --hp-ground: #1f1e1c;
+      --hp-tone: rgb(31 30 28 / 0.62);
+      --hp-solid: rgb(31 30 28 / 0.95);
+    }
+  }
+  :root[data-app-theme='dark'] .hpanel {
+    --hp-ground: #1f1e1c;
+    --hp-tone: rgb(31 30 28 / 0.62);
+    --hp-solid: rgb(31 30 28 / 0.95);
+  }
+  @media (min-width: 1100px) {
+    .hpanel {
+      grid-area: 1 / 1 / -1 / -1;
+      margin: -48px -40px 0;
     }
   }
 
@@ -264,9 +336,14 @@ const words = PROMPT.split(' ');
     grid-area: stage;
     position: relative;
     z-index: 1;
-    height: 740px;
-    margin-top: 24px;
+    height: 800px;
+    margin-top: 40px;
     pointer-events: none;
+  }
+  @media (min-width: 1100px) {
+    .sstage {
+      margin-top: 24px;
+    }
   }
   .sclip {
     position: absolute;
@@ -285,21 +362,19 @@ const words = PROMPT.split(' ');
   }
   .sbg {
     position: absolute;
-    inset: 0;
+    inset: 0 0 -80px;
     border-radius: 14px;
     background: var(--wn-rail);
     box-shadow:
       0 0 0 1px var(--edge),
       inset 0 1px 0 var(--hi),
       0 40px 100px -24px var(--shadow);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 86%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0, #000 86%, transparent 100%);
   }
   .sbg-main {
     position: absolute;
     top: 8px;
     right: 8px;
-    bottom: 0;
+    bottom: -80px;
     left: 216px;
     border-radius: 11px;
     background: var(--wn-main);
@@ -346,16 +421,6 @@ const words = PROMPT.split(' ');
   }
   .sapp .thumb {
     aspect-ratio: 16 / 9;
-  }
-  /* The same fade as the app window's bottom, laid over the cards. */
-  .sovl {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 18%;
-    background: linear-gradient(to bottom, transparent, var(--color-ground) 92%);
-    pointer-events: none;
   }
 
   /* The slot is a size container so the chip can sit on the thumbnail's lower
@@ -533,7 +598,7 @@ const words = PROMPT.split(' ');
   @media (max-width: 960px) {
     .sstage {
       height: 640px;
-      margin-top: 24px;
+      margin-top: 40px;
     }
     .sapp {
       grid-template-columns: minmax(0, 1fr);

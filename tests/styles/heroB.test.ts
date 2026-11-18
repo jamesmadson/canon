@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 
@@ -57,6 +57,22 @@ describe('the scattered hero at /hero-b/', () => {
     expect(inside).not.toMatch(/<(a|button|input|select|textarea)\b|tabindex/);
   });
 
+  it('has a texture panel whose picture is decorative, sized, self-hosted and base-aware', () => {
+    const panel = html.slice(html.indexOf('class="hpanel"'), html.indexOf('class="pbox"'));
+    const img = panel.match(/<img\b[^>]*>/)![0];
+    expect(panel).toContain('aria-hidden="true"');
+    expect(img).toContain('alt=""');
+    expect(img).toContain('width="1920"');
+    expect(img).toContain('height="1080"');
+    expect(img).toContain('loading="eager"');
+    expect(img).toContain('decoding="async"');
+    expect(img).toContain('src="/canon/texture/hero-grain.webp"');
+    expect(img).toContain('/canon/texture/hero-grain-960.webp 960w');
+    expect(img).not.toMatch(/https?:/);
+    expect(statSync(join(root, 'public/texture/hero-grain.webp')).size).toBeLessThan(120 * 1024);
+    expect(statSync(join(root, 'public/texture/hero-grain-960.webp')).size).toBeLessThan(120 * 1024);
+  });
+
   it('leaves the original hero as it was', () => {
     expect(read('src/pages/index.astro')).not.toContain('hero=');
     expect(read('src/components/home/HomePage.astro')).toContain("hero = 'terminal'");
@@ -100,6 +116,12 @@ describe('the scattered hero styles and script', () => {
     expect(script).toContain('new IntersectionObserver');
     expect(script).toContain("document.addEventListener('visibilitychange'");
     expect(script).toContain(".get('state')");
+  });
+
+  it('leaves the blur to the photograph and does not animate the panel', () => {
+    expect(css).not.toMatch(/blur\(|backdrop-filter/);
+    const panelRules = [...css.matchAll(/\.(?:hpanel|htone)[^{]*\{[^}]*\}/g)].map((m) => m[0]).join('\n');
+    expect(panelRules).not.toMatch(/transition|animation/);
   });
 
   it('puts no orange on the chips', () => {
