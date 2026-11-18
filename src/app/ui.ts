@@ -2,12 +2,13 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import * as store from './store';
 import type { Frame, Note } from './db';
 import { groupsFromDrop } from './intake';
-import { BoardView, BundleView, Focus } from './canvas';
+import { BoardView, BundleView } from './canvas';
+import { PrototypeView, openPrototype } from './prototype';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
 import { FilterMenu, Home } from './home';
 import { AddMenu, ProtoRow, StarButton, Tags } from './parts';
 import { currentOf, stackKey, versionOf } from './lib/versions';
-import { checkPrototypeUrl, safeFrameUrl } from './lib/resolve';
+import { checkPrototypeUrl } from './lib/resolve';
 import { type Address, buildAddress, parseAddress } from './lib/address';
 import { type PairLink, pairNotice, parsePairLink, saveAgent } from './bridge/client';
 import { SearchHost } from './palette';
@@ -174,7 +175,6 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
   const [filter, setFilter] = useState<LibraryFilter>({ source: 'all', tags: [] });
   const [sort, setSort] = useState<LibrarySort>('updated');
   const [picked, setPicked] = useState<Set<string>>(new Set());
-  const [focus, setFocus] = useState<string | null>(null);
   const all = store.libraryItems(projectId);
   const matched = sortPrototypes(filterPrototypes(all, filter), sort);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -204,11 +204,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
     next.has(fid) ? next.delete(fid) : next.add(fid);
     setPicked(next);
   };
-  const open = (fid: string) => {
-    const f = all.find((i) => i.id === fid)!.frame;
-    if (pageCount(f) > 1) go(`/f/${fid}`);
-    else setFocus(fid);
-  };
+  const open = (fid: string) => openPrototype(all.find((i) => i.id === fid)!.frame);
   const addTo = async (boardId: string | 'new') => {
     const bid = boardId === 'new' ? (await store.createBoard(projectId, 'New board')).id : boardId;
     for (const fid of picked) await store.placeOnBoard(bid, fid);
@@ -224,7 +220,6 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
   const way = (w: Way) => runWay(w, projectId, undefined, askUrl);
   const chip = (key: keyof LibraryFilter, label: string) =>
     html`<button type="button" class="chip-toggle" aria-pressed=${!!filter[key]} onClick=${() => setFilter({ ...filter, [key]: !filter[key] })}>${label}</button>`;
-  const focused = all.find((i) => i.id === focus)?.frame;
   const clear = () => setFilter({ source: 'all', tags: [] });
   const tagList = tagCounts(scopeCards(cardsOf(all.map((i) => i.frame)), { kind: filter.archived ? 'archive' : 'home' }));
   const cardFor = (i: (typeof items)[number]) => ({ ...cardOf(i.frame), versions: i.versions });
@@ -303,7 +298,6 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
       : html`<ul class="rows lib-rows">
           ${items.map((i) => html`<${ProtoRow} key=${i.id} card=${cardFor(i)} older=${i.extra} onOpen=${() => open(i.id)} versions=${versionsSlot(i)} pick=${{ checked: picked.has(i.id), onChange: () => toggle(i.id) }} />`)}
         </ul>`}
-    ${focused && html`<${Focus} frame=${focused} onClose=${() => setFocus(null)} />`}
   </div>`;
 }
 
@@ -338,30 +332,13 @@ function ProjectComments({ projectId }: { projectId: string }) {
   </div></div>`;
 }
 
-/* ── A full-screen link with no board: the prototype's project, with Focus over it ── */
-function FullOverProject({ address, askUrl }: { address: Extract<Address, { name: 'full' }>; askUrl: () => Promise<string | null> }) {
-  const s = useStore();
-  const frame = s.frames.find((f) => f.id === address.frame);
-  if (!frame) return html`<div class="main"><div class="empty">That prototype is not in this browser. <a href="#/">All projects</a></div></div>`;
-  const project = frame.projectId;
-  return html`<${ProjectView} id=${project} tab="prototypes" askUrl=${askUrl} />
-    <${Focus} frame=${frame} address=${address} onClose=${() => go(buildAddress({ name: 'project', project, tab: 'prototypes' }))} />`;
-}
-
 /* ── App ───────────────────────────────────────────────────────────────── */
-export function openPrototype(f: Frame, focus: (id: string) => void) {
-  if (f.kind === 'url') window.open(safeFrameUrl(f.url), '_blank', 'noopener');
-  else if (pageCount(f) > 1) go(`/f/${f.id}`);
-  else focus(f.id);
-}
-
 const SCOPES: Record<string, Scope> = { home: { kind: 'home' }, starred: { kind: 'starred' }, archive: { kind: 'archive' } };
 
 export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
   const s = useStore();
   const route = useRoute();
   const url = useUrlDialog();
-  const [focusId, setFocusId] = useState<string | null>(null);
   const [pair, setPair] = useState<PairLink | null>(pairAtLoad);
   // A pairing link counts only when it opened this page (main.ts reads it). Anything
   // holding a reference to this tab can rewrite its hash, so a later #pair is cleared.
@@ -375,10 +352,9 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
     addEventListener('hashchange', later);
     return () => removeEventListener('hashchange', later);
   }, []);
-  const focused = focusId ? s.frames.find((f) => f.id === focusId) : undefined;
   const cards = useMemo(() => cardsOf(s.frames), [s.frames]);
   const projectName = (id: string) => s.projects.find((p) => p.id === id)?.name ?? '';
-  const open = (c: Card) => openPrototype(c.frame, setFocusId);
+  const open = (c: Card) => openPrototype(c.frame);
   const scope: Scope | null = route.name === 'tag' ? { kind: 'tag', tag: route.tag } : SCOPES[route.name] ?? null;
 
   return html`<div class="shell">
@@ -390,13 +366,12 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
         : route.name === 'board' || (route.name === 'full' && route.board)
           ? html`<${BoardView} id=${route.board} frameId=${route.frame} full=${route.name === 'full' ? route : null} askUrl=${url.ask} />`
           : route.name === 'full'
-            ? html`<${FullOverProject} address=${route} askUrl=${url.ask} />`
+            ? html`<${PrototypeView} address=${route} />`
             : route.name === 'project'
               ? html`<${ProjectView} id=${route.project} tab=${route.tab} askUrl=${url.ask} />`
               : html`<${Home} scope=${scope ?? SCOPES.home} askUrl=${url.ask} onOpen=${open} />`}
     ${url.view}
     <${SearchHost} cards=${cards} projectName=${projectName} onPick=${open} />
-    ${focused && html`<${Focus} frame=${focused} onClose=${() => setFocusId(null)} />`}
     ${pair && html`<${PairDialog} pair=${pair} onClose=${() => setPair(null)} />`}
     ${s.toast && html`<div class="toast" role="status">${s.toast}</div>`}
   </div>`;

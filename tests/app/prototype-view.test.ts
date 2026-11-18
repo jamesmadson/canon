@@ -1,0 +1,200 @@
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { h } from 'preact';
+import { act } from 'preact/test-utils';
+import { useEffect, useState } from 'preact/hooks';
+
+const db = vi.hoisted(() => ({ lists: {} as Record<string, unknown[]>, writes: [] as [string, any][] }));
+vi.mock('../../src/app/db', async (orig) => ({
+  ...(await orig<typeof import('../../src/app/db')>()),
+  getAll: async (name: string) => db.lists[name] ?? [],
+  put: async (name: string, value: unknown) => { db.writes.push([name, value]); },
+}));
+
+import * as store from '../../src/app/store';
+import { PrototypeView, openPrototype } from '../../src/app/prototype';
+import { parseAddress } from '../../src/app/lib/address';
+import { resetLive } from '../../src/app/live';
+import { clear, click, frame, key, mount, nameOf, project } from './helpers/dom';
+
+/** The route the app reads: whatever the hash says now. */
+const Router = () => {
+  const [hash, setHash] = useState(location.hash);
+  useEffect(() => {
+    const on = () => setHash(location.hash);
+    addEventListener('hashchange', on);
+    return () => removeEventListener('hashchange', on);
+  }, []);
+  const a = parseAddress(hash);
+  return a.name === 'full' ? h(PrototypeView, { address: a }) : h('div', { id: 'elsewhere' }, hash);
+};
+
+const flush = () => new Promise((r) => setTimeout(r, 0));
+const stored = (id: string) => db.writes.filter(([n, v]) => n === 'frames' && v.id === id).map(([, v]) => v);
+const btn = (box: HTMLElement, label: RegExp) => Array.from(box.querySelectorAll<HTMLButtonElement>('button')).find((b) => label.test(nameOf(b)))!;
+const title = (box: HTMLElement) => box.querySelector('h1')!.textContent;
+
+beforeEach(async () => {
+  resetLive();
+  db.writes = [];
+  db.lists = {
+    projects: [project('p1', 'Pricing')], boards: [], placements: [], notes: [],
+    frames: [
+      frame({ id: 'a1', name: 'Annual toggle', stackId: 'a', createdAt: Date.now() - 3 * 86_400_000, updatedAt: 1 }),
+      frame({ id: 'a2', name: 'Annual toggle', stackId: 'a', kind: 'url', url: 'https://example.com/a', entry: undefined, createdAt: Date.now() - 2 * 86_400_000, updatedAt: 2 }),
+      frame({ id: 'a3', name: 'Annual toggle', stackId: 'a', createdAt: Date.now() - 86_400_000, updatedAt: 3, current: true, liveUrl: 'https://preview.example.com/' }),
+      frame({ id: 'b', name: 'Three tiers', createdAt: 5, updatedAt: 5 }),
+      frame({ id: 'k', name: 'Webflow', kind: 'url', url: 'https://x.webflow.io/', entry: undefined, frameBlocked: true, createdAt: 6, updatedAt: 6 }),
+      frame({ id: 'u', name: 'Some site', kind: 'url', url: 'https://example.org/', entry: undefined, createdAt: 7, updatedAt: 7 }),
+    ],
+  };
+  await store.load();
+  history.replaceState(null, '', '#/');
+});
+afterEach(() => { clear(); vi.useRealTimers(); });
+
+const open = async (id: string) => {
+  const box = await mount(Router, {});
+  await act(() => { openPrototype({ id }); });
+  return box;
+};
+
+describe('the prototype view', () => {
+  it('has the whole bar: star, note, versions, archive and zoom', async () => {
+    const box = await open('b');
+    for (const label of [/^Star /, /^Prototype note for/, /^Versions/, /^Archive /, /^Zoom \d+%/, /^Zoom out/, /^Zoom in/]) expect(btn(box, label), String(label)).toBeTruthy();
+    expect(btn(box, /^Versions/).disabled).toBe(true);
+  });
+
+  it('stars and notes in place, with no trip to another page', async () => {
+    const box = await open('b');
+    await click(btn(box, /^Star /));
+    await flush();
+    expect(stored('b').at(-1)!.starred).toBe(true);
+    await click(btn(box, /^Prototype note for/));
+    const field = box.querySelector<HTMLTextAreaElement>('textarea')!;
+    field.value = 'Check the tiers';
+    await act(() => { field.dispatchEvent(new Event('input', { bubbles: true })); });
+    await key(field, 'Enter', { metaKey: true });
+    await flush();
+    expect(stored('b').at(-1)!.note).toBe('Check the tiers');
+  });
+
+  it('shows the Live switch for a stored copy with a live address, and not otherwise', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({ type: 'opaque' }) as unknown as Response));
+    const withLive = await open('a3');
+    expect(withLive.querySelector('.live-btn')).toBeTruthy();
+    expect(withLive.querySelector('[role="tooltip"]')!.textContent).toBe('Live shows the running version at its localhost address. Off shows the stored copy.');
+    clear();
+    const without = await open('b');
+    expect(without.querySelector('.live-btn')).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
+  it('opens a link in the same view, with the bar and an Open in new tab link', async () => {
+    const box = await open('u');
+    expect(btn(box, /^Star /)).toBeTruthy();
+    const a = Array.from(box.querySelectorAll('a')).find((x) => x.textContent === 'Open in new tab') as HTMLAnchorElement;
+    expect(a.getAttribute('target')).toBe('_blank');
+    expect(a.getAttribute('href')).toBe('https://example.org/');
+  });
+
+  it('Back and Escape return to where the person came from', async () => {
+    history.replaceState(null, '', '#/starred');
+    const box = await mount(Router, {});
+    await act(() => { openPrototype({ id: 'b' }); });
+    expect(location.hash).toBe('#/f/b/full');
+    const back = vi.spyOn(history, 'back').mockImplementation(() => { history.replaceState(null, '', '#/starred'); dispatchEvent(new HashChangeEvent('hashchange')); });
+    await click(btn(box, /^Back$/));
+    expect(back).toHaveBeenCalledTimes(1);
+    expect(box.querySelector('#elsewhere')!.textContent).toBe('#/starred');
+    await act(() => { openPrototype({ id: 'b' }); });
+    await key(window, 'Escape');
+    expect(back).toHaveBeenCalledTimes(2);
+    back.mockRestore();
+  });
+
+  it('goes to the project when it was opened from outside the app', async () => {
+    history.replaceState(null, '', '#/f/b/full');
+    const box = await mount(Router, {});
+    await key(window, 'Escape');
+    expect(location.hash).toBe('#/p/p1');
+    expect(box).toBeTruthy();
+  });
+
+  it('leaves Escape to an open note', async () => {
+    const box = await open('b');
+    await click(btn(box, /^Prototype note for/));
+    await key(box.querySelector('textarea')!, 'Escape');
+    expect(location.hash).toBe('#/f/b/full');
+  });
+});
+
+describe('versions in the prototype view', () => {
+  it('says which version is showing, and steps with the arrow keys', async () => {
+    const box = await open('a3');
+    expect(title(box)).toContain('Version 3 of 3');
+    await key(window, 'ArrowLeft');
+    expect(location.hash).toBe('#/f/a2/full');
+    expect(title(box)).toContain('Version 2 of 3');
+    await key(window, 'ArrowLeft');
+    await key(window, 'ArrowLeft');
+    expect(title(box)).toContain('Version 1 of 3');
+    expect(btn(box, /^Previous version/).disabled).toBe(true);
+    await click(btn(box, /^Next version/));
+    expect(title(box)).toContain('Version 2 of 3');
+  });
+
+  it('leaves the arrow keys to a field', async () => {
+    const box = await open('a3');
+    await click(btn(box, /^Prototype note for/));
+    await key(box.querySelector('textarea')!, 'ArrowLeft');
+    expect(title(box)).toContain('Version 3 of 3');
+  });
+
+  it('lists each version with its date and kind, and showing one changes nothing stored', async () => {
+    const box = await open('a3');
+    await click(btn(box, /^Versions of/));
+    const rows = Array.from(box.querySelectorAll('.vrow')).map((r) => r.textContent);
+    expect(rows).toEqual(['Version 3 · Yesterday · Stored copy · Current', expect.stringMatching(/^Version 2 · .+ · Link$/), expect.stringMatching(/^Version 1 · .+ · Stored copy$/)]);
+    await click(box.querySelectorAll('.vrow')[2]);
+    expect(title(box)).toContain('Version 1 of 3');
+    expect(db.writes.filter(([n]) => n === 'frames')).toEqual([]);
+  });
+
+  it('changes the current version only through its own action', async () => {
+    const box = await open('a2');
+    await click(btn(box, /^Versions of/));
+    await click(Array.from(box.querySelectorAll('button')).find((b) => b.textContent === 'Make this the current version')!);
+    await flush();
+    expect(stored('a2').at(-1)!.current).toBe(true);
+    expect(stored('a3').at(-1)!.current).toBe(false);
+  });
+});
+
+describe('a page that will not show', () => {
+  it('says so when the version is known to refuse framing, with a way out', async () => {
+    const box = await open('k');
+    expect(box.querySelector('iframe')).toBeNull();
+    expect(box.querySelector('.frame-blocked')!.textContent).toContain('This site does not allow itself to be shown inside other pages.');
+    expect(box.querySelector('.frame-blocked a')!.getAttribute('href')).toBe('https://x.webflow.io/');
+  });
+
+  it('says nothing about a link it knows nothing about, until four seconds pass without a load', async () => {
+    vi.useFakeTimers();
+    const box = await open('u');
+    expect(box.querySelector('.slow')).toBeNull();
+    await act(() => { vi.advanceTimersByTime(3900); });
+    expect(box.querySelector('.slow')).toBeNull();
+    await act(() => { vi.advanceTimersByTime(200); });
+    expect(box.querySelector('.slow')!.textContent).toBe('Not showing? Some sites refuse to load inside other pages. Open in new tab.');
+  });
+
+  it('stays quiet when the frame loads', async () => {
+    vi.useFakeTimers();
+    const box = await open('u');
+    await act(() => { box.querySelector('iframe')!.dispatchEvent(new Event('load')); });
+    await act(() => { vi.advanceTimersByTime(5000); });
+    expect(box.querySelector('.slow')).toBeNull();
+  });
+});

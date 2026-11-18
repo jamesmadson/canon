@@ -6,12 +6,13 @@ import { canLinkFolders, groupsFromDrop } from './intake';
 import { type Camera, type Point, fitCamera, screenToWorld, tidyPositions, zoomAt } from './lib/layout';
 import { iaLayout, splitNav, teaseSlots } from './lib/bundle';
 import { sortPrototypes, type LibrarySort } from './lib/library';
-import { currentOf, isLocal, versionOf } from './lib/versions';
+import { currentOf, versionOf } from './lib/versions';
 import { safeFrameUrl } from './lib/resolve';
-import { type Address, buildAddress, joinPath } from './lib/address';
+import { buildAddress } from './lib/address';
+import { Focus, type FullAddress } from './prototype';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
 import { PrototypeActions, ZoomControls } from './bar';
-import { FrameBody, LiveSwitch, ServerOff, useShown } from './live';
+import { FrameBody, LiveSwitch } from './live';
 import {
   html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES, showsCover, coverSrc,
   addGroups, runWay, NoteItem, type Way,
@@ -79,13 +80,6 @@ function LibraryPicker({ projectId, boardId, onClose }: { projectId: string; boa
 }
 
 /* ── Board ─────────────────────────────────────────────────────────────── */
-export type FullAddress = Extract<Address, { name: 'full' }>;
-
-/** Change the address without a history entry. replaceState fires no hashchange, so tell the router ourselves. */
-const replaceAddress = (a: Address) => {
-  history.replaceState(null, '', buildAddress(a));
-  dispatchEvent(new HashChangeEvent('hashchange'));
-};
 
 export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: string | null; full: FullAddress | null; askUrl: () => Promise<string | null> }) {
   const s = useStore();
@@ -817,57 +811,4 @@ function PageInspector({ frame, page, onFocus, onPick, onComment, onOpenThread }
       ${notes.length > 0 && html`<button class="btn ghost" onClick=${onComment}><${Icon} name="comment" />Add a note</button>`}
     </div>
   </aside>`;
-}
-
-/* ── Focus: one page, full size ─────────────────────────────────────────── */
-/**
- * With an address, Focus is a link: its width, path and version live in the
- * hash and change it in place, so Back leaves Focus rather than stepping
- * through widths. Without one (Library, ⌘K, a bundle page) it keeps its own state.
- */
-export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: string; onClose: () => void; address?: FullAddress }) {
-  const [localWidth, setLocalWidth] = useState<number | null>(frame.w);
-  const width = address ? (address.width === 'fill' ? null : address.width ?? frame.w) : localWidth;
-  const setWidth = (w: number | null) => (address ? replaceAddress({ ...address, width: w ?? 'fill' }) : setLocalWidth(w));
-  const stack = address ? store.stackOf(frame.id) : [];
-  const v = versionOf(stack, frame.id);
-  const isCurrent = stack.length < 2 || currentOf(stack).id === frame.id;
-  const shown = useShown(frame);
-  const src = shown.show === 'live' ? shown.url : address && frame.kind === 'url' ? joinPath(safeFrameUrl(frame.url), address.path) : frameSrc(frame, page);
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    addEventListener('keydown', k);
-    return () => removeEventListener('keydown', k);
-  }, []);
-  const copy = async () => {
-    if (!address) return;
-    try {
-      await navigator.clipboard.writeText(location.origin + location.pathname + buildAddress(address));
-      store.toast('Link copied.');
-    } catch {
-      store.toast('Could not copy the link. Copy it from the address bar.');
-    }
-  };
-  return html`<div class="focus">
-    <div class="topbar">
-      <button class="btn ghost icon" onClick=${onClose} title="Back (Esc)"><${Icon} name="back" /></button>
-      <h1>${frame.name}${page && page !== frame.entry ? html`<span class="faint"> · ${pageName(page)}</span>` : ''}</h1>
-      <span class="spacer"></span>
-      ${address && stack.length > 1 && html`<select class="select" aria-label="Version" value=${frame.id} onChange=${(e: Event) => replaceAddress({ ...address, frame: (e.target as HTMLSelectElement).value })}>
-        ${[...stack].reverse().map((m) => html`<option value=${m.id} selected=${m.id === frame.id}>v${versionOf(stack, m.id)}${m.id === currentOf(stack).id ? ' · current' : ''}</option>`)}
-      </select>`}
-      <div class="seg">
-        ${SIZES.map((sz) => html`<button aria-pressed=${width === sz.w} onClick=${() => setWidth(sz.w)}>${sz.name} ${sz.w}</button>`)}
-        <button aria-pressed=${width === null} onClick=${() => setWidth(null)}>Fill</button>
-      </div>
-      ${address && html`<button class="btn ghost" onClick=${copy}><${Icon} name="link" />Copy link</button>`}
-      <a class="btn ghost" href=${previewUrl(frame, page)} target="_blank" rel="noopener"><${Icon} name="comment" />Preview link</a>
-    </div>
-    ${address && frame.kind === 'url' && !isCurrent && isLocal(frame.url ?? '') && html`<p class="hint" role="status" style="margin:8px 16px 0">This is localhost, so it shows what's running now, not v${v}.</p>`}
-    <div class="focus-stage">
-      ${shown.show === 'off'
-        ? html`<${ServerOff} url=${shown.url} />`
-        : shown.show === 'wait' ? null : html`<iframe src=${src} title=${frame.name} style=${{ width: width ? `${width}px` : '100%' }} sandbox=${SANDBOX}></iframe>`}
-    </div>
-  </div>`;
 }
