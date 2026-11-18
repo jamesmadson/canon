@@ -93,7 +93,7 @@ export async function addGroups(projectId: string, groups: Group[], opts: { boar
       store.toast(`${g.name} has no HTML file, so there is nothing to show.`);
       continue;
     }
-    const f = await store.addPrepared(projectId, p, { boardId: opts.boardId, at: x !== undefined && opts.at ? { x, y: opts.at.y } : undefined });
+    const f = await store.addPrepared(projectId, p, { autoTag: true, boardId: opts.boardId, at: x !== undefined && opts.at ? { x, y: opts.at.y } : undefined });
     if (x !== undefined) x += f.w + 120;
     added++;
     if (store.getState().frames.find((fr) => fr.id === f.id)?.stackId) stacked++;

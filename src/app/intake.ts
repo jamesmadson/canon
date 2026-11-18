@@ -4,7 +4,9 @@ import { linkGraph, orderPages } from './lib/bundle';
 
 export interface RawFile { path: string; blob: Blob }
 export interface Group { name: string; files: RawFile[]; handle?: FileSystemDirectoryHandle }
-export interface Prepared { name: string; entry: string; files: { path: string; blob: Blob; type: string }[]; handle?: FileSystemDirectoryHandle; pages?: string[]; links?: [string, string][] }
+export interface Prepared { name: string; entry: string; files: { path: string; blob: Blob; type: string }[]; handle?: FileSystemDirectoryHandle; pages?: string[]; links?: [string, string][];
+  /** The entry page's text, kept so a drop can be tagged from it. */
+  html?: string }
 
 function unzipBlob(blob: Blob): Promise<RawFile[]> {
   return blob.arrayBuffer().then(
@@ -130,5 +132,5 @@ export async function prepare(group: Group, entryHint?: string): Promise<Prepare
   const pagePaths = htmlFiles.map((f) => f.path);
   const links = linkGraph(pagePaths, texts);
   const pages = orderPages(pagePaths, entry, links);
-  return { name: titleFromHtml(html) ?? group.name, entry, files, handle: group.handle, pages, links };
+  return { name: titleFromHtml(html) ?? group.name, entry, files, handle: group.handle, pages, links, html };
 }
