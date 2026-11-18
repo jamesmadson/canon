@@ -4,6 +4,7 @@ import type { Card } from './lib/home';
 import { isSearchHotkey, moveSelection } from './lib/keys';
 import { searchCards } from './lib/search';
 import { html, Icon } from './shared';
+import { record } from './lib/tester';
 
 export const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 export const SEARCH_EVENT = 'canon:switcher';
@@ -31,6 +32,10 @@ export function Palette({ cards, projectName, onPick, onClose }: PaletteProps) {
   const found = searchCards(cards, q, projectName, Infinity);
   const rows = all ? found : found.slice(0, RESULT_CAP);
   const here = Math.min(at, Math.max(rows.length - 1, 0));
+  // How long the query was and how many results it had, noted when the palette closes. Never the words.
+  const seen = useRef({ length: 0, results: 0 });
+  seen.current = { length: q.trim().length, results: found.length };
+  useEffect(() => () => { if (seen.current.length) record('search', seen.current); }, []);
   const pick = (c: Card) => { onClose(); onPick(c); };
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') { e.preventDefault(); onClose(); }

@@ -6,6 +6,7 @@ import { html, Icon } from './shared';
 import { currentOf, versionOf } from './lib/versions';
 import { versionLine, versionTitle } from './lib/viewer';
 import { LiveToggle } from './live';
+import { record } from './lib/tester';
 
 const NONE = 'select a prototype first';
 
@@ -37,14 +38,15 @@ export function PrototypeActions({ frame }: { frame: Frame | undefined }) {
     setOpen(true);
   };
   const close = (save: boolean) => {
-    if (save && frame && draft.trim() !== noteText) void store.setNote(frame.id, draft.trim());
+    if (save && frame && draft.trim() !== noteText) { void store.setNote(frame.id, draft.trim()); record('note_save', { length: draft.trim().length }); }
     setOpen(false);
     button.current?.focus();
   };
-  const star = () => frame && store.setStarred(frame.id, !frame.starred);
+  const star = () => { if (!frame) return; record('star', { on: !frame.starred }); void store.setStarred(frame.id, !frame.starred); };
   const archive = async () => {
     if (!frame) return;
     const next = !frame.archived;
+    record('archive', { on: next });
     await store.setArchived(frame.id, next);
     store.toast(next ? `Archived ${frame.name}. It is out of Home and the project list until you bring it back.` : `${frame.name} is back in Home and the project list.`);
   };
@@ -110,14 +112,14 @@ export function VersionsMenu({ frame, stack, onShow }: { frame: Frame; stack: Fr
   const n = versionOf(stack, frame.id);
   const label = many ? `Versions of ${frame.name}, ${versionTitle(n, stack.length)}` : 'Versions: this prototype has only one';
   return html`<div class="bar-note" ref=${wrap}>
-    <button type="button" ref=${button} class="btn" disabled=${!many} aria-expanded=${open} aria-haspopup="true" aria-label=${label} title=${many ? 'Versions' : 'Only one version so far'} onClick=${() => setOpen(!open)}>Versions${many ? html`<span class="count">${stack.length}</span>` : null}</button>
+    <button type="button" ref=${button} class="btn" disabled=${!many} aria-expanded=${open} aria-haspopup="true" aria-label=${label} title=${many ? 'Versions' : 'Only one version so far'} onClick=${() => { if (!open) record('versions_menu'); setOpen(!open); }}>Versions${many ? html`<span class="count">${stack.length}</span>` : null}</button>
     ${open && many && html`<div class="bar-pop versions-pop" role="group" aria-label="Versions">
       <ol>
         ${[...stack].reverse().map((v) => html`<li key=${v.id}><button type="button" class="vrow" aria-current=${v.id === frame.id ? 'true' : undefined} onClick=${() => { setOpen(false); onShow(v.id); }}>${versionLine(versionOf(stack, v.id), v, v.id === current.id)}</button></li>`)}
       </ol>
       ${isCurrent
         ? html`<p class="hint">Version ${n} is the current version, the one Home and the project show.</p>`
-        : html`<button type="button" class="btn" onClick=${() => { void store.makeCurrent(frame.id); store.toast(`Version ${n} is now the current version.`); setOpen(false); }}>Make this the current version</button>`}
+        : html`<button type="button" class="btn" onClick=${() => { record('make_current'); void store.makeCurrent(frame.id); store.toast(`Version ${n} is now the current version.`); setOpen(false); }}>Make this the current version</button>`}
     </div>`}
   </div>`;
 }

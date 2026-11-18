@@ -15,6 +15,7 @@ import { SearchHost } from './palette';
 import { Sidebar, useBridge } from './sidebar';
 import { type Card, type Scope, cardOf, cardsOf, countPrototypes, scopeCards, tagCounts } from './lib/home';
 import { Avatar } from './comments';
+import { record } from './lib/tester';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
 export { BASE } from './shared';
@@ -76,10 +77,12 @@ function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) {
 
 /* ── Agents: pairing and the sidebar list ───────────────────────────────── */
 function PairDialog({ pair, onClose }: { pair: PairLink; onClose: () => void }) {
+  useEffect(() => { record('pair_start'); }, []);
   const notice = pairNotice(useBridge().agents.find((a) => a.id === pair.agentId), pair);
   const connect = async () => {
     try {
       await saveAgent(pair);
+      record('pair_done');
       store.toast(`Connected ${pair.name}.`);
     } catch {
       store.toast(`Could not save ${pair.name}. Try the link again.`);
@@ -322,6 +325,7 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
   const s = useStore();
   const route = useRoute();
   const url = useUrlDialog();
+  useEffect(() => { record('view', { view: ({ full: 'prototype', bundle: 'prototype' } as Record<string, string>)[route.name] ?? route.name }); }, [route.name]);
   const [pair, setPair] = useState<PairLink | null>(pairAtLoad);
   // A pairing link counts only when it opened this page (main.ts reads it). Anything
   // holding a reference to this tab can rewrite its hash, so a later #pair is cleared.

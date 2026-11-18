@@ -9,6 +9,7 @@ import type { Frame } from './db';
 import { html, frameSrc, SANDBOX } from './shared';
 import { decideShown, loopbackHost, probeLoopback, serverOffMessage, type Reach, type Shown } from './lib/probe';
 import { LIVE_HINT } from './lib/viewer';
+import { record } from './lib/tester';
 
 const running = new Set<string>(); // frame ids switched to the running version, this session only
 const reach = new Map<string, 'up' | 'down'>(); // by host and port
@@ -127,7 +128,7 @@ export function LiveToggle({ frame }: { frame: Frame }) {
   if (!offered) return null;
   const hint = `live-tip-${frame.id}`;
   return html`<span class="live-wrap">
-    <button type="button" class="btn live-btn" aria-pressed=${on} aria-describedby=${hint} onClick=${() => setLive(frame.id, !on)}>Live</button>
+    <button type="button" class="btn live-btn" aria-pressed=${on} aria-describedby=${hint} onClick=${() => { record('live_toggle', { on: !on }); setLive(frame.id, !on); }}>Live</button>
     <span class="tip" role="tooltip" id=${hint}>${LIVE_HINT}</span>
   </span>`;
 }

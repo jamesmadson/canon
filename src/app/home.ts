@@ -8,6 +8,7 @@ import { moveSelection } from './lib/keys';
 import { SETUP_COMMAND } from './lib/setup';
 import { stackKey } from './lib/versions';
 import { isMac } from './palette';
+import { record } from './lib/tester';
 import { AddMenu, ProtoRow, ShelfCard } from './parts';
 import { addGroups, html, Icon, runWay, useStore, type Way } from './shared';
 import type { Project } from './db';
@@ -22,6 +23,7 @@ export function useHomeView(): [HomeView, (v: HomeView) => void] {
   });
   return [view, (v) => {
     set(v);
+    record('home_layout', { layout: v });
     try { localStorage.setItem(VIEW_KEY, v); } catch { /* private mode: the choice lasts this visit */ }
   }];
 }
@@ -218,7 +220,10 @@ export function Home({ scope, askUrl, onOpen }: { scope: Scope; askUrl: () => Pr
   };
   const addLinks = async (links: string[], projectId: string | null) => {
     const target = await ensureProject(projectId ?? dropTarget(store.getState().projects, null));
+    const t0 = Date.now();
+    record('add_start', { kind: 'link' });
     await track(null, async () => { for (const l of links) await store.addUrl(target, l); });
+    record('add_done', { kind: 'link', ms: Date.now() - t0 });
   };
 
   useEffect(() => {

@@ -12,6 +12,7 @@ import { currentOf, isLocal, versionOf } from './lib/versions';
 import { safeFrameUrl } from './lib/resolve';
 import { FRAME_BLOCKED, NOT_SHOWING_AFTER_MS, clampZoom, fitZoom, neighbour, typingIn, versionTitle } from './lib/viewer';
 import { PrototypeBar } from './bar';
+import { record } from './lib/tester';
 import { ServerOff, useShown } from './live';
 import { html, Icon, useStore, frameSrc, pageCount, pageName, previewUrl, SANDBOX, SIZES } from './shared';
 
@@ -21,11 +22,11 @@ export type FullAddress = Extract<Address, { name: 'full' }>;
 export const openPrototype = (f: Pick<Frame, 'id'>) => openHash(buildAddress({ name: 'full', frame: f.id, board: null, width: null, path: null }));
 
 /** In place of a page that says it cannot be shown inside another page. */
-function Blocked({ frame, href }: { frame: Frame; href: string }) {
+function Blocked({ href }: { href: string }) {
   return html`<div class="frame-blocked" role="status">
     <h2>${FRAME_BLOCKED}</h2>
     <p>Canon shows a link to it instead, so open it in a new tab. To see it here, add a build folder or a zip as another version, and Canon keeps a copy that shows inside it.</p>
-    <a class="btn primary" href=${href} target="_blank" rel="noopener"><${Icon} name="open" />Open in new tab</a>
+    <a class="btn primary" href=${href} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}><${Icon} name="open" />Open in new tab</a>
   </div>`;
 }
 
@@ -93,16 +94,35 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
 
   const prev = neighbour(stack, here.id, -1);
   const next = neighbour(stack, here.id, 1);
-  const keys = useRef({ onClose, prev, next, show });
-  keys.current = { onClose, prev, next, show };
+  const step = (to: Frame | undefined, dir: 'prev' | 'next') => {
+    if (!to) return;
+    record('version_step', { dir });
+    show(to.id);
+  };
+  const keys = useRef({ onClose, prev, next, step });
+  keys.current = { onClose, prev, next, step };
+
+  // How long the frame took to load, noted once per prototype shown. A page known to refuse framing never loads, so it is noted at once.
+  const opening = useRef({ id: '', t0: 0, done: true });
+  const noteOpen = (ms?: number) => {
+    const o = opening.current;
+    if (o.done) return;
+    o.done = true;
+    record('prototype_open', { kind: here.kind === 'url' ? 'link' : 'stored', blocked: known, ...(ms === undefined ? {} : { ms }) });
+  };
+  useEffect(() => {
+    opening.current = { id: here.id, t0: performance.now(), done: false };
+    if (known) noteOpen();
+    return () => noteOpen();
+  }, [here.id]);
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
       const now = keys.current;
       if (e.key === 'Escape') now.onClose();
       else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !typingIn(e.target)) {
-        const to = e.key === 'ArrowLeft' ? now.prev : now.next;
-        if (to) { e.preventDefault(); now.show(to.id); }
+        const left = e.key === 'ArrowLeft';
+        if (left ? now.prev : now.next) { e.preventDefault(); now.step(left ? now.prev : now.next, left ? 'prev' : 'next'); }
       }
     };
     addEventListener('keydown', k);
@@ -127,8 +147,8 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
       <button type="button" class="btn ghost icon" aria-label="Back" onClick=${onClose} title="Back (Esc)"><${Icon} name="back" /></button>
       <h1>${here.name}${pg && pg !== here.entry ? html`<span class="faint"> · ${pageName(pg)}</span>` : ''}${total > 1 && html`<span class="ver-title" aria-live="polite">${versionTitle(n, total)}</span>`}</h1>
       ${total > 1 && html`<div class="bar-group" role="group" aria-label="Step through versions">
-        <button type="button" class="btn ghost icon" disabled=${!prev} aria-label="Previous version" title="Previous version (Left arrow)" onClick=${() => prev && show(prev.id)}><${Icon} name="back" /></button>
-        <button type="button" class="btn ghost icon next" disabled=${!next} aria-label="Next version" title="Next version (Right arrow)" onClick=${() => next && show(next.id)}><${Icon} name="back" /></button>
+        <button type="button" class="btn ghost icon" disabled=${!prev} aria-label="Previous version" title="Previous version (Left arrow)" onClick=${() => step(prev, 'prev')}><${Icon} name="back" /></button>
+        <button type="button" class="btn ghost icon next" disabled=${!next} aria-label="Next version" title="Next version (Right arrow)" onClick=${() => step(next, 'next')}><${Icon} name="back" /></button>
       </div>`}
       <span class="spacer"></span>
       ${multi && html`<select class="select" aria-label="Page" value=${pg ?? here.entry} onChange=${(e: Event) => setPg((e.target as HTMLSelectElement).value)}>
@@ -140,7 +160,7 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
         <button type="button" aria-pressed=${width === null} onClick=${() => { setManual(null); setWidth(null); }}>Fill</button>
       </div>
       ${address && html`<button type="button" class="btn ghost" onClick=${copy}><${Icon} name="link" />Copy link</button>`}
-      <a class="btn ghost" href=${newTab} target="_blank" rel="noopener"><${Icon} name="open" />Open in new tab</a>
+      <a class="btn ghost" href=${newTab} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}><${Icon} name="open" />Open in new tab</a>
     </div>
     ${!isCurrent && html`<p class="hint view-note" role="status">This is ${versionTitle(n, total).toLowerCase()}, not the current version. Use Versions, below, to make it the current one.</p>`}
     ${address && here.kind === 'url' && !isCurrent && isLocal(here.url ?? '') && html`<p class="hint view-note" role="status">This is localhost, so it shows what is running now, not version ${n}.</p>`}
@@ -148,14 +168,14 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
       ${shown.show === 'off'
         ? html`<${ServerOff} url=${shown.url} />`
         : known
-          ? html`<${Blocked} frame=${here} href=${newTab} />`
+          ? html`<${Blocked} href=${newTab} />`
           : shown.show === 'wait'
             ? null
             : html`<div class="focus-frame" style=${{ width: width ? `${width * z}px` : '100%' }}>
-              <iframe key=${src} src=${src} title=${here.name} style=${{ width: inner, height: `${100 / z}%`, transform: `scale(${z})` }} sandbox=${SANDBOX} onLoad=${() => { loaded.current = true; setSlow(false); }}></iframe>
+              <iframe key=${src} src=${src} title=${here.name} style=${{ width: inner, height: `${100 / z}%`, transform: `scale(${z})` }} sandbox=${SANDBOX} onLoad=${() => { loaded.current = true; setSlow(false); noteOpen(Math.round(performance.now() - opening.current.t0)); }}></iframe>
             </div>`}
     </div>
-    ${slow && html`<p class="hint view-note slow" role="status">Not showing? Some sites refuse to load inside other pages. <a href=${newTab} target="_blank" rel="noopener">Open in new tab</a>.</p>`}
+    ${slow && html`<p class="hint view-note slow" role="status">Not showing? Some sites refuse to load inside other pages. <a href=${newTab} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}>Open in new tab</a>.</p>`}
     <${PrototypeBar} frame=${here} stack=${stack} onShow=${show} zoom=${{ value: z, onOut: () => zoomBy(0.8), onIn: () => zoomBy(1.25), onReset: () => setManual(1), onFit: fit }} />
   </div>`;
 }

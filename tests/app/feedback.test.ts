@@ -43,7 +43,7 @@ describe('posting feedback', () => {
     const down = vi.fn(async () => { throw new TypeError('offline'); });
     const r = await postJson('u', {}, down as unknown as typeof fetch);
     expect(r).toEqual({ ok: false, reason: 'network' });
-    for (const x of [r, { ok: false as const, reason: 'rate' as const }]) expect(failureMessage(x)).toContain('still here');
+    for (const x of [r, { ok: false as const, reason: 'rate' as const }]) expect(failureMessage(x as never)).toContain('still here');
   });
 });
 
