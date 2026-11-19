@@ -17,8 +17,8 @@ describe('a list row that is short of room', () => {
   it('never fixes the width of the date, so a long label like "33 min ago" is not clipped', () => {
     const when = ruleOf('.prow .when');
     expect(when).toMatch(/flex: none/);
-    expect(when).toMatch(/min-width: 68px/);
-    expect(when).not.toMatch(/[^-]width: 68px/);
+    expect(when).toMatch(/min-width: 76px/);
+    expect(when).not.toMatch(/[^-]width: 76px/);
   });
 
   it('shows whole tags only, so a squeezed row hides the last ones rather than cutting them', () => {

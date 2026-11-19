@@ -71,13 +71,13 @@ export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions,
   return html`<li class=${`prow${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${older ? ' older' : ''}`} data-card=${card.id}>
     ${pick && html`<label class="pick"><input type="checkbox" checked=${pick.checked} onChange=${pick.onChange} aria-label=${`Select ${card.name}`} /></label>`}
     <${Thumb} card=${card} />
-    <button type="button" class="nm" onClick=${() => onOpen(card)} onFocus=${() => onSelect?.(card)}>${card.name}</button>
+    <button type="button" class="nm" title=${card.name} onClick=${() => onOpen(card)} onFocus=${() => onSelect?.(card)}>${card.name}</button>
     <${ReachNote} frame=${card.frame} />
-    <span class="sm">${card.summary}</span>
+    <span class="sm" title=${card.summary || undefined}>${card.summary}</span>
     <${Tags} tags=${card.tags} />
     ${versions !== undefined ? versions : label ? html`<span class="ver">${label}</span>` : html`<span class="ver"></span>`}
     ${board !== undefined && html`<span class="brd" title=${board}>${board}</span>`}
-    <span class="src">${card.source}</span>
+    <span class="src" title=${card.source}>${card.source}</span>
     <${StarButton} card=${card} />
     <span class="when">${whenLabel(card.updatedAt, now)}</span>
   </li>`;
@@ -102,7 +102,7 @@ export function ShelfCard({ card, selected, arriving, showTags, onOpen, onSelect
         <${Thumb} card=${card} big />
         ${arriving?.zip && html`<span class="zip" aria-hidden="true"><i class="zl"></i><i class="zr"></i><i class="teeth"></i><i class="pull"></i><span class="zname">${arriving.zip}</span></span>`}
       </span>
-      <b class="cname">${card.name}</b>
+      <b class="cname" title=${card.name}>${card.name}</b>
       <small class="cmeta">${card.source}${' · '}${whenLabel(card.updatedAt, now)}</small>
       ${metaOf(card) && html`<small class="cver">${metaOf(card)}</small>`}
       <${ReachNote} frame=${card.frame} />

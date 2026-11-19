@@ -251,8 +251,8 @@ function PageInspector({ frame, page, onFocus, onPick, onComment, onOpenThread }
   return html`<aside class="inspector" onPointerDown=${(e: Event) => e.stopPropagation()}>
     <div class="insp-sec">
       <div class="label">Page</div>
-      <div style="font-size:15px;font-weight:500">${pageName(page)}</div>
-      <div class="mono faint" style="font-size:11.5px">${page}</div>
+      <div style="font-size:var(--fs-name);font-weight:500">${pageName(page)}</div>
+      <div class="mono faint" style="font-size:var(--fs-meta)">${page}</div>
       <div class="row">
         <button type="button" class="btn primary" onClick=${onFocus}><${Icon} name="open" />Open</button>
         <a class="btn ghost" href=${previewUrl(frame, page)} target="_blank" rel="noopener"><${Icon} name="open" />Open in new tab</a>

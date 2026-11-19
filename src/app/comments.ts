@@ -111,7 +111,7 @@ export function CommentsPanel({ notes, onPick, onClose }: { notes: Note[]; onPic
           <span class="thread-row-body">
             <span class="msg-meta"><b>${authorOf(n)}</b><span>${ago(n.createdAt)}</span></span>
             <span class="thread-row-text">${n.said}</span>
-            <span class="faint" style="font-size:11.5px">${f ? f.name : 'On the canvas'}${(n.replies?.length ?? 0) > 0 ? ` · ${n.replies!.length} ${n.replies!.length === 1 ? 'reply' : 'replies'}` : ''}</span>
+            <span class="faint" style="font-size:var(--fs-meta)">${f ? f.name : 'On the canvas'}${(n.replies?.length ?? 0) > 0 ? ` · ${n.replies!.length} ${n.replies!.length === 1 ? 'reply' : 'replies'}` : ''}</span>
           </span>
         </button>`;
       })}

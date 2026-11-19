@@ -56,7 +56,7 @@ function LibraryPicker({ projectId, boardId, onClose }: { projectId: string; boa
       <div class="pick-list">
         ${items.length === 0 && html`<p class="hint">Everything in this project is already on this board.</p>`}
         ${items.map((f) => html`<button onClick=${async () => { await store.placeOnBoard(boardId, f.id); store.toast(`Added ${f.name}.`); }}>
-          <span>${f.name}</span><span class="faint mono" style="font-size:11px">${pageCount(f) > 1 ? `${pageCount(f)} pages · ` : ''}${f.w}×${f.h}</span><${Icon} name="plus" />
+          <span>${f.name}</span><span class="faint mono" style="font-size:var(--fs-meta)">${pageCount(f) > 1 ? `${pageCount(f)} pages · ` : ''}${f.w}×${f.h}</span><${Icon} name="plus" />
         </button>`)}
       </div>
       <div class="row" style="justify-content:flex-end"><button class="btn" onClick=${onClose}>Done</button></div>
