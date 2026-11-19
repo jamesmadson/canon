@@ -56,21 +56,36 @@ describe('the two hidden hero concepts', () => {
   it('hold a decorative, hidden stage with no layout of their own that can scroll sideways', () => {
     for (const [html, variant] of [[heroC, 'cards'], [heroD, 'tabs']] as const) {
       expect(html).toContain(`aria-hidden="true" data-scatter data-variant="${variant}"`);
-      expect(html).not.toContain('data-prompt');
+      // The tabs hero keeps the homepage's prompt box; the cards one has none.
+      if (variant === 'cards') expect(html).not.toContain('data-prompt');
+      else expect(html).toContain('data-prompt="Put all my prototypes in Canon, by project."');
     }
     const css = read('src/components/home/HeroVariantStyles.astro');
     expect(css).toContain('clip-path: inset(-700px -50vw 0 -50vw)');
     expect(read('src/components/home/HomeStyles.astro')).toMatch(/overflow-x: clip/);
   });
 
-  it('draw 30 or more tabs and one Canon tab in hero-d, and cards past the edges in hero-c', () => {
+  it('draw 30 or more tabs and one Canon tab in the tabs hero, and cards past the edges in hero-c', () => {
     expect(heroD.match(/class="btab"/g)!.length).toBeGreaterThanOrEqual(30);
     expect(heroD.match(/class="btab canon-tab"/g)).toHaveLength(1);
-    expect(heroD).toContain('Checkout v3 · Lovable');
-    expect(heroD).toContain('Onboarding final FINAL');
     expect(read('src/components/home/HeroVariantStyles.astro')).toContain('.btab:nth-child(n + 13):not(.canon-tab)');
     expect(heroC.match(/class="xcard/g)!.length).toBeGreaterThanOrEqual(9);
     expect(read('src/scripts/scatter.ts')).toMatch(/CARDS_WIDE[\s\S]*\[-0\.1,[\s\S]*\[1\.07,/);
+  });
+
+  it('opens on eight readable tabs and a real page, then crowds in more tabs before filing', () => {
+    const tabs = [...heroD.matchAll(/<div class="btab"[^>]*>[\s\S]*?<span>([^<]+)<\/span>/g)].map((m) => m[1]);
+    expect(tabs.slice(0, 4)).toEqual(['Pricing v3 · Lovable', 'Onboarding · v0', 'Checkout · Figma Make', 'localhost:5173']);
+    // Each of the first eight names its tool or a local address.
+    for (const t of tabs.slice(0, 8)) expect(t).toMatch(/ · |localhost|\.zip/);
+    const page = heroD.slice(heroD.indexOf('class="bpage"'), heroD.indexOf('data-card'));
+    expect(page).toContain('Simple pricing for small');
+    expect(page).toContain('Start a trial');
+    expect(heroD).toContain('pricing-v3.lovable.app');
+    const script = read('src/scripts/scatter.ts');
+    expect(script).toContain('const CROWD_WIDE = [8,');
+    expect(script).toMatch(/CROWD_PHONE = \[4,/);
+    expect(script).toMatch(/forced === 'squeeze'/);
   });
 
   // Mutation: add a left, top, width, height or margin transition, or another curve.
@@ -103,7 +118,7 @@ describe('the two hidden hero concepts', () => {
     expect(script).toContain("matchMedia('(prefers-reduced-motion: reduce)').matches");
     expect(script).toContain('document.hidden');
     expect(script).toContain('IntersectionObserver');
-    expect(script).toMatch(/forced === 'filed' \? 'filed' : forced === 'scattered' \|\| forced === 'start'/);
+    expect(script).toMatch(/forced === 'filed' \? 'filed' : forced === 'squeeze' \? 'squeeze' : forced === 'scattered' \|\| forced === 'start' \? 'start' : null/);
     // The states only exist once the page has marked itself as scripted.
     expect(css).not.toMatch(/\n  \.hero-[cd] \.scard \{[^}]*opacity: 0/);
   });

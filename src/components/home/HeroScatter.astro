@@ -5,6 +5,7 @@ import type { ThumbKey } from '../../lib/thumbs';
 import { withBase } from '../../lib/withBase';
 import HeroVariantStyles from './HeroVariantStyles.astro';
 import { EXTRAS, TABS, TAB_OF_CARD } from './heroVariants';
+import { tie } from '../../lib/words';
 
 /**
  * The alternate hero. Nine prototypes sit loose, each with a chip naming where
@@ -16,13 +17,15 @@ import { EXTRAS, TABS, TAB_OF_CARD } from './heroVariants';
 interface Props {
   waitlistUrl?: string;
   /**
-   * 'scatter' is the homepage hero. 'cards' (/hero-c/) spreads the cards past
-   * the container's edges. 'tabs' (/hero-d/) starts as a crowded browser tab
-   * strip. The two alternates have no prompt box and share everything else.
+   * 'tabs' is the homepage hero: a browser with eight readable tabs and a
+   * prototype page open, which crowds into slivers, then files into Canon.
+   * 'scatter' (the earlier hero) has loose cards instead of tabs. 'cards'
+   * (/hero-c/) spreads the cards past the container's edges and has no prompt.
+   * They share the prompt box (except 'cards'), the window and the script.
    */
   variant?: 'scatter' | 'cards' | 'tabs';
 }
-const { waitlistUrl = '', variant = 'scatter' } = Astro.props;
+const { waitlistUrl = '', variant = 'tabs' } = Astro.props;
 
 interface Card {
   k: ThumbKey;
@@ -72,7 +75,7 @@ const REPLY = `canon_add  ${total} prototypes, ${PROJECTS.length} projects`;
 const words = PROMPT.split(' ');
 ---
 
-<section class:list={['hero hero-b', variant !== 'scatter' && `hero-${variant === 'cards' ? 'c' : 'd'}`]} aria-labelledby="h-hero">
+<section class:list={['hero hero-b', variant === 'cards' && 'hero-c', variant === 'tabs' && 'hero-tabs']} aria-labelledby="h-hero">
   <HeroText waitlistUrl={waitlistUrl} />
 
   <div class="hpanel" aria-hidden="true">
@@ -90,7 +93,7 @@ const words = PROMPT.split(' ');
     <div class="hgrain" style={`background-image: url(${withBase('/texture/grain.png')})`}></div>
   </div>
 
-  {variant === 'scatter' && (
+  {variant !== 'cards' && (
   <div class="pbox" aria-hidden="true" data-prompt={PROMPT}>
     <div class="plabel" data-agent-name>Claude Code</div>
     <div class="ptext"><span class="pdim">&gt;</span>{' '}{
@@ -121,8 +124,20 @@ const words = PROMPT.split(' ');
           ))}
           <div class="btab canon-tab"><div class="btab-in"><i class="bico"></i><span>Canon</span></div></div>
         </div>
-        <div class="bbarline"><span class="bnav-dots"><i></i><i></i></span><span class="burl"></span></div>
-        <div class="bpage"><i></i><i></i><i></i><i></i></div>
+        <div class="bbarline"><span class="bnav-dots"><i></i><i></i></span><span class="burl"><span class="burl-text">pricing-v3.lovable.app</span></span></div>
+        <div class="bpage">
+          <div class="pg-nav"><b>Fieldnote</b><span>Product</span><span>Pricing</span><span>Docs</span><em>Sign in</em></div>
+          <div class="pg-head">
+            <h3>{tie('Simple pricing for small teams.')}</h3>
+            <p>{tie('Start free. Pay when your team grows.')}</p>
+            <div class="pg-switch"><span class="on">Monthly</span><span>Yearly</span></div>
+          </div>
+          <div class="pg-plans">
+            <div class="pg-plan"><b>Free</b><strong>$0</strong><small>per month</small><ul><li>3 notebooks</li><li>Search</li></ul><span>Start free</span></div>
+            <div class="pg-plan pg-pick"><b>Team</b><strong>$12</strong><small>per person, monthly</small><ul><li>Unlimited notebooks</li><li>Shared folders</li><li>Version history</li></ul><span class="pg-cta">Start a trial</span></div>
+            <div class="pg-plan"><b>Company</b><strong>$24</strong><small>per person, monthly</small><ul><li>Single sign-on</li><li>Audit log</li></ul><span>Talk to us</span></div>
+          </div>
+        </div>
       </div>
     )}
       {variant === 'cards' && (

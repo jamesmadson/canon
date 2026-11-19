@@ -1,7 +1,7 @@
 ---
 /**
- * Styles for the two hidden hero concepts, /hero-c/ (cards past the edges) and
- * /hero-d/ (the 30 tabs). They sit on top of HeroScatter's styles and its
+ * Styles for the tabs hero (the homepage) and the hidden /hero-c/ (cards past
+ * the edges) (the homepage). They sit on top of HeroScatter's styles and its
  * script. Everything that moves changes only transform and opacity, on one
  * curve. The markup holds the final state, so no script and reduced motion
  * both show it.
@@ -11,7 +11,7 @@
 <style is:global>
   /* ---- Both: one curve, no spring, and the glide stays inside 400ms ---- */
   .hero-c .sstage.live .scard,
-  .hero-d .sstage.live .scard {
+  .hero-tabs .sstage.live .scard {
     transition:
       transform 400ms cubic-bezier(0.2, 0, 0, 1),
       opacity 300ms cubic-bezier(0.2, 0, 0, 1);
@@ -75,13 +75,13 @@
     }
   }
 
-  /* ---- hero-d: the 30 tabs ---- */
-  .hero-d .sstage {
+  /* ---- hero-tabs: the 30 tabs ---- */
+  .hero-tabs .sstage {
     height: 876px;
   }
-  .hero-d .sbg,
-  .hero-d .chip,
-  .hero-d .sh {
+  .hero-tabs .sbg,
+  .hero-tabs .chip,
+  .hero-tabs .sh {
     display: none;
   }
   .bframe {
@@ -121,6 +121,10 @@
   .btab {
     min-width: 0;
   }
+  /* While the loop is running, tabs that have not opened yet take no room. */
+  .btab.gone {
+    display: none;
+  }
   .btab-in {
     display: flex;
     align-items: center;
@@ -149,7 +153,7 @@
     background: var(--tint);
     box-shadow: inset 0 0 0 1px rgba(26, 25, 24, 0.14);
   }
-  .btab[data-n='4'] .btab-in {
+  .btab[data-n='0'] .btab-in {
     background: var(--wn-main);
     color: var(--color-ink);
   }
@@ -202,16 +206,16 @@
     border-radius: 11px;
     background: var(--wn-panel);
   }
-  .hero-d .sapp {
+  .hero-tabs .sapp {
     margin-top: 76px;
     height: calc(100% - 76px);
   }
-  .hero-d .sapp .wn-rail {
+  .hero-tabs .sapp .wn-rail {
     align-self: stretch;
     background: var(--wn-rail);
     border-right: 1px solid var(--wn-line);
   }
-  .hero-d .sapp .wn-main {
+  .hero-tabs .sapp .wn-main {
     margin: 0;
   }
 
@@ -240,56 +244,174 @@
   .sstage.live.is-filed .canon-tab .btab-in {
     transition-delay: 0.45s;
   }
-  .sstage.live.out .btab-in {
+  .sstage.live.out .btab:not(.canon-tab) .btab-in,
+  .sstage.live.out .canon-tab .btab-in {
     opacity: 0;
     transition-delay: 0s;
   }
-  /* The cards start as their tab, so loose they are invisible. */
-  .hero-d .sstage.live:not(.is-filed) .scard {
+  /* A tab that has just opened fades in. */
+  .sstage.live .btab.pre:not(.canon-tab) .btab-in {
     opacity: 0;
   }
-  .hero-d .sstage.live.out .scard {
+  /* The cards start as their tab, so loose they are invisible. */
+  .hero-tabs .sstage.live:not(.is-filed) .scard {
+    opacity: 0;
+  }
+  .hero-tabs .sstage.live.out .scard {
     opacity: 0;
   }
 
-  /* A blank page behind the tabs until the cards file in. */
-  .bpage {
-    position: absolute;
-    left: 56px;
-    top: 120px;
-    right: 56px;
-    display: grid;
-    gap: 14px;
+  /* A prototype page open in the active tab, behind the window until the cards
+     file in. */
+  .burl {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 12px;
+    line-height: 1;
+    color: var(--color-ink-soft);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .burl-text {
     opacity: 0;
   }
-  .bpage i {
-    display: block;
-    height: 12px;
-    border-radius: 6px;
+  .bpage {
+    position: absolute;
+    inset: 76px 0 0;
+    padding: 0 40px;
+    border-radius: 0 0 14px 14px;
+    background: var(--wn-main);
+    overflow: hidden;
+    opacity: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--color-ink);
+  }
+  .pg-nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    height: 64px;
+    max-width: 920px;
+    margin: 0 auto;
+    color: var(--color-ink-soft);
+  }
+  .pg-nav b {
+    margin-right: auto;
+    font-size: 16px;
+    color: var(--color-ink);
+  }
+  .pg-nav em {
+    font-style: normal;
+    padding: 6px 14px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--wn-line-strong);
+    color: var(--color-ink);
+  }
+  .pg-head {
+    max-width: 920px;
+    margin: 56px auto 0;
+    text-align: center;
+  }
+  .pg-head h3 {
+    margin: 0;
+    font-size: 44px;
+    line-height: 48px;
+    font-weight: 400;
+    text-wrap: balance;
+  }
+  .pg-head p {
+    margin: 12px 0 0;
+    font-size: 16px;
+    line-height: 24px;
+    color: var(--color-ink-soft);
+  }
+  .pg-switch {
+    display: inline-flex;
+    margin-top: 24px;
+    padding: 3px;
+    border-radius: 999px;
     background: var(--wn-raised);
   }
-  .bpage i:first-child {
-    width: 36%;
-    height: 22px;
+  .pg-switch span {
+    padding: 5px 16px;
+    border-radius: 999px;
+    color: var(--color-ink-soft);
   }
-  .bpage i:nth-child(3) {
-    width: 82%;
+  .pg-switch .on {
+    background: var(--wn-main);
+    color: var(--color-ink);
+    box-shadow: 0 1px 2px var(--shadow);
   }
-  .bpage i:nth-child(4) {
-    width: 64%;
+  .pg-plans {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    max-width: 920px;
+    margin: 40px auto 0;
   }
-  .sstage.live .bpage {
+  .pg-plan {
+    padding: 22px;
+    border-radius: 14px;
+    background: var(--wn-panel);
+    box-shadow: inset 0 0 0 1px var(--wn-line);
+  }
+  .pg-plan.pg-pick {
+    box-shadow: inset 0 0 0 2px var(--color-ink);
+  }
+  .pg-plan b {
+    display: block;
+    font-weight: 500;
+  }
+  .pg-plan strong {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 36px;
+    line-height: 40px;
+    font-weight: 400;
+  }
+  .pg-plan small {
+    display: block;
+    color: var(--color-ink-soft);
+    font-size: 12px;
+  }
+  .pg-plan ul {
+    margin: 16px 0 20px;
+    padding: 0;
+    list-style: none;
+    color: var(--color-ink-soft);
+  }
+  .pg-plan li {
+    padding: 3px 0;
+  }
+  .pg-plan > span {
+    display: block;
+    padding: 9px 0;
+    border-radius: 999px;
+    text-align: center;
+    box-shadow: inset 0 0 0 1px var(--wn-line-strong);
+  }
+  .pg-plan > .pg-cta {
+    background: var(--color-ink);
+    color: var(--wn-main);
+    box-shadow: none;
+  }
+  .sstage.live .bpage,
+  .sstage.live .burl-text {
     transition: opacity 300ms cubic-bezier(0.2, 0, 0, 1);
   }
-  .sstage.live:not(.is-filed) .bpage {
+  .sstage.live:not(.is-filed) .bpage,
+  .sstage.live:not(.is-filed) .burl-text {
     opacity: 1;
   }
-  .sstage.live.out .bpage {
+  .sstage.live.out .bpage,
+  .sstage.live.out .burl-text {
     opacity: 0;
   }
 
   @media (max-width: 960px) {
-    .hero-d .sstage {
+    .hero-tabs .sstage {
       height: 716px;
     }
     .bdots {
@@ -306,13 +428,55 @@
       width: 150px;
     }
     .bpage {
-      left: 24px;
-      right: 24px;
+      padding: 0 20px;
+    }
+    .pg-nav {
+      gap: 16px;
+      height: 52px;
+    }
+    .pg-nav span {
+      display: none;
+    }
+    .pg-head {
+      margin-top: 28px;
+    }
+    .pg-head h3 {
+      font-size: 30px;
+      line-height: 34px;
+    }
+    .pg-switch {
+      margin-top: 16px;
+    }
+    .pg-plans {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .pg-plan {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: 12px;
+      padding: 12px 16px;
+    }
+    .pg-plan b,
+    .pg-plan small {
+      grid-column: 1;
+    }
+    .pg-plan strong {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      margin: 0;
+    }
+    .pg-plan ul,
+    .pg-plan > span {
+      display: none;
     }
   }
   @media (prefers-reduced-motion: reduce) {
     .btab:not(.canon-tab) .btab-in,
-    .bpage {
+    .bpage,
+    .burl-text {
       opacity: 0 !important;
     }
     .canon-tab .btab-in {

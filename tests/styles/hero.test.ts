@@ -99,8 +99,8 @@ describe('the scattered hero at /', () => {
 
   it('is the default hero of the homepage', () => {
     expect(read('src/pages/index.astro')).not.toContain('hero=');
-    expect(read('src/components/home/HomePage.astro')).toContain("hero = 'scatter'");
-    expect(html).toContain('class="hero hero-b"');
+    expect(read('src/components/home/HomePage.astro')).toContain("hero = 'tabs'");
+    expect(html).toContain('class="hero hero-b hero-tabs"');
   });
 });
 

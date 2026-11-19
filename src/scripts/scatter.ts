@@ -88,6 +88,19 @@ const HOLD_FILED = 90; // 4.5 seconds once everything has landed
 const HOLD_LOOSE = 56; // without a prompt, the loose cards are held for 2.8 seconds
 const FADE = 7; // a little over the 300ms fade
 
+/**
+ * The tabs variant opens on a few readable tabs and a page, then more tabs
+ * open until they are slivers, then the prompt types and the tabs file into
+ * Canon. How many tabs show at each step of the squeeze, on a laptop and on a
+ * phone (which keeps twelve tabs at most). The last step is every tab.
+ */
+const CROWD_WIDE = [8, 11, 15, 20, 26, 34];
+const CROWD_PHONE = [4, 5, 7, 9, 12];
+const CROWD_AT = 44; // 2.2 seconds with the first tabs readable
+const CROWD_STEP = 4; // 200ms between steps
+/** The tabs variant starts its prompt after the squeeze: the crowding steps, then a beat. */
+const TABS_LAG = CROWD_AT + CROWD_WIDE.length * CROWD_STEP + 6 - TYPE_AT;
+
 function init(stage: HTMLElement) {
   const cards = [...stage.querySelectorAll<HTMLElement>('[data-card]')];
   const box = document.querySelector<HTMLElement>('[data-prompt]');
@@ -97,8 +110,26 @@ function init(stage: HTMLElement) {
   const line = box?.querySelector<HTMLElement>('.ptext') ?? null;
   const variant = stage.dataset.variant ?? 'scatter';
   const forced = new URLSearchParams(location.search).get('state');
-  const frozen = forced === 'filed' ? 'filed' : forced === 'scattered' || forced === 'start' ? 'start' : null;
+  const frozen = forced === 'filed' ? 'filed' : forced === 'squeeze' ? 'squeeze' : forced === 'scattered' || forced === 'start' ? 'start' : null;
   const parts = box ? [stage, box] : [stage];
+  const tabs = [...stage.querySelectorAll<HTMLElement>('.btab:not(.canon-tab)')];
+  const crowd = () => (matchMedia('(max-width: 960px)').matches ? CROWD_PHONE : CROWD_WIDE);
+
+  /** Shows the first n tabs. A tab that has just opened fades in. */
+  const openTabs = (n: number) => {
+    const fresh: HTMLElement[] = [];
+    tabs.forEach((tab, i) => {
+      const gone = i >= n;
+      if (!gone && tab.classList.contains('gone')) fresh.push(tab);
+      tab.classList.toggle('gone', gone);
+    });
+    if (!fresh.length) return;
+    fresh.forEach((tab) => tab.classList.add('pre'));
+    void stage.offsetWidth;
+    fresh.forEach((tab) => tab.classList.remove('pre'));
+  };
+  const squeezed = () => crowd()[crowd().length - 1];
+  const opening = () => crowd()[0];
 
   /** Reveals the first n characters and moves the cursor after them. */
   const type = (n: number) => {
@@ -120,7 +151,11 @@ function init(stage: HTMLElement) {
       const spots = variant === 'cards' ? (phone ? CARDS_PHONE : CARDS_WIDE) : phone ? PHONE : WIDE;
       const thumb = card.querySelector<HTMLElement>('.thumb');
       if (variant === 'tabs') {
+        // The cards start from where their tabs are once every tab is open.
+        const was = tabs.map((t) => t.classList.contains('gone'));
+        tabs.forEach((t) => t.classList.remove('gone'));
         placeOnTab(card, thumb, i);
+        tabs.forEach((t, k) => t.classList.toggle('gone', was[k]));
         return;
       }
       const spot = spots[i];
@@ -202,6 +237,7 @@ function init(stage: HTMLElement) {
   snap(() => {
     place();
     stage.classList.toggle('is-filed', frozen === 'filed');
+    if (variant === 'tabs') openTabs(frozen === 'start' || !frozen ? opening() : squeezed());
     type(frozen === 'filed' ? chars.length : 0);
     reply?.classList.toggle('on', frozen === 'filed');
   });
@@ -229,15 +265,21 @@ function init(stage: HTMLElement) {
   let visible = true;
   const tick = () => {
     t += 1;
-    const filedAt = box ? FILED_AT : HOLD_LOOSE;
+    const lag = variant === 'tabs' ? TABS_LAG : 0;
+    const typeAt = TYPE_AT + lag;
+    const replyAt = REPLY_AT + lag;
+    const filedAt = box ? FILED_AT + lag : HOLD_LOOSE;
     const outAt = filedAt + GLIDE + HOLD_FILED;
-    if (box && t >= TYPE_AT && t <= TYPE_AT + TYPE_TICKS) type(Math.ceil(((t - TYPE_AT) / TYPE_TICKS) * chars.length));
-    else if (box && t === REPLY_AT) reply?.classList.add('on');
+    const steps = crowd();
+    if (variant === 'tabs' && t >= CROWD_AT && (t - CROWD_AT) % CROWD_STEP === 0 && (t - CROWD_AT) / CROWD_STEP < steps.length) openTabs(steps[(t - CROWD_AT) / CROWD_STEP]);
+    if (box && t >= typeAt && t <= typeAt + TYPE_TICKS) type(Math.ceil(((t - typeAt) / TYPE_TICKS) * chars.length));
+    else if (box && t === replyAt) reply?.classList.add('on');
     else if (t === filedAt) stage.classList.add('is-filed');
     else if (t === outAt) mark('out', true);
     else if (t === outAt + FADE) {
       snap(() => {
         stage.classList.remove('is-filed');
+        if (variant === 'tabs') openTabs(opening());
         type(0);
         reply?.classList.remove('on');
         nextAgent();
