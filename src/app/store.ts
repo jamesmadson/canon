@@ -379,7 +379,7 @@ export async function moveToBoard(placementId: string, boardId: string) {
   const to = state.boards.find((b) => b.id === boardId);
   if (!from || !to) return;
   if (from.projectId !== to.projectId) {
-    await moveToProject([pl.frameId], { id: to.projectId }, { boardId: to.id, quiet: true });
+    await moveToProject([pl.frameId], { id: to.projectId }, { boardId: to.id });
     return;
   }
   const key = (() => {
@@ -430,7 +430,7 @@ export interface MoveResult {
  * the same step. `boardId` picks the board to land on instead of the first.
  */
 export async function moveToProject(
-  frameIds: string[], target: { id: string } | { name: string }, opts: { boardId?: string; quiet?: boolean } = {},
+  frameIds: string[], target: { id: string } | { name: string }, opts: { boardId?: string; quiet?: boolean; message?: string } = {},
 ): Promise<MoveResult | null> {
   const seen = new Set<string>();
   const stacksToMove: Frame[][] = [];
@@ -509,7 +509,7 @@ export async function moveToProject(
 
   const project = state.projects.find((p) => p.id === targetId)!;
   const result: MoveResult = { project, moved: todo.length, undo: () => undoMove(record) };
-  if (!opts.quiet) toast(`Moved to ${project.name}.`, { label: 'Undo', run: () => { void result.undo(); } });
+  if (!opts.quiet) toast(opts.message ?? `Moved to ${project.name}.`, { label: 'Undo', run: () => { void result.undo(); } });
   return result;
 }
 

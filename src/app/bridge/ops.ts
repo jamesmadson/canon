@@ -42,6 +42,8 @@ export interface OpsDeps {
   updateMeta(frameId: string, patch: FrameMeta): Promise<void>;
   placeOnBoard(boardId: string, frameId: string): Promise<void>;
   moveToBoard(placementId: string, boardId: string): Promise<void>;
+  /** Moves the whole prototype to another project, off the old project's boards and onto the new one's first, or onto boardId. Toasts with Undo. */
+  moveToProject(frameIds: string[], target: { id: string } | { name: string }, opts?: { boardId?: string; message?: string }): Promise<{ project: Project } | null>;
   navigate(hash: string): void;
   appBase: string;
   agentName: string;
@@ -350,24 +352,44 @@ async function update(args: Args, deps: OpsDeps) {
   const name = nameText(args.name);
   const m = metaArgs(args);
 
+  // A move to another project comes from moveToProject, or from a moveTo board that sits in one.
+  let toProject: Plan<Project> | null = null;
+  const toProjectQ = text(args.moveToProject);
+  if (toProjectQ) {
+    const r = resolveByName(s.projects, toProjectQ, { exact: true });
+    if (r.ok) toProject = r.item.id === project.id ? null : { have: r.item };
+    else if (r.reason === 'many') throw new Ambiguous('many', r.matches.map((p) => p.name), 'project', toProjectQ);
+    else toProject = { make: toProjectQ.slice(0, MAX_NAME).trim() };
+  }
   let target: Board | null = null;
+  let makeBoard: string | null = null;
   let move: Placement | null = null;
   const moveQ = text(args.moveTo);
   if (moveQ) {
-    try {
-      target = pickBoard(s, moveQ, project, 'moveTo');
-    } catch (e) {
-      if (!(e instanceof Ambiguous) || e.status !== 'none') throw e;
-      const elsewhere = resolveByName(s.boards.filter((b) => b.projectId !== project.id), moveQ);
-      if (elsewhere.ok || elsewhere.reason === 'many') throw new Refused('That board is in another project.');
-      throw e;
+    const scope = toProject ? ('have' in toProject ? toProject.have : null) : project;
+    if (scope === null) {
+      makeBoard = moveQ.slice(0, MAX_NAME).trim();
+    } else {
+      try {
+        target = pickBoard(s, moveQ, scope, 'moveTo');
+      } catch (e) {
+        if (!(e instanceof Ambiguous) || e.status !== 'none' || toProjectQ) throw e;
+        const elsewhere = resolveByName(s.boards.filter((b) => b.projectId !== project.id), moveQ);
+        if (elsewhere.ok) target = elsewhere.item;
+        else if (elsewhere.reason === 'many') throw new Ambiguous('many', elsewhere.matches.map((b) => boardLabel(s, b)), 'moveTo', moveQ);
+        else throw e;
+      }
+      const there = target && target.projectId !== project.id ? s.projects.find((p) => p.id === target!.projectId) : undefined;
+      if (there) toProject = { have: there };
     }
-    const spots = placementsOfStack(s, stack).filter((p) => !board || p.boardId === board.id);
-    if (spots.length > 1) {
-      const names = spots.map((p) => s.boards.find((b) => b.id === p.boardId)?.name ?? p.boardId);
-      throw new Ambiguous('many', names, 'board');
+    if (!toProject) {
+      const spots = placementsOfStack(s, stack).filter((p) => !board || p.boardId === board.id);
+      if (spots.length > 1) {
+        const names = spots.map((p) => s.boards.find((b) => b.id === p.boardId)?.name ?? p.boardId);
+        throw new Ambiguous('many', names, 'board');
+      }
+      move = spots[0] ?? null;
     }
-    move = spots[0] ?? null;
   }
 
   // What changes in the metadata, settled from the current version before anything is written.
@@ -418,7 +440,17 @@ async function update(args: Args, deps: OpsDeps) {
   }
   if (metaChanged) await deps.updateMeta(current.id, patch);
   let moved = false;
-  if (target) {
+  let movedTo: string | null = null;
+  if (toProject) {
+    const label = name || current.name;
+    const to = 'have' in toProject ? toProject.have.name : toProject.make;
+    const r = await deps.moveToProject([current.id], 'have' in toProject ? { id: toProject.have.id } : { name: toProject.make }, {
+      ...(target ? { boardId: target.id } : {}), message: `${deps.agentName} moved ${label} to ${to}.`,
+    });
+    if (r && makeBoard) await deps.placeOnBoard((await deps.createBoard(r.project.id, makeBoard)).id, current.id);
+    moved = true;
+    movedTo = r?.project.name ?? to;
+  } else if (target) {
     if (!move) {
       await deps.placeOnBoard(target.id, current.id);
       moved = true;
@@ -429,10 +461,11 @@ async function update(args: Args, deps: OpsDeps) {
   }
 
   const after = deps.state();
-  const shown = target ?? linkBoard(after, deps, stackNow(after, current.id), board);
+  const shown = target ?? linkBoard(after, deps, stackNow(after, current.id), movedTo ? null : board);
   const result = summary(deps, current.id, shown);
-  if (newVersion || renamed || moved || metaChanged) deps.toast(`${deps.agentName} updated ${result.frame}`);
-  return { ...result, newVersion, tags: next.tags, ...(build ? { storedFiles: build.length } : {}), link: frameLink(deps, current.id) };
+  // A move to another project says so itself, with Undo.
+  if (!movedTo && (newVersion || renamed || moved || metaChanged)) deps.toast(`${deps.agentName} updated ${result.frame}`);
+  return { ...result, newVersion, ...(movedTo ? { movedToProject: movedTo } : {}), tags: next.tags, ...(build ? { storedFiles: build.length } : {}), link: frameLink(deps, current.id) };
 }
 
 /* ── find and status ───────────────────────────────────────────────────── */

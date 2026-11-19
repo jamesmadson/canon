@@ -57,6 +57,7 @@ function agent() {
     updateMeta: (id, patch) => store.updateMeta(id, patch),
     placeOnBoard: (b, f) => store.placeOnBoard(b, f),
     moveToBoard: store.moveToBoard,
+    moveToProject: store.moveToProject,
     navigate: () => {},
     appBase: APP,
     agentName: 'Claude',

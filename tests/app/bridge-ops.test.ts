@@ -97,6 +97,19 @@ function fake(seed: Seed = {}) {
       writes.push(`move ${placementId} ${boardId}`);
       set({ placements: state.placements.map((p) => (p.id === placementId ? { ...p, boardId } : p)) });
     },
+    async moveToProject(frameIds: string[], target: { id: string } | { name: string }, opts: { boardId?: string; message?: string } = {}) {
+      const to = 'id' in target ? state.projects.find((p) => p.id === target.id)! : await deps.createProject(target.name);
+      writes.push(`moveProject ${stackOf(frameIds[0]).map((f) => f.id).join('+')} ${to.id}${opts.boardId ? ` ${opts.boardId}` : ''}`);
+      const ids = new Set(stackOf(frameIds[0]).map((f) => f.id));
+      const first = state.boards.filter((b) => b.projectId === to.id).sort((a, b) => b.updatedAt - a.updatedAt)[0];
+      const landing = opts.boardId ?? first?.id;
+      set({
+        frames: state.frames.map((f) => (ids.has(f.id) ? { ...f, projectId: to.id } : f)),
+        placements: [...state.placements.filter((p) => !ids.has(p.frameId)), ...(landing ? [place(`np${++n}`, landing, frameIds[0])] : [])],
+      });
+      toasts.push(opts.message ?? `Moved to ${to.name}.`);
+      return { project: to };
+    },
     navigate: (hash: string) => navigated.push(hash),
     appBase: APP,
     agentName: seed.agentName ?? 'Claude',
@@ -323,11 +336,63 @@ describe('runOp update', () => {
     expect(v.writes).toEqual(['place b1 f0']);
   });
 
-  it("moveTo another project's board is refused and nothing changes", async () => {
+  it("moveTo another project's board moves the prototype to that project and that board", async () => {
     const t = twoProjects();
-    const r = await runOp('update', { frame: 'Cart', moveTo: 'Launch', name: 'Basket' }, t.deps);
-    expect(r).toEqual({ ok: false, error: 'That board is in another project.' });
+    const r = await runOp('update', { frame: 'Cart', moveTo: 'Launch' }, t.deps);
+    expect(t.writes).toEqual(['moveProject f0+f1 z b3']);
+    expect(r).toMatchObject({ ok: true, result: { project: 'Zeta', projectId: 'z', board: 'Launch', boardId: 'b3', movedToProject: 'Zeta' } });
+    expect(t.state().frames.filter((f) => f.stackId === 'f0').every((f) => f.projectId === 'z')).toBe(true);
+    expect(t.toasts).toEqual(['Claude moved Cart v2 to Zeta.']);
+  });
+
+  it('moveTo an ambiguous board in other projects asks which, and writes nothing', async () => {
+    const t = twoProjects();
+    t.state().projects.push(project('y', 'Ypsilon'));
+    t.state().boards.push(board('b8', 'y', 'Checkout 3'));
+    const r = await runOp('update', { frame: 'Hero', moveTo: 'Check' }, t.deps);
+    expect(r).toMatchObject({ ok: true, result: { status: 'many', what: 'moveTo', query: 'Check' } });
     expect(t.writes).toEqual([]);
+  });
+
+  it('moveToProject moves every version to that project, onto its first board', async () => {
+    const t = twoProjects();
+    const r = await runOp('update', { frame: 'Cart', moveToProject: 'Zeta' }, t.deps);
+    expect(t.writes).toEqual(['moveProject f0+f1 z']);
+    expect(r).toMatchObject({ ok: true, result: { project: 'Zeta', board: 'Launch', movedToProject: 'Zeta', link: `${APP}#/f/f1/full` } });
+  });
+
+  it('moveToProject takes a project id, and with a board puts it there', async () => {
+    const t = twoProjects();
+    await runOp('update', { frame: 'Cart', moveToProject: 'z', moveTo: 'Launch' }, t.deps);
+    expect(t.writes).toEqual(['moveProject f0+f1 z b3']);
+  });
+
+  it('moveToProject makes a project that does not exist, and a moveTo board in it', async () => {
+    const t = twoProjects();
+    const r = await runOp('update', { frame: 'Cart', moveToProject: 'Gamma', moveTo: 'Round one' }, t.deps);
+    const gamma = t.state().projects.find((p) => p.name === 'Gamma')!;
+    expect(t.state().frames.filter((f) => f.stackId === 'f0').every((f) => f.projectId === gamma.id)).toBe(true);
+    const b = t.state().boards.find((x) => x.name === 'Round one')!;
+    expect(b.projectId).toBe(gamma.id);
+    expect(t.state().placements.some((p) => p.boardId === b.id && p.frameId === 'f1')).toBe(true);
+    expect(r).toMatchObject({ ok: true, result: { project: 'Gamma', movedToProject: 'Gamma' } });
+  });
+
+  it('moveToProject with the prototype’s own project moves nothing', async () => {
+    const t = twoProjects();
+    const r = await runOp('update', { frame: 'Cart', moveToProject: 'Alpha', summary: 'x' }, t.deps);
+    expect(t.writes.some((w) => w.startsWith('moveProject'))).toBe(false);
+    expect((r as any).result.movedToProject).toBeUndefined();
+  });
+
+  it('moveToProject with a new version moves the version too, and a bad board writes nothing', async () => {
+    const t = twoProjects();
+    await runOp('update', { frame: 'Cart', url: 'https://cart.test/9', moveToProject: 'Zeta' }, t.deps);
+    expect(t.state().frames.filter((f) => f.projectId === 'z').map((f) => f.url)).toContain('https://cart.test/9');
+    const u = twoProjects();
+    const r = await runOp('update', { frame: 'Cart', url: 'https://cart.test/9', moveToProject: 'Zeta', moveTo: 'Nowhere' }, u.deps);
+    expect(r).toMatchObject({ ok: true, result: { status: 'none', what: 'moveTo' } });
+    expect(u.writes).toEqual([]);
   });
 
   it('says which lookup failed: project, board, moveTo, frame', async () => {

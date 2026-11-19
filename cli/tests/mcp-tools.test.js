@@ -106,6 +106,25 @@ describe('canon tools', () => {
     expect(await first('canon_update', { frame: 'Cart' }, { ...base, board: null })).toBe('Updated Cart in project Shop.');
     expect(await first('canon_update', { frame: 'Cart' }, { ...base, board: 'Main', newVersion: true, version: 3 })).toBe('Updated Cart on board Main in project Shop. It is version 3 now.');
   });
+  it('passes moveToProject on and says the move in its first line', async () => {
+    const { tools, calls } = setup({ ok: true, result: { frameId: 'f1', frame: 'Cart', project: 'Beta', board: 'Main', movedToProject: 'Beta', link: 'L' } });
+    const r = await tools.call('canon_update', { frame: 'Cart', moveToProject: 'Beta' });
+    expect(calls[0][1].moveToProject).toBe('Beta');
+    expect(r.isError).toBeUndefined();
+    expect(r.content[0].text.split('\n')[0]).toBe('Moved Cart to Beta.');
+  });
+  it('adds the version to the move line when the update made one', async () => {
+    const { tools } = setup({ ok: true, result: { frame: 'Cart', project: 'Beta', board: null, movedToProject: 'Beta', newVersion: true, version: 3 } });
+    expect((await tools.call('canon_update', { frame: 'Cart', moveToProject: 'Beta', url: 'http://a.b' })).content[0].text.split('\n')[0]).toBe('Moved Cart to Beta. It is version 3 now.');
+  });
+  it('describes the move, and takes moveToProject only on canon_update', async () => {
+    const update = TOOL_DEFS.find((d) => d.name === 'canon_update');
+    expect(update.description).toContain('moveToProject');
+    expect(update.inputSchema.properties.moveToProject.type).toBe('string');
+    expect(update.inputSchema.properties.moveTo.description).toContain('another project');
+    const r = await setup().tools.call('canon_add', { url: 'http://a.b', moveToProject: 'Beta' });
+    expect(r.isError).toBe(true);
+  });
   it('canon_pair returns a link with a new secret', async () => {
     const { tools, secret } = setup();
     const r = await tools.call('canon_pair', {});

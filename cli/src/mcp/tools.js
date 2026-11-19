@@ -80,7 +80,7 @@ export const TOOL_DEFS = [
   },
   {
     name: 'canon_update',
-    description: 'Change a prototype: its URL, name, summary, tags, star, note, archive or place. Pass folder, the absolute path of a new build, to add it as the next version of the prototype; the older versions stay. For a page inside a built site, pass the build root as folder and the page path as page. For a prototype that is a link, pass url for the next version: a new address becomes the next version and the older ones stay. Pass newVersion: true with url to add that address as the next version even when it is the same as the current one, for example a dev server that now shows new work. A stack can mix link versions and stored copies.',
+    description: 'Change a prototype: its URL, name, summary, tags, star, note, archive, board or project. Pass folder, the absolute path of a new build, to add it as the next version of the prototype; the older versions stay. For a page inside a built site, pass the build root as folder and the page path as page. For a prototype that is a link, pass url for the next version: a new address becomes the next version and the older ones stay. Pass newVersion: true with url to add that address as the next version even when it is the same as the current one, for example a dev server that now shows new work. A stack can mix link versions and stored copies. Pass moveToProject to move the whole prototype, every version, to another project: it leaves the old project\'s boards and lands on the first board of the new one, and the person can undo it for a few seconds. A project that does not exist yet is made. A moveTo board in another project moves it there too.',
     inputSchema: schema(
       {
         project: PROJECT,
@@ -99,7 +99,8 @@ export const TOOL_DEFS = [
         archived: { type: 'boolean', description: 'Archive or restore the prototype.' },
         tags: TAGS('Tags to add.'),
         removeTags: TAGS('Tags to remove. They stay removed.'),
-        moveTo: str('Board name or id to move the prototype to.'),
+        moveTo: str('Board name or id to move the prototype to. A board in another project moves the prototype to that project.'),
+        moveToProject: str('Project name or id to move the prototype to, with all its versions. A name that matches no project makes one.'),
       },
       ['frame'],
     ),
@@ -200,6 +201,10 @@ function doneText(op, res) {
   if (typeof res.project !== 'string') {
     if (board === null) return null;
     return op === 'add' ? `Added ${res.frame} to board ${board}.` : `Updated ${res.frame} on board ${board}.`;
+  }
+  if (op === 'update' && typeof res.movedToProject === 'string') {
+    const moved = `Moved ${res.frame} to ${res.movedToProject}.`;
+    return res.newVersion === true && Number.isInteger(res.version) ? `${moved} It is version ${res.version} now.` : moved;
   }
   let line;
   if (op === 'add') {

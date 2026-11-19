@@ -76,7 +76,7 @@ const snapshot = () => structuredClone({ projects: db.tables.projects, boards: d
 const byId = (xs: any[]) => [...xs].sort((a, b) => a.id.localeCompare(b.id));
 const norm = (s: ReturnType<typeof snapshot>) => Object.fromEntries(Object.entries(s).map(([k, v]) => [k, byId(v as any[])]));
 
-beforeEach(async () => { seed(); await store.load(); vi.useRealTimers(); });
+beforeEach(async () => { seed(); await store.load(); vi.useRealTimers(); store.dismissToast(); });
 
 describe('moving a prototype to another project', () => {
   it('takes every version, keeping ids, meta, cover and files in place', async () => {
@@ -257,12 +257,49 @@ describe('an interrupted move', () => {
   });
 });
 
+describe('an agent moving a prototype with the real store', () => {
+  const run = async (args: Record<string, unknown>) => {
+    const { runOp } = await import('../../src/app/bridge/ops');
+    const { createStaging } = await import('../../src/app/lib/stage');
+    const toasts: string[] = [];
+    const deps = {
+      state: store.getState, route: () => ({ name: 'home' }), createProject: store.createProject, createBoard: store.createBoard,
+      addUrl: store.addUrl, addUrlVersion: store.addUrlVersion, staging: createStaging(), addBuild: store.addBuild, addBuildVersion: store.addBuildVersion,
+      updateFrame: store.updateFrame, updateMeta: store.updateMeta, placeOnBoard: store.placeOnBoard, moveToBoard: store.moveToBoard, moveToProject: store.moveToProject,
+      navigate: () => {}, appBase: 'https://example.test/canon/app/', agentName: 'Claude', toast: (m: string) => toasts.push(m),
+    } as any;
+    return { r: (await runOp('update', args, deps)) as any, toasts };
+  };
+
+  it('moves the stack under the same rules, and the person can undo it from the toast', async () => {
+    const before = norm(snapshot());
+    const { r } = await run({ frame: 'p2', moveToProject: 'Beta' });
+    expect(r.result).toMatchObject({ project: 'Beta', board: 'Beta main', movedToProject: 'Beta' });
+    expect(store.getState().frames.filter((f) => f.stackId === 'p1').every((f) => f.projectId === 'B')).toBe(true);
+    expect(store.getState().toast).toBe('Claude moved p2 to Beta.');
+    store.getState().toastAction!.run();
+    await vi.waitFor(() => expect(norm(snapshot())).toEqual(before));
+  });
+
+  it('moves to a board in another project, and that board is where it lands', async () => {
+    await run({ frame: 'q1', moveTo: 'Beta old' });
+    expect(store.getState().frames.find((f) => f.id === 'q1')!.projectId).toBe('B');
+    expect(store.getState().placements.filter((p) => p.frameId === 'q1').map((p) => p.boardId)).toEqual(['b2']);
+  });
+
+  it('makes the project when none has that name', async () => {
+    await run({ frame: 'q1', moveToProject: 'Gamma' });
+    const g = store.getState().projects.find((p) => p.name === 'Gamma')!;
+    expect(store.getState().frames.find((f) => f.id === 'q1')!.projectId).toBe(g.id);
+  });
+});
+
 describe('a board in another project', () => {
   it('moves the whole prototype there, onto that board', async () => {
     await store.moveToBoard('pl3', 'b2');
     const s = store.getState();
     expect(s.frames.find((f) => f.id === 'q1')!.projectId).toBe('B');
     expect(s.placements.filter((p) => p.frameId === 'q1')).toMatchObject([{ boardId: 'b2' }]);
-    expect(s.toast).toBeNull();
+    expect(s.toast).toBe('Moved to Beta.');
   });
 });
