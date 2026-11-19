@@ -11,14 +11,14 @@ import Plans from './Plans.astro';
 interface Props {
   waitlistUrl?: string;
   /** Which hero opens the page. The terminal one is the earlier hero, kept at /hero-a/. */
-  hero?: 'scatter' | 'terminal';
+  hero?: 'scatter' | 'terminal' | 'cards' | 'tabs';
 }
 const { waitlistUrl = '', hero = 'scatter' } = Astro.props;
 ---
 
 <div class="home">
   <div class="wrap">
-    {hero === 'terminal' ? <Hero waitlistUrl={waitlistUrl} /> : <HeroScatter waitlistUrl={waitlistUrl} />}
+    {hero === 'terminal' ? <Hero waitlistUrl={waitlistUrl} /> : <HeroScatter waitlistUrl={waitlistUrl} variant={hero === 'scatter' ? 'scatter' : hero} />}
     <WorksWith />
     <WaysIn />
     <AgentBand />

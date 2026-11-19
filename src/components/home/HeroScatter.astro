@@ -3,6 +3,8 @@ import HeroText from './HeroText.astro';
 import Thumb from './Thumb.astro';
 import type { ThumbKey } from '../../lib/thumbs';
 import { withBase } from '../../lib/withBase';
+import HeroVariantStyles from './HeroVariantStyles.astro';
+import { EXTRAS, TABS, TAB_OF_CARD } from './heroVariants';
 
 /**
  * The alternate hero. Nine prototypes sit loose, each with a chip naming where
@@ -13,8 +15,14 @@ import { withBase } from '../../lib/withBase';
  */
 interface Props {
   waitlistUrl?: string;
+  /**
+   * 'scatter' is the homepage hero. 'cards' (/hero-c/) spreads the cards past
+   * the container's edges. 'tabs' (/hero-d/) starts as a crowded browser tab
+   * strip. The two alternates have no prompt box and share everything else.
+   */
+  variant?: 'scatter' | 'cards' | 'tabs';
 }
-const { waitlistUrl = '' } = Astro.props;
+const { waitlistUrl = '', variant = 'scatter' } = Astro.props;
 
 interface Card {
   k: ThumbKey;
@@ -64,7 +72,7 @@ const REPLY = `canon_add  ${total} prototypes, ${PROJECTS.length} projects`;
 const words = PROMPT.split(' ');
 ---
 
-<section class="hero hero-b" aria-labelledby="h-hero">
+<section class:list={['hero hero-b', variant !== 'scatter' && `hero-${variant === 'cards' ? 'c' : 'd'}`]} aria-labelledby="h-hero">
   <HeroText waitlistUrl={waitlistUrl} />
 
   <div class="hpanel" aria-hidden="true">
@@ -82,6 +90,7 @@ const words = PROMPT.split(' ');
     <div class="hgrain" style={`background-image: url(${withBase('/texture/grain.png')})`}></div>
   </div>
 
+  {variant === 'scatter' && (
   <div class="pbox" aria-hidden="true" data-prompt={PROMPT}>
     <div class="plabel" data-agent-name>Claude Code</div>
     <div class="ptext"><span class="pdim">&gt;</span>{' '}{
@@ -94,9 +103,38 @@ const words = PROMPT.split(' ');
     }<span class="pcaret"></span></div>
     <div class="preply">{REPLY}</div>
   </div>
+  )}
 
-  <div class="sstage" aria-hidden="true" data-scatter>
+  <div class="sstage" aria-hidden="true" data-scatter data-variant={variant}>
     <div class="sclip">
+    {variant === 'tabs' && (
+      <div class="bframe">
+        <div class="bdots"><i></i><i></i><i></i></div>
+        <div class="btabs">
+          {TABS.map(([title, tint], n) => (
+            <div class="btab" data-tab-of={TAB_OF_CARD.indexOf(n) >= 0 ? TAB_OF_CARD.indexOf(n) : undefined} data-n={n} style={`--n:${n};--d:${TAB_OF_CARD.indexOf(n) >= 0 ? TAB_OF_CARD.indexOf(n) * 50 : 200 + n * 8}ms`}>
+              <div class="btab-in">
+                <i class={`bico t-${tint}`}></i>
+                <span>{title}</span>
+              </div>
+            </div>
+          ))}
+          <div class="btab canon-tab"><div class="btab-in"><i class="bico"></i><span>Canon</span></div></div>
+        </div>
+        <div class="bbarline"><span class="bnav-dots"><i></i><i></i></span><span class="burl"></span></div>
+        <div class="bpage"><i></i><i></i><i></i><i></i></div>
+      </div>
+    )}
+      {variant === 'cards' && (
+        <div class="xcards">
+          {EXTRAS.map(([k, fx, fy, rot, sc, phone], n) => (
+            <div class:list={['xcard', phone && 'xphone']} style={`--fx:${fx};--fy:${fy}px;--rot:${rot}deg;--sc:${sc};--dep:${Math.min(1, Math.max(0.35, (sc - 0.5) * 2.2)).toFixed(2)};z-index:${Math.round(sc * 10)};--n:${n}`}>
+              <div class="sh"></div>
+              <Thumb k={k} />
+            </div>
+          ))}
+        </div>
+      )}
       <div class="sapp">
         <div class="sbg fx"><div class="sbg-main"></div></div>
         <div class="wn-rail fx">
@@ -153,6 +191,8 @@ const words = PROMPT.split(' ');
 <script>
   import '../../scripts/scatter';
 </script>
+
+{variant !== 'scatter' && <HeroVariantStyles />}
 
 <style is:global>
   /* Text, then the prompt, then the stage. From 1100px the prompt moves up

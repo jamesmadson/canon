@@ -16,7 +16,7 @@ const ITEMS = [
 ];
 
 const path = Astro.url.pathname.replace(/\/$/, '');
-const isHome = path === withBase('/').replace(/\/$/, '') || path === withBase('/hero-a');
+const isHome = path === withBase('/').replace(/\/$/, '') || ['/hero-a', '/hero-c', '/hero-d'].some((p) => path === withBase(p));
 const onSkills = path.startsWith(withBase('/skills'));
 const current = ITEMS.findIndex((it) => (it.section === null ? onSkills : false));
 // Sections link in page on the homepage and to the homepage everywhere else.

@@ -42,6 +42,36 @@ const PHONE: (Spot | null)[] = [
   null,
 ];
 
+/**
+ * The "cards" variant (/hero-c/): cards sit around and beyond the content
+ * container, some crossing its edges and the viewport's, at a few depths. The
+ * fractions here run below 0 and above 1 on purpose; the page clips what
+ * crosses the viewport. The last number is the depth: bigger is nearer, so it
+ * stacks higher and casts a stronger shadow.
+ */
+const CARDS_WIDE: Spot[] = [
+  [-0.1, 70, -6, 0.8],
+  [0.17, 340, 4, 0.92],
+  [0.03, 600, -3, 0.68],
+  [0.4, 90, 5, 0.6],
+  [0.74, -130, -5, 0.8],
+  [0.9, -255, 4, 0.66],
+  [1.07, -60, 6, 0.94],
+  [0.94, 170, -4, 0.86],
+  [0.66, 430, 3, 0.74],
+];
+const CARDS_PHONE: (Spot | null)[] = [
+  [0.02, 70, -6, 1.0],
+  [1.0, 150, 5, 0.9],
+  null,
+  [0.06, 300, 4, 0.92],
+  [0.98, 400, -5, 1.0],
+  null,
+  [0.0, 540, -4, 0.96],
+  [0.98, 610, 6, 0.9],
+  null,
+];
+
 /** The agents Canon supports, in the order the loop names them. */
 const AGENTS = ['Claude Code', 'Codex', 'Cursor'];
 
@@ -55,6 +85,7 @@ const REPLY_AT = TYPE_AT + TYPE_TICKS + 2;
 const FILED_AT = REPLY_AT + 8; // the reply is read, then the cards glide
 const GLIDE = 18; // the last card lands and its name fades in
 const HOLD_FILED = 90; // 4.5 seconds once everything has landed
+const HOLD_LOOSE = 56; // without a prompt, the loose cards are held for 2.8 seconds
 const FADE = 7; // a little over the 300ms fade
 
 function init(stage: HTMLElement) {
@@ -64,7 +95,9 @@ function init(stage: HTMLElement) {
   const caret = box?.querySelector<HTMLElement>('.pcaret') ?? null;
   const reply = box?.querySelector<HTMLElement>('.preply') ?? null;
   const line = box?.querySelector<HTMLElement>('.ptext') ?? null;
+  const variant = stage.dataset.variant ?? 'scatter';
   const forced = new URLSearchParams(location.search).get('state');
+  const frozen = forced === 'filed' ? 'filed' : forced === 'scattered' || forced === 'start' ? 'start' : null;
   const parts = box ? [stage, box] : [stage];
 
   /** Reveals the first n characters and moves the cursor after them. */
@@ -84,8 +117,13 @@ function init(stage: HTMLElement) {
     // Layout offsets, so a glide in flight does not skew them.
     const panelTop = panel ? panel.offsetTop - stage.offsetTop : -Infinity;
     cards.forEach((card, i) => {
-      const spot = (phone ? PHONE : WIDE)[i];
+      const spots = variant === 'cards' ? (phone ? CARDS_PHONE : CARDS_WIDE) : phone ? PHONE : WIDE;
       const thumb = card.querySelector<HTMLElement>('.thumb');
+      if (variant === 'tabs') {
+        placeOnTab(card, thumb, i);
+        return;
+      }
+      const spot = spots[i];
       if (!spot || !thumb || card.offsetParent === null) return;
       const [fx, fy, rot, wished] = spot;
       let scale = wished;
@@ -99,11 +137,12 @@ function init(stage: HTMLElement) {
       const halfW = (thumb.offsetWidth * scale) / 2;
       const halfH = (thumb.offsetHeight * scale) / 2;
       const margin = 10;
-      const goalX = Math.min(Math.max(fx * width, halfW + margin), width - halfW - margin);
+      const spread = variant === 'cards';
+      const goalX = spread ? fx * width : Math.min(Math.max(fx * width, halfW + margin), width - halfW - margin);
       // Below 1100px the text spans the width, so nothing drifts above the stage.
       // Beside the text, no card may rise above the grey panel: the text column
       // is shorter or taller as the hero's lines change, and the stage moves with it.
-      let goalY = wide ? Math.max(fy, panelTop + halfH + 24) : Math.max(fy, halfH + margin);
+      let goalY = spread ? fy : wide ? Math.max(fy, panelTop + halfH + 24) : Math.max(fy, halfH + margin);
       // Beside the text, the prompt box sits on the stage, and no card may overlap it.
       if (wide && box) {
         const left = box.offsetLeft - stage.offsetLeft;
@@ -121,7 +160,33 @@ function init(stage: HTMLElement) {
       card.style.setProperty('--rot', `${rot}deg`);
       card.style.setProperty('--sc', String(scale));
       card.style.setProperty('--oy', `${thumb.offsetHeight / 2}px`);
+      if (spread) {
+        // Nearer cards stack higher and throw a stronger shadow.
+        card.parentElement!.style.zIndex = String(Math.round(scale * 10));
+        card.style.setProperty('--dep', String(Math.min(1, Math.max(0.35, (scale - 0.5) * 2.2)).toFixed(2)));
+      }
     });
+  };
+
+  /** The tabs variant: a card starts as the tab it came from, then grows into its place. */
+  const placeOnTab = (card: HTMLElement, thumb: HTMLElement | null, i: number) => {
+    const tab = stage.querySelector<HTMLElement>(`[data-tab-of="${i}"]`);
+    if (!thumb || !tab || card.offsetParent === null || tab.offsetParent === null) return;
+    const s = stage.getBoundingClientRect();
+    const t = tab.getBoundingClientRect();
+    let x = 0;
+    let y = 0;
+    for (let el: HTMLElement | null = card; el && el !== stage; el = el.offsetParent as HTMLElement | null) {
+      x += el.offsetLeft;
+      y += el.offsetTop;
+    }
+    const goalX = t.left - s.left + t.width / 2;
+    const goalY = t.top - s.top + t.height / 2;
+    card.style.setProperty('--tx', `${(goalX - (x + thumb.offsetWidth / 2)).toFixed(1)}px`);
+    card.style.setProperty('--ty', `${(goalY - (y + thumb.offsetHeight / 2)).toFixed(1)}px`);
+    card.style.setProperty('--rot', '0deg');
+    card.style.setProperty('--sc', String(Math.max(0.08, (t.width / thumb.offsetWidth) * 0.9).toFixed(3)));
+    card.style.setProperty('--oy', `${thumb.offsetHeight / 2}px`);
   };
 
   /** Runs a change with transitions off, so it lands in one frame. */
@@ -136,9 +201,9 @@ function init(stage: HTMLElement) {
   parts.forEach((p) => p.classList.add('live'));
   snap(() => {
     place();
-    stage.classList.toggle('is-filed', forced === 'filed');
-    type(forced === 'filed' ? chars.length : 0);
-    reply?.classList.toggle('on', forced === 'filed');
+    stage.classList.toggle('is-filed', frozen === 'filed');
+    type(frozen === 'filed' ? chars.length : 0);
+    reply?.classList.toggle('on', frozen === 'filed');
   });
   requestAnimationFrame(() => parts.forEach((p) => p.classList.add('ready')));
   if (typeof ResizeObserver !== 'undefined') {
@@ -147,7 +212,7 @@ function init(stage: HTMLElement) {
     const backdrop = document.querySelector<HTMLElement>('.hpanel');
     if (backdrop) new ResizeObserver(() => place()).observe(backdrop);
   }
-  if (forced === 'filed' || forced === 'scattered') return;
+  if (frozen) return;
 
   // Each cycle names the next agent, swapped while everything is faded out.
   // The label is a block, so its width never depends on the name. The markup
@@ -164,10 +229,11 @@ function init(stage: HTMLElement) {
   let visible = true;
   const tick = () => {
     t += 1;
-    const outAt = FILED_AT + GLIDE + HOLD_FILED;
-    if (t >= TYPE_AT && t <= TYPE_AT + TYPE_TICKS) type(Math.ceil(((t - TYPE_AT) / TYPE_TICKS) * chars.length));
-    else if (t === REPLY_AT) reply?.classList.add('on');
-    else if (t === FILED_AT) stage.classList.add('is-filed');
+    const filedAt = box ? FILED_AT : HOLD_LOOSE;
+    const outAt = filedAt + GLIDE + HOLD_FILED;
+    if (box && t >= TYPE_AT && t <= TYPE_AT + TYPE_TICKS) type(Math.ceil(((t - TYPE_AT) / TYPE_TICKS) * chars.length));
+    else if (box && t === REPLY_AT) reply?.classList.add('on');
+    else if (t === filedAt) stage.classList.add('is-filed');
     else if (t === outAt) mark('out', true);
     else if (t === outAt + FADE) {
       snap(() => {

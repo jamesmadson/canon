@@ -1,0 +1,326 @@
+---
+/**
+ * Styles for the two hidden hero concepts, /hero-c/ (cards past the edges) and
+ * /hero-d/ (the 30 tabs). They sit on top of HeroScatter's styles and its
+ * script. Everything that moves changes only transform and opacity, on one
+ * curve. The markup holds the final state, so no script and reduced motion
+ * both show it.
+ */
+---
+
+<style is:global>
+  /* ---- Both: one curve, no spring, and the glide stays inside 400ms ---- */
+  .hero-c .sstage.live .scard,
+  .hero-d .sstage.live .scard {
+    transition:
+      transform 400ms cubic-bezier(0.2, 0, 0, 1),
+      opacity 300ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  /* ---- hero-c: cards past the edges ---- */
+  /* The cards may cross the container and the viewport. The page clips them at
+     the viewport, so nothing can add a horizontal scroll. */
+  .hero-c .sclip {
+    clip-path: inset(-700px -50vw 0 -50vw);
+  }
+  .xcards {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .xcard {
+    position: absolute;
+    left: calc(var(--fx) * 100%);
+    top: var(--fy);
+    width: 280px;
+    margin: -87px 0 0 -140px;
+    transform: rotate(var(--rot)) scale(var(--sc));
+    opacity: 0;
+  }
+  .xcard.xphone {
+    display: none;
+  }
+  .xcard .sh {
+    aspect-ratio: 16 / 10;
+  }
+  .sstage.live .xcard {
+    transition: opacity 300ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .sstage.live:not(.is-filed) .xcard {
+    opacity: 1;
+  }
+  .sstage.live.out .xcard {
+    opacity: 0;
+  }
+  /* Nearer cards throw a stronger shadow. */
+  .hero-c .sstage.live:not(.is-filed) .sh {
+    opacity: var(--dep, 1);
+  }
+  .hero-c .sstage.live .xcard .sh {
+    transition: none;
+  }
+  @media (max-width: 960px) {
+    .xcard {
+      display: none;
+      width: 150px;
+      margin: -47px 0 0 -75px;
+    }
+    .xcard.xphone {
+      display: block;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .xcard {
+      display: none !important;
+    }
+  }
+
+  /* ---- hero-d: the 30 tabs ---- */
+  .hero-d .sstage {
+    height: 876px;
+  }
+  .hero-d .sbg,
+  .hero-d .chip,
+  .hero-d .sh {
+    display: none;
+  }
+  .bframe {
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background: var(--wn-rail);
+    box-shadow:
+      0 0 0 1px var(--edge),
+      inset 0 1px 0 var(--hi),
+      0 40px 100px -24px var(--shadow);
+  }
+  .bdots {
+    position: absolute;
+    left: 16px;
+    top: 17px;
+    display: flex;
+    gap: 7px;
+  }
+  .bdots i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--wn-line-strong);
+  }
+  .btabs {
+    position: absolute;
+    left: 76px;
+    right: 14px;
+    top: 8px;
+    height: 32px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 1px;
+  }
+  .btab {
+    min-width: 0;
+  }
+  .btab-in {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 5px;
+    border-radius: 8px 8px 0 0;
+    background: color-mix(in srgb, var(--color-ink) 7%, var(--wn-rail));
+    color: var(--color-ink-soft);
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .btab-in span {
+    min-width: 0;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, #000 60%, transparent 100%);
+    mask-image: linear-gradient(to right, #000 60%, transparent 100%);
+  }
+  .bico {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--tint);
+    box-shadow: inset 0 0 0 1px rgba(26, 25, 24, 0.14);
+  }
+  .btab[data-n='4'] .btab-in {
+    background: var(--wn-main);
+    color: var(--color-ink);
+  }
+  .canon-tab {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 180px;
+  }
+  .canon-tab .btab-in {
+    background: var(--wn-main);
+    color: var(--color-ink);
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .canon-tab .btab-in span {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .canon-tab .bico {
+    background: var(--sel);
+    box-shadow: none;
+    border-radius: 50%;
+  }
+  .bbarline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 40px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 14px;
+    background: var(--wn-main);
+  }
+  .bnav-dots {
+    display: flex;
+    gap: 8px;
+  }
+  .bnav-dots i {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px var(--wn-line-strong);
+  }
+  .burl {
+    flex: 1;
+    height: 22px;
+    border-radius: 11px;
+    background: var(--wn-panel);
+  }
+  .hero-d .sapp {
+    margin-top: 76px;
+    height: calc(100% - 76px);
+  }
+  .hero-d .sapp .wn-rail {
+    align-self: stretch;
+    background: var(--wn-rail);
+    border-right: 1px solid var(--wn-line);
+  }
+  .hero-d .sapp .wn-main {
+    margin: 0;
+  }
+
+  /* The final state: only the Canon tab is left in the strip. */
+  .btab:not(.canon-tab) .btab-in {
+    opacity: 0;
+  }
+  .sstage.live .btab-in {
+    transition:
+      opacity 240ms cubic-bezier(0.2, 0, 0, 1),
+      transform 400ms cubic-bezier(0.2, 0, 0, 1);
+    transition-delay: var(--d, 0s);
+  }
+  .sstage.live:not(.is-filed) .btab:not(.canon-tab) .btab-in {
+    opacity: 1;
+    transition-delay: 0s;
+  }
+  .sstage.live:not(.is-filed) .canon-tab .btab-in {
+    opacity: 0;
+    transition-delay: 0s;
+  }
+  /* Tabs lift out as the cards take their place. */
+  .sstage.live.is-filed .btab:not(.canon-tab) .btab-in {
+    transform: translateY(-8px);
+  }
+  .sstage.live.is-filed .canon-tab .btab-in {
+    transition-delay: 0.45s;
+  }
+  .sstage.live.out .btab-in {
+    opacity: 0;
+    transition-delay: 0s;
+  }
+  /* The cards start as their tab, so loose they are invisible. */
+  .hero-d .sstage.live:not(.is-filed) .scard {
+    opacity: 0;
+  }
+  .hero-d .sstage.live.out .scard {
+    opacity: 0;
+  }
+
+  /* A blank page behind the tabs until the cards file in. */
+  .bpage {
+    position: absolute;
+    left: 56px;
+    top: 120px;
+    right: 56px;
+    display: grid;
+    gap: 14px;
+    opacity: 0;
+  }
+  .bpage i {
+    display: block;
+    height: 12px;
+    border-radius: 6px;
+    background: var(--wn-raised);
+  }
+  .bpage i:first-child {
+    width: 36%;
+    height: 22px;
+  }
+  .bpage i:nth-child(3) {
+    width: 82%;
+  }
+  .bpage i:nth-child(4) {
+    width: 64%;
+  }
+  .sstage.live .bpage {
+    transition: opacity 300ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .sstage.live:not(.is-filed) .bpage {
+    opacity: 1;
+  }
+  .sstage.live.out .bpage {
+    opacity: 0;
+  }
+
+  @media (max-width: 960px) {
+    .hero-d .sstage {
+      height: 716px;
+    }
+    .bdots {
+      display: none;
+    }
+    .btabs {
+      left: 12px;
+      right: 12px;
+    }
+    .btab:nth-child(n + 13):not(.canon-tab) {
+      display: none;
+    }
+    .canon-tab {
+      width: 150px;
+    }
+    .bpage {
+      left: 24px;
+      right: 24px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btab:not(.canon-tab) .btab-in,
+    .bpage {
+      opacity: 0 !important;
+    }
+    .canon-tab .btab-in {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .btab-in {
+      transition: none !important;
+    }
+  }
+</style>
