@@ -8,6 +8,7 @@ import { bridgeView, removeAgent, subscribeBridge } from './bridge/client';
 import { Avatar } from './comments';
 import { html, Icon, go, ago, useStore } from './shared';
 import { isMac, openSearch } from './palette';
+import { askProjectName } from './lib/naming';
 import { FeedbackFoot } from './feedback';
 
 export function useBridge(): ReturnType<typeof bridgeView> {
@@ -92,7 +93,11 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
     const { project } = await store.createSampleProject();
     go(`/p/${project.id}`);
   };
-  const newProject = async () => go(`/p/${(await store.createProject()).id}`);
+  const newProject = async () => {
+    const made = await store.createProject();
+    askProjectName(made.id);
+    go(`/p/${made.id}`);
+  };
   return html`<aside class="rail" aria-label="Canon">
     <a class="workspace" href="#/"><span class="mark" aria-hidden="true"></span><b>Canon</b></a>
     <button type="button" class="find" aria-label="Search prototypes" aria-keyshortcuts=${isMac ? 'Meta+K' : 'Control+K'} onClick=${openSearch}>

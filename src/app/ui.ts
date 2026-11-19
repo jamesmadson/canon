@@ -11,6 +11,7 @@ import { pagesOf } from './lib/pageview';
 import { currentOf, stackKey } from './lib/versions';
 import { checkPrototypeUrl } from './lib/resolve';
 import { nameFromUrl, rememberLinkName } from './lib/linkname';
+import { takeProjectNameAsk } from './lib/naming';
 import { type Address, buildAddress } from './lib/address';
 import { currentAddress, replaceAddress } from './lib/nav';
 import { chooseView, setStartPage } from './lib/pageview';
@@ -135,10 +136,16 @@ function BoardThumb({ rects }: { rects: { x: number; y: number; w: number; h: nu
 const boardRects = (boardId: string) => store.framesOf(boardId).map((f) => ({ x: f.x, y: f.y, w: f.w, h: f.h, multi: pageCount(f) > 1 }));
 
 /* ── Project ───────────────────────────────────────────────────────────── */
-function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boards' | 'comments'; askUrl: () => Promise<string | null> }) {
+export function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boards' | 'comments'; askUrl: () => Promise<string | null> }) {
   const s = useStore();
   const project = s.projects.find((p) => p.id === id);
   const [drop, setDrop] = useState(false);
+  const nameBox = useRef<HTMLInputElement>(null);
+  const escaped = useRef(false);
+  // A project that was just made asks for its name: the cursor goes in, with the default selected.
+  useEffect(() => {
+    if (project && takeProjectNameAsk(project.id)) { nameBox.current?.focus(); nameBox.current?.select(); }
+  }, [project?.id]);
   if (!s.ready) return html`<div class="main"></div>`;
   if (!project) return html`<div class="main"><div class="empty">That project is not in this browser. <a href="#/">All projects</a></div></div>`;
   const onDrop = async (e: DragEvent) => {
@@ -152,7 +159,13 @@ function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boa
   return html`<div class="main" onDragOver=${(e: DragEvent) => { e.preventDefault(); setDrop(true); }} onDragLeave=${(e: DragEvent) => !e.relatedTarget && setDrop(false)} onDrop=${onDrop}>
     <div class="topbar">
       <div class="crumb"><a href="#/">Projects</a><span class="faint">/</span>
-        <input value=${project.name} onChange=${(e: Event) => store.renameProject(id, (e.target as HTMLInputElement).value)} onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} aria-label="Project name" />
+        <input ref=${nameBox} value=${project.name} aria-label="Project name"
+          onChange=${(e: Event) => { if (escaped.current) escaped.current = false; else store.renameProject(id, (e.target as HTMLInputElement).value); }}
+          onKeyDown=${(e: KeyboardEvent) => {
+            const input = e.target as HTMLInputElement;
+            if (e.key === 'Enter') input.blur();
+            else if (e.key === 'Escape') { escaped.current = true; input.value = project.name; input.blur(); }
+          }} />
       </div>
       <div class="tabs">
         <a href=${`#/p/${id}`} aria-current=${tab === 'prototypes' ? 'page' : undefined}>Prototypes <span>${countPrototypes(store.getState().frames, { projectId: id })}</span></a>
