@@ -2,7 +2,8 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import * as store from './store';
 import * as vault from './vault';
-import type { Address } from './lib/address';
+import { type Address, buildAddress } from './lib/address';
+import { askTagMenu, sameTag } from './lib/tagbar';
 import { cardsOf, countPrototypes, scopeCards, tagCounts } from './lib/home';
 import { bridgeView, removeAgent, subscribeBridge } from './bridge/client';
 import { Avatar } from './comments';
@@ -85,7 +86,8 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
   const cards = useMemo(() => cardsOf(s.frames), [s.frames]);
   const live = scopeCards(cards, { kind: 'home' });
   const starred = scopeCards(cards, { kind: 'starred' }).length;
-  const tags = tagCounts(live).slice(0, 8);
+  const allTags = tagCounts(live);
+  const tags = allTags.slice(0, 8);
   const projects = [...s.projects].sort((a, b) => b.updatedAt - a.updatedAt);
   const countIn = (id: string) => countPrototypes(s.frames, { projectId: id });
   const me = store.myName();
@@ -105,7 +107,7 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
     </button>
     <div class="rail-scroll">
       <nav aria-label="Library">
-        <a class="ni" href="#/" aria-current=${here(route.name === 'home')}><${Icon} name="home" size=${14} /><span>Home</span><em>${countPrototypes(s.frames)}</em></a>
+        <a class="ni" href="#/" aria-current=${here(route.name === 'home' && !route.tags?.length)}><${Icon} name="home" size=${14} /><span>Home</span><em>${countPrototypes(s.frames)}</em></a>
         <a class="ni" href="#/starred" aria-current=${here(route.name === 'starred')}><${Icon} name="star" size=${14} /><span>Starred</span><em>${starred}</em></a>
         <a class="ni" href="#/archive" aria-current=${here(route.name === 'archive')}><${Icon} name="archive" size=${14} /><span>Archive</span></a>
       </nav>
@@ -118,7 +120,8 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
       </nav>
       ${tags.length > 0 && html`<div class="sh"><span>Tags</span></div>
         <nav aria-label="Tags">
-          ${tags.map(({ tag, count }) => html`<a class="ni tg" key=${tag} href=${`#/t/${encodeURIComponent(tag)}`} aria-current=${here(route.name === 'tag' && route.tag === tag)}><i aria-hidden="true"></i><span>${tag}</span><em>${count}</em></a>`)}
+          ${tags.map(({ tag, count }) => html`<a class="ni tg" key=${tag} href=${buildAddress({ name: 'home', tags: [tag] })} aria-current=${here(route.name === 'home' && route.tags?.length === 1 && sameTag(route.tags[0], tag))}><i aria-hidden="true"></i><span>${tag}</span><em>${count}</em></a>`)}
+          ${allTags.length > tags.length && html`<a class="ni see-all" href="#/" onClick=${askTagMenu}><span>See all ${allTags.length} tags</span></a>`}
         </nav>`}
     </div>
     ${!store.isInstalled() && store.canInstall() && html`<button type="button" class="install" onClick=${() => store.install()}>

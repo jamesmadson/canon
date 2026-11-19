@@ -1,14 +1,19 @@
 export type ProjectTab = 'prototypes' | 'boards' | 'comments';
 export type Width = number | 'fill' | null;
 export type Address =
-  | { name: 'home' }
-  | { name: 'starred' }
-  | { name: 'archive' }
+  | { name: 'home'; tags?: string[] }
+  | { name: 'starred'; tags?: string[] }
+  | { name: 'archive'; tags?: string[] }
   | { name: 'tag'; tag: string }
   | { name: 'project'; project: string; tab: ProjectTab }
   | { name: 'board'; board: string; frame: string | null }
   | { name: 'bundle'; frame: string; from: string | null; page: string | null }
   | { name: 'full'; frame: string; board: string | null; width: Width; path: string | null };
+
+/** The tags chosen in the address, in order, without blanks or repeats. */
+const tagsOf = (q: URLSearchParams): string[] => [...new Set(q.getAll('tag').map((t) => t.trim()).filter(Boolean))];
+const withTags = <A extends Address>(a: A, tags: string[]): A => (tags.length ? { ...a, tags } : a);
+const tagQuery = (tags?: string[]) => (tags?.length ? `?${tags.map((t) => `tag=${encodeURIComponent(t)}`).join('&')}` : '');
 
 const dec = (s: string) => {
   try { return decodeURIComponent(s); } catch { return s; }
@@ -21,8 +26,10 @@ export function parseAddress(hash: string): Address {
   const [route, query] = cut < 0 ? [raw, ''] : [raw.slice(0, cut), raw.slice(cut + 1)];
   const seg = route.split('/');
   const q = new URLSearchParams(query);
-  if (seg.length === 1 && seg[0] === 'starred') return { name: 'starred' };
-  if (seg.length === 1 && seg[0] === 'archive') return { name: 'archive' };
+  const tags = tagsOf(q);
+  if (seg.length === 1 && seg[0] === '') return withTags({ name: 'home' }, tags);
+  if (seg.length === 1 && seg[0] === 'starred') return withTags({ name: 'starred' }, tags);
+  if (seg.length === 1 && seg[0] === 'archive') return withTags({ name: 'archive' }, tags);
   if (seg[0] === 't' && seg[1] && seg.length === 2) return { name: 'tag', tag: dec(seg[1]) };
   if (seg[0] === 'p' && seg[1] && seg.length <= 3) {
     const tab = seg[2];
@@ -61,11 +68,11 @@ const enc = encodeURIComponent;
 export function buildAddress(a: Address): string {
   switch (a.name) {
     case 'home':
-      return '#/';
+      return `#/${tagQuery(a.tags)}`;
     case 'starred':
-      return '#/starred';
+      return `#/starred${tagQuery(a.tags)}`;
     case 'archive':
-      return '#/archive';
+      return `#/archive${tagQuery(a.tags)}`;
     case 'tag':
       return `#/t/${enc(a.tag)}`;
     case 'project':
@@ -96,6 +103,7 @@ export function buildAddress(a: Address): string {
  * is marked as opened by the app, so only a link from outside is moved.
  */
 export function canonicalAddress(a: Address, openedByApp: boolean): Address | null {
+  if (a.name === 'tag') return { name: 'home', tags: [a.tag] };
   if (a.name === 'board' && a.frame) return { name: 'full', frame: a.frame, board: null, width: null, path: null };
   if (a.name === 'full' && a.board && !openedByApp) return { ...a, board: null };
   return null;

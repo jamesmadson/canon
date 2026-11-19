@@ -1054,3 +1054,32 @@ button.ver-chip:hover { color: var(--text); }
   .topbar .lbl { display: none; }
   .topbar .btn:not(.back) { width: var(--h-ctl); padding: 0; }
 }
+
+/* ── Tag filters across the top of Home ─────────────────────────────────────
+   Chips are tags, not actions: rounded 9, 32px tall. A chosen one is a fill and a heavier
+   weight in ink, never orange. */
+.tagbar { position: relative; flex: none; display: flex; align-items: center; min-height: 52px; padding: 0 24px; border-bottom: 1px solid var(--line); }
+.tagbar-row { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+.fchip {
+  display: inline-flex; align-items: center; gap: 4px; flex: none; height: var(--h-chip); padding: 0 12px; border: 0; border-radius: var(--r-md);
+  background: none; box-shadow: inset 0 0 0 1px var(--line-strong); color: var(--soft); font-size: var(--fs-base); letter-spacing: var(--ls-text); font-weight: 400; white-space: nowrap;
+}
+.fchip[aria-pressed="true"] { background: var(--raised); box-shadow: none; color: var(--text); font-weight: 500; }
+.fchip:active { background: var(--press); }
+.tagbar-probe { position: absolute; left: 24px; top: 0; display: flex; gap: 8px; visibility: hidden; pointer-events: none; height: 0; overflow: hidden; white-space: nowrap; }
+.tagbar .addwrap .menu { top: calc(100% + 6px); bottom: auto; left: auto; right: 0; width: 280px; max-width: calc(100vw - 32px); }
+.tag-menu { display: flex; flex-direction: column; gap: 4px; }
+.tag-search { display: flex; align-items: center; gap: 8px; height: var(--h-ctl); padding: 0 12px; border-radius: var(--r-md); background: var(--panel); box-shadow: inset 0 0 0 1px var(--input-border); color: var(--faint); }
+.tag-search input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; outline: none; color: var(--text); }
+.tag-search:focus-within { box-shadow: inset 0 0 0 1px var(--focus), 0 0 0 1px var(--focus); }
+.tag-list { max-height: min(50vh, 360px); overflow: auto; display: flex; flex-direction: column; gap: 2px; }
+.tag-list button { justify-content: space-between; }
+.tag-list button[aria-pressed="true"] { background: var(--raised); font-weight: 500; }
+.tag-list button[aria-pressed="true"] span::before { content: "\2713\00a0"; }
+.tag-list .hint { margin: 6px 12px; }
+.body > .empty p { margin: 0 0 16px; }
+.ni.see-all span { color: var(--soft); }
+@media (hover: hover) and (pointer: fine) {
+  .fchip:hover { background: var(--hover); }
+  .fchip[aria-pressed="true"]:hover { background: var(--hover); }
+}

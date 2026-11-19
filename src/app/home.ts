@@ -10,6 +10,7 @@ import { stackKey } from './lib/versions';
 import { isMac } from './palette';
 import { record } from './lib/tester';
 import { AddMenu, ProtoRow, ShelfCard } from './parts';
+import { TagBar } from './tagbar';
 import { useHomeProbe } from './live';
 import { addGroups, html, Icon, runWay, useStore, type Way } from './shared';
 import type { Project } from './db';
@@ -153,15 +154,17 @@ export function HomeBody(p: HomeBodyProps) {
   return html`<main class="main" aria-label=${title}>
     <header class="bar">
       <h1>${title}<small>${plural(p.cards.length, 'prototype')} in ${plural(projectCount, 'project')}</small></h1>
-      <${FilterMenu} tags=${p.tagList} chosen=${p.chosenTags} onChange=${p.onTags} />
       <div class="seg" role="group" aria-label="View">
         <button type="button" aria-pressed=${p.view === 'list'} onClick=${() => p.onView('list')}>List</button>
         <button type="button" aria-pressed=${p.view === 'shelf'} onClick=${() => p.onView('shelf')}>Shelf</button>
       </div>
       <${AddMenu} primary onWay=${(w: Way) => p.onWay(w, null)} />
     </header>
+    ${(p.tagList.length > 0 || filtering) && html`<${TagBar} tags=${p.tagList} chosen=${p.chosenTags} onChange=${p.onTags} />`}
     <div class="body" onKeyDown=${onKeys}>
-      ${p.cards.length === 0 && html`<div class="empty">${filtering ? 'Nothing matches that filter.' : EMPTY[p.scope.kind]}${filtering && html` <button type="button" class="link" onClick=${() => p.onTags([])}>Clear filter</button>`}</div>`}
+      ${p.cards.length === 0 && (filtering
+        ? html`<div class="empty"><p>No prototypes have all of these tags.</p><button type="button" class="btn" onClick=${() => p.onTags([])}>Clear filters</button></div>`
+        : html`<div class="empty">${EMPTY[p.scope.kind]}</div>`)}
       ${groups.map(({ project, cards }) => {
         const open = !shut.has(project.id);
         return p.view === 'list'
@@ -185,16 +188,14 @@ export function HomeBody(p: HomeBodyProps) {
 }
 
 /* ── The container: reads the store, handles drops and pastes ──────────── */
-export function Home({ scope, askUrl, onOpen }: { scope: Scope; askUrl: () => Promise<string | null>; onOpen: (c: Card) => void }) {
+export function Home({ scope, askUrl, onOpen, tags = [], onTags }: { scope: Scope; askUrl: () => Promise<string | null>; onOpen: (c: Card) => void; tags?: string[]; onTags: (t: string[]) => void }) {
   const s = useStore();
   const [view, setView] = useHomeView();
-  const [tags, setTags] = useState<string[]>([]);
   const [arriving, setArriving] = useState<Arriving | null>(null);
   const [landed, setLanded] = useState<string | null>(null);
   const [drag, setDrag] = useState<{ project: string | null } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => clearTimeout(timer.current), []);
-  useEffect(() => setTags([]), [scope.kind, scope.kind === 'tag' ? scope.tag : '']);
 
   const all = useMemo(() => cardsOf(s.frames), [s.frames]);
   const scoped = scopeCards(all, scope);
@@ -266,7 +267,7 @@ export function Home({ scope, askUrl, onOpen }: { scope: Scope; askUrl: () => Pr
   const dropName = drag?.project ? s.projects.find((p) => p.id === drag.project)?.name : null;
   const body = first
     ? html`<main class="main" aria-label="Home"><${FirstRun} onChoose=${() => way('files', null)} /></main>`
-    : html`<${HomeBody} scope=${scope} cards=${cards} projects=${s.projects} view=${view} onView=${setView} chosenTags=${tags} onTags=${setTags}
+    : html`<${HomeBody} scope=${scope} cards=${cards} projects=${s.projects} view=${view} onView=${setView} chosenTags=${tags} onTags=${onTags}
         tagList=${tagList} onOpen=${onOpen} onWay=${way} arriving=${arriving} landed=${landed} />`;
   return html`<div class="home-drop" onDragOver=${(e: DragEvent) => { if (!accepts(e)) return; e.preventDefault(); setDrag({ project: hitOf(e) }); }}
       onDragLeave=${(e: DragEvent) => { if (!e.relatedTarget) setDrag(null); }} onDrop=${onDrop}>

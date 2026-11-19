@@ -13,7 +13,7 @@ import { checkPrototypeUrl } from './lib/resolve';
 import { nameFromUrl, rememberLinkName } from './lib/linkname';
 import { takeProjectNameAsk } from './lib/naming';
 import { type Address, buildAddress } from './lib/address';
-import { currentAddress, replaceAddress } from './lib/nav';
+import { currentAddress, openHash, replaceAddress } from './lib/nav';
 import { chooseView, setStartPage } from './lib/pageview';
 import { type PairLink, pairNotice, parsePairLink, saveAgent } from './bridge/client';
 import { SearchHost } from './palette';
@@ -404,6 +404,9 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
   const projectName = (id: string) => s.projects.find((p) => p.id === id)?.name ?? '';
   const open = (c: Card) => openPrototype(c.frame);
   const scope: Scope | null = route.name === 'tag' ? { kind: 'tag', tag: route.tag } : SCOPES[route.name] ?? null;
+  // The chosen tags live in the address, so Back undoes a choice and a link carries it.
+  const tags = route.name === 'home' || route.name === 'starred' || route.name === 'archive' ? route.tags ?? [] : [];
+  const chooseTags = (next: string[]) => openHash(buildAddress({ name: route.name === 'starred' || route.name === 'archive' ? route.name : 'home', tags: next }));
 
   return html`<div class="shell">
     <${Sidebar} route=${route} activeProject=${projectOf(route)} />
@@ -417,7 +420,7 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
             ? html`<${PrototypeView} address=${route} />`
             : route.name === 'project'
               ? html`<${ProjectView} id=${route.project} tab=${route.tab} askUrl=${url.ask} />`
-              : html`<${Home} scope=${scope ?? SCOPES.home} askUrl=${url.ask} onOpen=${open} />`}
+              : html`<${Home} scope=${scope ?? SCOPES.home} askUrl=${url.ask} onOpen=${open} tags=${tags} onTags=${chooseTags} />`}
     ${url.view}
     <${SearchHost} cards=${cards} projectName=${projectName} onPick=${open} />
     ${pair && html`<${PairDialog} pair=${pair} onClose=${() => setPair(null)} />`}
