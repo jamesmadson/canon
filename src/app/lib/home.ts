@@ -2,6 +2,7 @@
 import type { Frame, Project } from '../db';
 import { normalizeTag } from './tags';
 import { currentOf, stackKey, stacks } from './versions';
+import { pagesOf } from './pageview';
 
 export interface Card {
   /** The current version's id. It is what opens and what star, note and archive are written through. */
@@ -12,6 +13,8 @@ export interface Card {
   summary: string;
   tags: string[];
   versions: number;
+  /** Pages a stored prototype has, 1 for a single page or a link. */
+  pages: number;
   source: string;
   kind: Frame['kind'];
   starred: boolean;
@@ -41,7 +44,7 @@ export function sourceOf(f: Pick<Frame, 'tool' | 'kind' | 'url'>): string {
 export function cardOf(f: Frame, stack: Frame[] = [f]): Card {
   return {
     id: f.id, stack: stackKey(f), projectId: f.projectId, name: f.name,
-    summary: f.summary ?? '', tags: f.tags ?? [], versions: stack.length, source: sourceOf(f), kind: f.kind,
+    summary: f.summary ?? '', tags: f.tags ?? [], versions: stack.length, pages: pagesOf(f), source: sourceOf(f), kind: f.kind,
     starred: !!f.starred, archived: !!f.archived, note: f.note ?? '',
     createdAt: Math.min(...stack.map((x) => x.createdAt)), updatedAt: Math.max(...stack.map((x) => x.updatedAt)), frame: f,
   };

@@ -381,6 +381,11 @@ input, textarea { caret-color: var(--accent); }
 .focus .topbar h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .focus .topbar .ver-title { margin-left: 10px; font-weight: 400; font-size: 13px; color: var(--soft); }
 .focus .topbar .next svg { transform: rotate(180deg); }
+.focus-stage.map-stage { padding: 0; display: flex; overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+/* Page-only controls keep their room on Map, so the View control does not move. */
+.focus .topbar .away { visibility: hidden; }
+.map-board { flex: 1; min-width: 0; }
+.map-tools { top: 12px; bottom: auto; }
 .view-note { margin: 8px 24px 0; flex: none; text-wrap: pretty; }
 .view-note a, .view-note .link { color: var(--text); }
 .view-note.view-hints { margin: 0 24px 6px; min-height: 2.6em; text-wrap: balance; }
@@ -728,10 +733,10 @@ button.ver-chip:hover { color: var(--text); }
   background: transparent; color: var(--soft); font-size: 12px; transition: transform 120ms var(--ease);
 }
 .util:active { transform: scale(0.97); }
-.bar .seg { padding: 2px; border-radius: 8px; background: var(--panel); }
-.bar .seg button { height: 24px; padding: 0 10px; border-radius: 6px; transition: transform 120ms var(--ease); }
-.bar .seg button:active { transform: scale(0.97); }
-.bar .seg button[aria-pressed="true"] { background: var(--ground); color: var(--text); font-weight: 500; box-shadow: 0 0 0 1px var(--line), 0 1px 1px var(--shadow); }
+.bar .seg, .focus .topbar .seg { padding: 2px; border-radius: 8px; background: var(--panel); }
+.bar .seg button, .focus .topbar .seg button { height: 24px; padding: 0 10px; border-radius: 6px; transition: transform 120ms var(--ease); }
+.bar .seg button:active, .focus .topbar .seg button:active { transform: scale(0.97); }
+.bar .seg button[aria-pressed="true"], .focus .topbar .seg button[aria-pressed="true"] { background: var(--ground); color: var(--text); font-weight: 500; box-shadow: 0 0 0 1px var(--line), 0 1px 1px var(--shadow); }
 .add {
   display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px 0 9px; border: 0; border-radius: 999px;
   background: var(--text); color: var(--ground); font-size: 12px; font-weight: 500; transition: transform 120ms var(--ease);
@@ -764,7 +769,7 @@ button.ver-chip:hover { color: var(--text); }
 .prow .nm::after { content: ""; position: absolute; inset: 0; }
 .prow .sm { flex: 1; min-width: 0; color: var(--soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .prow .src { width: 84px; flex: none; font-size: 12px; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.prow .ver { flex: none; min-width: 66px; font-size: 12px; color: var(--faint); white-space: nowrap; }
+.prow .ver { flex: none; min-width: 112px; font-size: 12px; color: var(--faint); white-space: nowrap; }
 .prow .when { flex: none; width: 68px; text-align: right; font-size: 12px; color: var(--faint); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .prow .pick { position: relative; z-index: 1; display: grid; place-items: center; width: 20px; }
 .prow .pick input { accent-color: var(--text); width: 15px; height: 15px; }

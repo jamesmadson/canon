@@ -43,6 +43,10 @@ export function StarButton({ card }: { card: Card }) {
 export const Tags = ({ tags, max = 3 }: { tags: string[]; max?: number }) =>
   tags.length ? html`<span class="tags">${tags.slice(0, max).map((t) => html`<span class="tag" key=${t}>${t}</span>`)}</span>` : html`<span class="tags"></span>`;
 
+/** The quiet count beside a prototype's other meta: "5 pages", "3 versions", or both. */
+export const metaOf = (c: Pick<Card, 'pages' | 'versions'>): string =>
+  [c.pages > 1 ? `${c.pages} pages` : '', c.versions > 1 ? `${c.versions} versions` : ''].filter(Boolean).join(' · ');
+
 /* ── One row of the list ───────────────────────────────────────────────── */
 export interface RowProps {
   card: Card;
@@ -59,7 +63,7 @@ export interface RowProps {
 }
 
 export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions, pick, older, now }: RowProps) {
-  const label = card.versions > 1 ? `${card.versions} versions` : '';
+  const label = metaOf(card);
   return html`<li class=${`prow${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${older ? ' older' : ''}`} data-card=${card.id}>
     ${pick && html`<label class="pick"><input type="checkbox" checked=${pick.checked} onChange=${pick.onChange} aria-label=${`Select ${card.name}`} /></label>`}
     <${Thumb} card=${card} />
@@ -94,7 +98,7 @@ export function ShelfCard({ card, selected, arriving, showTags, onOpen, onSelect
       </span>
       <b class="cname">${card.name}</b>
       <small class="cmeta">${card.source}${' · '}${whenLabel(card.updatedAt, now)}</small>
-      ${card.versions > 1 && html`<small class="cver">${card.versions} versions</small>`}
+      ${metaOf(card) && html`<small class="cver">${metaOf(card)}</small>`}
     </button>
     ${showTags && card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
     <${StarButton} card=${card} />

@@ -124,14 +124,16 @@ describe('the canvas bottom bar', () => {
 });
 
 describe('where the bar appears', () => {
-  it('is in the bottom bar of a board and of a multi-page prototype', async () => {
+  it('is in the bottom bar of a board, and the page map uses the prototype view\'s own bar', async () => {
     const { readFileSync } = await import('node:fs');
     const src = readFileSync('src/app/canvas.ts', 'utf8');
-    expect(src.match(/<\$\{PrototypeActions\} frame=/g)).toHaveLength(2);
-    expect(src.match(/<\$\{ZoomControls\} zoom=/g)).toHaveLength(2);
-    // The board bar acts on the selected prototype, the page view bar on its prototype.
+    expect(src.match(/<\$\{PrototypeActions\} frame=/g)).toHaveLength(1);
+    expect(src.match(/<\$\{ZoomControls\} zoom=/g)).toHaveLength(1);
+    // The board bar acts on the selected prototype.
     expect(src).toContain('<${PrototypeActions} frame=${sel ?? undefined} />');
-    expect(src).toContain('<${PrototypeActions} frame=${frame} />');
+    // The map draws no bar of its own: the view shows one bar on Page and on Map.
+    expect(readFileSync('src/app/map.ts', 'utf8')).not.toMatch(/PrototypeActions|ZoomControls|PrototypeBar/);
+    expect(readFileSync('src/app/prototype.ts', 'utf8').match(/<\$\{PrototypeBar\}/g)).toHaveLength(1);
   });
 });
 

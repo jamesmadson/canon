@@ -12,9 +12,12 @@ import { currentOf, isLocal, versionOf } from './lib/versions';
 import { safeFrameUrl } from './lib/resolve';
 import { FRAME_BLOCKED, clampZoom, fitZoom, neighbour, typingIn, versionTitle } from './lib/viewer';
 import { PrototypeBar } from './bar';
+import { PageMap, START_CAMERA, type MapApi } from './map';
+import { chooseView, isMulti, takeStartPage, viewOf, type PageView } from './lib/pageview';
+import type { Camera } from './lib/layout';
 import { record } from './lib/tester';
 import { ServerOff, useShown } from './live';
-import { html, Icon, useStore, frameSrc, pageCount, pageName, previewUrl, SANDBOX, SIZES } from './shared';
+import { html, Icon, useStore, frameSrc, pageName, previewUrl, SANDBOX, SIZES } from './shared';
 
 export type FullAddress = Extract<Address, { name: 'full' }>;
 
@@ -50,6 +53,11 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
   const [pg, setPg] = useState(page);
   const [manual, setManual] = useState<number | null>(null);
   const [room, setRoom] = useState(0);
+  const [cam, setCam] = useState<Camera>(START_CAMERA);
+  const [, bump] = useState(0);
+  const map = useRef<MapApi | null>(null);
+  const fromMap = useRef(false);
+  const startPage = useRef<string | undefined>(undefined);
   const stage = useRef<HTMLDivElement>(null);
 
   const fid = address ? frame.id : localId;
@@ -64,7 +72,16 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
   const show = (id: string) => (address ? replaceAddress({ ...address, frame: id }) : setLocalId(id));
 
   const shown = useShown(here);
-  const multi = pageCount(here) > 1 && here.kind !== 'url';
+  const multi = isMulti(here);
+  const view: PageView = multi ? viewOf(here) : 'page';
+  const choose = (v: PageView) => { chooseView(here, v); fromMap.current = false; bump((n) => n + 1); };
+  if (multi && view === 'map' && startPage.current === undefined) startPage.current = takeStartPage(here.id) ?? '';
+  // A page picked in the map opens in the page view, and Back from it returns to the map.
+  const pickPage = (p: string) => { setPg(p); chooseView(here, 'page'); fromMap.current = true; bump((n) => n + 1); };
+  const goBack = () => {
+    if (fromMap.current && multi && viewOf(here) === 'page') choose('map');
+    else onClose();
+  };
   const src = shown.show === 'live' ? shown.url : address && here.kind === 'url' ? joinPath(safeFrameUrl(here.url), address.path) : frameSrc(here, pg);
   const newTab = here.kind === 'url' ? safeFrameUrl(here.url) : previewUrl(here, pg);
   const known = shown.show === 'link' && here.kind === 'url' && here.frameBlocked === true;
@@ -78,7 +95,7 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
     ro.observe(el);
     setRoom(Math.max(0, el.clientWidth - 40));
     return () => ro.disconnect();
-  }, []);
+  }, [view]);
   const z = manual ?? fitZoom(width, room);
 
   // Every hint that applies goes in one line under the frame, whose room is always kept, so the frame never moves when one comes or goes.
@@ -96,8 +113,8 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
     record('version_step', { dir });
     show(to.id);
   };
-  const keys = useRef({ onClose, prev, next, step });
-  keys.current = { onClose, prev, next, step };
+  const keys = useRef({ onClose: goBack, prev, next, step });
+  keys.current = { onClose: goBack, prev, next, step };
 
   // How long the frame took to load, noted once per prototype shown. A page known to refuse framing never loads, so it is noted at once.
   const opening = useRef({ id: '', t0: 0, done: true });
@@ -141,25 +158,30 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
 
   return html`<div class="focus" role="region" aria-label=${here.name}>
     <div class="topbar">
-      <button type="button" class="btn ghost icon" aria-label="Back" onClick=${onClose} title="Back (Esc)"><${Icon} name="back" /></button>
-      <h1>${here.name}${pg && pg !== here.entry ? html`<span class="faint"> · ${pageName(pg)}</span>` : ''}${total > 1 && html`<span class="ver-title" aria-live="polite">${versionTitle(n, total)}</span>`}</h1>
+      <button type="button" class="btn ghost icon" aria-label="Back" onClick=${goBack} title="Back (Esc)"><${Icon} name="back" /></button>
+      <h1>${here.name}${view === 'page' && pg && pg !== here.entry ? html`<span class="faint"> · ${pageName(pg)}</span>` : ''}${total > 1 && html`<span class="ver-title" aria-live="polite">${versionTitle(n, total)}</span>`}</h1>
       ${total > 1 && html`<div class="bar-group" role="group" aria-label="Step through versions">
         <button type="button" class="btn ghost icon" disabled=${!prev} aria-label="Previous version" title="Previous version (Left arrow)" onClick=${() => step(prev, 'prev')}><${Icon} name="back" /></button>
         <button type="button" class="btn ghost icon next" disabled=${!next} aria-label="Next version" title="Next version (Right arrow)" onClick=${() => step(next, 'next')}><${Icon} name="back" /></button>
       </div>`}
       <span class="spacer"></span>
-      ${multi && html`<select class="select" aria-label="Page" value=${pg ?? here.entry} onChange=${(e: Event) => setPg((e.target as HTMLSelectElement).value)}>
+      ${multi && html`<div class="seg" role="group" aria-label="View">
+        <button type="button" aria-pressed=${view === 'page'} onClick=${() => choose('page')}>Page</button>
+        <button type="button" aria-pressed=${view === 'map'} onClick=${() => choose('map')}>Map</button>
+      </div>`}
+      ${multi && html`<select class=${`select${view === 'map' ? ' away' : ''}`} aria-label="Page" inert=${view === 'map'} value=${pg ?? here.entry} onChange=${(e: Event) => setPg((e.target as HTMLSelectElement).value)}>
         ${(here.pages ?? []).map((p) => html`<option value=${p} selected=${p === (pg ?? here.entry)}>${pageName(p)}</option>`)}
-      </select>
-      <a class="btn ghost" href=${buildAddress({ name: 'bundle', frame: here.id, from: null, page: null })}><${Icon} name="pages" />Page map</a>`}
-      <div class="seg" role="group" aria-label="Width">
+      </select>`}
+      <div class=${`seg${view === 'map' ? ' away' : ''}`} role="group" aria-label="Width" inert=${view === 'map'}>
         ${SIZES.map((sz) => html`<button type="button" aria-pressed=${width === sz.w} onClick=${() => { setManual(null); setWidth(sz.w); }}>${sz.name} ${sz.w}</button>`)}
         <button type="button" aria-pressed=${width === null} onClick=${() => { setManual(null); setWidth(null); }}>Fill</button>
       </div>
       ${address && html`<button type="button" class="btn ghost" onClick=${copy}><${Icon} name="link" />Copy link</button>`}
       <a class="btn ghost" href=${newTab} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}><${Icon} name="open" />Open in new tab</a>
     </div>
-    <div class="focus-stage" ref=${stage}>
+    ${view === 'map'
+      ? html`<div class="focus-stage map-stage"><${PageMap} key=${here.id} frame=${here} cam=${cam} setCam=${(fn: (c: Camera) => Camera) => setCam(fn)} api=${map} startPage=${startPage.current || undefined} onPage=${pickPage} /></div>`
+      : html`<div class="focus-stage" ref=${stage}>
       ${shown.show === 'off'
         ? html`<${ServerOff} url=${shown.url} />`
         : known
@@ -169,8 +191,10 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
             : html`<div class="focus-frame" style=${{ width: width ? `${width * z}px` : '100%' }}>
               <iframe key=${src} src=${src} title=${here.name} style=${{ width: inner, height: `${100 / z}%`, transform: `scale(${z})` }} sandbox=${SANDBOX} onLoad=${() => { noteOpen(Math.round(performance.now() - opening.current.t0)); }}></iframe>
             </div>`}
-    </div>
+    </div>`}
     <p class="hint view-note view-hints" role="status">${hints.map((h, i) => html`${i ? ' ' : ''}${h}`)}</p>
-    <${PrototypeBar} frame=${here} stack=${stack} onShow=${show} zoom=${{ value: z, onOut: () => zoomBy(0.8), onIn: () => zoomBy(1.25), onReset: () => setManual(1), onFit: fit }} />
+    <${PrototypeBar} frame=${here} stack=${stack} onShow=${show} zoom=${view === 'map'
+      ? { value: cam.zoom, onOut: () => map.current?.zoomBy(0.8), onIn: () => map.current?.zoomBy(1.25), onReset: () => map.current?.zoomTo(1), onFit: () => map.current?.fit() }
+      : { value: z, onOut: () => zoomBy(0.8), onIn: () => zoomBy(1.25), onReset: () => setManual(1), onFit: fit }} />
   </div>`;
 }

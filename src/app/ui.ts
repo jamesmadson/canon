@@ -2,15 +2,17 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import * as store from './store';
 import type { Frame, Note } from './db';
 import { groupsFromDrop } from './intake';
-import { BoardView, BundleView } from './canvas';
+import { BoardView } from './canvas';
 import { PrototypeView, openPrototype } from './prototype';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
 import { FilterMenu, Home } from './home';
-import { AddMenu, ProtoRow, StarButton, Tags } from './parts';
+import { AddMenu, ProtoRow, StarButton, Tags, metaOf } from './parts';
+import { pagesOf } from './lib/pageview';
 import { currentOf, stackKey } from './lib/versions';
 import { checkPrototypeUrl } from './lib/resolve';
 import { type Address, buildAddress } from './lib/address';
-import { currentAddress } from './lib/nav';
+import { currentAddress, replaceAddress } from './lib/nav';
+import { chooseView, setStartPage } from './lib/pageview';
 import { type PairLink, pairNotice, parsePairLink, saveAgent } from './bridge/client';
 import { SearchHost } from './palette';
 import { Sidebar, useBridge } from './sidebar';
@@ -221,7 +223,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
   const filtering = !!(filter.query || filter.tags?.length || filter.multiPage || filter.hasComments || filter.unplaced || filter.archived || (filter.source && filter.source !== 'all'));
 
   const versionsSlot = (i: (typeof items)[number]) =>
-    html`<span class="ver">${i.versions > 1 ? `${i.versions} versions` : ''}</span>`;
+    html`<span class="ver">${metaOf({ pages: pagesOf(i.frame), versions: i.versions })}</span>`;
 
   return html`<div class="page library">
     <div class="lib-bar">
@@ -288,6 +290,21 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
   </div>`;
 }
 
+/**
+ * An old link to a prototype's page map. The map is now the Map side of the
+ * prototype view, so this opens it there and moves the address on in place.
+ */
+function OpenMap({ frame, from, page }: { frame: string; from: string | null; page: string | null }) {
+  const f = useStore().frames.find((x) => x.id === frame);
+  useEffect(() => {
+    if (!f) return;
+    chooseView(f, 'map');
+    if (page) setStartPage(f.id, page);
+    replaceAddress({ name: 'full', frame, board: from, width: null, path: null });
+  }, [f?.id]);
+  return html`<div class="main"></div>`;
+}
+
 function ProjectComments({ projectId }: { projectId: string }) {
   const s = useStore();
   const [show, setShow] = useState<'open' | 'resolved'>('open');
@@ -350,7 +367,7 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
     ${!s.ready
       ? html`<div class="main"></div>`
       : route.name === 'bundle'
-        ? html`<${BundleView} key=${route.frame} frameId=${route.frame} fromBoard=${route.from ?? undefined} startPage=${route.page ?? undefined} />`
+        ? html`<${OpenMap} key=${route.frame} frame=${route.frame} from=${route.from} page=${route.page} />`
         : route.name === 'board' || (route.name === 'full' && route.board)
           ? html`<${BoardView} id=${route.board} frameId=${route.frame} full=${route.name === 'full' ? route : null} askUrl=${url.ask} />`
           : route.name === 'full'
