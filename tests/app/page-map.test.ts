@@ -89,7 +89,7 @@ describe('the Page and Map control', () => {
 
   it('keeps the whole bottom bar and the top bar when switching', async () => {
     const box = await open('four');
-    const bars = () => [/^Star /, /^Prototype note for/, /^Versions/, /^Archive /, /^Zoom \d+%/, /^Zoom out/, /^Zoom in/, /^Fit everything/].map((l) => !!btn(box, l));
+    const bars = () => [/^Star, /, /^Note, /, /^Versions/, /^Archive, /, /^Zoom \d+%/, /^Zoom out/, /^Zoom in/, /^Fit everything/].map((l) => !!btn(box, l));
     expect(bars()).toEqual(Array(8).fill(true));
     expect(box.querySelector('.viewer-bar')).toBeTruthy();
     await click(btn(box, /^Page$/)!);

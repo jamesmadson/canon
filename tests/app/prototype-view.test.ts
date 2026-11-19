@@ -62,16 +62,16 @@ const open = async (id: string) => {
 describe('the prototype view', () => {
   it('has the whole bar: star, note, versions, archive and zoom', async () => {
     const box = await open('b');
-    for (const label of [/^Star /, /^Prototype note for/, /^Versions/, /^Archive /, /^Zoom \d+%/, /^Zoom out/, /^Zoom in/]) expect(btn(box, label), String(label)).toBeTruthy();
+    for (const label of [/^Star, /, /^Note, /, /^Versions/, /^Archive, /, /^Zoom \d+%/, /^Zoom out/, /^Zoom in/]) expect(btn(box, label), String(label)).toBeTruthy();
     expect(btn(box, /^Versions/).disabled).toBe(true);
   });
 
   it('stars and notes in place, with no trip to another page', async () => {
     const box = await open('b');
-    await click(btn(box, /^Star /));
+    await click(btn(box, /^Star, /));
     await flush();
     expect(stored('b').at(-1)!.starred).toBe(true);
-    await click(btn(box, /^Prototype note for/));
+    await click(btn(box, /^Note, /));
     const field = box.querySelector<HTMLTextAreaElement>('textarea')!;
     field.value = 'Check the tiers';
     await act(() => { field.dispatchEvent(new Event('input', { bubbles: true })); });
@@ -93,7 +93,7 @@ describe('the prototype view', () => {
 
   it('opens a link in the same view, with the bar and an Open in new tab link', async () => {
     const box = await open('u');
-    expect(btn(box, /^Star /)).toBeTruthy();
+    expect(btn(box, /^Star, /)).toBeTruthy();
     const a = Array.from(box.querySelectorAll('a')).find((x) => x.textContent === 'Open in new tab') as HTMLAnchorElement;
     expect(a.getAttribute('target')).toBe('_blank');
     expect(a.getAttribute('href')).toBe('https://example.org/');
@@ -124,7 +124,7 @@ describe('the prototype view', () => {
 
   it('leaves Escape to an open note', async () => {
     const box = await open('b');
-    await click(btn(box, /^Prototype note for/));
+    await click(btn(box, /^Note, /));
     await key(box.querySelector('textarea')!, 'Escape');
     expect(location.hash).toBe('#/f/b/full');
   });
@@ -147,7 +147,7 @@ describe('versions in the prototype view', () => {
 
   it('leaves the arrow keys to a field', async () => {
     const box = await open('a3');
-    await click(btn(box, /^Prototype note for/));
+    await click(btn(box, /^Note, /));
     await key(box.querySelector('textarea')!, 'ArrowLeft');
     expect(title(box)).toContain('Version 3 of 3');
   });

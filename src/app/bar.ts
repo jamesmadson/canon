@@ -63,7 +63,7 @@ export function PrototypeActions({ frame, compact = false, children }: { frame: 
   const word = (text: string, cls: string) => (compact ? null : html`<span class=${`lbl ${cls}`}>${text}</span>`);
   return html`<div class="bar-group" role="group" aria-label="Prototype">
     <div class="bar-note">
-      <button type="button" ref=${button} class=${`btn vb-note${compact ? ' icon' : ''}`} disabled=${!frame} aria-expanded=${open} aria-haspopup="dialog" aria-label=${frame ? `Prototype note for ${name}${noteText ? ', has text' : ''}` : `Prototype note: ${NONE}`} title=${frame ? 'Note' : `Note: ${NONE}`} onClick=${toggleNote}>
+      <button type="button" ref=${button} class=${`btn vb-note${compact ? ' icon' : ''}`} disabled=${!frame} aria-expanded=${open} aria-haspopup="dialog" aria-label=${frame ? `Note, ${name}${noteText ? ', has text' : ''}` : `Note: ${NONE}`} title=${frame ? 'Note' : `Note: ${NONE}`} onClick=${toggleNote}>
         <${Icon} name="note" />${word('Note', 'lbl-note')}${noteText && html`<i class="badge" aria-hidden="true"></i>`}
       </button>
       ${open && frame && html`<div class="bar-pop" role="dialog" aria-label=${`Prototype note for ${name}`}>
@@ -77,9 +77,9 @@ export function PrototypeActions({ frame, compact = false, children }: { frame: 
         <div class="row"><button type="button" class="btn ghost" onClick=${() => close(false)}>Cancel</button><button type="button" class="btn" onClick=${() => close(true)}>Save</button></div>
       </div>`}
     </div>
-    <button type="button" class=${`btn vb-star${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${starred} aria-label=${frame ? `Star ${name}` : `Star: ${NONE}`} title=${frame ? (starred ? 'Starred' : 'Star') : `Star: ${NONE}`} onClick=${star}><${Icon} name="star" fill=${starred} />${word(starred ? 'Starred' : 'Star', 'lbl-star')}</button>
+    <button type="button" class=${`btn vb-star${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${starred} aria-label=${frame ? `${starred ? 'Starred' : 'Star'}, ${name}` : `Star: ${NONE}`} title=${frame ? (starred ? 'Starred' : 'Star') : `Star: ${NONE}`} onClick=${star}><${Icon} name="star" fill=${starred} />${word(starred ? 'Starred' : 'Star', 'lbl-star')}</button>
     ${children}
-    <button type="button" class=${`btn vb-archive${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${archived} aria-label=${frame ? `Archive ${name}` : `Archive: ${NONE}`} title=${frame ? (archived ? 'Archived' : 'Archive') : `Archive: ${NONE}`} onClick=${archive}><${Icon} name="archive" />${word(archived ? 'Archived' : 'Archive', 'lbl-archive')}</button>
+    <button type="button" class=${`btn vb-archive${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${archived} aria-label=${frame ? `${archived ? 'Archived' : 'Archive'}, ${name}` : `Archive: ${NONE}`} title=${frame ? (archived ? 'Archived' : 'Archive') : `Archive: ${NONE}`} onClick=${archive}><${Icon} name="archive" />${word(archived ? 'Archived' : 'Archive', 'lbl-archive')}</button>
   </div>`;
 }
 

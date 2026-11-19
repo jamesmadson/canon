@@ -83,10 +83,10 @@ describe('the bottom bar of the prototype view', () => {
     const acts = (await open('a2')).querySelector('.vb-acts')!;
     const order = labels(acts);
     const at = (re: RegExp) => order.findIndex((l) => re.test(l));
-    expect(at(/^Prototype note for/)).toBeLessThan(at(/^Star /));
-    expect(at(/^Star /)).toBeLessThan(at(/^Versions of/));
-    expect(at(/^Versions of/)).toBeLessThan(at(/^Archive /));
-    expect(at(/^Archive /)).toBeLessThan(at(/^Zoom out/));
+    expect(at(/^Note, /)).toBeLessThan(at(/^Star, /));
+    expect(at(/^Star, /)).toBeLessThan(at(/^Versions of/));
+    expect(at(/^Versions of/)).toBeLessThan(at(/^Archive, /));
+    expect(at(/^Archive, /)).toBeLessThan(at(/^Zoom out/));
     expect(at(/^Fit everything/)).toBeLessThan(order.indexOf('Live'));
     expect(Array.from(acts.querySelectorAll('.lbl')).map((l) => l.textContent)).toEqual(['Note', 'Star', 'Versions', 'Archive']);
   });
