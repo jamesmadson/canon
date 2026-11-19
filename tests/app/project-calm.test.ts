@@ -82,4 +82,17 @@ describe('filters stay reachable', () => {
     await key(box.querySelector('#filter-panel')!, 'Escape');
     expect(box.querySelector('#filter-panel')).toBeNull();
   });
+
+  it('closes when focus moves on to another control, and stays open while it moves between options', async () => {
+    seed([frame({ id: 'a', name: 'Annual toggle' })]);
+    const box = await view();
+    const pill = Array.from(box.querySelectorAll<HTMLButtonElement>('.lib-bar button')).find((b) => b.textContent?.startsWith('Filter'))!;
+    await click(pill);
+    const options = box.querySelectorAll<HTMLButtonElement>('#filter-panel button');
+    const out = (relatedTarget: Element) => fire(options[0], new FocusEvent('focusout', { bubbles: true, relatedTarget }));
+    await out(options[1]);
+    expect(box.querySelector('#filter-panel')).toBeTruthy();
+    await out(box.querySelector('select[aria-label="Sort"]')!);
+    expect(box.querySelector('#filter-panel')).toBeNull();
+  });
 });

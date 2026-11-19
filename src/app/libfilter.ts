@@ -30,7 +30,9 @@ export function FilterPop({ filter, onChange, tags }: { filter: LibraryFilter; o
   const on = activeFilters(filter).length;
   const chosen = filter.tags ?? [];
   const toggleTag = (t: string) => onChange({ ...filter, tags: chosen.includes(t) ? chosen.filter((x) => x !== t) : [...chosen, t] });
-  return html`<div class="addwrap" ref=${wrap}>
+  // Tabbing past the last option closes the popover, so it never hangs open behind other controls.
+  const leave = (e: FocusEvent) => { if (open && e.relatedTarget && !wrap.current?.contains(e.relatedTarget as Node)) setOpen(false); };
+  return html`<div class="addwrap" ref=${wrap} onFocusOut=${leave}>
     <button type="button" ref=${button} class="util" aria-expanded=${open} aria-controls="filter-panel" onClick=${() => setOpen(!open)}><${Icon} name="filter" size=${14} />Filter${on ? html`<span class="count">${on}</span>` : ''}</button>
     ${open && html`<div class="menu filter-pop" id="filter-panel" role="group" aria-label="Filters">
       <div class="pop-group" role="group" aria-label="Source">
@@ -45,7 +47,7 @@ export function FilterPop({ filter, onChange, tags }: { filter: LibraryFilter; o
           ${QUICK.map(([k, label]) => html`<button type="button" class="chip-toggle" key=${k} aria-pressed=${!!filter[k]} onClick=${() => onChange({ ...filter, [k]: !filter[k] })}>${label}</button>`)}
         </div>
       </div>
-      ${tags.length > 0 && html`<div class="pop-group" role="group" aria-label="Tags">
+      ${tags.length > 0 && html`<div class="pop-group pop-tags" role="group" aria-label="Tags">
         <span class="pop-label">Tags</span>
         <div class="pop-chips">
           ${tags.map(({ tag, count }) => html`<button type="button" class="chip-toggle" key=${tag} aria-pressed=${chosen.includes(tag)} onClick=${() => toggleTag(tag)}>${tag}<small>${count}</small></button>`)}

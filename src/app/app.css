@@ -1261,6 +1261,9 @@ button.ver-chip:hover { color: var(--text); }
 .pop-label { color: var(--soft); font-size: var(--fs-meta); line-height: var(--lh-meta); letter-spacing: 0; }
 .pop-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .filter-pop .chip-toggle { display: inline-flex; align-items: center; gap: 6px; width: auto; height: var(--h-chip); padding: 0 14px; background: var(--panel); color: var(--soft); }
+/* Toggles are pills (D-137); `.menu button` would square them, so the popover says so. Tags stay squared. */
+.filter-pop .chip-toggle { border-radius: var(--r-btn); }
+.filter-pop .pop-tags .chip-toggle { border-radius: var(--r-md); }
 .filter-pop .chip-toggle small { margin: 0; color: inherit; opacity: .8; font: inherit; }
 .filter-pop .chip-toggle[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
 .filter-pop .pop-clear { align-self: flex-start; width: auto; height: var(--h-chip); padding: 0 14px; margin-inline-start: -6px; }
