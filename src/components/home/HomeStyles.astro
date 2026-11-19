@@ -544,16 +544,16 @@
   }
 
   /* A prototype thumbnail: a small drawn page in container units, so it reads
-     at any size. Warm greys on white, at most one muted tint each. */
+     at any size. Each page sits on one muted tint from src/styles/tints.css. */
   .thumb {
-    --tint: #e6e3dc;
+    --tint: var(--tint-warm);
     position: relative;
     display: flex;
     flex-direction: column;
     aspect-ratio: 16 / 10;
     container-type: inline-size;
     border-radius: 9px;
-    background: #fff;
+    background: var(--tint);
     box-shadow:
       0 0 0 1px rgba(26, 25, 24, 0.1),
       0 1px 2px rgba(26, 25, 24, 0.05);
@@ -561,21 +561,23 @@
     color: #1c1b19;
     text-align: left;
   }
-  .t-sage {
-    --tint: #dfe5dc;
-  }
   .t-sand {
-    --tint: #f0e9dd;
+    --tint: var(--tint-sand);
   }
-  .t-slate {
-    --tint: #dde3e9;
-  }
-  .t-stone {
-    --tint: #e8e5df;
+  .t-sage {
+    --tint: var(--tint-sage);
   }
   .t-clay {
-    --tint: #ebe3dd;
-    background: #ece9e3;
+    --tint: var(--tint-clay);
+  }
+  .t-slate {
+    --tint: var(--tint-slate);
+  }
+  .t-lilac {
+    --tint: var(--tint-lilac);
+  }
+  .t-warm {
+    --tint: var(--tint-warm);
   }
   .thumb u,
   .thumb i,
@@ -591,10 +593,10 @@
     gap: 3cqw;
     height: 8cqw;
     padding: 0 5cqw;
-    box-shadow: inset 0 -0.3cqw 0 #efece6;
+    box-shadow: inset 0 -0.3cqw 0 rgba(26, 25, 24, 0.08);
     font-size: 2.6cqw;
     line-height: 1;
-    color: #8c877e;
+    color: #5c5954;
   }
   .tp-nav b {
     margin-right: auto;
@@ -634,7 +636,7 @@
   .tp-cap {
     font-size: 2.4cqw;
     line-height: 1;
-    color: #8c877e;
+    color: #5c5954;
   }
   .tp-cap.c {
     align-self: center;
@@ -648,7 +650,7 @@
   .tp-t {
     font-size: 2.7cqw;
     line-height: 1.4;
-    color: #6f6b63;
+    color: #5c5954;
   }
   .tp-btn {
     display: inline-flex;
@@ -673,7 +675,7 @@
   .tp-img {
     position: relative;
     border-radius: 2.4cqw;
-    background: var(--tint);
+    background: color-mix(in srgb, var(--tint) 86%, #1a1918);
     overflow: hidden;
   }
   .tp-img i {
@@ -734,7 +736,7 @@
     box-shadow: inset 0 0 0 0.3cqw #cfcbc2;
     font-size: 2.6cqw;
     line-height: 1;
-    color: #9a958c;
+    color: #6f6b63;
     text-align: left;
   }
   .tp-chips {
@@ -748,7 +750,7 @@
     padding: 0 2.2cqw;
     border-radius: 999px;
     background: #f1efea;
-    color: #6f6b63;
+    color: #5c5954;
     font-size: 2.3cqw;
     line-height: 1;
   }
@@ -780,7 +782,7 @@
     align-items: center;
     gap: 2.4cqw;
     height: 9cqw;
-    box-shadow: inset 0 -0.3cqw 0 #efece6;
+    box-shadow: inset 0 -0.3cqw 0 rgba(26, 25, 24, 0.08);
   }
   .tp-who i {
     flex: none;
@@ -802,11 +804,11 @@
   }
   .tp-who span {
     font-size: 2.3cqw;
-    color: #8c877e;
+    color: #5c5954;
   }
   .tp-who u {
     font-size: 2.4cqw;
-    color: #6f6b63;
+    color: #5c5954;
   }
   .tp-foot {
     display: flex;
@@ -835,7 +837,7 @@
     box-shadow: inset -0.3cqw 0 0 #efece6;
     font-size: 2.4cqw;
     line-height: 1;
-    color: #6f6b63;
+    color: #5c5954;
   }
   .tp-side b {
     margin-bottom: 2cqw;
@@ -869,12 +871,13 @@
     gap: 1.2cqw;
     padding: 2.2cqw 2.4cqw;
     border-radius: 1.6cqw;
-    box-shadow: inset 0 0 0 0.3cqw #e8e5de;
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 0 0 0.3cqw rgba(26, 25, 24, 0.1);
     line-height: 1;
   }
   .tp-stat span {
     font-size: 2.2cqw;
-    color: #8c877e;
+    color: #5c5954;
   }
   .tp-stat b {
     font-size: 4.4cqw;
@@ -888,7 +891,8 @@
     min-height: 0;
     padding: 3cqw;
     border-radius: 1.6cqw;
-    box-shadow: inset 0 0 0 0.3cqw #e8e5de;
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 0 0 0.3cqw rgba(26, 25, 24, 0.1);
   }
   .tp-bars {
     flex: 1;
@@ -913,7 +917,7 @@
     display: grid;
     place-items: center;
     font-size: 2.6cqw;
-    color: #6f6b63;
+    color: #5c5954;
   }
   .tp-phone {
     display: flex;

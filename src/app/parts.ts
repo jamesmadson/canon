@@ -4,6 +4,7 @@ import type { VNode } from 'preact';
 import * as store from './store';
 import type { Frame } from './db';
 import { type Card, whenLabel } from './lib/home';
+import { tintOf } from '../lib/thumbTints';
 import { canLinkFolders } from './intake';
 import { ReachNote } from './live';
 import { html, Icon, frameSrc, SANDBOX, showsCover, coverSrc, type Way } from './shared';
@@ -29,7 +30,7 @@ export function Thumb({ card, big = false }: { card: Card; big?: boolean }) {
   const f = card.frame;
   if (showsCover(f)) return html`<div class=${`th${big ? ' big' : ''}`} aria-hidden="true"><img src=${coverSrc(f)} alt="" loading="lazy" /></div>`;
   if (f.kind !== 'url') return html`<${LiveThumb} frame=${f} big=${big} />`;
-  return html`<div class=${`th${big ? ' big' : ''}`} aria-hidden="true"><i class="hd"></i><i class="ln"></i><i class="ln s"></i><i class="bt"></i></div>`;
+  return html`<div class=${`th${big ? ' big' : ''} tint-${tintOf(f.id)}`} aria-hidden="true"><i class="hd"></i><i class="ln"></i><i class="ln s"></i><i class="bt"></i></div>`;
 }
 
 /* ── Star ───────────────────────────────────────────────────────────────── */

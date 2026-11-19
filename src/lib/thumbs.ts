@@ -2,8 +2,10 @@
  * The small drawn pages the homepage uses as prototypes. They are pictures,
  * made of HTML and sized in container units, so one drawing reads at 64px and
  * at 600px. Nothing in them is read out: the cards that hold them carry the
- * names. Near monochrome warm greys, and at most one muted tint each.
+ * names. Each has one muted tint from the palette in thumbTints.ts, as its page background.
  */
+import type { Tint } from './thumbTints';
+
 export type ThumbKey = 'w1' | 'w2' | 'w3' | 'w4' | 'w5' | 'd1' | 'd2' | 'd3' | 'm1';
 
 const nav = (...links: string[]) =>
@@ -19,7 +21,7 @@ const bars = (heights: number[], hot: number) =>
   `<div class="tp-bars">${heights.map((h, i) => `<i${i === hot ? ' class="hot"' : ''} style="height:${h}%"></i>`).join('')}</div>`;
 const side = `<div class="tp-side"><b>Fieldnote</b><u class="on">Overview</u><u>Notebooks</u><u>People</u><u>Billing</u></div>`;
 
-const T: Record<ThumbKey, [string, string]> = {
+const T: Record<ThumbKey, [Tint, string]> = {
   // Welcome, three steps: copy on the left, a picture on the right.
   w1: [
     'sage',
@@ -32,12 +34,12 @@ const T: Record<ThumbKey, [string, string]> = {
   ],
   // Invite a teammate: a list of people and a send button.
   w3: [
-    'slate',
+    'lilac',
     `${nav('Settings')}<div class="tp-body"><div class="tp-h">Invite your team</div>${lines('They get a link by email.')}<div class="tp-list">${person('Maya Ortiz', 'Design', 'Editor')}${person('Sam Chen', 'Product', 'Viewer')}${person('Lee Park', 'Engineering', 'Editor')}</div><div class="tp-foot">${field('Add a name')}${btn('Send invites')}</div></div>`,
   ],
   // Empty dashboard, with sample data: stats at zero and a ghosted chart.
   w4: [
-    'stone',
+    'warm',
     `<div class="tp-dash">${side}<div class="tp-main"><div class="tp-top"><div class="tp-h">Overview</div>${btn('Load sample data', 'o')}</div><div class="tp-stats">${stat('Notebooks', '0')}${stat('Notes', '0')}${stat('People', '0')}</div><div class="tp-chart ghost">${bars([34, 52, 40, 66, 58, 78, 70], 5)}<span>No data yet</span></div></div></div>`,
   ],
   // Mobile sign-up: a phone on a grey ground, because it came as a zip of a phone layout.
@@ -47,7 +49,7 @@ const T: Record<ThumbKey, [string, string]> = {
   ],
   // Bottom tab bar: a phone with a list and a bar of four tabs.
   m1: [
-    'sand',
+    'sage',
     `<div class="tp-phone tp-tabbed"><div class="tp-pn"><b>Fieldnote</b></div><div class="tp-h">Notebooks</div>${lines('Research', 'Meetings', 'Ideas')}<div class="tp-tabs"><i class="on"></i><i></i><i></i><i></i></div></div>`,
   ],
   d1: [
@@ -55,16 +57,16 @@ const T: Record<ThumbKey, [string, string]> = {
     `<div class="tp-dash">${side}<div class="tp-main"><div class="tp-top"><div class="tp-h">This week</div>${btn('Export', 'o')}</div><div class="tp-stats">${stat('Notebooks', '128')}${stat('Notes', '2,431')}${stat('People', '36')}</div><div class="tp-chart">${bars([30, 46, 40, 62, 55, 80, 72], 5)}</div></div></div>`,
   ],
   d2: [
-    'stone',
+    'sand',
     `${nav('Overview', 'People')}<div class="tp-body"><div class="tp-top"><div class="tp-h">People</div>${btn('Invite')}</div><div class="tp-list">${person('Maya Ortiz', 'Design', '12 notes')}${person('Sam Chen', 'Product', '9 notes')}${person('Lee Park', 'Engineering', '4 notes')}</div></div>`,
   ],
   d3: [
-    'sage',
+    'slate',
     `${nav('Overview', 'Reports')}<div class="tp-body"><div class="tp-h">Notes by month</div>${lines('Grouped by notebook.')}<div class="tp-chart wide">${bars([22, 30, 38, 34, 50, 58, 52, 70, 64, 82], 7)}</div></div>`,
   ],
 };
 
-export function thumbTint(key: ThumbKey): string {
+export function thumbTint(key: ThumbKey): Tint {
   return T[key][0];
 }
 
