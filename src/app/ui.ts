@@ -432,7 +432,7 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
       : route.name === 'bundle'
         ? html`<${OpenMap} key=${route.frame} frame=${route.frame} from=${route.from} page=${route.page} />`
         : route.name === 'board' || (route.name === 'full' && route.board)
-          ? html`<${BoardView} id=${route.board} frameId=${route.frame} full=${route.name === 'full' ? route : null} askUrl=${url.ask} />`
+          ? html`<${BoardView} id=${route.board} frameId=${route.name === 'board' ? route.frame ?? route.show ?? null : route.frame} full=${route.name === 'full' ? route : null} askUrl=${url.ask} />`
           : route.name === 'full'
             ? html`<${PrototypeView} address=${route} />`
             : route.name === 'project'

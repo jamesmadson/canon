@@ -1132,3 +1132,19 @@ button.ver-chip:hover { color: var(--text); }
   .viewer-bar .vb-move { width: var(--h-ctl); padding: 0; }
 }
 .viewer-bar .move-pop { bottom: calc(100% + 12px); }
+
+/* Quiet links into a board: text, not buttons. */
+.quiet-link { display: inline-flex; align-items: center; height: 28px; padding: 0 8px; border: 0; border-radius: 9px; background: none; color: var(--soft); font-size: var(--fs-meta); letter-spacing: 0; white-space: nowrap; text-decoration: none; }
+.shead-links { margin-left: auto; display: flex; align-items: baseline; gap: 8px; }
+.shead .shead-links a { margin-left: 0; }
+.shead-links .addwrap { align-self: center; }
+.grp .grp-boards { margin-left: auto; margin-right: 8px; }
+.grp .grp-boards + .addwrap .ibtn { margin-left: 0; }
+.menu.boards-pop { min-width: 220px; }
+.menu a { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; border-radius: var(--r-md); color: var(--text); text-decoration: none; }
+.menu a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.focus .topbar .quiet-link { flex: none; }
+@media (hover: hover) and (pointer: fine) {
+  .quiet-link:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+  .menu a:hover { background: var(--hover); }
+}

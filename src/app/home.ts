@@ -9,7 +9,7 @@ import { SETUP_COMMAND } from './lib/setup';
 import { stackKey } from './lib/versions';
 import { isMac } from './palette';
 import { record } from './lib/tester';
-import { AddMenu, ProtoRow, ShelfCard } from './parts';
+import { AddMenu, BoardLinks, ProtoRow, ShelfCard } from './parts';
 import { TagBar } from './tagbar';
 import { useHomeProbe } from './live';
 import { addGroups, html, Icon, runWay, useStore, type Way } from './shared';
@@ -171,12 +171,13 @@ export function HomeBody(p: HomeBodyProps) {
           ? html`<section class="grp-wrap" data-project=${project.id} aria-label=${project.name} key=${project.id}>
               <div class="grp">
                 <button type="button" class="gbtn" aria-expanded=${open} onClick=${() => toggleShut(project.id)}><${Icon} name="chevron" size=${14} /><span>${project.name}</span><em>${cards.length}</em></button>
+                <${BoardLinks} className="grp-boards" boards=${store.boardsOf(project.id)} label=${['Open board', 'Boards']} name=${project.name} />
                 <${AddMenu} label=${`Add a prototype to ${project.name}`} onWay=${(w: Way) => p.onWay(w, project.id)} />
               </div>
               ${open && html`<ul class="rows">${cards.map((c) => html`<${ProtoRow} key=${c.id} card=${c} selected=${selected === c.id} arriving=${!!arrivingOf(c)} now=${p.now} onOpen=${p.onOpen} onSelect=${(x: Card) => setSel(x.id)} />`)}</ul>`}
             </section>`
           : html`<section class="srow" data-project=${project.id} aria-label=${project.name} key=${project.id}>
-              <div class="shead"><h2>${project.name}</h2><span class="muted">${plural(cards.length, 'prototype')}</span><a href=${`#/p/${project.id}`}>Open project<span class="sr"> ${project.name}</span></a></div>
+              <div class="shead"><h2>${project.name}</h2><span class="muted">${plural(cards.length, 'prototype')}</span><span class="shead-links"><${BoardLinks} boards=${store.boardsOf(project.id)} label=${['Open board', 'Boards']} name=${project.name} /><a href=${`#/p/${project.id}`}>Open project<span class="sr"> ${project.name}</span></a></span></div>
               <ul class=${`cards${p.arriving && cards.some((c) => arrivingOf(c)) ? ' arriving' : ''}`}>
                 ${cards.slice(0, SHELF_MAX).map((c) => html`<${ShelfCard} key=${c.id} card=${c} selected=${selected === c.id} arriving=${arrivingOf(c)} showTags=${p.landed === c.stack} now=${p.now} onOpen=${p.onOpen} onSelect=${(x: Card) => setSel(x.id)} />`)}
               </ul>

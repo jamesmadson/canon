@@ -6,7 +6,7 @@ export type Address =
   | { name: 'archive'; tags?: string[] }
   | { name: 'tag'; tag: string }
   | { name: 'project'; project: string; tab: ProjectTab }
-  | { name: 'board'; board: string; frame: string | null }
+  | { name: 'board'; board: string; frame: string | null; /** Open the board centred on this prototype, selected. Set only by the app. */ show?: string }
   | { name: 'bundle'; frame: string; from: string | null; page: string | null }
   | { name: 'full'; frame: string; board: string | null; width: Width; path: string | null };
 
@@ -44,7 +44,7 @@ export function parseAddress(hash: string): Address {
   }
   if (seg[0] === 'b' && seg[1]) {
     const board = dec(seg[1]);
-    if (seg.length === 2) return { name: 'board', board, frame: null };
+    if (seg.length === 2) return q.get('show') ? { name: 'board', board, frame: null, show: q.get('show')! } : { name: 'board', board, frame: null };
     if (seg[2] === 'f' && seg[3]) {
       if (seg.length === 4) return { name: 'board', board, frame: dec(seg[3]) };
       if (seg.length === 5 && seg[4] === 'full') return { name: 'full', frame: dec(seg[3]), board, ...fullQuery(q) };
@@ -78,7 +78,7 @@ export function buildAddress(a: Address): string {
     case 'project':
       return `#/p/${enc(a.project)}${a.tab === 'prototypes' ? '' : `/${a.tab}`}`;
     case 'board':
-      return `#/b/${enc(a.board)}${a.frame ? `/f/${enc(a.frame)}` : ''}`;
+      return `#/b/${enc(a.board)}${a.frame ? `/f/${enc(a.frame)}` : a.show ? `?show=${enc(a.show)}` : ''}`;
     case 'bundle': {
       const q = new URLSearchParams();
       if (a.from !== null) q.set('from', a.from);

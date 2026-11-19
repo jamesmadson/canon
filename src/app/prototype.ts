@@ -12,6 +12,7 @@ import { currentOf, isLocal, versionOf } from './lib/versions';
 import { safeFrameUrl } from './lib/resolve';
 import { FRAME_BLOCKED, clampZoom, fitZoom, neighbour, typingIn, versionTitle } from './lib/viewer';
 import { PrototypeBar } from './bar';
+import { BoardLinks } from './parts';
 import { PageMap, START_CAMERA, type MapApi } from './map';
 import { chooseView, isMulti, takeStartPage, viewOf, type PageView } from './lib/pageview';
 import type { Camera } from './lib/layout';
@@ -66,6 +67,8 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
   const n = versionOf(stack, here.id);
   const total = stack.length;
   const current = total ? currentOf(stack) : here;
+  // The boards that show any version of this prototype.
+  const boardsHere = [...new Map(stack.flatMap((f) => store.boardsHolding(f.id)).map((b) => [b.id, b])).values()];
   const isCurrent = total < 2 || current.id === here.id;
   const width = address ? (address.width === 'fill' ? null : address.width ?? here.w) : localWidth;
   const setWidth = (w: number | null) => (address ? replaceAddress({ ...address, width: w ?? 'fill' }) : setLocalWidth(w));
@@ -175,6 +178,7 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
         <button type="button" aria-pressed=${width === null} onClick=${() => { setManual(null); setWidth(null); }}>Fill</button>
       </div>
       <span class="spacer"></span>
+      ${address && !address.board && html`<${BoardLinks} className="show-board" boards=${boardsHere} label=${['Show on board', 'Show on board']} name=${here.name} show=${here.id} />`}
       ${address && html`<button type="button" class="btn" aria-label="Copy link" title="Copy link" onClick=${copy}><${Icon} name="link" /><span class="lbl">Copy link</span></button>`}
       <a class="btn" href=${newTab} target="_blank" rel="noopener" aria-label="Open in new tab" title="Open in new tab" onClick=${() => record('open_new_tab')}><span class="lbl">Open in new tab</span><${Icon} name="open" /></a>
     </div>
