@@ -1,5 +1,7 @@
 import { render, h } from 'preact';
 import './app.css';
+import { startAppearance } from './lib/appearance';
+startAppearance();
 import { App, BASE } from './ui';
 import { load, watchOtherTabs, setInstallPrompt, toast, createSampleProject, getState, type InstallPromptEvent } from './store';
 import { parseTry, tryDestination, TRY_TARGETS, type TryLink } from './lib/tryout';

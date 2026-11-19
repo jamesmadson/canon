@@ -79,7 +79,7 @@ describe('the bottom bar of the prototype view', () => {
     expect(box.querySelector('.vb-ver')).toBeNull();
   });
 
-  it('puts Note, Star, Versions and Archive on the right with a word beside each icon, then zoom, then Live', async () => {
+  it('puts Note, Star, Versions, Archive and Move on the right with a word beside each icon, then zoom, then Live', async () => {
     const acts = (await open('a2')).querySelector('.vb-acts')!;
     const order = labels(acts);
     const at = (re: RegExp) => order.findIndex((l) => re.test(l));
@@ -88,7 +88,7 @@ describe('the bottom bar of the prototype view', () => {
     expect(at(/^Versions of/)).toBeLessThan(at(/^Archive, /));
     expect(at(/^Archive, /)).toBeLessThan(at(/^Zoom out/));
     expect(at(/^Fit everything/)).toBeLessThan(order.indexOf('Live'));
-    expect(Array.from(acts.querySelectorAll('.lbl')).map((l) => l.textContent)).toEqual(['Note', 'Star', 'Versions', 'Archive']);
+    expect(Array.from(acts.querySelectorAll('.lbl')).map((l) => l.textContent)).toEqual(['Note', 'Star', 'Versions', 'Archive', 'Move']);
   });
 
   it('reads Starred with a filled icon when on, and never marks it orange', async () => {

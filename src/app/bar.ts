@@ -8,6 +8,7 @@ import { currentOf, versionOf } from './lib/versions';
 import { neighbour, tagsForBar, versionLine, versionTitle } from './lib/viewer';
 import { LiveToggle } from './live';
 import { record } from './lib/tester';
+import { MoveMenu, useDismiss } from './move';
 
 const NONE = 'select a prototype first';
 
@@ -80,6 +81,20 @@ export function PrototypeActions({ frame, compact = false, children }: { frame: 
     <button type="button" class=${`btn vb-star${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${starred} aria-label=${frame ? `${starred ? 'Starred' : 'Star'}, ${name}` : `Star: ${NONE}`} title=${frame ? (starred ? 'Starred' : 'Star') : `Star: ${NONE}`} onClick=${star}><${Icon} name="star" fill=${starred} />${word(starred ? 'Starred' : 'Star', 'lbl-star')}</button>
     ${children}
     <button type="button" class=${`btn vb-archive${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${archived} aria-label=${frame ? `${archived ? 'Archived' : 'Archive'}, ${name}` : `Archive: ${NONE}`} title=${frame ? (archived ? 'Archived' : 'Archive') : `Archive: ${NONE}`} onClick=${archive}><${Icon} name="archive" />${word(archived ? 'Archived' : 'Archive', 'lbl-archive')}</button>
+    ${!compact && frame && html`<${MoveButton} frame=${frame} />`}
+  </div>`;
+}
+
+/** Move: opens the project picker above the bar. Its word drops just after Archive's does. */
+function MoveButton({ frame }: { frame: Frame }) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  useDismiss(open, () => setOpen(false), wrap, button);
+  useEffect(() => setOpen(false), [frame.id]);
+  return html`<div class="bar-note" ref=${wrap}>
+    <button type="button" ref=${button} class="btn vb-move" aria-expanded=${open} aria-haspopup="dialog" aria-label=${`Move ${frame.name} to a project`} title="Move to project" onClick=${() => setOpen(!open)}><${Icon} name="move" /><span class="lbl lbl-move">Move</span></button>
+    ${open && html`<div class="bar-pop move-pop" role="dialog" aria-label=${`Move ${frame.name} to a project`}><${MoveMenu} ids=${[frame.id]} onDone=${() => setOpen(false)} /></div>`}
   </div>`;
 }
 

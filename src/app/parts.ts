@@ -2,12 +2,15 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { VNode } from 'preact';
 import * as store from './store';
-import type { Frame } from './db';
+import type { Board, Frame } from './db';
+import { type Address, buildAddress } from './lib/address';
+import { openHash } from './lib/nav';
 import { type Card, whenLabel } from './lib/home';
 import { tintOf } from '../lib/thumbTints';
 import { canLinkFolders } from './intake';
 import { ReachNote } from './live';
 import { html, Icon, frameSrc, SANDBOX, showsCover, coverSrc, type Way } from './shared';
+import { RowMenu, startDrag, useDismiss } from './move';
 
 /* ── Thumbnails: the cover if there is one, a live page for files kept here, else a neutral drawing ── */
 function LiveThumb({ frame, big }: { frame: Frame; big: boolean }) {
@@ -64,11 +67,13 @@ export interface RowProps {
   now?: number;
   /** The board names a project view shows when its project has several. Undefined leaves the column out. */
   board?: string;
+  /** The prototypes a drag of this row carries. Defaults to the row's own. */
+  drag?: string[];
 }
 
-export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions, pick, older, now, board }: RowProps) {
+export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions, pick, older, now, board, drag }: RowProps) {
   const label = metaOf(card);
-  return html`<li class=${`prow${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${older ? ' older' : ''}`} data-card=${card.id}>
+  return html`<li class=${`prow${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${older ? ' older' : ''}`} data-card=${card.id} draggable="true" onDragStart=${(e: DragEvent) => startDrag(e, drag ?? [card.id])}>
     ${pick && html`<label class="pick"><input type="checkbox" checked=${pick.checked} onChange=${pick.onChange} aria-label=${`Select ${card.name}`} /></label>`}
     <${Thumb} card=${card} />
     <button type="button" class="nm" title=${card.name} onClick=${() => onOpen(card)} onFocus=${() => onSelect?.(card)}>${card.name}</button>
@@ -80,6 +85,7 @@ export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions,
     <span class="src" title=${card.source}>${card.source}</span>
     <${StarButton} card=${card} />
     <span class="when">${whenLabel(card.updatedAt, now)}</span>
+    <${RowMenu} ids=${drag ?? [card.id]} name=${card.name} />
   </li>`;
 }
 
@@ -96,7 +102,7 @@ export interface CardProps {
 }
 
 export function ShelfCard({ card, selected, arriving, showTags, onOpen, onSelect, now }: CardProps) {
-  return html`<li class=${`scard${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${arriving?.zip ? ' zipped' : ''}`} data-card=${card.id}>
+  return html`<li class=${`scard${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${arriving?.zip ? ' zipped' : ''}`} data-card=${card.id} draggable="true" onDragStart=${(e: DragEvent) => startDrag(e, [card.id])}>
     <button type="button" class="card-main" onClick=${() => onOpen(card)} onFocus=${() => onSelect?.(card)}>
       <span class="th-wrap">
         <${Thumb} card=${card} big />
@@ -109,7 +115,35 @@ export function ShelfCard({ card, selected, arriving, showTags, onOpen, onSelect
     </button>
     ${showTags && card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
     <${StarButton} card=${card} />
+    <${RowMenu} ids=${[card.id]} name=${card.name} />
   </li>`;
+}
+
+/* ── Into a board: a quiet link for one board, a small menu for several ── */
+/** Open a board from inside the app, so Back returns to where the person was. */
+const openBoard = (e: MouseEvent, address: Address) => {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  e.preventDefault();
+  openHash(buildAddress(address));
+};
+
+export function BoardLinks({ boards, label, name, show, className = '' }: { boards: Board[]; label: [string, string]; name: string; show?: string; className?: string }) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  useDismiss(open, () => setOpen(false), wrap, button);
+  if (!boards.length) return null;
+  const to = (b: Board): Address => ({ name: 'board', board: b.id, frame: null, ...(show ? { show } : {}) });
+  if (boards.length === 1) {
+    const b = boards[0];
+    return html`<a class=${`quiet-link ${className}`} href=${buildAddress(to(b))} onClick=${(e: MouseEvent) => openBoard(e, to(b))}>${label[0]}<span class="sr"> ${name}</span></a>`;
+  }
+  return html`<div class=${`addwrap ${className}`} ref=${wrap}>
+    <button type="button" ref=${button} class="quiet-link" aria-haspopup="menu" aria-expanded=${open} onClick=${() => setOpen(!open)}>${label[1]}<span class="sr"> of ${name}</span></button>
+    ${open && html`<div class="menu boards-pop" role="menu" aria-label=${`Boards of ${name}`}>
+      ${boards.map((b) => html`<a role="menuitem" key=${b.id} href=${buildAddress(to(b))} onClick=${(e: MouseEvent) => { setOpen(false); openBoard(e, to(b)); }}><${Icon} name="board" /><span>${b.name}</span></a>`)}
+    </div>`}
+  </div>`;
 }
 
 /* ── The Add menu: the four ways in ────────────────────────────────────── */

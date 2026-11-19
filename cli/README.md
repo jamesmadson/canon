@@ -48,7 +48,7 @@ It never deletes anything, never sends anything to a server of ours, and has no 
 - `canon_status`: says whether Canon is connected and which project and board are open.
 - `canon_pair`: makes a new pairing link for this agent.
 - `canon_add`: puts a prototype in a project. Give it a `url`, a `folder` (a build), or a `folder` with a `page` (one page of a built site). It also takes a name, a summary, tags, a star and a note. It tags the prototype from its page, the agent, the repo and the branch, and warns when the name reads like a web address, a file name or a placeholder. With a folder and a `url`, the address becomes the live address while that server runs.
-- `canon_update`: changes a prototype's name, summary, tags, star, note, archive flag or board. A new `url`, or a new `folder` (with `page` for a site), adds the next version and keeps the older ones. `newVersion: true` with a `url` adds a version even when the address is the same.
+- `canon_update`: changes a prototype's name, summary, tags, star, note, archive flag, board or project. `moveToProject` moves the whole prototype, every version, to another project, and the person can undo it for a few seconds. A new `url`, or a new `folder` (with `page` for a site), adds the next version and keeps the older ones. `newVersion: true` with a `url` adds a version even when the address is the same.
 - `canon_find`: lists projects, boards and prototypes, or searches them by name, summary and tag.
 - `canon_open`: shows a project, board or prototype in your Canon tab, which may be behind other tabs.
 - `canon_link`: gives you a link to a project, board, prototype, full-screen view or version. Links open the prototype view.

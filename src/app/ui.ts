@@ -7,6 +7,7 @@ import { PrototypeView, openPrototype } from './prototype';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
 import { FilterMenu, Home } from './home';
 import { AddMenu, ProtoRow, StarButton, Tags, metaOf } from './parts';
+import { MoveMenu, RowMenu, carries, startDrag, useDismiss } from './move';
 import { pagesOf } from './lib/pageview';
 import { currentOf, stackKey } from './lib/versions';
 import { checkPrototypeUrl } from './lib/resolve';
@@ -156,7 +157,7 @@ export function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes'
     await addGroups(id, groups);
   };
   const newBoard = async () => go(`/b/${(await store.createBoard(id)).id}`);
-  return html`<div class="main" onDragOver=${(e: DragEvent) => { e.preventDefault(); setDrop(true); }} onDragLeave=${(e: DragEvent) => !e.relatedTarget && setDrop(false)} onDrop=${onDrop}>
+  return html`<div class="main" onDragOver=${(e: DragEvent) => { if (carries(e)) return; e.preventDefault(); setDrop(true); }} onDragLeave=${(e: DragEvent) => !e.relatedTarget && setDrop(false)} onDrop=${onDrop}>
     <div class="topbar">
       <div class="crumb"><a href="#/">Projects</a><span class="faint">/</span>
         <input ref=${nameBox} value=${project.name} aria-label="Project name"
@@ -185,6 +186,18 @@ export function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes'
     </div></div>`}
     ${tab === 'comments' && html`<${ProjectComments} projectId=${id} />`}
     ${drop && html`<div class="dropzone" style="position:absolute">Drop to add to ${project.name}</div>`}
+  </div>`;
+}
+
+/** "Move to project" in the selection bar, for every prototype picked. */
+function MoveSelected({ ids, onDone }: { ids: string[]; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  useDismiss(open, () => setOpen(false), wrap, button);
+  return html`<div class="bar-note" ref=${wrap}>
+    <button type="button" ref=${button} class="btn" aria-haspopup="dialog" aria-expanded=${open} onClick=${() => setOpen(!open)}><${Icon} name="move" />Move to project</button>
+    ${open && html`<div class="bar-pop move-pop move-below" role="dialog" aria-label="Move the selected prototypes to a project"><${MoveMenu} ids=${ids} onDone=${() => { setOpen(false); onDone(); }} /></div>`}
   </div>`;
 }
 
@@ -238,6 +251,8 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
     setPicked(next);
   };
   const open = (fid: string) => openPrototype(all.find((i) => i.id === fid)!.frame);
+  // A row that is part of the selection carries the whole selection; any other carries itself.
+  const dragIds = (fid: string) => (picked.has(fid) ? [...picked] : [fid]);
   const addTo = async (boardId: string | 'new') => {
     const bid = boardId === 'new' ? (await store.createBoard(projectId, 'New board')).id : boardId;
     for (const fid of picked) await store.placeOnBoard(bid, fid);
@@ -288,6 +303,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
       <span class="faint">Add to</span>
       ${boards.map((b) => html`<button type="button" class="btn" key=${b.id} onClick=${() => addTo(b.id)}>${b.name}</button>`)}
       <button type="button" class="btn" onClick=${() => addTo('new')}><${Icon} name="plus" />New board</button>
+      <${MoveSelected} ids=${[...picked]} onDone=${() => setPicked(new Set())} />
       <span class="spacer"></span>
       <button type="button" class="btn ghost danger" onClick=${remove}><${Icon} name="trash" />Delete</button>
       <button type="button" class="btn ghost" onClick=${() => setPicked(new Set())}>Clear</button>
@@ -305,7 +321,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
             const f = i.frame;
             const card = cardFor(i);
             const s = Math.min(240 / f.w, 160 / f.h);
-            return html`<div class=${`lib-card${picked.has(i.id) ? ' picked' : ''}`} key=${i.id} data-card=${i.id}>
+            return html`<div class=${`lib-card${picked.has(i.id) ? ' picked' : ''}`} key=${i.id} data-card=${i.id} draggable="true" onDragStart=${(e: DragEvent) => startDrag(e, dragIds(i.id))}>
               <button type="button" class="lib-thumb" onClick=${() => open(i.id)} aria-label=${`Open ${f.name}`}>
                 ${(pageCount(f) > 1 || i.versions > 1) && html`<span class="lib-sheet"></span>`}
                 <span class="lib-frame" style=${{ width: f.w * s, height: f.h * s }}>
@@ -316,6 +332,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
               </button>
               <label class="lib-check"><input type="checkbox" checked=${picked.has(i.id)} onChange=${() => toggle(i.id)} aria-label=${`Select ${f.name}`} /></label>
               <${StarButton} card=${card} />
+              <${RowMenu} ids=${dragIds(i.id)} name=${f.name} />
               <div class="meta">
                 <b>${f.name}</b>
                 <${ReachNote} frame=${f} />
@@ -328,7 +345,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
           })}
         </div>`
       : html`<ul class="rows lib-rows">
-          ${shown.map((i) => html`<${ProtoRow} key=${i.id} card=${cardFor(i)} onOpen=${() => open(i.id)} versions=${versionsSlot(i)} board=${manyBoards ? boardText(i) : undefined} pick=${{ checked: picked.has(i.id), onChange: () => toggle(i.id) }} />`)}
+          ${shown.map((i) => html`<${ProtoRow} key=${i.id} card=${cardFor(i)} onOpen=${() => open(i.id)} versions=${versionsSlot(i)} board=${manyBoards ? boardText(i) : undefined} drag=${dragIds(i.id)} pick=${{ checked: picked.has(i.id), onChange: () => toggle(i.id) }} />`)}
         </ul>`}
   </div>`;
 }
@@ -415,7 +432,7 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
       : route.name === 'bundle'
         ? html`<${OpenMap} key=${route.frame} frame=${route.frame} from=${route.from} page=${route.page} />`
         : route.name === 'board' || (route.name === 'full' && route.board)
-          ? html`<${BoardView} id=${route.board} frameId=${route.frame} full=${route.name === 'full' ? route : null} askUrl=${url.ask} />`
+          ? html`<${BoardView} id=${route.board} frameId=${route.name === 'board' ? route.frame ?? route.show ?? null : route.frame} full=${route.name === 'full' ? route : null} askUrl=${url.ask} />`
           : route.name === 'full'
             ? html`<${PrototypeView} address=${route} />`
             : route.name === 'project'
@@ -424,6 +441,6 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
     ${url.view}
     <${SearchHost} cards=${cards} projectName=${projectName} onPick=${open} />
     ${pair && html`<${PairDialog} pair=${pair} onClose=${() => setPair(null)} />`}
-    ${s.toast && html`<div class="toast" role="status">${s.toast}</div>`}
+    ${s.toast && html`<div class="toast" role="status"><span>${s.toast}</span>${s.toastAction && html`<button type="button" class="toast-act" onClick=${() => { const run = s.toastAction!.run; store.dismissToast(); run(); }}>${s.toastAction.label}</button>`}</div>`}
   </div>`;
 }

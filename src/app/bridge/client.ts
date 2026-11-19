@@ -297,6 +297,7 @@ function opsDeps(ctx: Ctx, agent: Agent): OpsDeps {
     updateMeta: (frameId, patch) => store.updateMeta(frameId, patch),
     placeOnBoard: (boardId, frameId) => store.placeOnBoard(boardId, frameId),
     moveToBoard: store.moveToBoard,
+    moveToProject: store.moveToProject,
     navigate: navigateActive,
     appBase: ctx.appBase,
     agentName: agent.name,
