@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildAddress, joinPath, parseAddress, safePath, type Address } from '../../src/app/lib/address';
+import { buildAddress, canonicalAddress, joinPath, parseAddress, safePath, type Address } from '../../src/app/lib/address';
 
 describe('addresses', () => {
   it('round-trips every shape', () => {
@@ -51,5 +51,25 @@ describe('addresses', () => {
   it('joinPath keeps the frame origin', () => {
     expect(joinPath('http://localhost:5173/app/', '/checkout')).toBe('http://localhost:5173/checkout');
     expect(joinPath('http://localhost:5173/', null)).toBe('http://localhost:5173/');
+  });
+});
+
+describe('old prototype links', () => {
+  const full = (board: string | null, extra = {}) => ({ name: 'full' as const, frame: 'f1', board, width: null, path: null, ...extra });
+
+  it('sends a saved board-and-prototype link to the prototype view', () => {
+    expect(canonicalAddress({ name: 'board', board: 'b1', frame: 'f1' }, false)).toEqual(full(null));
+    expect(canonicalAddress({ name: 'board', board: 'b1', frame: 'f1' }, true)).toEqual(full(null));
+  });
+
+  it('sends a saved board full-screen link there too, keeping its width and path, unless the app opened it', () => {
+    expect(canonicalAddress(full('b1', { width: 390, path: '/a' }), false)).toEqual(full(null, { width: 390, path: '/a' }));
+    expect(canonicalAddress(full('b1'), true)).toBeNull();
+  });
+
+  it('leaves board links, project links and plain prototype links alone', () => {
+    for (const a of [{ name: 'board', board: 'b1', frame: null }, { name: 'home' }, { name: 'project', project: 'p', tab: 'boards' }, full(null)] as Address[]) {
+      expect(canonicalAddress(a, false)).toBeNull();
+    }
   });
 });

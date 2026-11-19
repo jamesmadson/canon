@@ -9,6 +9,7 @@ import { sortPrototypes, type LibrarySort } from './lib/library';
 import { currentOf, versionOf } from './lib/versions';
 import { safeFrameUrl } from './lib/resolve';
 import { buildAddress } from './lib/address';
+import { openHash } from './lib/nav';
 import { Focus, type FullAddress } from './prototype';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
 import { PrototypeActions, ZoomControls } from './bar';
@@ -106,7 +107,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
   const fitted = useRef<string | null>(null);
   const centred = useRef<string | null>(null);
   const focus = full?.frame ?? null;
-  const openFocus = (fid: string) => go(buildAddress({ name: 'full', board: id, frame: fid, width: null, path: null }));
+  const openFocus = (fid: string) => openHash(buildAddress({ name: 'full', board: id, frame: fid, width: null, path: null }));
   const closeFocus = () => go(buildAddress({ name: 'board', board: id, frame: null }));
   const hoverTimer = useRef<ReturnType<typeof setTimeout>>();
 

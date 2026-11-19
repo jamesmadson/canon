@@ -9,7 +9,8 @@ import { FilterMenu, Home } from './home';
 import { AddMenu, ProtoRow, StarButton, Tags } from './parts';
 import { currentOf, stackKey } from './lib/versions';
 import { checkPrototypeUrl } from './lib/resolve';
-import { type Address, buildAddress, parseAddress } from './lib/address';
+import { type Address, buildAddress } from './lib/address';
+import { currentAddress } from './lib/nav';
 import { type PairLink, pairNotice, parsePairLink, saveAgent } from './bridge/client';
 import { SearchHost } from './palette';
 import { Sidebar, useBridge } from './sidebar';
@@ -21,7 +22,7 @@ import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, addGroups,
 export { BASE } from './shared';
 
 type Route = Address;
-const parseRoute = (): Route => parseAddress(location.hash);
+const parseRoute = (): Route => currentAddress();
 
 function useRoute() {
   const [route, setRoute] = useState(parseRoute);

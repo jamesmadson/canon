@@ -221,8 +221,9 @@ function linkBoard(s: State, deps: OpsDeps, stack: Frame[], asked: Board | null)
 }
 
 const linkTo = (deps: OpsDeps, a: Address) => deps.appBase + buildAddress(a);
-const frameLink = (deps: OpsDeps, frameId: string, board: Board | null) =>
-  linkTo(deps, board ? { name: 'board', board: board.id, frame: frameId } : { name: 'full', frame: frameId, board: null, width: null, path: null });
+/** Every link to a prototype opens the prototype view, whether or not it sits on a board. A link to a board still opens the board. */
+const frameLink = (deps: OpsDeps, frameId: string) =>
+  linkTo(deps, { name: 'full', frame: frameId, board: null, width: null, path: null });
 
 /** Where an agent's add lands, settled without writing: what to make, and what already exists. */
 type Plan<T> = { have: T } | { make: string };
@@ -337,7 +338,7 @@ async function add(args: Args, deps: OpsDeps) {
   if (!build && m.page?.frameBlocked) await deps.updateFrame(frame.id, { frameBlocked: true });
   deps.toast(`${deps.agentName} added ${frame.name}`);
   const stored = build ? { storedFiles: build.length, ...(url ? { liveUrl: url } : {}) } : {};
-  return { ...summary(deps, frame.id, b), ...(m.summary ? { summary: m.summary } : {}), tags, names, ...stored, link: frameLink(deps, frame.id, b) };
+  return { ...summary(deps, frame.id, b), ...(m.summary ? { summary: m.summary } : {}), tags, names, ...stored, link: frameLink(deps, frame.id) };
 }
 
 /* ── update ────────────────────────────────────────────────────────────── */
@@ -431,7 +432,7 @@ async function update(args: Args, deps: OpsDeps) {
   const shown = target ?? linkBoard(after, deps, stackNow(after, current.id), board);
   const result = summary(deps, current.id, shown);
   if (newVersion || renamed || moved || metaChanged) deps.toast(`${deps.agentName} updated ${result.frame}`);
-  return { ...result, newVersion, tags: next.tags, ...(build ? { storedFiles: build.length } : {}), link: frameLink(deps, current.id, shown) };
+  return { ...result, newVersion, tags: next.tags, ...(build ? { storedFiles: build.length } : {}), link: frameLink(deps, current.id) };
 }
 
 /* ── find and status ───────────────────────────────────────────────────── */
@@ -534,9 +535,7 @@ function address(args: Args, deps: OpsDeps): Address {
     path = safePath(text(args.path));
     if (path === null) throw new Refused('That path points off the prototype.');
   }
-  const shown = linkBoard(s, deps, stack, board);
-  if (!wantsFull && shown) return { name: 'board', board: shown.id, frame: member.id };
-  return { name: 'full', frame: member.id, board: shown?.id ?? null, width, path };
+  return { name: 'full', frame: member.id, board: null, width, path };
 }
 
 /* ── The one way in ────────────────────────────────────────────────────── */
