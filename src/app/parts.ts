@@ -61,9 +61,11 @@ export interface RowProps {
   pick?: { checked: boolean; onChange: () => void } | null;
   older?: boolean;
   now?: number;
+  /** The board names a project view shows when its project has several. Undefined leaves the column out. */
+  board?: string;
 }
 
-export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions, pick, older, now }: RowProps) {
+export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions, pick, older, now, board }: RowProps) {
   const label = metaOf(card);
   return html`<li class=${`prow${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${older ? ' older' : ''}`} data-card=${card.id}>
     ${pick && html`<label class="pick"><input type="checkbox" checked=${pick.checked} onChange=${pick.onChange} aria-label=${`Select ${card.name}`} /></label>`}
@@ -73,6 +75,7 @@ export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions,
     <span class="sm">${card.summary}</span>
     <${Tags} tags=${card.tags} />
     ${versions !== undefined ? versions : label ? html`<span class="ver">${label}</span>` : html`<span class="ver"></span>`}
+    ${board !== undefined && html`<span class="brd" title=${board}>${board}</span>`}
     <span class="src">${card.source}</span>
     <${StarButton} card=${card} />
     <span class="when">${whenLabel(card.updatedAt, now)}</span>

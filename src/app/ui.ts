@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import * as store from './store';
-import type { Frame, Note } from './db';
+import type { Board, Frame, Note } from './db';
 import { groupsFromDrop } from './intake';
 import { BoardView } from './canvas';
 import { PrototypeView, openPrototype } from './prototype';
@@ -176,7 +176,7 @@ export function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes'
       ${tab === 'boards' && html`<button class="btn primary" onClick=${newBoard}><${Icon} name="plus" />New board</button>`}
     </div>
     ${tab === 'prototypes' && html`<${Library} projectId=${id} askUrl=${askUrl} />`}
-    ${tab === 'boards' && html`<div class="page"><div class="grid">
+    ${tab === 'boards' && html`<div class="page"><p class="hint boards-note">Boards lay prototypes side by side. Agents file new prototypes onto a\u00a0board.</p><div class="grid">
       ${store.boardsOf(id).map((b) => html`<a class="card" href=${`#/b/${b.id}`}>
         <${BoardThumb} rects=${boardRects(b.id)} />
         <div class="meta"><b>${b.name}</b><small>${countPrototypes(store.framesOf(b.id), { archived: 'any' })} prototypes · edited ${ago(b.updatedAt)}</small></div>
@@ -205,6 +205,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
   const [view, setView] = useProjectView();
   const [filter, setFilter] = useState<LibraryFilter>({ source: 'all', tags: [] });
   const [sort, setSort] = useState<LibrarySort>('updated');
+  const [board, setBoard] = useState<string | null>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const all = store.libraryItems(projectId);
   const matched = sortPrototypes(filterPrototypes(all, filter), sort);
@@ -221,7 +222,16 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
     items.push({ ...lead, versions: stack.length });
   }
   const boards = store.boardsOf(projectId);
-  useHomeProbe(items.map((i) => i.frame));
+  // Board names show only when there is more than one board to tell apart.
+  const manyBoards = boards.length > 1;
+  const boardsOfItem = (i: (typeof items)[number]): Board[] => {
+    const stack = store.stackOf(i.id);
+    const ids = new Set((stack.length ? stack : [i.frame]).flatMap((f) => store.boardsHolding(f.id).map((b) => b.id)));
+    return boards.filter((b) => ids.has(b.id));
+  };
+  const shownBoard = manyBoards && board && boards.some((b) => b.id === board) ? board : null;
+  const shown = shownBoard ? items.filter((i) => boardsOfItem(i).some((b) => b.id === shownBoard)) : items;
+  useHomeProbe(shown.map((i) => i.frame));
   const toggle = (fid: string) => {
     const next = new Set(picked);
     next.has(fid) ? next.delete(fid) : next.add(fid);
@@ -243,13 +253,14 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
   const way = (w: Way) => runWay(w, projectId, undefined, askUrl);
   const chip = (key: keyof LibraryFilter, label: string) =>
     html`<button type="button" class="chip-toggle" aria-pressed=${!!filter[key]} onClick=${() => setFilter({ ...filter, [key]: !filter[key] })}>${label}</button>`;
-  const clear = () => setFilter({ source: 'all', tags: [] });
+  const clear = () => { setFilter({ source: 'all', tags: [] }); setBoard(null); };
   const tagList = tagCounts(scopeCards(cardsOf(all.map((i) => i.frame)), { kind: filter.archived ? 'archive' : 'home' }));
   const cardFor = (i: (typeof items)[number]) => ({ ...cardOf(i.frame), versions: i.versions });
-  const filtering = !!(filter.query || filter.tags?.length || filter.multiPage || filter.hasComments || filter.unplaced || filter.archived || (filter.source && filter.source !== 'all'));
+  const filtering = !!(shownBoard || filter.query || filter.tags?.length || filter.multiPage || filter.hasComments || filter.unplaced || filter.archived || (filter.source && filter.source !== 'all'));
 
   const versionsSlot = (i: (typeof items)[number]) =>
     html`<span class="ver">${metaOf({ pages: pagesOf(i.frame), versions: i.versions })}</span>`;
+  const boardText = (i: (typeof items)[number]) => boardsOfItem(i).map((b) => b.name).join(', ');
 
   return html`<div class="page library">
     <div class="lib-bar">
@@ -267,6 +278,11 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
       <${AddMenu} primary label="Add" onWay=${way} />
     </div>
 
+    ${manyBoards && html`<div class="board-chips" role="group" aria-label="Show one board">
+      <button type="button" class="chip-toggle" aria-pressed=${!shownBoard} onClick=${() => setBoard(null)}>All boards</button>
+      ${boards.map((b) => html`<button type="button" class="chip-toggle" key=${b.id} aria-pressed=${shownBoard === b.id} onClick=${() => setBoard(b.id)}>${b.name}</button>`)}
+    </div>`}
+
     ${picked.size > 0 && html`<div class="selection-bar">
       <b>${picked.size} selected</b>
       <span class="faint">Add to</span>
@@ -281,11 +297,11 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
     ${all.length === 0 && html`<div class="empty-board" style="position:static;padding:40px 0"><div>
       <h2>No prototypes yet</h2><p>Or use Add, above, to pick files or link a folder.</p>
     </div></div>`}
-    ${all.length > 0 && items.length === 0 && html`<div class="empty">${filter.archived && !filtering ? 'Nothing is archived.' : 'Nothing matches.'} <button type="button" class="btn ghost" onClick=${clear}>Clear filters</button></div>`}
+    ${all.length > 0 && shown.length === 0 && html`<div class="empty">${filter.archived && !filtering ? 'Nothing is archived.' : 'Nothing matches.'} <button type="button" class="btn ghost" onClick=${clear}>Clear filters</button></div>`}
 
     ${view === 'grid'
       ? html`<div class="lib-grid">
-          ${items.map((i) => {
+          ${shown.map((i) => {
             const f = i.frame;
             const card = cardFor(i);
             const s = Math.min(240 / f.w, 160 / f.h);
@@ -304,7 +320,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
                 <b>${f.name}</b>
                 <${ReachNote} frame=${f} />
                 ${f.summary && html`<span class="lib-sum">${f.summary}</span>`}
-                <small>${i.pages > 1 ? `${i.pages} pages · ` : ''}${i.boards ? `${i.boards} board${i.boards > 1 ? 's' : ''}` : 'Not on a board'}${i.comments ? ` · ${i.comments} open` : ''}</small>
+                <small>${i.pages > 1 ? `${i.pages} pages · ` : ''}${manyBoards ? boardText(i) || 'Not on a board' : i.boards ? `${i.boards} board${i.boards > 1 ? 's' : ''}` : 'Not on a board'}${i.comments ? ` · ${i.comments} open` : ''}</small>
                 ${card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
                 ${i.versions > 1 && html`<div class="lib-ver"><span class="ver-chip">${i.versions} versions</span></div>`}
               </div>
@@ -312,7 +328,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
           })}
         </div>`
       : html`<ul class="rows lib-rows">
-          ${items.map((i) => html`<${ProtoRow} key=${i.id} card=${cardFor(i)} onOpen=${() => open(i.id)} versions=${versionsSlot(i)} pick=${{ checked: picked.has(i.id), onChange: () => toggle(i.id) }} />`)}
+          ${shown.map((i) => html`<${ProtoRow} key=${i.id} card=${cardFor(i)} onOpen=${() => open(i.id)} versions=${versionsSlot(i)} board=${manyBoards ? boardText(i) : undefined} pick=${{ checked: picked.has(i.id), onChange: () => toggle(i.id) }} />`)}
         </ul>`}
   </div>`;
 }
