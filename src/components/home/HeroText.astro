@@ -1,11 +1,15 @@
 ---
 import CopyField from './CopyField.astro';
-import { SETUP_COMMAND } from '../../lib/site';
+import { REPO_URL, SETUP_COMMAND } from '../../lib/site';
 import { withBase } from '../../lib/withBase';
 import { waitlistOpen } from '../../lib/waitlist';
 import { tie } from '../../lib/words';
 
-/** The hero's words and actions, shared by both hero variants. */
+/**
+ * The hero's words and actions, shared by both hero variants. "Try the MCP"
+ * opens a panel under the buttons with the setup command. Without script the
+ * panel is simply open and its button is hidden.
+ */
 interface Props {
   waitlistUrl?: string;
 }
@@ -14,16 +18,222 @@ const { waitlistUrl = '' } = Astro.props;
 
 <div class="htext">
   <h1 id="h-hero" class="rise"><span class="sent">Your prototypes are everywhere.</span><span class="sent">{tie('Canon keeps them in one place.')}</span></h1>
-  <p class="lede rise rise-2">
-    {tie('You and your team juggle Figma Make links, v0 previews, Lovable apps, zips and whatever an agent built this morning. Canon files every one by project on your machine, named, tagged and easy to find.')}
+  <p class="lede lede-hero rise rise-2">
+    {tie('You and your team juggle Figma Make links, v0 deployments, Lovable apps, zips and whatever an agent built this morning. Canon files every one by project on your machine, named, tagged and easy to find.')}
   </p>
-  <div class="cta rise rise-3">
-    <a class="hbtn hbtn-primary" href={withBase('/app/')}>Open the app</a>
-    {waitlistOpen(waitlistUrl) && <a class="hbtn" href="#hosted">Join the hosted waitlist</a>}
+  <div class="mcp-scope" data-mcp>
+    <div class="cta rise rise-3">
+      <a class="hbtn hbtn-primary" href={withBase('/app/')} data-ga="open_app" data-ga-location="hero">Open the app</a>
+      <button type="button" class="hbtn" data-mcp-toggle aria-expanded="false" aria-controls="mcp-panel">Try the MCP</button>
+      {waitlistOpen(waitlistUrl) && <a class="hbtn" href="#hosted">Join the hosted waitlist</a>}
+    </div>
+    <div class="mcp">
+      <div class="mcp-panel" id="mcp-panel" role="group" aria-labelledby="mcp-label">
+        <p class="mcp-label" id="mcp-label">{tie('Connect your agent')}</p>
+        <div class="mcp-cmd">
+          <CopyField command={SETUP_COMMAND} name="the setup command" location="hero" />
+        </div>
+        <p class="mcp-note">
+          {'One line connects Claude Code. Codex and Cursor take a few lines in their config, '}<a href={`${REPO_URL}#connect-your-agent`} data-ga="readme_click">written up in the&nbsp;README</a>.
+        </p>
+      </div>
+    </div>
   </div>
-  <p class="fine connect rise rise-3">{tie('Connect your agent')}</p>
-  <div class="rise rise-3">
-    <CopyField command={SETUP_COMMAND} name="the setup command" />
-  </div>
-  <p class="fine rise rise-3">{tie('Free and open source. No account, and nothing leaves your machine.')}</p>
+  <p class="fine rise rise-3" data-mcp-after>{tie('Free and open source. No account, and nothing leaves your machine.')}</p>
 </div>
+
+<script>
+  import '../../scripts/mcp';
+</script>
+
+<style is:global>
+  /* The panel inverts the surface: ink in light mode, white in dark mode, with
+     no border. It opens by transform, opacity and a little blur, and the page
+     below glides down by transform (see scripts/mcp.ts). */
+  .mcp-scope {
+    position: relative;
+  }
+  .mcp {
+    --mp-bg: #1a1918;
+    --mp-ink: #f3f0eb;
+    --mp-muted: #b0aba3;
+    --mp-fill: rgba(255, 255, 255, 0.09);
+    --mp-line: #85817a;
+    display: flow-root;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-app-theme='system'] .mcp {
+      --mp-bg: #ffffff;
+      --mp-ink: #1a1918;
+      --mp-muted: #5c5954;
+      --mp-fill: rgba(26, 25, 24, 0.07);
+    }
+  }
+  :root[data-app-theme='dark'] .mcp {
+    --mp-bg: #ffffff;
+    --mp-ink: #1a1918;
+    --mp-muted: #5c5954;
+    --mp-fill: rgba(26, 25, 24, 0.07);
+  }
+  .mcp-panel {
+    position: relative;
+    z-index: 5;
+    max-width: 580px;
+    margin-top: 16px;
+    padding: 18px 18px 20px;
+    border-radius: 14px;
+    background: var(--mp-bg);
+    color: var(--mp-ink);
+    transform-origin: 0 0;
+  }
+  .home .mcp-panel p {
+    margin: 0;
+  }
+  .mcp-label {
+    font-size: 15px;
+    line-height: 22px;
+    font-weight: 500;
+  }
+  .mcp-cmd {
+    margin-top: 10px;
+  }
+  .mcp-panel .setup {
+    width: 100%;
+    background: var(--mp-fill);
+    color: var(--mp-ink);
+  }
+  .mcp-panel .setup code {
+    flex: 1 1 auto;
+  }
+  .mcp-panel .util {
+    color: var(--mp-ink);
+    border-color: var(--mp-line);
+  }
+  .home .mcp-panel .mcp-note {
+    margin-top: 12px;
+    font-size: 15px;
+    line-height: 22px;
+    color: var(--mp-muted);
+  }
+  .mcp-note a {
+    color: var(--mp-ink);
+    text-underline-offset: 3px;
+  }
+  .home .mcp-panel a:focus-visible,
+  .home .mcp-panel button:focus-visible {
+    outline-color: var(--mp-ink);
+  }
+  .mcp-scope [aria-expanded='true'] {
+    background: var(--color-recess);
+  }
+  .fine[data-mcp-after] {
+    margin-top: 16px;
+  }
+
+  /* No script: the panel is open and the button that would open it is gone. */
+  html:not(.js) [data-mcp-toggle] {
+    display: none;
+  }
+
+  /* With script the panel rests closed, out of the flow so the page does not
+     reserve its height, and hidden from everything including the tab key. */
+  .js .mcp-panel {
+    position: absolute;
+    inset: 0 0 auto 0;
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(-8px) scale(0.98);
+    transition:
+      opacity 200ms var(--ease),
+      transform 200ms var(--ease),
+      filter 200ms var(--ease),
+      visibility 0s linear 200ms;
+  }
+  .js .mcp.is-open .mcp-panel {
+    position: relative;
+    inset: auto;
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+    transition:
+      opacity 360ms var(--ease),
+      transform 360ms var(--ease),
+      filter 360ms var(--ease),
+      visibility 0s linear 0s;
+  }
+  /* The panel's lines fade up 4px, 40ms apart. They close together, quickly. */
+  .js .mcp-panel > * {
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 160ms var(--ease),
+      transform 160ms var(--ease);
+  }
+  .js .mcp.is-open .mcp-panel > * {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 280ms var(--ease),
+      transform 280ms var(--ease);
+  }
+  .js .mcp.is-open .mcp-panel > :nth-child(1) {
+    transition-delay: 40ms;
+  }
+  .js .mcp.is-open .mcp-panel > :nth-child(2) {
+    transition-delay: 80ms;
+  }
+  .js .mcp.is-open .mcp-panel > :nth-child(3) {
+    transition-delay: 120ms;
+  }
+
+  /* Reduced motion: the panel only fades. */
+  @media (prefers-reduced-motion: reduce) {
+    .js .mcp-panel,
+    .js .mcp.is-open .mcp-panel {
+      filter: none;
+      transform: none;
+    }
+    .js .mcp-panel {
+      transition:
+        opacity 200ms var(--ease),
+        visibility 0s linear 200ms;
+    }
+    .js .mcp.is-open .mcp-panel {
+      transition:
+        opacity 200ms var(--ease),
+        visibility 0s linear 0s;
+    }
+    .js .mcp-panel > *,
+    .js .mcp.is-open .mcp-panel > * {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .mcp-panel {
+      max-width: none;
+    }
+  }
+  @media (max-width: 480px) {
+    .mcp-panel {
+      padding: 16px 14px 18px;
+    }
+    .mcp-panel .setup {
+      align-items: flex-start;
+      flex-wrap: wrap;
+      padding: 12px;
+    }
+    .mcp-panel .setup code {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      overflow: visible;
+      font-size: 13px;
+    }
+  }
+</style>

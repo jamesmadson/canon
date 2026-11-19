@@ -5,6 +5,7 @@
  */
 
 import { submitWaitlist } from '../lib/waitlist';
+import { track } from '../lib/events';
 
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -32,6 +33,8 @@ document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((button) => 
   button.addEventListener('click', async () => {
     try {
       await copyText(button.dataset.copy ?? '');
+      const where = button.dataset.gaCopy;
+      if (where === 'hero' || where === 'agents') track(window, 'copy_setup', { location: where });
       button.textContent = 'Copied';
       button.setAttribute('aria-label', 'Copied');
     } catch {
@@ -156,8 +159,10 @@ if (form) {
     if (!form.reportValidity()) return;
     const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     if (submit) submit.disabled = true;
+    track(window, 'waitlist_submit');
     const result = await submitWaitlist(form.action, new FormData(form));
     if (note) note.textContent = result.message;
+    if (result.ok) track(window, 'waitlist_done');
     // A failure leaves what the person typed and lets them send again.
     if (!result.ok) {
       if (submit) submit.disabled = false;

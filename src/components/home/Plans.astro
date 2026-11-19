@@ -8,16 +8,12 @@ interface Props {
 }
 const { waitlistUrl = '' } = Astro.props;
 const open = waitlistOpen(waitlistUrl);
-
-const GROUPS: Array<{ name: string; legend: string; options: string[] }> = [
-  { name: 'role', legend: 'What you do', options: ['Designer', 'Engineer', 'Product', 'Founder', 'Other'] },
-  { name: 'company_size', legend: 'Company size', options: ['Just me', '2 to 10', '11 to 50', '51 to 200', 'Over 200'] },
-  { name: 'used_canon', legend: 'Have you used Canon?', options: ['Yes', 'Not yet'] },
-];
 ---
 
 <section class="band" id="hosted" aria-labelledby="h-hosted">
-  <h2 id="h-hosted"><span class="sent">Free on your machine.</span><span class="sent">{tie('Hosted when you need to share.')}</span></h2>
+  <div class="bhead">
+    <h2 id="h-hosted"><span class="sent">Free on your machine.</span><span class="sent">{tie('Hosted when you need to share.')}</span></h2>
+  </div>
   <div class="plans">
     <div class="panel">
       <div class="shot win" role="img" aria-label="Canon in its own window, showing the Onboarding project with two prototypes in a list.">
@@ -40,7 +36,7 @@ const GROUPS: Array<{ name: string; legend: string; options: string[] }> = [
       </div>
       <div class="tx2">
         <h3>{tie('Canon, local')}</h3>
-        <p>{tie('Free and open source under MIT. Available now.')}</p>
+        <p>{'Free and open source under MIT. Available now.'}</p>
         <ul>
           <li>Every project and prototype, stored on your machine</li>
           <li>Claude Code, Codex and Cursor, with as many projects as you like</li>
@@ -69,33 +65,21 @@ const GROUPS: Array<{ name: string; legend: string; options: string[] }> = [
       {
         open && (
           <form class="form" aria-labelledby="h-form" method="post" action={waitlistUrl} data-waitlist>
-            <div>
-              <h3 id="h-form">{tie('Join the waitlist')}</h3>
-              <p class="muted" style="margin-top:2px">{tie('About 20 seconds.')}</p>
+            <h3 id="h-form">{tie('Join the waitlist')}</h3>
+            <p class="muted form-hint">{tie('Your email address is all we need.')}</p>
+            <div class="frow">
+              <div class="wl-field">
+                <label for="wl-email">Email</label>
+                <input id="wl-email" name="email" type="email" autocomplete="email" required />
+              </div>
+              <button class="hbtn hbtn-primary" type="submit">Join the waitlist</button>
             </div>
-            <div class="field">
-              <label for="wl-email">Email</label>
-              <input id="wl-email" name="email" type="email" autocomplete="email" placeholder="you@studio.com" required />
+            <div class="hp" aria-hidden="true">
+              <label for="wl-gotcha">Leave this field empty</label>
+              <input id="wl-gotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off" />
             </div>
-            <div class="field">
-              <label for="wl-name">Name</label>
-              <input id="wl-name" name="name" type="text" autocomplete="name" />
-            </div>
-            {GROUPS.map((g) => (
-              <fieldset class="group">
-                <legend>{g.legend}</legend>
-                <div class="opts">
-                  {g.options.map((o, i) => (
-                    <>
-                      <input class="opt-input" type="radio" name={g.name} id={`wl-${g.name}-${i}`} value={o} />
-                      <label class="opt" for={`wl-${g.name}-${i}`}>{o}</label>
-                    </>
-                  ))}
-                </div>
-              </fieldset>
-            ))}
-            <button class="hbtn hbtn-primary hbtn-wide" type="submit">Join the waitlist</button>
-            <p class="fine form-note" role="status" data-waitlist-note style="margin-top:-6px">{tie('One email when hosting opens, and nothing else.')}</p>
+            <p class="fine form-note">{tie('Only your email address is sent, to Formspree, so we can tell you when hosting opens.')}</p>
+            <p class="fine form-status" role="status" aria-live="polite" data-waitlist-note></p>
           </form>
         )
       }

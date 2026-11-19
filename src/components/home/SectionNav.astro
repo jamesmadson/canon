@@ -1,0 +1,156 @@
+---
+import { withBase } from '../../lib/withBase';
+
+/**
+ * A pill fixed to the bottom centre of the window with the page's sections.
+ * On the homepage it appears after the first 200px of scroll and marks the
+ * section in view with a segment that glides between items (scripts/nav.ts).
+ * On other pages it is always there and marks the page you are on.
+ */
+const ITEMS = [
+  { label: 'Projects', section: 'projects', href: '/#projects' },
+  { label: 'Agents', section: 'agents', href: '/#agents' },
+  { label: 'Search', section: 'find', href: '/#find' },
+  { label: 'Hosted', section: 'hosted', href: '/#hosted' },
+  { label: 'Skills', section: null, href: '/skills/' },
+];
+
+const path = Astro.url.pathname.replace(/\/$/, '');
+const isHome = path === withBase('/').replace(/\/$/, '') || path === withBase('/hero-a');
+const onSkills = path.startsWith(withBase('/skills'));
+const current = ITEMS.findIndex((it) => (it.section === null ? onSkills : false));
+// Sections link in page on the homepage and to the homepage everywhere else.
+const href = (it: (typeof ITEMS)[number]) => (isHome && it.section ? `#${it.section}` : withBase(it.href));
+---
+
+<div class="home pillwrap">
+  <nav class="pill" aria-label="Sections" data-pill data-home={isHome ? '' : undefined} data-none={current < 0 ? '' : undefined} style={`--n:${ITEMS.length}; --i:${Math.max(current, 0)}`}>
+    <span class="pill-glide" aria-hidden="true"></span>
+    {
+      ITEMS.map((it, i) => (
+        <a href={href(it)} data-section={it.section ?? undefined} data-ga="nav_section" data-ga-section={it.section ?? 'skills'} aria-current={i === current ? 'page' : undefined}>
+          {it.label}
+        </a>
+      ))
+    }
+  </nav>
+</div>
+
+<script>
+  import '../../scripts/nav';
+</script>
+
+<style is:global>
+  .pillwrap {
+    position: fixed;
+    z-index: 40;
+    left: 0;
+    right: 0;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    justify-content: center;
+    padding-inline: 8px;
+    pointer-events: none;
+    overflow: visible;
+  }
+  .pill {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--n), 1fr);
+    padding: 4px;
+    border-radius: 999px;
+    background: var(--color-recess);
+    box-shadow:
+      0 1px 2px rgba(26, 25, 24, 0.08),
+      0 12px 32px -8px var(--shadow);
+    pointer-events: auto;
+    transition:
+      opacity 240ms var(--ease),
+      transform 240ms var(--ease);
+  }
+  .pill a {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 76px;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: 999px;
+    color: var(--color-ink-soft);
+    font-size: 15px;
+    line-height: 20px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .pill a[aria-current] {
+    color: var(--color-ink);
+  }
+  .home .pill a:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: -2px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .pill a:hover {
+      color: var(--color-ink);
+    }
+  }
+  /* The filled segment is one cell wide, so it only ever translates. */
+  .pill-glide {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / var(--n));
+    border-radius: 999px;
+    background: var(--color-ground);
+    box-shadow: 0 1px 2px rgba(26, 25, 24, 0.1);
+    transform: translateX(calc(var(--i) * 100%));
+    opacity: 1;
+  }
+  .pill[data-none] .pill-glide {
+    opacity: 0;
+  }
+  .pill.ready .pill-glide {
+    transition:
+      transform 360ms var(--ease-glide),
+      opacity 200ms var(--ease);
+  }
+
+  /* On the homepage the pill waits until the hero has scrolled a little, and
+     steps away when the footer's links come into view. */
+  .js .pill[data-home]:not(.is-on),
+  .js .pill.is-away {
+    opacity: 0;
+    transform: translateY(8px);
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 200ms var(--ease),
+      transform 200ms var(--ease),
+      visibility 0s linear 200ms;
+  }
+  .js .pill.is-away {
+    transform: translateY(8px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pill,
+    .js .pill[data-home]:not(.is-on),
+    .js .pill.is-away {
+      transform: none;
+    }
+    .pill.ready .pill-glide {
+      transition: opacity 200ms var(--ease);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .pill a {
+      min-width: 0;
+      padding: 0 6px;
+      font-size: 13px;
+    }
+  }
+</style>

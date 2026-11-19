@@ -7,8 +7,8 @@ const root = join(__dirname, '..', '..');
 const read = (p: string) => readFileSync(join(root, p), 'utf8');
 
 /** The homepage as HTML, rendered by Astro in a child process. */
-function render(waitlistUrl = ''): string {
-  const out = execFileSync('node', ['tests/helpers/renderHome.mjs', waitlistUrl], { cwd: root, encoding: 'utf8', maxBuffer: 20_000_000 });
+function render(waitlistUrl = '', hero = 'scatter'): string {
+  const out = execFileSync('node', ['tests/helpers/renderHome.mjs', waitlistUrl, hero], { cwd: root, encoding: 'utf8', maxBuffer: 20_000_000 });
   return out.slice(out.indexOf('\u0001') + 1);
 }
 
@@ -25,9 +25,11 @@ const text = (html: string) =>
 const WAITLIST = 'https://example.test/join';
 let closed = '';
 let open = '';
+let terminal = '';
 beforeAll(() => {
   closed = render('');
   open = render(WAITLIST);
+  terminal = render('', 'terminal');
 }, 120_000);
 
 describe('the commands and feedback link', () => {
@@ -43,8 +45,8 @@ describe('the commands and feedback link', () => {
   // Mutation: bring back the bare command or point the hero link elsewhere.
   it('has an Open the app link in the hero and no bare npx usecanon command', () => {
     for (const html of [closed, open]) {
-      const hero = html.slice(html.indexOf('class="hero"'), html.indexOf('class="stage'));
-      expect(hero).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/">Open the app<\/a>/);
+      const hero = html.slice(html.indexOf('class="hero'), html.indexOf('id="projects"'));
+      expect(hero).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/"[^>]*>Open the app<\/a>/);
       expect(hero).toContain('claude mcp add canon -- npx -y usecanon mcp');
       expect(text(html).replaceAll('npx -y usecanon mcp', '')).not.toMatch(/npx\s+usecanon/);
       expect(html).not.toContain('data-copy="npx usecanon"');
@@ -69,10 +71,8 @@ describe('the pictures', () => {
       const t = text(html);
       expect(t).not.toMatch(/pricing|checkout/i);
       expect(t).toContain('Welcome, single screen');
-      expect(html).toContain('data-type="Add the single screen version of the welcome flow"');
       expect(html).toContain('data-type="Gather every onboarding prototype into one project."');
       expect(t).toContain('canon_add');
-      expect(t).toContain('“Welcome, single screen”');
       expect(t).toContain('Welcome, three steps');
       expect(t).toContain('Invite a teammate');
       expect(t).toContain('Empty dashboard, with sample data');
@@ -87,9 +87,14 @@ describe('the pictures', () => {
     }
   });
 
+  it('keeps the terminal hero prompt on the earlier hero', () => {
+    expect(terminal).toContain('data-type="Add the single screen version of the welcome flow"');
+    expect(text(terminal)).toContain('“Welcome, single screen”');
+  });
+
   // Mutation: rename the section back, or drop the project row under the three cards.
   it('labels the nav Projects', () => {
-    expect(read('src/components/home/SiteHeader.astro')).toContain("{ label: 'Projects', href: '/#projects' }");
+    expect(read('src/components/home/SectionNav.astro')).toContain("{ label: 'Projects', section: 'projects', href: '/#projects' }");
   });
 
   it('opens with projects: the heading, the nav label, and one project fed by three sources', () => {
@@ -164,8 +169,8 @@ describe('the footer wordmark', () => {
 });
 
 describe('the waitlist', () => {
-  it('is empty by default, in one obvious place', () => {
-    expect(read('src/lib/site.ts')).toMatch(/export const WAITLIST_URL = '';/);
+  it('is set to the Formspree form, in one obvious place', () => {
+    expect(read('src/lib/site.ts')).toMatch(/export const WAITLIST_URL = 'https:\/\/formspree\.io\/f\/xrpqqjqb';/);
   });
 
   // Mutation: render the form or the hero button while the address is empty.
@@ -184,10 +189,18 @@ describe('the waitlist', () => {
     const form = open.match(/<form[^>]*>/)![0];
     expect(form).toContain(`action="${WAITLIST}"`);
     expect(form).toContain('method="post"');
-    for (const name of ['email', 'name', 'role', 'company_size', 'used_canon']) {
+    for (const name of ['email', '_gotcha']) {
       expect(open, name).toMatch(new RegExp(`<input[^>]*name="${name}"`));
     }
-    expect(open).toMatch(/<input[^>]*name="email"[^>]*required|<input[^>]*required[^>]*name="email"/);
+    const email = open.match(/<input[^>]*name="email"[^>]*>/)![0];
+    expect(email).toContain('type="email"');
+    expect(email).toContain('autocomplete="email"');
+    expect(email).toMatch(/\brequired\b/);
+    expect(open).toMatch(/<label for="wl-email">Email<\/label>/);
+    expect(open).toMatch(/<[^>]*aria-live="polite"[^>]*data-waitlist-note|<[^>]*data-waitlist-note[^>]*aria-live="polite"/);
+    expect(text(open)).toContain('Only your email address is sent, to Formspree, so we can tell you when hosting opens.');
+    // The honeypot is hidden from people and from screen readers, and cannot be tabbed to.
+    expect(open).toMatch(/<input[^>]*name="_gotcha"[^>]*tabindex="-1"/);
   });
 
   it('only treats an http or https address as open', async () => {
@@ -314,9 +327,10 @@ describe('structure and names', () => {
     }
   });
 
-  it('puts the radio groups in fieldsets with legends', () => {
-    expect(open.match(/<fieldset/g)).toHaveLength(3);
-    expect(open.match(/<legend>/g)).toHaveLength(3);
+  it('asks for an email address only, with no extra fields', () => {
+    const form = open.slice(open.indexOf('<form'), open.indexOf('</form>'));
+    expect(form).not.toContain('<fieldset');
+    expect(form).not.toContain('type="radio"');
   });
 });
 

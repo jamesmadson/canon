@@ -21,8 +21,10 @@ const FILED: Row[] = [
 ---
 
 <section class="band" id="agents" aria-labelledby="h-agents">
-  <h2 id="h-agents"><span class="sent">Say it once.</span><span class="sent">{tie('Your agent does the filing.')}</span></h2>
-  <p class="lede">{tie('Your agent can add, name, tag and move prototypes for you. Ask in plain words and they land in one project.')}</p>
+  <div class="bhead">
+    <h2 id="h-agents"><span class="sent">Say it once.</span><span class="sent">{tie('Your agent does the filing.')}</span></h2>
+    <p class="lede">{tie('Your agent can add, name, tag and move prototypes for you. Ask in plain words and they land in one project.')}</p>
+  </div>
   <div class="tint" data-demo="agents">
     <p class="say">{tie('You, to your agent')}</p>
     <p class="big"><span data-type={PROMPT} data-type-start="0">{PROMPT}</span><span class="caret" data-caret="30" style="opacity:0" aria-hidden="true"></span></p>
@@ -69,9 +71,9 @@ const FILED: Row[] = [
     </div>
   </div>
   <div class="after">
-    <CopyField command={SETUP_COMMAND} name="the setup command" />
+    <CopyField command={SETUP_COMMAND} name="the setup command" location="agents" />
     <p class="fine">
-      One line connects Claude Code. Codex and Cursor take a few lines in their config, <a href={`${REPO_URL}#connect-your-agent`}>written up in the README</a>. Canon works without it, so add it when you want the filing done for&nbsp;you.
+      One line connects Claude Code. Codex and Cursor take a few lines in their config, <a href={`${REPO_URL}#connect-your-agent`} data-ga="readme_click">written up in the README</a>. Canon works without it, so add it when you want the filing done for&nbsp;you.
     </p>
   </div>
 </section>

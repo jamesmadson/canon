@@ -130,7 +130,9 @@ describe('transitions', () => {
             .map((p) => p.trim().split(/\s+/)[0])
             .filter((p) => p && p !== 'none' && !/^[\d.]/.test(p));
           // visibility and display are discrete flips that wait for an opacity fade.
-          for (const p of props) if (!['transform', 'opacity', 'visibility', 'display'].includes(p)) bad.push(`${name}: ${r.sel} ${p}`);
+          // The reveal panel may also blur, by up to 4px (D-114).
+          const allowed = ['transform', 'opacity', 'visibility', 'display', ...(r.sel.includes('.mcp-panel') ? ['filter'] : [])];
+          for (const p of props) if (!allowed.includes(p)) bad.push(`${name}: ${r.sel} ${p}`);
         }
       }
     }

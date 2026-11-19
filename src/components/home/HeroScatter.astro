@@ -2,6 +2,7 @@
 import HeroText from './HeroText.astro';
 import Thumb from './Thumb.astro';
 import type { ThumbKey } from '../../lib/thumbs';
+import { withBase } from '../../lib/withBase';
 
 /**
  * The alternate hero. Nine prototypes sit loose, each with a chip naming where
@@ -22,6 +23,8 @@ interface Card {
   source: string;
   when: string;
   mono?: boolean;
+  /** The card the agent filed: its source follows the agent name in the prompt box. */
+  agent?: boolean;
 }
 interface Project {
   name: string;
@@ -32,22 +35,22 @@ const PROJECTS: Project[] = [
     name: 'Onboarding',
     cards: [
       { k: 'w2', name: 'Welcome, single screen', source: 'Lovable', when: 'just now' },
-      { k: 'w1', name: 'Welcome, three steps', source: 'Claude Code', when: 'Tuesday' },
+      { k: 'w1', name: 'Welcome, three steps', source: 'Claude Code', when: 'Tuesday', agent: true },
       { k: 'w3', name: 'Invite a teammate', source: 'Figma Make', when: 'Monday' },
-      { k: 'w4', name: 'Empty dashboard, with sample data', source: 'v0', when: 'last week' },
     ],
   },
   {
     name: 'Dashboard',
     cards: [
+      { k: 'w4', name: 'Empty dashboard', source: 'v0', when: 'last week' },
       { k: 'd1', name: 'Overview, this week', source: 'Codex', when: '2 Nov' },
       { k: 'd2', name: 'People table', source: 'Bolt', when: '30 Oct' },
-      { k: 'd3', name: 'Notes by month', source: 'localhost:3000', when: '28 Oct', mono: true },
     ],
   },
   {
     name: 'Mobile navigation',
     cards: [
+      { k: 'd3', name: 'Navigation, notes view', source: 'localhost:3000', when: '28 Oct', mono: true },
       { k: 'w5', name: 'Mobile sign-up', source: 'mobile-sign-up.zip', when: '26 Oct', mono: true },
       { k: 'm1', name: 'Bottom tab bar', source: 'Slack link', when: '24 Oct' },
     ],
@@ -55,10 +58,42 @@ const PROJECTS: Project[] = [
 ];
 const total = PROJECTS.reduce((n, p) => n + p.cards.length, 0);
 let index = 0;
+
+const PROMPT = 'Put all my prototypes in Canon, by project.';
+const REPLY = `canon_add  ${total} prototypes, ${PROJECTS.length} projects`;
+const words = PROMPT.split(' ');
 ---
 
 <section class="hero hero-b" aria-labelledby="h-hero">
   <HeroText waitlistUrl={waitlistUrl} />
+
+  <div class="hpanel" aria-hidden="true">
+    <img
+      src={withBase('/texture/hero-grain.webp')}
+      srcset={`${withBase('/texture/hero-grain-960.webp')} 960w, ${withBase('/texture/hero-grain.webp')} 1920w`}
+      sizes="100vw"
+      alt=""
+      width="1920"
+      height="1080"
+      loading="eager"
+      decoding="async"
+    />
+    <div class="htone"></div>
+    <div class="hgrain" style={`background-image: url(${withBase('/texture/grain.png')})`}></div>
+  </div>
+
+  <div class="pbox" aria-hidden="true" data-prompt={PROMPT}>
+    <div class="plabel" data-agent-name>Claude Code</div>
+    <div class="ptext"><span class="pdim">&gt;</span>{' '}{
+      words.map((w, i) => (
+        <>
+          <span class="pw">{[...w].map((ch) => <span class="pc">{ch}</span>)}</span>
+          {i < words.length - 1 ? ' ' : ''}
+        </>
+      ))
+    }<span class="pcaret"></span></div>
+    <div class="preply">{REPLY}</div>
+  </div>
 
   <div class="sstage" aria-hidden="true" data-scatter>
     <div class="sclip">
@@ -97,9 +132,9 @@ let index = 0;
                           <div class="sh"></div>
                           <Thumb k={c.k} />
                           {i === 0 && <div class="sring fx"></div>}
-                          <span class:list={['chip', c.mono && 'mono']}>{c.source}</span>
+                          <span class:list={['chip', c.mono && 'mono']} data-agent-name={c.agent ? '' : undefined}>{c.source}</span>
                           <div class="pname fxn">{c.name}</div>
-                          <div class="pmeta fxn"><span class:list={[c.mono && 'mono']}>{c.source}</span> · {c.when}</div>
+                          <div class="pmeta fxn"><span class:list={[c.mono && 'mono']} data-agent-name={c.agent ? '' : undefined}>{c.source}</span> · {c.when}</div>
                         </div>
                       </div>
                     );
@@ -110,7 +145,6 @@ let index = 0;
             ))
           }
         </div>
-        <div class="sovl fx"></div>
       </div>
     </div>
   </div>
@@ -121,11 +155,13 @@ let index = 0;
 </script>
 
 <style is:global>
-  /* One column, text above the stage, on every width. */
+  /* Text, then the prompt, then the stage. From 1100px the prompt moves up
+     beside the text, centred on it. */
   .hero.hero-b {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       'text'
+      'prompt'
       'stage';
     gap: 0;
     align-items: start;
@@ -134,15 +170,211 @@ let index = 0;
     position: relative;
     z-index: 2;
   }
+  @media (min-width: 1100px) {
+    .hero.hero-b {
+      grid-template-columns: minmax(0, 1fr) 420px;
+      grid-template-areas:
+        'text prompt'
+        'stage stage';
+      column-gap: 48px;
+      row-gap: 0;
+      align-items: center;
+    }
+  }
+
+  /* The texture panel: a blurred grey photograph behind the product. From
+     1100px it spans the container behind the text, the prompt and the whole
+     stage, and ends where the window is cut off. Below that it wraps only the
+     stage. The photo is already blurred, so nothing here blurs or animates. */
+  .hpanel {
+    --hp-ground: #eae6e2;
+    --hp-tone: rgb(234 230 226 / 0.58);
+    --hp-solid: rgb(234 230 226 / 0.95);
+    grid-area: stage;
+    position: relative;
+    z-index: 0;
+    align-self: stretch;
+    margin: 28px -12px 0;
+    border-radius: 14px;
+    background: var(--hp-ground);
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .hpanel img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .htone {
+    position: absolute;
+    inset: 0;
+    background: var(--hp-tone);
+  }
+  /* The grain: a crisp one-pixel noise tile over the smooth photograph and its
+     wash. Drawn one to one with device pixels (256px on 1x, 128px on 2x and
+     up) so it stays sharp. It is still, and sits under every card. */
+  .hgrain {
+    --hg-opacity: 0.4;
+    position: absolute;
+    inset: 0;
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    mix-blend-mode: overlay;
+    opacity: var(--hg-opacity);
+  }
+  @media (min-resolution: 1.5dppx) {
+    .hgrain {
+      background-size: 128px 128px;
+    }
+  }
+  /* Beside the text the panel washes out to its ground colour, so the muted
+     lines keep 4.5:1; the texture shows to the right and below. */
+  @media (min-width: 1100px) {
+    .htone {
+      background:
+        radial-gradient(ellipse 800px 400px at 330px 240px, var(--hp-solid) 0, var(--hp-solid) 55%, transparent 100%),
+        linear-gradient(var(--hp-tone), var(--hp-tone));
+    }
+  }
+  @media (min-width: 1100px) {
+    .hgrain {
+      mask-image: radial-gradient(ellipse 800px 400px at 330px 240px, rgb(0 0 0 / 0.3) 0, rgb(0 0 0 / 0.3) 55%, #000 100%);
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-app-theme='system'] .hpanel .hgrain {
+      --hg-opacity: 0.5;
+    }
+    :root[data-app-theme='system'] .hpanel {
+      --hp-ground: #1f1e1c;
+      --hp-tone: rgb(31 30 28 / 0.62);
+      --hp-solid: rgb(31 30 28 / 0.95);
+    }
+  }
+  :root[data-app-theme='dark'] .hpanel .hgrain {
+    --hg-opacity: 0.5;
+  }
+  :root[data-app-theme='dark'] .hpanel {
+    --hp-ground: #1f1e1c;
+    --hp-tone: rgb(31 30 28 / 0.62);
+    --hp-solid: rgb(31 30 28 / 0.95);
+  }
+  @media (min-width: 1100px) {
+    .hpanel {
+      grid-area: 1 / 1 / -1 / -1;
+      margin: -48px -40px 0;
+    }
+  }
+
+  /* The prompt: a decorative agent input that types the request. The whole
+     line is in the layout from the start; characters are only revealed. */
+  .pbox {
+    grid-area: prompt;
+    position: relative;
+    z-index: 3;
+    margin-top: 32px;
+    padding: 14px 18px 16px;
+    border-radius: 14px;
+    background: var(--wn-main);
+    box-shadow:
+      0 0 0 1px var(--wn-line-strong),
+      0 24px 60px -20px var(--shadow);
+    pointer-events: none;
+  }
+  @media (min-width: 1100px) {
+    .pbox {
+      margin-top: 0;
+    }
+  }
+  .plabel {
+    margin-bottom: 10px;
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--color-ink-soft);
+  }
+  .ptext {
+    font-size: 15px;
+    line-height: 24px;
+    color: var(--color-ink);
+  }
+  .pdim {
+    color: var(--color-ink-soft);
+  }
+  .pw {
+    white-space: nowrap;
+  }
+  .preply {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--color-ink-soft);
+    white-space: pre-wrap;
+  }
+  /* The cursor takes no room, so moving it never reflows the line. */
+  .pcaret {
+    display: none;
+    width: 2px;
+    height: 18px;
+    margin-right: -2px;
+    vertical-align: -3px;
+    background: var(--sel);
+    animation: pblink 1.1s steps(1) infinite;
+  }
+  @keyframes pblink {
+    50% {
+      opacity: 0;
+    }
+  }
+  .pbox.live .pcaret {
+    display: inline-block;
+  }
+  .pbox.live .pc:not(.on) {
+    opacity: 0;
+  }
+  .motion .pbox {
+    opacity: 0;
+  }
+  .motion .pbox.ready {
+    opacity: 1;
+    transition: opacity 300ms var(--ease);
+  }
+  .pbox.live .ptext,
+  .pbox.live .preply {
+    transition: opacity 300ms var(--ease);
+  }
+  .pbox.live .preply {
+    opacity: 0;
+  }
+  .pbox.live .preply.on {
+    opacity: 1;
+  }
+  .pbox.live.out .ptext,
+  .pbox.live.out .preply {
+    opacity: 0;
+  }
+  .pbox.snap *,
+  .pbox.snap *::before,
+  .pbox.snap *::after {
+    transition: none !important;
+  }
 
   /* The stage is as wide as the page container. The window inside is clipped
      only along its bottom edge, so loose cards can drift up beside the text. */
   .sstage {
     grid-area: stage;
     position: relative;
-    height: 660px;
+    z-index: 1;
+    height: 800px;
     margin-top: 40px;
     pointer-events: none;
+  }
+  @media (min-width: 1100px) {
+    .sstage {
+      margin-top: 24px;
+    }
   }
   .sclip {
     position: absolute;
@@ -161,21 +393,19 @@ let index = 0;
   }
   .sbg {
     position: absolute;
-    inset: 0;
+    inset: 0 0 -80px;
     border-radius: 14px;
     background: var(--wn-rail);
     box-shadow:
       0 0 0 1px var(--edge),
       inset 0 1px 0 var(--hi),
       0 40px 100px -24px var(--shadow);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 78%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0, #000 78%, transparent 100%);
   }
   .sbg-main {
     position: absolute;
     top: 8px;
     right: 8px;
-    bottom: 0;
+    bottom: -80px;
     left: 216px;
     border-radius: 11px;
     background: var(--wn-main);
@@ -210,25 +440,18 @@ let index = 0;
   }
   .sapp .srow {
     position: relative;
-    padding: 10px 20px 12px;
+    padding: 8px 20px 10px;
     border-bottom: 0;
   }
   .sapp .shead {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .sapp .shelf {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
   }
-  /* The same fade as the app window's bottom, laid over the cards. */
-  .sovl {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 24%;
-    background: linear-gradient(to bottom, transparent, var(--color-ground) 92%);
-    pointer-events: none;
+  .sapp .thumb {
+    aspect-ratio: 16 / 9;
   }
 
   /* The slot is a size container so the chip can sit on the thumbnail's lower
@@ -244,7 +467,7 @@ let index = 0;
     top: 0;
     left: 0;
     right: 0;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
     border-radius: 9px;
     box-shadow:
       0 24px 44px -12px var(--shadow),
@@ -256,7 +479,7 @@ let index = 0;
     top: 0;
     left: 0;
     right: 0;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
     border-radius: 9px;
     box-shadow:
       0 0 0 2px var(--wn-main),
@@ -264,17 +487,17 @@ let index = 0;
   }
   .chip {
     position: absolute;
-    left: 8px;
-    top: calc(62.5cqw - 30px);
+    left: calc(8px / var(--sc, 1));
+    top: calc(56.25cqw - 30px / var(--sc, 1));
     z-index: 3;
     display: inline-flex;
     align-items: center;
-    height: 22px;
-    padding: 0 9px;
-    border-radius: 9px;
+    height: 1.75em;
+    padding: 0 0.7em;
+    border-radius: 0.7em;
     background: var(--wn-main);
     color: var(--color-ink);
-    font-size: 12px;
+    font-size: calc(13px / var(--sc, 1));
     line-height: 1;
     font-weight: 500;
     white-space: nowrap;
@@ -284,7 +507,7 @@ let index = 0;
     opacity: 0;
   }
   .chip.mono {
-    font-size: 12px;
+    font-size: calc(13px / var(--sc, 1));
     font-weight: 400;
   }
   .pmeta .mono {
@@ -386,11 +609,26 @@ let index = 0;
     .sstage .sh {
       opacity: 0 !important;
     }
+    /* The prompt shows whole, with its reply and no cursor. */
+    .pbox {
+      opacity: 1;
+    }
+    .pbox * {
+      transition: none !important;
+    }
+    .pbox .pc,
+    .pbox .ptext,
+    .pbox .preply {
+      opacity: 1 !important;
+    }
+    .pbox .pcaret {
+      display: none !important;
+    }
   }
 
   @media (max-width: 960px) {
     .sstage {
-      height: 690px;
+      height: 640px;
       margin-top: 40px;
     }
     .sapp {

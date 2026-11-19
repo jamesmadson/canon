@@ -1,25 +1,10 @@
 ---
 import { withBase } from '../../lib/withBase';
-import { REPO_URL } from '../../lib/site';
-
-const NAV = [
-  { label: 'Projects', href: '/#projects' },
-  { label: 'Agents', href: '/#agents' },
-  { label: 'Search', href: '/#find' },
-  { label: 'Hosted', href: '/#hosted' },
-  { label: 'Skills', href: '/skills/' },
-];
-const path = Astro.url.pathname;
-const current = (href: string) => !href.includes('#') && path.startsWith(withBase(href));
 ---
 
 <div class="home">
   <header class="wrap top">
     <a class="lockup" href={withBase('/')} aria-label="Canon, home">Canon</a>
-    <nav aria-label="Sections">
-      {NAV.map((n) => <a href={withBase(n.href)} aria-current={current(n.href) ? 'page' : undefined}>{n.label}</a>)}
-      <a href={REPO_URL}>GitHub</a>
-    </nav>
-    <a class="hbtn hbtn-small" href={withBase('/app/')}>Open the app</a>
+    <a class="hbtn hbtn-small" href={withBase('/app/')} data-ga="open_app" data-ga-location="header">Open the app</a>
   </header>
 </div>

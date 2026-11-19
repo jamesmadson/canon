@@ -83,6 +83,67 @@ describe('submitWaitlist', () => {
   });
 });
 
+describe('submitWaitlist against Formspree answers', () => {
+  const URL = 'https://formspree.io/f/xrpqqjqb';
+  const form = (gotcha = '') => {
+    const d = new FormData();
+    d.set('email', ' a@example.test ');
+    d.set('_gotcha', gotcha);
+    return d;
+  };
+  const answer = (status: number, json?: unknown) => (async () => new Response(json === undefined ? '' : JSON.stringify(json), { status })) as typeof fetch;
+
+  it('sends json with an Accept header, the email and the subject', async () => {
+    let seen: RequestInit | undefined;
+    let seenUrl = '';
+    const fetcher = (async (u: string, init?: RequestInit) => {
+      seenUrl = u;
+      seen = init;
+      return new Response('{"ok":true}', { status: 200 });
+    }) as typeof fetch;
+    expect(await submitWaitlist(URL, form(), fetcher)).toEqual({ ok: true, message: WAITLIST_THANKS });
+    expect(seenUrl).toBe(URL);
+    expect(seen?.method).toBe('POST');
+    const headers = seen?.headers as Record<string, string>;
+    expect(headers.Accept).toBe('application/json');
+    expect(headers['Content-Type']).toBe('application/json');
+    expect(JSON.parse(seen?.body as string)).toEqual({ email: 'a@example.test', _subject: 'Canon hosted waitlist' });
+  });
+
+  it('does not send when the honeypot is filled', async () => {
+    let calls = 0;
+    const fetcher = (async () => {
+      calls++;
+      return new Response('', { status: 200 });
+    }) as typeof fetch;
+    await submitWaitlist(URL, form('bot'), fetcher);
+    expect(calls).toBe(0);
+  });
+
+  it('says the address did not go through for a 422 with errors', async () => {
+    const r = await submitWaitlist(URL, form(), answer(422, { errors: [{ field: 'email', message: 'invalid' }] }));
+    expect(r).toEqual({ ok: false, message: 'That address did not go through. Check it and try again.' });
+  });
+
+  it('keeps the retry message for a 4xx without errors', async () => {
+    expect(await submitWaitlist(URL, form(), answer(403, { error: 'nope' }))).toEqual({ ok: false, message: WAITLIST_FAILED });
+    expect(await submitWaitlist(URL, form(), answer(400))).toEqual({ ok: false, message: WAITLIST_FAILED });
+  });
+
+  it('says there are too many sign-ups for a 429', async () => {
+    const r = await submitWaitlist(URL, form(), answer(429, { errors: [{ message: 'slow down' }] }));
+    expect(r).toEqual({ ok: false, message: 'Too many sign-ups right now. Try again in a few minutes.' });
+  });
+
+  it('keeps the retry message for a 500 and for a thrown network error', async () => {
+    expect(await submitWaitlist(URL, form(), answer(500, { errors: [{ message: 'boom' }] }))).toEqual({ ok: false, message: WAITLIST_FAILED });
+    const down = (async () => {
+      throw new TypeError('Failed to fetch');
+    }) as typeof fetch;
+    expect(await submitWaitlist(URL, form(), down)).toEqual({ ok: false, message: WAITLIST_FAILED });
+  });
+});
+
 describe('the form script', () => {
   const script = read('src/scripts/home.ts');
   // Mutation: show the thanks before checking the result, clear the form, or leave the button disabled on failure.
