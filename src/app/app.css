@@ -1083,3 +1083,4 @@ button.ver-chip:hover { color: var(--text); }
   .fchip:hover { background: var(--hover); }
   .fchip[aria-pressed="true"]:hover { background: var(--hover); }
 }
+@container (max-width: 940px) { .prow .sm { display: none; } }
