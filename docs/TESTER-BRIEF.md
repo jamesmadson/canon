@@ -3,14 +3,15 @@
 The ask is one task, not "check this out." Fifteen minutes, one concrete
 deliverable, and the failures are the point.
 
-Feedback goes to **james@jamesmadson.me** for prose, or a GitHub issue at
-`jamesmadson/canon` for anything reproducible.
+Testers send feedback in one of two ways. Open an issue at
+https://github.com/jamesmadson/canon/issues, or use Send feedback at the foot
+of Canon's sidebar.
 
 ---
 
 ## The message to send
 
-> I built Canon — a small collection of design skills for AI tools, plus a
+> I built Canon, a small collection of design skills for AI tools, plus a
 > thing that picks the right one for the job. It's at
 > jamesmadson.github.io/canon.
 >
@@ -19,16 +20,16 @@ Feedback goes to **james@jamesmadson.me** for prose, or a GitHub issue at
 >
 > Install: `/plugin marketplace add jamesmadson/canon` in Claude Code. If you
 > work in Figma instead, download canon-all.md from the kits page and upload it
-> as a skill — no install needed.
+> as a skill, no install needed.
 >
-> Then just describe the work you're doing — "design the hero for our launch
-> page", "review this dashboard", "audit this screen on mobile" — and see what
+> Then just describe the work you're doing, "design the hero for our launch
+> page", "review this dashboard", "audit this screen on mobile", and see what
 > comes back.
 >
 > Three things I most want to hear:
 > 1. Did installing it work, or did it fail somewhere?
 > 2. Did it pull in guidance that actually fit the task, or something off?
-> 3. Was the output better than what you'd have got without it — and if not,
+> 3. Was the output better than what you'd have got without it, and if not,
 >    where did it fall short?
 >
 > Blunt is useful. Thanks.
@@ -50,7 +51,7 @@ So they don't report things already known:
 Everything else is static content; these are the only things that can break.
 
 1. **Install on a machine that isn't mine.** Fresh clone, no `gh` auth, a
-   different shell. Most likely first failure — the automated tests prove the
+   different shell. Most likely first failure: the automated tests prove the
    scripts are well-formed bash, not that the clones succeed.
 2. **Routing.** Does describing a landing page reliably reach the marketing
    kit, a dashboard reach product UI, a phone audit reach mobile review?
@@ -70,7 +71,7 @@ Enough to feed the waste benchmark later:
 
 ## Recruiting, in order of yield
 
-1. People James already knows — designers at NatureQuant, former colleagues,
+1. People James already knows, designers at NatureQuant, former colleagues,
    anyone who has asked him about AI design tools. Ten personal asks beat a
    thousand impressions.
 2. The skill authors themselves, in the same wave as the notification emails.
