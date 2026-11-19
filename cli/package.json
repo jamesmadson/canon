@@ -1,12 +1,12 @@
 {
   "name": "usecanon",
   "version": "0.1.0",
-  "description": "Canon for coding agents: a local MCP server that lets your agent put prototypes on the Canon boards open in your browser.",
+  "description": "Canon for coding agents: a local MCP server that lets your agent put prototypes, as links or stored copies of a build, into the projects in your Canon app.",
   "type": "module",
   "license": "MIT",
   "author": "James Madson",
   "bin": {
-    "canon": "./bin/canon.js"
+    "canon": "bin/canon.js"
   },
   "engines": {
     "node": ">=20"
@@ -19,8 +19,12 @@
   "keywords": [
     "canon",
     "mcp",
+    "mcp-server",
     "prototype",
+    "prototyping",
     "design",
+    "design-review",
+    "coding-agent",
     "claude-code",
     "codex",
     "cursor"
@@ -30,6 +34,9 @@
     "test": "vitest run --root .. cli/tests"
   },
   "homepage": "https://jamesmadson.github.io/canon/",
+  "bugs": {
+    "url": "https://github.com/jamesmadson/canon/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jamesmadson/canon.git",

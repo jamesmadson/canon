@@ -39,6 +39,35 @@ describe('the canon binary', () => {
   });
 });
 
+describe('the usage text', () => {
+  it('speaks of the Canon app and prototypes, not boards, and uses no dashes', () => {
+    const text = run(['--help']).stdout;
+    expect(text).toContain('prototypes');
+    expect(text).not.toMatch(/boards/i);
+    expect(text).not.toMatch(/[–—]/);
+  });
+
+  it('prints usage and exits 1 with no command', () => {
+    const result = run([]);
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain('Usage: canon mcp');
+  });
+
+  it('names an unknown option and exits 1', () => {
+    const result = run(['mcp', '--bogus']);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('--bogus is not an option');
+  });
+});
+
+describe('the manifest', () => {
+  it('names the issues page, the site and what the package does now', () => {
+    expect(manifest.bugs.url).toBe('https://github.com/jamesmadson/canon/issues');
+    expect(manifest.homepage).toBe('https://jamesmadson.github.io/canon/');
+    expect(manifest.description).toContain('prototypes');
+  });
+});
+
 describe('the package', () => {
   it('is usecanon, MIT, and ships only the binary and the MCP server', () => {
     expect(manifest.name).toBe('usecanon');

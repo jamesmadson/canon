@@ -11,7 +11,7 @@ import { mcp } from '../src/mcp/index.js';
 const COMMANDS = { mcp };
 
 const USAGE = [
-  'canon connects your coding agent to the Canon boards open in your browser.',
+  'canon lets your coding agent put prototypes into the Canon app open in your browser.',
   '',
   'Usage: canon mcp [--dev [--dev-port N]]',
   '',
@@ -23,7 +23,7 @@ const USAGE = [
   '  --version            the version',
   '',
   'Set up: claude mcp add canon -- npx -y usecanon mcp',
-  'It runs on your machine. Nothing is uploaded.',
+  'It runs on your machine and sends nothing to a server.',
 ].join('\n');
 
 /** The flags that take a value, and the key each one lands under. */
