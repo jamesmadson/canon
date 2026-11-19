@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import * as store from './store';
 import type { Frame, Note } from './db';
 import { groupsFromDrop } from './intake';
@@ -10,6 +10,7 @@ import { AddMenu, ProtoRow, StarButton, Tags, metaOf } from './parts';
 import { pagesOf } from './lib/pageview';
 import { currentOf, stackKey } from './lib/versions';
 import { checkPrototypeUrl } from './lib/resolve';
+import { nameFromUrl, rememberLinkName } from './lib/linkname';
 import { type Address, buildAddress } from './lib/address';
 import { currentAddress, replaceAddress } from './lib/nav';
 import { chooseView, setStartPage } from './lib/pageview';
@@ -58,19 +59,29 @@ function useUrlDialog() {
   return { ask, view: open ? html`<${UrlDialog} onClose=${close} />` : null };
 }
 
-function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) {
+export function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) {
   const [value, setValue] = useState('http://localhost:5173/');
+  // The name follows the address until the person types one of their own.
+  const [typedName, setTypedName] = useState<string | null>(null);
+  const nameBox = useRef<HTMLInputElement>(null);
+  const checked = checkPrototypeUrl(value, location.origin);
+  const name = typedName ?? nameFromUrl(checked.ok ? checked.url : value);
+  useEffect(() => { nameBox.current?.focus(); nameBox.current?.select(); }, []);
   const submit = (e: Event) => {
     e.preventDefault();
-    const checked = checkPrototypeUrl(value, location.origin);
-    if (checked.ok) onClose(checked.url);
-    else store.toast(checked.message);
+    if (checked.ok) {
+      rememberLinkName(checked.url, name);
+      onClose(checked.url);
+    } else store.toast(checked.message);
   };
   return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose(null)}>
-    <form class="dialog" onSubmit=${submit}>
-      <h3>Link a running prototype</h3>
+    <form class="dialog" onSubmit=${submit} role="dialog" aria-modal="true" aria-labelledby="url-title">
+      <h3 id="url-title">Link a running prototype</h3>
       <p class="soft" style="margin:0">A dev server or a preview deploy. Canon frames the page and keeps no copy. Some sites refuse to be framed and stay blank.</p>
-      <input class="field" autofocus value=${value} onInput=${(e: Event) => setValue((e.target as HTMLInputElement).value)} />
+      <label class="fb-label" for="url-address">Address</label>
+      <input class="field" id="url-address" value=${value} onInput=${(e: Event) => setValue((e.target as HTMLInputElement).value)} />
+      <label class="fb-label" for="url-name">Name</label>
+      <input class="field" id="url-name" ref=${nameBox} value=${name} onInput=${(e: Event) => setTypedName((e.target as HTMLInputElement).value)} />
       <div class="row" style="justify-content:flex-end">
         <button type="button" class="btn ghost" onClick=${() => onClose(null)}>Cancel</button>
         <button class="btn primary">Add</button>

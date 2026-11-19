@@ -5,7 +5,9 @@
  * stored. A link to a server on this machine says so when the server is off.
  */
 import { useEffect, useState } from 'preact/hooks';
+import * as store from './store';
 import type { Frame } from './db';
+import { nameFromUrl, titleFromSameOrigin } from './lib/linkname';
 import { html, Icon, frameSrc, SANDBOX } from './shared';
 import { decideShown, hostsToProbe, loopbackHost, markOf, probeLoopback, serverOffMessage, type Reach, type Shown } from './lib/probe';
 import { LIVE_HINT } from './lib/viewer';
@@ -112,6 +114,17 @@ export function useShown(f: Frame): Shown {
   return decideShown(f, on, useReach(target));
 }
 
+/**
+ * A link still named from its address takes the page's own title, when the page
+ * is on the same origin as Canon and so can be read. Another origin is never read.
+ * A name the person typed stays.
+ */
+export function adoptTitle(f: Frame, el: HTMLIFrameElement) {
+  if (f.kind !== 'url' || !f.url || f.name !== nameFromUrl(f.url)) return;
+  const title = titleFromSameOrigin(el, f.url, location.origin);
+  if (title && title !== f.name) void store.updateFrame(f.id, { name: title });
+}
+
 /** In place of a frame whose server is not running. */
 export function ServerOff({ url }: { url: string }) {
   return html`<div class="server-off" role="status"><p>${serverOffMessage(url)}</p></div>`;
@@ -123,7 +136,7 @@ export function FrameBody({ frame }: { frame: Frame }) {
   if (shown.show === 'wait') return null;
   if (shown.show === 'off') return html`<${ServerOff} url=${shown.url} />`;
   if (shown.show === 'live') return html`<iframe src=${shown.url} title=${frame.name} loading="lazy" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>`;
-  return html`<iframe src=${frameSrc(frame)} title=${frame.name} loading="lazy" sandbox=${frame.kind === 'url' ? 'allow-scripts allow-same-origin allow-forms allow-popups' : SANDBOX}></iframe>`;
+  return html`<iframe src=${frameSrc(frame)} title=${frame.name} loading="lazy" sandbox=${frame.kind === 'url' ? 'allow-scripts allow-same-origin allow-forms allow-popups' : SANDBOX} onLoad=${(e: Event) => adoptTitle(frame, e.currentTarget as HTMLIFrameElement)}></iframe>`;
 }
 
 /** A rectangle switch in the prototype's panel. Offered only when the running version can be shown. */

@@ -16,7 +16,7 @@ import { PageMap, START_CAMERA, type MapApi } from './map';
 import { chooseView, isMulti, takeStartPage, viewOf, type PageView } from './lib/pageview';
 import type { Camera } from './lib/layout';
 import { record } from './lib/tester';
-import { ServerOff, useShown } from './live';
+import { ServerOff, adoptTitle, useShown } from './live';
 import { html, Icon, useStore, frameSrc, pageName, previewUrl, SANDBOX, SIZES } from './shared';
 
 export type FullAddress = Extract<Address, { name: 'full' }>;
@@ -189,7 +189,7 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
           : shown.show === 'wait'
             ? null
             : html`<div class="focus-frame" style=${{ width: width ? `${width * z}px` : '100%' }}>
-              <iframe key=${src} src=${src} title=${here.name} style=${{ width: inner, height: `${100 / z}%`, transform: `scale(${z})` }} sandbox=${SANDBOX} onLoad=${() => { noteOpen(Math.round(performance.now() - opening.current.t0)); }}></iframe>
+              <iframe key=${src} src=${src} title=${here.name} style=${{ width: inner, height: `${100 / z}%`, transform: `scale(${z})` }} sandbox=${SANDBOX} onLoad=${(e: Event) => { noteOpen(Math.round(performance.now() - opening.current.t0)); adoptTitle(here, e.currentTarget as HTMLIFrameElement); }}></iframe>
             </div>`}
     </div>`}
     <p class="hint view-note view-hints" role="status">${hints.map((h, i) => html`${i ? ' ' : ''}${h}`)}</p>

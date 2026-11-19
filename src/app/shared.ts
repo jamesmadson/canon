@@ -7,6 +7,7 @@ import { SIZES } from './lib/sizes';
 import { safeFrameUrl } from './lib/resolve';
 import { groupsFromFiles, linkFolder, prepare, type Group } from './intake';
 import { record } from './lib/tester';
+import { takeLinkName } from './lib/linkname';
 
 export const html = htm.bind(h);
 export const BASE = import.meta.env.BASE_URL.replace(/\/?$/, '/');
@@ -138,7 +139,7 @@ async function runWayInner(way: Way, projectId: string, boardId: string | undefi
   if (way === 'url') {
     const url = await askUrl();
     if (!url) return 0;
-    await store.addUrl(projectId, url, { boardId });
+    await store.addUrl(projectId, url, { boardId, name: takeLinkName(url) });
     return 1;
   }
   let groups: Group[] = [];
