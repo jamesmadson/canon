@@ -1,7 +1,7 @@
 /** Sending feedback, kept apart from the dialog so it can be tested. Nothing here runs until a person presses a button. */
 
 /** Where feedback is posted. Empty until the owner supplies a Formspree endpoint. */
-export const FEEDBACK_URL = '';
+export const FEEDBACK_URL = 'https://formspree.io/f/mdegzjze';
 export const ISSUES_URL = 'https://github.com/jamesmadson/canon/issues/new';
 export const CANON_VERSION = '0.1.0';
 

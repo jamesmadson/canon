@@ -14,7 +14,7 @@ const submit = (box: HTMLElement) => act(() => { box.querySelector('form')!.disp
 const settle = () => act(async () => { await new Promise((r) => setTimeout(r, 0)); });
 
 describe('the feedback address', () => {
-  it('is empty until the owner supplies one', () => expect(FEEDBACK_URL).toBe(''));
+  it("is the owner's Formspree form", () => expect(FEEDBACK_URL).toBe('https://formspree.io/f/mdegzjze'));
 });
 
 describe('the GitHub issue fallback', () => {
@@ -71,6 +71,23 @@ describe('the feedback dialog', () => {
     for (const l of ['What were you trying to do?', 'What happened?', 'Email, if you want a reply']) expect(field(box, l)).toBeTruthy();
     expect(box.textContent).toContain("This sends only what you typed here, plus Canon's version.");
     expect(box.textContent).not.toContain('Include my session list');
+  });
+
+  it('says where it goes when there is an address, and not when there is none', async () => {
+    const withUrl = await mount(FeedbackDialog, { onClose: () => {}, returnTo: null, onSeeList: () => {}, url: 'https://f.test/x' });
+    expect(withUrl.textContent!.replace(/ /g, ' ')).toContain("It goes to Formspree, which emails it to Canon's maker.");
+    clear();
+    const without = await mount(FeedbackDialog, { onClose: () => {}, returnTo: null, onSeeList: () => {}, url: '' });
+    expect(without.textContent).not.toContain('Formspree');
+  });
+
+  it('by default takes the Formspree path: email field, Send, and the session box in tester mode', async () => {
+    setTester(true);
+    vi.stubGlobal('fetch', vi.fn());
+    const box = await mount(FeedbackDialog, { onClose: () => {}, returnTo: null, onSeeList: () => {} });
+    expect(field(box, 'Email, if you want a reply')).toBeTruthy();
+    expect(box.querySelector('button[type="submit"]')!.textContent).toBe('Send');
+    expect(box.textContent).toContain('Include my session list');
   });
 
   it('will not send without the first answer, and says why', async () => {

@@ -88,7 +88,7 @@ export function FeedbackDialog({ onClose, returnTo, onSeeList, url = FEEDBACK_UR
       <textarea id="fb-happened" class="field" rows="3" value=${f.happened} onInput=${set('happened')}></textarea>
       ${url && html`<label class="fb-label" for="fb-email">Email, if you want a reply</label>
       <input id="fb-email" class="field" type="email" autocomplete="email" value=${f.email} onInput=${set('email')} />`}
-      <p class="soft fb-line">This sends only what you typed here, plus Canon's version.</p>
+      <p class="soft fb-line">This sends only what you typed here, plus Canon's version.${url ? " It goes to Formspree, which emails it to Canon's maker." : ''}</p>
       ${on && url && html`<div class="fb-session">
         <label class="fb-check"><input type="checkbox" checked=${withSession} onChange=${(e: Event) => setWithSession((e.target as HTMLInputElement).checked)} />Include my session list</label>
         <button type="button" class="link" onClick=${onSeeList}>See what is in it</button>

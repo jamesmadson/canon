@@ -102,6 +102,16 @@ describe('the Help test Canon panel', () => {
     vi.useRealTimers();
   });
 
+  it('by default posts the session to the Formspree form, with fetch mocked', async () => {
+    const f = vi.fn(async () => new Response('{}', { status: 200 }));
+    vi.stubGlobal('fetch', f);
+    setTester(true);
+    record('star', { on: true });
+    const box = await mount(TesterPanel, { onClose: () => {}, returnTo: null });
+    await click(Array.from(box.querySelectorAll('button')).find((b) => b.textContent === 'Send my session')!);
+    expect((f.mock.calls[0] as unknown as [string])[0]).toBe('https://formspree.io/f/mdegzjze');
+  });
+
   it('without an address offers a file and Copy instead of Send, listing newest first', async () => {
     setTester(true);
     record('star', { on: true });
