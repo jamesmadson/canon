@@ -383,7 +383,7 @@ input, textarea { caret-color: var(--accent); }
 .focus .topbar .next svg { transform: rotate(180deg); }
 .view-note { margin: 8px 24px 0; flex: none; text-wrap: pretty; }
 .view-note a, .view-note .link { color: var(--text); }
-.view-note.slow { margin: 0 24px 6px; }
+.view-note.view-hints { margin: 0 24px 6px; min-height: 2.6em; text-wrap: balance; }
 .focus .toolbar.viewer-bar { position: static; transform: none; align-self: center; margin: 10px 0 16px; flex: none; }
 .viewer-bar .btn .count { margin-left: 6px; font: 500 11.5px var(--mono); color: var(--soft); }
 .bar-pop.versions-pop { width: 380px; max-width: calc(100vw - 32px); padding: 6px; }

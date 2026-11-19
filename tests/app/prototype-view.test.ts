@@ -180,21 +180,48 @@ describe('a page that will not show', () => {
     expect(box.querySelector('.frame-blocked a')!.getAttribute('href')).toBe('https://x.webflow.io/');
   });
 
-  it('says nothing about a link it knows nothing about, until four seconds pass without a load', async () => {
-    vi.useFakeTimers();
+  const hints = (box: HTMLElement) => Array.from(box.querySelectorAll('.view-hints'));
+
+  it('always carries a quiet way out under a link, from the first paint', async () => {
     const box = await open('u');
+    const line = box.querySelector('.view-hints')!;
+    expect(line.textContent).toBe('Blank? Some sites refuse to load inside other pages. Open in new tab.');
+    const a = line.querySelector('a')!;
+    expect(a.textContent).toBe('Open in new tab');
+    expect(a.getAttribute('href')).toBe('https://example.org/');
     expect(box.querySelector('.slow')).toBeNull();
-    await act(() => { vi.advanceTimersByTime(3900); });
-    expect(box.querySelector('.slow')).toBeNull();
-    await act(() => { vi.advanceTimersByTime(200); });
-    expect(box.querySelector('.slow')!.textContent).toBe('Not showing? Some sites refuse to load inside other pages. Open in new tab.');
   });
 
-  it('stays quiet when the frame loads', async () => {
+  it('keeps the line after the frame loads and after time passes', async () => {
     vi.useFakeTimers();
     const box = await open('u');
     await act(() => { box.querySelector('iframe')!.dispatchEvent(new Event('load')); });
     await act(() => { vi.advanceTimersByTime(5000); });
-    expect(box.querySelector('.slow')).toBeNull();
+    expect(box.querySelector('.view-hints')!.textContent).toContain('Blank?');
+  });
+
+  it('has no way out line for a stored copy, and a blocked link keeps its fuller message instead', async () => {
+    const stored = await open('b');
+    expect(stored.querySelector('.view-hints')!.textContent).toBe('');
+    clear();
+    const blocked = await open('k');
+    expect(blocked.querySelector('.view-hints')!.textContent).toBe('');
+    expect(blocked.querySelector('.frame-blocked')).not.toBeNull();
+  });
+
+  it('reserves the line in every view, so nothing moves when it appears', async () => {
+    const box = await open('b');
+    expect(hints(box)).toHaveLength(1);
+    const css = (await import('node:fs')).readFileSync('src/app/app.css', 'utf8');
+    expect(css).toMatch(/\.view-hints\s*\{[^}]*min-height:/);
+  });
+
+  it('shows every hint that applies as one line in one place', async () => {
+    const box = await open('a2');
+    expect(box.querySelectorAll('.view-note')).toHaveLength(1);
+    expect(hints(box)).toHaveLength(1);
+    const text = box.querySelector('.view-hints')!.textContent!;
+    expect(text).toContain('not the current version');
+    expect(text).toContain('Blank? Some sites refuse');
   });
 });

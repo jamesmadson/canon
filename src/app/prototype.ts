@@ -10,7 +10,7 @@ import { type Address, buildAddress, joinPath } from './lib/address';
 import { leave, openHash, replaceAddress } from './lib/nav';
 import { currentOf, isLocal, versionOf } from './lib/versions';
 import { safeFrameUrl } from './lib/resolve';
-import { FRAME_BLOCKED, NOT_SHOWING_AFTER_MS, clampZoom, fitZoom, neighbour, typingIn, versionTitle } from './lib/viewer';
+import { FRAME_BLOCKED, clampZoom, fitZoom, neighbour, typingIn, versionTitle } from './lib/viewer';
 import { PrototypeBar } from './bar';
 import { record } from './lib/tester';
 import { ServerOff, useShown } from './live';
@@ -50,7 +50,6 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
   const [pg, setPg] = useState(page);
   const [manual, setManual] = useState<number | null>(null);
   const [room, setRoom] = useState(0);
-  const [slow, setSlow] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
 
   const fid = address ? frame.id : localId;
@@ -82,15 +81,13 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
   }, []);
   const z = manual ?? fitZoom(width, room);
 
-  // Nothing says a page refused to load, so say only that it may have, and only after a pause.
-  const loaded = useRef(false);
-  useEffect(() => {
-    loaded.current = false;
-    setSlow(false);
-    if (!remote || known) return;
-    const t = setTimeout(() => !loaded.current && setSlow(true), NOT_SHOWING_AFTER_MS);
-    return () => clearTimeout(t);
-  }, [src, remote, known]);
+  // Every hint that applies goes in one line under the frame, whose room is always kept, so the frame never moves when one comes or goes.
+  const wayOut = here.kind === 'url' && !known && shown.show !== 'off';
+  const hints = [
+    !isCurrent && `This is ${versionTitle(n, total).toLowerCase()}, not the current version. Use Versions, below, to make it the current one.`,
+    address && here.kind === 'url' && !isCurrent && isLocal(here.url ?? '') && `This is localhost, so it shows what is running now, not version ${n}.`,
+    wayOut && html`Blank? Some sites refuse to load inside other pages. <a href=${newTab} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}>Open in new tab</a>.`,
+  ].filter(Boolean);
 
   const prev = neighbour(stack, here.id, -1);
   const next = neighbour(stack, here.id, 1);
@@ -162,8 +159,6 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
       ${address && html`<button type="button" class="btn ghost" onClick=${copy}><${Icon} name="link" />Copy link</button>`}
       <a class="btn ghost" href=${newTab} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}><${Icon} name="open" />Open in new tab</a>
     </div>
-    ${!isCurrent && html`<p class="hint view-note" role="status">This is ${versionTitle(n, total).toLowerCase()}, not the current version. Use Versions, below, to make it the current one.</p>`}
-    ${address && here.kind === 'url' && !isCurrent && isLocal(here.url ?? '') && html`<p class="hint view-note" role="status">This is localhost, so it shows what is running now, not version ${n}.</p>`}
     <div class="focus-stage" ref=${stage}>
       ${shown.show === 'off'
         ? html`<${ServerOff} url=${shown.url} />`
@@ -172,10 +167,10 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
           : shown.show === 'wait'
             ? null
             : html`<div class="focus-frame" style=${{ width: width ? `${width * z}px` : '100%' }}>
-              <iframe key=${src} src=${src} title=${here.name} style=${{ width: inner, height: `${100 / z}%`, transform: `scale(${z})` }} sandbox=${SANDBOX} onLoad=${() => { loaded.current = true; setSlow(false); noteOpen(Math.round(performance.now() - opening.current.t0)); }}></iframe>
+              <iframe key=${src} src=${src} title=${here.name} style=${{ width: inner, height: `${100 / z}%`, transform: `scale(${z})` }} sandbox=${SANDBOX} onLoad=${() => { noteOpen(Math.round(performance.now() - opening.current.t0)); }}></iframe>
             </div>`}
     </div>
-    ${slow && html`<p class="hint view-note slow" role="status">Not showing? Some sites refuse to load inside other pages. <a href=${newTab} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}>Open in new tab</a>.</p>`}
+    <p class="hint view-note view-hints" role="status">${hints.map((h, i) => html`${i ? ' ' : ''}${h}`)}</p>
     <${PrototypeBar} frame=${here} stack=${stack} onShow=${show} zoom=${{ value: z, onOut: () => zoomBy(0.8), onIn: () => zoomBy(1.25), onReset: () => setManual(1), onFit: fit }} />
   </div>`;
 }

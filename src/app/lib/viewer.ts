@@ -37,5 +37,4 @@ export function typingIn(target: EventTarget | null): boolean {
 }
 
 export const FRAME_BLOCKED = 'This site does not allow itself to be shown inside other pages.';
-export const NOT_SHOWING_AFTER_MS = 4000;
 export const LIVE_HINT = 'Live shows the running version at its localhost address. Off shows the stored copy.';
