@@ -90,6 +90,17 @@ export function buildAddress(a: Address): string {
   }
 }
 
+/**
+ * Where an older saved link should go. Links to a prototype used to open it on
+ * its board; they now open the prototype view. A board's own full-screen view
+ * is marked as opened by the app, so only a link from outside is moved.
+ */
+export function canonicalAddress(a: Address, openedByApp: boolean): Address | null {
+  if (a.name === 'board' && a.frame) return { name: 'full', frame: a.frame, board: null, width: null, path: null };
+  if (a.name === 'full' && a.board && !openedByApp) return { ...a, board: null };
+  return null;
+}
+
 /** A path on the prototype's own origin, or null if it could point anywhere else. */
 export function safePath(path: string): string | null {
   // URL parsers drop tabs and newlines, so '/\t/evil' would read as '//evil'.

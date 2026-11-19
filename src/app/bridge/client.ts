@@ -18,6 +18,7 @@ import { type Address, parseAddress } from '../lib/address';
 import { sign, verify, newNonce } from './auth';
 import { runOp, type OpsDeps } from './ops';
 import { createStaging } from '../lib/stage';
+import { record } from '../lib/tester';
 
 export const BRIDGE_PORTS = Array.from({ length: 10 }, (_, i) => 47800 + i);
 const AGENT_ID = /^[a-z0-9-]{1,64}$/;
@@ -287,10 +288,10 @@ function opsDeps(ctx: Ctx, agent: Agent): OpsDeps {
     route: activeRoute,
     createProject: (name) => store.createProject(name),
     createBoard: (projectId, name) => store.createBoard(projectId, name),
-    addUrl: store.addUrl,
+    addUrl: async (...a) => { const f = await store.addUrl(...a); record('add_done', { kind: 'agent' }); return f; },
     addUrlVersion: store.addUrlVersion,
     staging,
-    addBuild: store.addBuild,
+    addBuild: async (...a) => { const f = await store.addBuild(...a); record('add_done', { kind: 'agent' }); return f; },
     addBuildVersion: store.addBuildVersion,
     updateFrame: (id, patch) => store.updateFrame(id, patch),
     updateMeta: (frameId, patch) => store.updateMeta(frameId, patch),

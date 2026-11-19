@@ -6,6 +6,7 @@ import type { Frame, Note } from './db';
 import { SIZES } from './lib/sizes';
 import { safeFrameUrl } from './lib/resolve';
 import { groupsFromFiles, linkFolder, prepare, type Group } from './intake';
+import { record } from './lib/tester';
 
 export const html = htm.bind(h);
 export const BASE = import.meta.env.BASE_URL.replace(/\/?$/, '/');
@@ -93,7 +94,7 @@ export async function addGroups(projectId: string, groups: Group[], opts: { boar
       store.toast(`${g.name} has no HTML file, so there is nothing to show.`);
       continue;
     }
-    const f = await store.addPrepared(projectId, p, { boardId: opts.boardId, at: x !== undefined && opts.at ? { x, y: opts.at.y } : undefined });
+    const f = await store.addPrepared(projectId, p, { autoTag: true, boardId: opts.boardId, at: x !== undefined && opts.at ? { x, y: opts.at.y } : undefined });
     if (x !== undefined) x += f.w + 120;
     added++;
     if (store.getState().frames.find((fr) => fr.id === f.id)?.stackId) stacked++;
@@ -120,6 +121,20 @@ function pickFiles(opts: { folder?: boolean }): Promise<FileList | null> {
 export type Way = 'files' | 'folder' | 'link' | 'url';
 /** Runs one way in. Returns how many prototypes were added. */
 export async function runWay(way: Way, projectId: string, boardId: string | undefined, askUrl: () => Promise<string | null>): Promise<number> {
+  const kind = way === 'url' ? 'link' : way === 'files' ? 'file' : 'folder';
+  const t0 = Date.now();
+  record('add_start', { kind });
+  try {
+    const n = await runWayInner(way, projectId, boardId, askUrl);
+    if (n > 0) record('add_done', { kind, ms: Date.now() - t0 });
+    return n;
+  } catch (err) {
+    record('add_error', { code: 'failed' });
+    throw err;
+  }
+}
+
+async function runWayInner(way: Way, projectId: string, boardId: string | undefined, askUrl: () => Promise<string | null>): Promise<number> {
   if (way === 'url') {
     const url = await askUrl();
     if (!url) return 0;

@@ -185,6 +185,19 @@ describe('canon tools', () => {
         expect(calls[0][1].branch).toBe(given.branch);
       }
     });
+    it('says so when the page refuses to be framed, on add and on update, and sends the finding', async () => {
+      const page = { title: 'Members', headings: [], frameBlocked: true };
+      const said = 'This site does not allow itself to be shown inside other pages, so Canon will show a link to open it in a new tab. Add a build folder or a zip to keep a copy that shows here.';
+      const a = setup(added('Members'), { readPage: async () => page });
+      const added1 = await a.tools.call('canon_add', { url: 'https://membership-one.webflow.io' });
+      expect(added1.content[0].text).toContain(said);
+      expect(a.calls[0][1].page.frameBlocked).toBe(true);
+      const u = setup(added('Members'), { readPage: async () => page });
+      const updated = await u.tools.call('canon_update', { frame: 'Members', url: 'https://membership-one.webflow.io' });
+      expect(updated.content[0].text).toContain(said);
+      const quiet = setup(added('Members'), { readPage: async () => ({ title: 'Members', headings: [] }) });
+      expect((await quiet.tools.call('canon_add', { url: 'https://membership-one.webflow.io' })).content[0].text).not.toContain('does not allow itself');
+    });
     it('add still adds when the page cannot be read, and sends no page', async () => {
       const { tools, calls } = setup(added('Cart'), { readPage: async () => null });
       const r = await tools.call('canon_add', { url: 'http://a.b' });

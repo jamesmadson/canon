@@ -94,6 +94,7 @@ export function ShelfCard({ card, selected, arriving, showTags, onOpen, onSelect
       </span>
       <b class="cname">${card.name}</b>
       <small class="cmeta">${card.source}${' · '}${whenLabel(card.updatedAt, now)}</small>
+      ${card.versions > 1 && html`<small class="cver">${card.versions} versions</small>`}
     </button>
     ${showTags && card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
     <${StarButton} card=${card} />

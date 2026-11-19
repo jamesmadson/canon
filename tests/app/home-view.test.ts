@@ -70,6 +70,30 @@ describe('every control has a real label', () => {
   });
 });
 
+describe('search is not capped without saying so', () => {
+  it('searching a tag carried by 37 prototypes shows 12 of 37 and a way to show all', async () => {
+    const frames = Array.from({ length: 37 }, (_, i) => frame({ id: `t${i}`, name: `Screen ${i}`, tags: ['claude-code'], createdAt: i, updatedAt: i }));
+    await mount(SearchHost, { cards: cardsOf(frames), projectName: () => 'P', onPick: () => {} });
+    await key(window, 'k', { metaKey: true });
+    const input = document.querySelector<HTMLInputElement>('input[role="combobox"]')!;
+    await type(input, 'claude-code');
+    expect(document.querySelectorAll('[role="option"]').length).toBe(12);
+    expect(document.querySelector('.sw-more')!.textContent).toBe('Showing 12 of 37Show all');
+    await click(document.querySelector('.sw-more button')!);
+    expect(document.querySelectorAll('[role="option"]').length).toBe(37);
+    expect(document.querySelector('.sw-more')).toBeNull();
+  });
+
+  it('shows no count when everything fits', async () => {
+    const frames = Array.from({ length: 5 }, (_, i) => frame({ id: `t${i}`, name: `Screen ${i}`, tags: ['claude-code'] }));
+    await mount(SearchHost, { cards: cardsOf(frames), projectName: () => 'P', onPick: () => {} });
+    await key(window, 'k', { metaKey: true });
+    await type(document.querySelector<HTMLInputElement>('input[role="combobox"]')!, 'claude-code');
+    expect(document.querySelectorAll('[role="option"]').length).toBe(5);
+    expect(document.querySelector('.sw-more')).toBeNull();
+  });
+});
+
 describe('a named prototype is on screen in three actions or fewer', () => {
   const setup = async () => {
     const { frames, projects } = fifty();
@@ -225,6 +249,17 @@ describe('the list and the shelf', () => {
       expect(row.querySelector('a')!.getAttribute('href')).toMatch(/^#\/p\//);
     }
     expect(box.querySelector('.srow .shead .muted')!.textContent).toMatch(/prototypes?$/);
+  });
+
+  it('shows a prototype with five versions as one item with a count, in the list and the shelf', async () => {
+    const frames = [1, 2, 3, 4, 5].map((n) => frame({ id: `v${n}`, name: `Checkout v${n}`, stackId: 'v1', createdAt: n, updatedAt: n }));
+    const cards = cardsOf(frames);
+    for (const view of ['list', 'shelf'] as const) {
+      const box = await mount(HomeBody, props({ cards, projects: [project('p1', 'One')], view }));
+      expect(box.querySelectorAll('[data-card]').length).toBe(1);
+      expect(box.querySelector('[data-card]')!.textContent).toContain('5 versions');
+      clear();
+    }
   });
 
   it('draws a neutral placeholder when a prototype has no preview', async () => {

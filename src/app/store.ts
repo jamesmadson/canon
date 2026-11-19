@@ -1,6 +1,7 @@
 import * as db from './db';
 import type { Board, Frame, FrameMeta, Note, Placement, Project, Reply } from './db';
 import { addTag, hostTag, mergeTags, removeTag } from './lib/tags';
+import { dropTags } from './lib/page';
 import type { Prepared } from './intake';
 import { walkHandle, prepare } from './intake';
 import type { LibraryItem } from './lib/library';
@@ -253,9 +254,13 @@ async function insertFrame(frame: Frame, boardId?: string, at?: { x: number; y: 
 
 export async function addPrepared(
   projectId: string, p: Prepared,
-  opts: { boardId?: string; at?: { x: number; y: number }; size?: { w: number; h: number }; stack?: boolean; meta?: FrameMeta; liveUrl?: string } = {}
+  opts: { boardId?: string; at?: { x: number; y: number }; size?: { w: number; h: number }; stack?: boolean; meta?: FrameMeta; liveUrl?: string; autoTag?: boolean } = {}
 ) {
   const id = uid();
+  // A drop is tagged from its entry page and its source, unless the caller already gave tags.
+  const meta = opts.autoTag && p.html !== undefined && opts.meta?.tags === undefined
+    ? { ...opts.meta, tags: dropTags(p.html, p.handle ? 'folder' : 'files', projectTagsOf(projectId)) }
+    : opts.meta;
   await db.replaceFiles(id, p.files);
   let handleId: string | undefined;
   if (p.handle) {
@@ -266,7 +271,7 @@ export async function addPrepared(
   const frame: Frame = {
     id, projectId, name: p.name, kind: p.handle ? 'linked' : 'files', entry: p.entry, fileCount: p.files.length,
     pages: p.pages ?? [p.entry], links: p.links ?? [], handleId, x: 0, y: 0, w: size.w, h: size.h, rev: 0,
-    createdAt: now(), updatedAt: now(), ...opts.meta, ...(opts.liveUrl ? { liveUrl: opts.liveUrl } : {}),
+    createdAt: now(), updatedAt: now(), ...meta, ...(opts.liveUrl ? { liveUrl: opts.liveUrl } : {}),
   };
   await insertFrame(frame, opts.boardId, opts.at);
   if (opts.stack !== false) await autoStack(frame);

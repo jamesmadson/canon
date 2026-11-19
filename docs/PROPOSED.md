@@ -176,3 +176,37 @@ My calls, for James to correct.
 14. **The page's own outside requests still happen.** An external script on a
    kept page, such as analytics, runs when the copy is shown. Canon does not
    remove them. Should it?
+
+## The prototype view, blocked pages, feedback and tester mode
+
+1. **Agent links to a prototype on a board still open the board canvas.** Links
+   without a board open the new prototype view. Should every agent link open
+   the prototype view instead? That changes the link formats in `bridge/ops.ts`
+   and their tests.
+   Answered by James on 2026-11-18: yes, every agent link to a prototype opens the prototype view, and older saved links redirect to it. Board links still open the board.
+2. **Multi-page prototypes open in the prototype view too**, with a page
+   picker and a "Page map" link to the old map. The map has the note, star and
+   archive bar but no versions menu or Live switch. Is that enough?
+3. **A page that refuses framing is only detected when an agent adds it.**
+   Chrome fires `load` for a frame that was blocked, so the four second line
+   under the frame shows only for a page that never loads at all. A link added
+   by hand in the browser shows a blank frame for a blocked site, with "Open in
+   new tab" in the top bar. Should a link always carry a quiet "Blank? Open in
+   new tab" line?
+   Answered by James on 2026-11-18: yes, a link always carries the quiet line, and it shares one line with any other hint.
+4. **Search matches the agent name too.** Searching the tag `claude-code` also
+   finds prototypes whose source is Claude Code, so the count can exceed the tag
+   count (the audit saw 12 results, the cap, not a wrong match). Results now say
+   "Showing 12 of N" with a Show all button. Should the match be tag only when
+   the query is an exact tag?
+5. **Feedback without an address.** With `FEEDBACK_URL` empty the email field is
+   hidden and the email is left out of the GitHub issue, because issues are
+   public. The owner supplies the Formspree endpoint in
+   `src/app/lib/feedback.ts`. `ISSUES_URL` points at `jamesmadson/canon`: is
+   that the right repository?
+6. **Tester mode lives in localStorage** (`canon-tester-*`), outside the
+   library database, and is not part of backups. A sent session contains the
+   readable lines only. Is that the form wanted for the owner's inbox?
+   Answered by James on 2026-11-18: a sent session also carries the raw events as compact JSON in session_json, so sessions can be tallied.
+7. **Disconnect** keeps the native confirm dialog, with new wording, and now
+   sits in its own group above the feedback links.

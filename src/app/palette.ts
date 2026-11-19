@@ -4,9 +4,11 @@ import type { Card } from './lib/home';
 import { isSearchHotkey, moveSelection } from './lib/keys';
 import { searchCards } from './lib/search';
 import { html, Icon } from './shared';
+import { record } from './lib/tester';
 
 export const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 export const SEARCH_EVENT = 'canon:switcher';
+export const RESULT_CAP = 12;
 export const openSearch = () => dispatchEvent(new Event(SEARCH_EVENT));
 
 interface PaletteProps {
@@ -19,6 +21,7 @@ interface PaletteProps {
 export function Palette({ cards, projectName, onPick, onClose }: PaletteProps) {
   const [q, setQ] = useState('');
   const [at, setAt] = useState(0);
+  const [all, setAll] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const back = useRef<Element | null>(typeof document !== 'undefined' ? document.activeElement : null);
   useEffect(() => {
@@ -26,8 +29,13 @@ export function Palette({ cards, projectName, onPick, onClose }: PaletteProps) {
     const was = back.current as HTMLElement | null;
     return () => { if (was?.isConnected) was.focus?.(); };
   }, []);
-  const rows = searchCards(cards, q, projectName);
+  const found = searchCards(cards, q, projectName, Infinity);
+  const rows = all ? found : found.slice(0, RESULT_CAP);
   const here = Math.min(at, Math.max(rows.length - 1, 0));
+  // How long the query was and how many results it had, noted when the palette closes. Never the words.
+  const seen = useRef({ length: 0, results: 0 });
+  seen.current = { length: q.trim().length, results: found.length };
+  useEffect(() => () => { if (seen.current.length) record('search', seen.current); }, []);
   const pick = (c: Card) => { onClose(); onPick(c); };
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') { e.preventDefault(); onClose(); }
@@ -39,7 +47,7 @@ export function Palette({ cards, projectName, onPick, onClose }: PaletteProps) {
     <div class="switcher" role="dialog" aria-modal="true" aria-label="Search prototypes">
       <label class="search"><${Icon} name="search" /><span class="sr">Search prototypes</span>
         <input ref=${input} role="combobox" aria-expanded="true" aria-controls="results" aria-activedescendant=${rows.length ? id(here) : undefined} aria-autocomplete="list" placeholder="Search by name, tag, summary or project" value=${q}
-          onInput=${(e: Event) => { setQ((e.target as HTMLInputElement).value); setAt(0); }} onKeyDown=${onKey} />
+          onInput=${(e: Event) => { setQ((e.target as HTMLInputElement).value); setAt(0); setAll(false); }} onKeyDown=${onKey} />
       </label>
       <ul id="results" role="listbox" aria-label="Results">
         ${rows.length === 0 && html`<li class="sw-empty" role="presentation">${cards.length ? `Nothing matches “${q.trim()}”. Try fewer words.` : 'No prototypes yet.'}</li>`}
@@ -48,6 +56,7 @@ export function Palette({ cards, projectName, onPick, onClose }: PaletteProps) {
           ${c.starred && html`<span class="sw-star" role="img" aria-label="Starred"><${Icon} name="star" size=${13} fill /></span>`}
         </li>`)}
       </ul>
+      ${found.length > rows.length && html`<div class="sw-more"><span>Showing ${rows.length} of ${found.length}</span><button type="button" onClick=${() => { setAll(true); input.current?.focus(); }}>Show all</button></div>`}
       <div class="sw-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> opens it</span><span><kbd>esc</kbd> to close</span></div>
     </div>
   </div>`;

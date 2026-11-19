@@ -4,6 +4,8 @@ import { App, BASE } from './ui';
 import { load, watchOtherTabs, setInstallPrompt, toast, createSampleProject, getState, type InstallPromptEvent } from './store';
 import { parseTry, tryDestination, TRY_TARGETS, type TryLink } from './lib/tryout';
 import { askPersistence, initVault } from './vault';
+import { record } from './lib/tester';
+import { countPrototypes } from './lib/home';
 import { type PairLink, parsePairLink, startBridgeClient } from './bridge/client';
 
 /**
@@ -16,6 +18,8 @@ function takePairLink(): PairLink | 'bad' | null {
   return p;
 }
 const pairAtLoad = takePairLink();
+addEventListener('error', () => record('error', { code: 'script' }));
+addEventListener('unhandledrejection', () => record('error', { code: 'unhandled' }));
 
 /** A "Try it now" link from the site, cleared from the address at once like a pairing link. */
 function takeTryLink(): TryLink | null {
@@ -57,6 +61,7 @@ async function boot() {
     }
   }
   await load();
+  record('app_open', { first: getState().frames.length === 0, projects: getState().projects.length, prototypes: countPrototypes(getState().frames) });
   // Ask the browser not to evict the library, then pick up the Canon folder if there is one.
   void askPersistence();
   await initVault();

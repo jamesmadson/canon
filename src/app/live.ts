@@ -8,6 +8,8 @@ import { useEffect, useState } from 'preact/hooks';
 import type { Frame } from './db';
 import { html, frameSrc, SANDBOX } from './shared';
 import { decideShown, loopbackHost, probeLoopback, serverOffMessage, type Reach, type Shown } from './lib/probe';
+import { LIVE_HINT } from './lib/viewer';
+import { record } from './lib/tester';
 
 const running = new Set<string>(); // frame ids switched to the running version, this session only
 const reach = new Map<string, 'up' | 'down'>(); // by host and port
@@ -107,6 +109,26 @@ export function LiveSwitch({ frame }: { frame: Frame }) {
   return html`<div class="insp-sec">
     <div class="label">Running version</div>
     <div class="seg live-seg"><button type="button" aria-pressed=${on} aria-describedby=${hint} onClick=${() => setLive(frame.id, !on)}>Live</button></div>
-    <p class="hint insp-hint" id=${hint}>Shows what is running at ${loopbackHost(frame.liveUrl) ?? new URL(frame.liveUrl).host} instead of the stored copy. Not saved.</p>
+    <p class="hint insp-hint" id=${hint}>${LIVE_HINT} Not saved.</p>
   </div>`;
+}
+
+/** Whether to offer the Live switch: a stored copy with a live address, and a server that answers (or that is not on this machine, or Live is already on). */
+export function useLiveOffer(frame: Frame): boolean {
+  const on = useLiveOn(frame.id);
+  const r = useReach(frame.kind === 'url' ? null : frame.liveUrl);
+  if (frame.kind === 'url' || !frame.liveUrl) return false;
+  return on || r === 'up' || r === 'none';
+}
+
+/** The same switch in the prototype view's bottom bar. Its description shows on hover and on keyboard focus. */
+export function LiveToggle({ frame }: { frame: Frame }) {
+  const on = useLiveOn(frame.id);
+  const offered = useLiveOffer(frame);
+  if (!offered) return null;
+  const hint = `live-tip-${frame.id}`;
+  return html`<span class="live-wrap">
+    <button type="button" class="btn live-btn" aria-pressed=${on} aria-describedby=${hint} onClick=${() => { record('live_toggle', { on: !on }); setLive(frame.id, !on); }}>Live</button>
+    <span class="tip" role="tooltip" id=${hint}>${LIVE_HINT}</span>
+  </span>`;
 }

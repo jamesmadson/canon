@@ -93,14 +93,17 @@ describe('the project view', () => {
     expect(box.querySelector('[data-card="e2"] .st')!.getAttribute('aria-pressed')).toBe('true');
   });
 
-  it('expands a prototype with versions in the list', async () => {
+  it('shows a prototype with versions as one item with a count, in the grid and in the list', async () => {
     const box = await lib();
+    expect(box.querySelectorAll('[data-card^="e"]').length).toBe(1);
+    await click(viewButton(box, 'Grid'));
+    expect(box.querySelector('[data-card="e2"] .lib-ver')!.textContent).toBe('2 versions');
+    expect(box.querySelectorAll('[data-card^="e"]').length).toBe(1);
     await click(viewButton(box, 'List'));
-    const btn = box.querySelector<HTMLButtonElement>('.ver-btn')!;
-    expect(nameOf(btn)).toBe('2 versions of Checkout v2');
-    await click(btn);
-    expect(box.querySelectorAll('.prow').length).toBe(5);
-    expect(box.querySelector('.prow.older .link')!.textContent).toBe('Make current');
+    expect(box.querySelectorAll('.prow').length).toBe(4);
+    expect(box.querySelector('[data-card="e2"] .ver')!.textContent).toBe('2 versions');
+    expect(box.querySelector('.ver-btn')).toBeNull();
+    expect(box.querySelector('.link')).toBeNull();
   });
 
   it('has a name and a real label on every control, in the grid and in the list', async () => {

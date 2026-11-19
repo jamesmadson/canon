@@ -134,7 +134,7 @@ describe('runOp add', () => {
     expect(s.placements.some((x) => x.boardId === b.id && x.frameId === f.id)).toBe(true);
     expect(r).toEqual({
       ok: true,
-      result: { frameId: f.id, frame: 'Sheet', projectId: p.id, project: 'Gamma', boardId: b.id, board: 'Onboarding', version: 1, versions: 1, link: `${APP}#/b/${b.id}/f/${f.id}`, tags: ['claude'], names: [] },
+      result: { frameId: f.id, frame: 'Sheet', projectId: p.id, project: 'Gamma', boardId: b.id, board: 'Onboarding', version: 1, versions: 1, link: `${APP}#/f/${f.id}/full`, tags: ['claude'], names: [] },
     });
     expect(t.toasts).toEqual(['Claude added Sheet']);
   });
@@ -244,7 +244,7 @@ describe('runOp update', () => {
     expect(t.state().frames.find((f) => f.id === 'f0')).toBeTruthy();
     expect(r).toEqual({
       ok: true,
-      result: { frameId: made.id, frame: 'Cart', projectId: 'a', project: 'Alpha', boardId: 'b1', board: 'Checkout', version: 2, versions: 2, newVersion: true, tags: [], link: `${APP}#/b/b1/f/${made.id}` },
+      result: { frameId: made.id, frame: 'Cart', projectId: 'a', project: 'Alpha', boardId: 'b1', board: 'Checkout', version: 2, versions: 2, newVersion: true, tags: [], link: `${APP}#/f/${made.id}/full` },
     });
     expect(t.toasts).toEqual(['Claude updated Cart']);
   });
@@ -302,7 +302,7 @@ describe('runOp update', () => {
     const t = twoProjects();
     const r = await runOp('update', { frame: 'Cart', moveTo: 'Archive' }, t.deps);
     expect(t.writes).toEqual(['move p1 b2']);
-    expect(r).toMatchObject({ ok: true, result: { boardId: 'b2', board: 'Archive', link: `${APP}#/b/b2/f/f1` } });
+    expect(r).toMatchObject({ ok: true, result: { boardId: 'b2', board: 'Archive', link: `${APP}#/f/f1/full` } });
 
     const u = twoProjects();
     u.state().placements.push(place('p2', 'b2', 'f0'));
@@ -367,20 +367,20 @@ describe('runOp open and link', () => {
   it('open navigates and replies with the absolute link', async () => {
     const t = twoProjects();
     const r = await runOp('open', { frame: 'Cart' }, t.deps);
-    expect(t.navigated).toEqual(['#/b/b1/f/f1']);
-    expect(r).toEqual({ ok: true, result: { link: `${APP}#/b/b1/f/f1` } });
+    expect(t.navigated).toEqual(['#/f/f1/full']);
+    expect(r).toEqual({ ok: true, result: { link: `${APP}#/f/f1/full` } });
   });
 
-  it('full at phone width with a path builds #/b/b1/f/f1/full?w=390&path=%2Fcheckout', async () => {
+  it('full at phone width with a path builds #/f/f1/full?w=390&path=%2Fcheckout', async () => {
     const t = twoProjects();
     const r = await runOp('link', { frame: 'Cart', full: true, width: 'phone', path: '/checkout' }, t.deps);
-    expect(r).toEqual({ ok: true, result: { link: `${APP}#/b/b1/f/f1/full?w=390&path=%2Fcheckout` } });
+    expect(r).toEqual({ ok: true, result: { link: `${APP}#/f/f1/full?w=390&path=%2Fcheckout` } });
   });
 
   it('version picks that member, oldest first; past the end is refused', async () => {
     const t = twoProjects();
-    expect(await runOp('link', { frame: 'Cart', version: 1 }, t.deps)).toEqual({ ok: true, result: { link: `${APP}#/b/b1/f/f0/full` } });
-    expect(await runOp('link', { frame: 'Cart', version: 2 }, t.deps)).toEqual({ ok: true, result: { link: `${APP}#/b/b1/f/f1/full` } });
+    expect(await runOp('link', { frame: 'Cart', version: 1 }, t.deps)).toEqual({ ok: true, result: { link: `${APP}#/f/f0/full` } });
+    expect(await runOp('link', { frame: 'Cart', version: 2 }, t.deps)).toEqual({ ok: true, result: { link: `${APP}#/f/f1/full` } });
     expect(await runOp('open', { frame: 'Cart', version: 3 }, t.deps)).toEqual({ ok: false, error: 'That prototype has 2 versions, so there is no version 3.' });
     expect(await runOp('link', { frame: 'Hero', version: 2 }, t.deps)).toEqual({ ok: false, error: 'That prototype has only 1 version, so there is no version 2.' });
     expect(t.navigated).toEqual([]);
@@ -391,13 +391,13 @@ describe('runOp open and link', () => {
     expect(await runOp('link', { frame: 'Loose' }, t.deps)).toEqual({ ok: true, result: { link: `${APP}#/f/f0/full` } });
   });
 
-  it('links the open board when it holds the stack, else the latest board that does', async () => {
+  it('links the prototype view even when the prototype sits on boards', async () => {
     const t = twoProjects({ name: 'board', board: 'b2', frame: null });
     t.state().placements.push(place('p2', 'b2', 'f0'));
-    expect(await runOp('link', { frame: 'Cart' }, t.deps)).toEqual({ ok: true, result: { link: `${APP}#/b/b2/f/f1` } });
+    expect(await runOp('link', { frame: 'Cart' }, t.deps)).toEqual({ ok: true, result: { link: `${APP}#/f/f1/full` } });
     const u = twoProjects({ name: 'board', board: 'b3', frame: null });
     u.state().placements.push(place('p2', 'b2', 'f0'));
-    expect(await runOp('link', { frame: 'Cart' }, u.deps)).toEqual({ ok: true, result: { link: `${APP}#/b/b1/f/f1` } });
+    expect(await runOp('link', { frame: 'Cart' }, u.deps)).toEqual({ ok: true, result: { link: `${APP}#/f/f1/full` } });
   });
 
   it('a path leaving the prototype is refused', async () => {
@@ -592,6 +592,26 @@ describe('names, summaries, tags, star, note and archive', () => {
     const s = await runOp('add', { url: 'https://proto.test/', project: 'Gamma', starred: 'yes' }, t.deps);
     expect(s).toEqual({ ok: false, error: 'starred must be true or false.' });
     expect(t.writes).toEqual([]);
+  });
+
+  it('add records that a linked page refuses to be framed, and says nothing for one that allows it', async () => {
+    const t = fake({ projects: proj() });
+    await runOp('add', { url: 'https://membership-one.webflow.io/', project: 'Alpha', page: { title: 'Members', headings: [], frameBlocked: true } }, t.deps);
+    await runOp('add', { url: 'https://open.test/', project: 'Alpha', page: { title: 'Open', headings: [] } }, t.deps);
+    const [blocked, open] = t.state().frames;
+    expect(blocked.frameBlocked).toBe(true);
+    expect(open.frameBlocked).toBeUndefined();
+  });
+
+  it('update records and clears the finding on the version it adds, and ignores anything but true', async () => {
+    const t = fake({ projects: proj(), frames: [frame('f1', 'a', 'Cart', { url: 'https://cart.test/1', createdAt: 1 })] });
+    await runOp('update', { frame: 'Cart', url: 'https://cart.test/2', page: { title: 'Cart', headings: [], frameBlocked: true } }, t.deps);
+    const v2 = () => t.state().frames.find((f) => f.url === 'https://cart.test/2')!;
+    expect(v2().frameBlocked).toBe(true);
+    await runOp('update', { frame: 'Cart', url: 'https://cart.test/2', page: { title: 'Cart', headings: [] } }, t.deps);
+    expect(v2().frameBlocked).toBeFalsy();
+    await runOp('update', { frame: 'Cart', url: 'https://cart.test/2', page: { title: 'Cart', headings: [], frameBlocked: 'yes' } }, t.deps);
+    expect(v2().frameBlocked).toBeFalsy();
   });
 
   it('add ignores a malformed page and cuts long text', async () => {

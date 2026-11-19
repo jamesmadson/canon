@@ -3,11 +3,12 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import * as store from './store';
 import * as vault from './vault';
 import type { Address } from './lib/address';
-import { cardsOf, scopeCards, tagCounts } from './lib/home';
+import { cardsOf, countPrototypes, scopeCards, tagCounts } from './lib/home';
 import { bridgeView, removeAgent, subscribeBridge } from './bridge/client';
 import { Avatar } from './comments';
 import { html, Icon, go, ago, useStore } from './shared';
 import { isMac, openSearch } from './palette';
+import { FeedbackFoot } from './feedback';
 
 export function useBridge(): ReturnType<typeof bridgeView> {
   const [, force] = useState(0);
@@ -60,9 +61,9 @@ function Agents() {
   const { agents, connected, connecting } = useBridge();
   if (!agents.length) return null;
   const disconnect = (id: string, name: string) => {
-    if (confirm(`Disconnect ${name}? It will need a new pairing link to reach Canon again.`)) removeAgent(id).catch(() => store.toast(`Could not disconnect ${name}.`));
+    if (confirm(`Disconnect ${name}? It will stop adding prototypes to Canon, and nothing already here is deleted. To connect it again, ask it to run canon_pair and open the link it gives you.`)) removeAgent(id).catch(() => store.toast(`Could not disconnect ${name}.`));
   };
-  return html`<div class="agents">
+  return html`<div class="agents" role="group" aria-label="Connected agents">
     ${[...agents].sort((a, b) => a.name.localeCompare(b.name)).map((a) => {
       const state = connected.has(a.id) ? 'on' : connecting.has(a.id) ? 'wait' : 'off';
       const label = { on: 'connected', wait: 'connecting', off: 'not connected' }[state];
@@ -85,7 +86,7 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
   const starred = scopeCards(cards, { kind: 'starred' }).length;
   const tags = tagCounts(live).slice(0, 8);
   const projects = [...s.projects].sort((a, b) => b.updatedAt - a.updatedAt);
-  const countIn = (id: string) => live.filter((c) => c.projectId === id).length;
+  const countIn = (id: string) => countPrototypes(s.frames, { projectId: id });
   const me = store.myName();
   const sample = async () => {
     const { project } = await store.createSampleProject();
@@ -99,7 +100,7 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
     </button>
     <div class="rail-scroll">
       <nav aria-label="Library">
-        <a class="ni" href="#/" aria-current=${here(route.name === 'home')}><${Icon} name="home" size=${14} /><span>Home</span><em>${live.length}</em></a>
+        <a class="ni" href="#/" aria-current=${here(route.name === 'home')}><${Icon} name="home" size=${14} /><span>Home</span><em>${countPrototypes(s.frames)}</em></a>
         <a class="ni" href="#/starred" aria-current=${here(route.name === 'starred')}><${Icon} name="star" size=${14} /><span>Starred</span><em>${starred}</em></a>
         <a class="ni" href="#/archive" aria-current=${here(route.name === 'archive')}><${Icon} name="archive" size=${14} /><span>Archive</span></a>
       </nav>
@@ -127,6 +128,7 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
       ${me ? html`<div class="me"><${Avatar} name=${me} /><span>${me}</span></div>` : null}
       <${Storage} />
       <${Agents} />
+      <${FeedbackFoot} />
     </div>
   </aside>`;
 }
