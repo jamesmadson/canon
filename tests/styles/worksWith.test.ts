@@ -32,6 +32,10 @@ describe('the works with row', () => {
     expect(page.indexOf('<WorksWith />')).toBeLessThan(page.indexOf('<WaysIn />'));
   });
 
+  it('balances the framing note, so its second line is never just "as a zip."', () => {
+    expect(src).toMatch(/\.home \.ww-note \{[^}]*text-wrap: balance/);
+  });
+
   it('carries the framing note, and the hero lede says deployments', () => {
     expect(src).toContain('v0 links work once the project is deployed. Claude artifacts and Webflow staging sites do not allow framing, so add those as a zip.');
     const hero = read('src/components/home/HeroText.astro');

@@ -87,7 +87,8 @@ const GROUPS = [
     color: var(--color-ink-soft);
     font-size: 13px;
     line-height: 20px;
-    text-wrap: pretty;
+    /* Balanced, so the second line is never just the last few words. */
+    text-wrap: balance;
   }
   @media (max-width: 960px) {
     .ww-group,
