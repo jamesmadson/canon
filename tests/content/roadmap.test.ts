@@ -3,6 +3,7 @@ import { mkdtempSync, readFileSync, readdirSync, statSync, existsSync } from 'no
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { buildSite } from '../helpers/buildSite';
 
 const root = join(__dirname, '..', '..');
 let out = '';
@@ -16,8 +17,7 @@ function files(dir: string): string[] {
 const text = (p: string) => readFileSync(p, 'utf8');
 
 beforeAll(() => {
-  out = mkdtempSync(join(tmpdir(), 'canon-roadmap-'));
-  execFileSync('npx', ['astro', 'build', '--outDir', out], { cwd: root, stdio: 'pipe' });
+  out = buildSite('canon-roadmap');
 }, 300_000);
 
 describe('the hidden roadmap page', () => {

@@ -3,6 +3,7 @@ import { mkdtempSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { buildSite } from '../helpers/buildSite';
 
 const root = join(__dirname, '..', '..');
 let out = '';
@@ -19,8 +20,7 @@ const EVENT_NAMES = ['open_app', 'try_mcp_open', 'copy_setup', 'waitlist_submit'
 
 beforeAll(() => {
   // Built apart from dist, so the owner's dev server and any other build are left alone.
-  out = mkdtempSync(join(tmpdir(), 'canon-ga-'));
-  execFileSync('npx', ['astro', 'build', '--outDir', out], { cwd: root, stdio: 'pipe' });
+  out = buildSite('canon-ga');
 }, 300_000);
 
 describe('analytics in the built site', () => {

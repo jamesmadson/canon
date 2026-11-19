@@ -31,19 +31,11 @@ describe('site tokens', () => {
     it(`${token} carries the light value ${light}`, () => {
       expect(values(token)).toContain(light);
     });
-    // Mutation: change this token's dark hex in the dark blocks of global.css.
-    it(`${token} carries the dark value ${dark}`, () => {
-      expect(values(token)).toContain(dark);
+    // Mutation: put a dark value back into global.css.
+    it(`${token} has no dark value`, () => {
+      if (dark !== light) expect(values(token)).not.toContain(dark);
     });
   }
-
-  it('declares the dark values in both the explicit and the system block', () => {
-    // Mutation: delete one of the two dark blocks, or change a hex in one only.
-    const varying = TABLE.filter(([, light, dark]) => light !== dark);
-    for (const [token, , dark] of varying) {
-      expect(values(token).filter((v) => v === dark).length).toBeGreaterThanOrEqual(2);
-    }
-  });
 
   it('has none of the old near-miss colours', () => {
     // Mutation: reintroduce #ff4b12 anywhere in global.css.
@@ -55,15 +47,12 @@ describe('site tokens', () => {
 });
 
 describe('BaseLayout theme', () => {
-  it('follows the system theme', () => {
-    // Mutation: set the attribute back to "dark" in BaseLayout.astro.
-    expect(layout).toContain('data-app-theme="system"');
-    expect(layout).not.toContain('data-app-theme="dark"');
-  });
-
-  it('sets the theme-color per scheme', () => {
-    // Mutation: change either meta content or drop its media attribute.
-    expect(layout).toMatch(/name="theme-color" content="#FFFFFF" media="\(prefers-color-scheme: light\)"/);
-    expect(layout).toMatch(/name="theme-color" content="#151413" media="\(prefers-color-scheme: dark\)"/);
+  it('is light only', () => {
+    // Mutation: bring back data-app-theme, a dark theme-color or a dark colour-scheme.
+    expect(layout).not.toContain('data-app-theme');
+    expect(layout).toContain('<meta name="color-scheme" content="light" />');
+    expect(layout).toMatch(/name="theme-color" content="#FFFFFF" \/>/);
+    expect(layout).not.toContain('prefers-color-scheme');
+    expect(css).toMatch(/:root \{\s*\/\*[^*]*\*\/\s*color-scheme: light;/);
   });
 });

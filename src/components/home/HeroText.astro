@@ -62,22 +62,6 @@ const { waitlistUrl = '' } = Astro.props;
     --mp-line: #85817a;
     display: flow-root;
   }
-  @media (prefers-color-scheme: dark) {
-    :root[data-app-theme='system'] .mcp {
-      --mp-bg: #ffffff;
-      --mp-ink: #1a1918;
-      --mp-muted: #5c5954;
-      --mp-fill: rgba(26, 25, 24, 0.07);
-      --mp-hover: #e4e2de;
-    }
-  }
-  :root[data-app-theme='dark'] .mcp {
-    --mp-bg: #ffffff;
-    --mp-ink: #1a1918;
-    --mp-muted: #5c5954;
-    --mp-fill: rgba(26, 25, 24, 0.07);
-    --mp-hover: #e4e2de;
-  }
   .mcp-panel {
     position: relative;
     z-index: 5;

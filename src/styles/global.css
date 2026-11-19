@@ -133,46 +133,13 @@
    The rule-strong mix has to resolve against whichever --color-rule is current,
    which is what keeps one declaration correct in both themes. */
 :root {
+  /* The marketing site is light only. The app has its own theme handling. */
+  color-scheme: light;
   --color-rule-strong: color-mix(in oklab, var(--color-rule) 55%, var(--color-ink-soft));
   /* Canon's one spring (D-114), the same curve as the dashboard's
      --ease-glide: a damped spring (ratio 0.7, 26 rad/s) over 360ms that
      peaks 4.6% past its target and settles. */
   --ease-glide: linear(0, 0.088, 0.277, 0.489, 0.68, 0.83, 0.934, 0.999, 1.033, 1.045, 1.044, 1.037, 1.027, 1.018, 1.01, 1.005, 1.001, 0.999, 0.998, 0.998, 1);
-}
-
-/* Dark mode, site-wide.
-   Same ramp read from the other end: near-black ground, paper ink, the rules
-   landing where they landed in light. Monochrome on both sides; a dark mode
-   that introduced a hue would be a different design, not the same one after
-   dark.
-
-   The two blocks are the same declarations twice: once for an explicit choice,
-   once for "System" against the OS preference. Neither folds into the other,
-   because an explicit Light has to win over a dark OS. */
-:root[data-app-theme="dark"] {
-  color-scheme: dark;
-  --color-ground: #151413;
-  --color-panel: #1F1E1C;
-  --color-recess: #2E2D2A;
-  --color-fill-2: #262522;
-  --color-rule: #34332F;
-  --color-ink-soft: #A29E96;
-  --color-ink: #EDEBE6;
-  --color-input-border: #77736B;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root[data-app-theme="system"] {
-    color-scheme: dark;
-    --color-ground: #151413;
-    --color-panel: #1F1E1C;
-    --color-recess: #2E2D2A;
-    --color-fill-2: #262522;
-    --color-rule: #34332F;
-    --color-ink-soft: #A29E96;
-    --color-ink: #EDEBE6;
-    --color-input-border: #77736B;
-  }
 }
 
 /* Tailwind Typography's colours, drawn from the site's own tokens. Its
@@ -627,23 +594,3 @@ summary,
   color: var(--color-ink);
 }
 
-/* ── Theme-swapped stills ─────────────────────────────────────────────────
-   Two captures of the same screen, one per theme. The dark one is hidden from
-   assistive technology entirely, so the alt text is written once. */
-.shot-dark {
-  display: none;
-}
-:root[data-app-theme="dark"] .shot-light {
-  display: none;
-}
-:root[data-app-theme="dark"] .shot-dark {
-  display: block;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-app-theme="system"] .shot-light {
-    display: none;
-  }
-  :root[data-app-theme="system"] .shot-dark {
-    display: block;
-  }
-}

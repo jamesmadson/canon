@@ -31,7 +31,7 @@ describe('lineDiff', () => {
       ['removed', 'tr', 'Scheduling and invoices'],
       ['removed', 'tr', '14-day free trial, no card'],
     ]);
-    expect(diff.map((d) => d.line)).toEqual([194, 195, 196, 202]);
+    expect(diff.map((d) => d.line)).toEqual([181, 182, 183, 189]);
   });
 });
 

@@ -75,7 +75,7 @@ describe('the reveal panel styles', () => {
 
   it('inverts the surface with no border, radius 14', () => {
     expect(css).toMatch(/\.mcp \{[^}]*--mp-bg: #1a1918/);
-    expect(css).toMatch(/:root\[data-app-theme='dark'\] \.mcp \{[^}]*--mp-bg: #ffffff/);
+    expect(css).not.toContain('data-app-theme');
     const panel = css.match(/\n  \.mcp-panel \{[^}]*\}/)![0];
     expect(panel).toContain('border-radius: 14px');
     expect(panel).toContain('background: var(--mp-bg)');
@@ -121,16 +121,14 @@ describe('the reveal panel styles', () => {
     expect(reduced).toMatch(/\.js \.mcp-panel > \*[\s\S]*?transition: none/);
   });
 
-  it('meets 4.5:1 for ink and muted text, and 3:1 for the Copy border, in both themes', () => {
+  it('meets 4.5:1 for ink and muted text, and 3:1 for the Copy border', () => {
     const light = { bg: '#1a1918', ink: '#f3f0eb', muted: '#b0aba3' };
-    const dark = { bg: '#ffffff', ink: '#1a1918', muted: '#5c5954' };
-    for (const t of [light, dark]) {
+    for (const t of [light]) {
       expect(ratio(t.ink, t.bg)).toBeGreaterThanOrEqual(4.5);
       expect(ratio(t.muted, t.bg)).toBeGreaterThanOrEqual(4.5);
       expect(ratio('#85817a', t.bg)).toBeGreaterThanOrEqual(3);
     }
     expect(css).toContain('--mp-muted: #b0aba3');
-    expect(css).toContain('--mp-muted: #5c5954');
     expect(css).toContain('--mp-line: #85817a');
   });
 

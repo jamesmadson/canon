@@ -246,24 +246,6 @@ const words = PROMPT.split(' ');
       mask-image: radial-gradient(ellipse 800px 400px at 322px 240px, rgb(0 0 0 / 0.3) 0, rgb(0 0 0 / 0.3) 55%, #000 100%);
     }
   }
-  @media (prefers-color-scheme: dark) {
-    :root[data-app-theme='system'] .hpanel .hgrain {
-      --hg-opacity: 0.5;
-    }
-    :root[data-app-theme='system'] .hpanel {
-      --hp-ground: #1f1e1c;
-      --hp-tone: rgb(31 30 28 / 0.62);
-      --hp-solid: rgb(31 30 28 / 0.95);
-    }
-  }
-  :root[data-app-theme='dark'] .hpanel .hgrain {
-    --hg-opacity: 0.5;
-  }
-  :root[data-app-theme='dark'] .hpanel {
-    --hp-ground: #1f1e1c;
-    --hp-tone: rgb(31 30 28 / 0.62);
-    --hp-solid: rgb(31 30 28 / 0.95);
-  }
   @media (min-width: 1100px) {
     .hpanel {
       grid-area: 1 / 1 / -1 / -1;
