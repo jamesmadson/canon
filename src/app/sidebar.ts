@@ -11,6 +11,7 @@ import { html, Icon, go, ago, useStore } from './shared';
 import { isMac, openSearch } from './palette';
 import { askProjectName } from './lib/naming';
 import { FeedbackFoot } from './feedback';
+import { carries, draggedIds, moveTo } from './move';
 
 export function useBridge(): ReturnType<typeof bridgeView> {
   const [, force] = useState(0);
@@ -83,8 +84,11 @@ const here = (on: boolean) => (on ? 'page' : undefined);
 
 export function Sidebar({ route, activeProject }: { route: Address; activeProject: string | null }) {
   const s = useStore();
+  const [dropOn, setDropOn] = useState<string | null>(null);
+  // A drag that ends anywhere else leaves no project lit.
+  useEffect(() => { const off = () => setDropOn(null); addEventListener('dragend', off); addEventListener('drop', off); return () => { removeEventListener('dragend', off); removeEventListener('drop', off); }; }, []);
   const cards = useMemo(() => cardsOf(s.frames), [s.frames]);
-  const live = scopeCards(cards, { kind: 'home' });
+  const live =scopeCards(cards, { kind: 'home' });
   const starred = scopeCards(cards, { kind: 'starred' }).length;
   const allTags = tagCounts(live);
   const tags = allTags.slice(0, 8);
@@ -113,7 +117,10 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
       </nav>
       <div class="sh"><span>Projects</span><button type="button" class="ibtn" aria-label="New project" onClick=${newProject}><${Icon} name="plus" size=${14} /></button></div>
       <nav aria-label="Projects">
-        ${projects.map((p) => html`<a class="ni" key=${p.id} href=${`#/p/${p.id}`} aria-current=${route.name === 'project' && route.project === p.id ? 'page' : activeProject === p.id ? 'true' : undefined}>
+        ${projects.map((p) => html`<a class=${`ni${dropOn === p.id ? ' drop' : ''}`} key=${p.id} href=${`#/p/${p.id}`} data-drop-project=${p.id} aria-current=${route.name === 'project' && route.project === p.id ? 'page' : activeProject === p.id ? 'true' : undefined}
+          onDragOver=${(e: DragEvent) => { if (!carries(e)) return; e.preventDefault(); if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'; setDropOn(p.id); }}
+          onDragLeave=${(e: DragEvent) => { if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) setDropOn((on) => (on === p.id ? null : on)); }}
+          onDrop=${(e: DragEvent) => { if (!carries(e)) return; e.preventDefault(); e.stopPropagation(); setDropOn(null); void moveTo(draggedIds(e), { id: p.id }); }}>
           <${Icon} name="project" size=${14} /><span>${p.name}</span><em>${countIn(p.id)}</em>
         </a>`)}
         ${projects.length === 0 && html`<button type="button" class="ni sample" onClick=${sample}><${Icon} name="spark" size=${14} /><span>Try the sample project</span></button>`}

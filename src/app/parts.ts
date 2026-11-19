@@ -8,6 +8,7 @@ import { tintOf } from '../lib/thumbTints';
 import { canLinkFolders } from './intake';
 import { ReachNote } from './live';
 import { html, Icon, frameSrc, SANDBOX, showsCover, coverSrc, type Way } from './shared';
+import { RowMenu, startDrag } from './move';
 
 /* ── Thumbnails: the cover if there is one, a live page for files kept here, else a neutral drawing ── */
 function LiveThumb({ frame, big }: { frame: Frame; big: boolean }) {
@@ -64,11 +65,13 @@ export interface RowProps {
   now?: number;
   /** The board names a project view shows when its project has several. Undefined leaves the column out. */
   board?: string;
+  /** The prototypes a drag of this row carries. Defaults to the row's own. */
+  drag?: string[];
 }
 
-export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions, pick, older, now, board }: RowProps) {
+export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions, pick, older, now, board, drag }: RowProps) {
   const label = metaOf(card);
-  return html`<li class=${`prow${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${older ? ' older' : ''}`} data-card=${card.id}>
+  return html`<li class=${`prow${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${older ? ' older' : ''}`} data-card=${card.id} draggable="true" onDragStart=${(e: DragEvent) => startDrag(e, drag ?? [card.id])}>
     ${pick && html`<label class="pick"><input type="checkbox" checked=${pick.checked} onChange=${pick.onChange} aria-label=${`Select ${card.name}`} /></label>`}
     <${Thumb} card=${card} />
     <button type="button" class="nm" title=${card.name} onClick=${() => onOpen(card)} onFocus=${() => onSelect?.(card)}>${card.name}</button>
@@ -80,6 +83,7 @@ export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions,
     <span class="src" title=${card.source}>${card.source}</span>
     <${StarButton} card=${card} />
     <span class="when">${whenLabel(card.updatedAt, now)}</span>
+    <${RowMenu} ids=${drag ?? [card.id]} name=${card.name} />
   </li>`;
 }
 
@@ -96,7 +100,7 @@ export interface CardProps {
 }
 
 export function ShelfCard({ card, selected, arriving, showTags, onOpen, onSelect, now }: CardProps) {
-  return html`<li class=${`scard${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${arriving?.zip ? ' zipped' : ''}`} data-card=${card.id}>
+  return html`<li class=${`scard${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${arriving?.zip ? ' zipped' : ''}`} data-card=${card.id} draggable="true" onDragStart=${(e: DragEvent) => startDrag(e, [card.id])}>
     <button type="button" class="card-main" onClick=${() => onOpen(card)} onFocus=${() => onSelect?.(card)}>
       <span class="th-wrap">
         <${Thumb} card=${card} big />
@@ -109,6 +113,7 @@ export function ShelfCard({ card, selected, arriving, showTags, onOpen, onSelect
     </button>
     ${showTags && card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
     <${StarButton} card=${card} />
+    <${RowMenu} ids=${[card.id]} name=${card.name} />
   </li>`;
 }
 
