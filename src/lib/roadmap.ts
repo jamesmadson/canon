@@ -18,8 +18,7 @@ export const ROADMAP: RoadmapColumn[] = [
     name: 'Now',
     items: [
       { text: 'Usability sessions with five designers' },
-      { text: 'Move a prototype to another project' },
-      { text: 'Open a project’s board from Home' },
+      { text: 'A calmer project page' },
     ],
   },
   {
