@@ -18,6 +18,8 @@ interface Props {
   wide?: boolean;
   /** Keeps the page out of search results, for pages that are only for comparing. */
   noindex?: boolean;
+  /** With noindex, also asks crawlers not to follow the page's links. */
+  nofollow?: boolean;
 }
 
 const {
@@ -25,6 +27,7 @@ const {
   description = 'Every prototype, from any tool, in one place.',
   wide = false,
   noindex = false,
+  nofollow = false,
 } = Astro.props;
 
 ---
@@ -36,7 +39,7 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} · Canon</title>
     <meta name="description" content={description} />
-    {noindex && <meta name="robots" content="noindex" />}
+    {noindex && <meta name="robots" content={nofollow ? 'noindex, nofollow' : 'noindex'} />}
     <meta property="og:title" content={`${title} · Canon`} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
