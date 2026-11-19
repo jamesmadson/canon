@@ -95,3 +95,14 @@ describe('the Boards tab', () => {
     expect(note.nextElementSibling?.classList.contains('grid')).toBe(true);
   });
 });
+
+describe('a grid card counts pages and versions the way rows and shelves do', () => {
+  it('shows 4 pages, and both counts together', async () => {
+    seed([board('b1', 'Explorations')]);
+    (db.lists.frames as any[]).push(frame({ id: 'v1', name: 'Many', stackId: 'v1', pages: ['index.html', 'a.html', 'b.html', 'c.html'], createdAt: 5, updatedAt: 5 }), frame({ id: 'v2', name: 'Many 2', stackId: 'v1', pages: ['index.html', 'a.html', 'b.html', 'c.html'], createdAt: 6, updatedAt: 6 }));
+    const box = await lib('grid');
+    expect(box.querySelector('[data-card="c"] .lib-ver')!.textContent).toBe('4 pages');
+    expect(box.querySelector('[data-card="v2"] .lib-ver')!.textContent).toBe('4 pages · 2 versions');
+    expect(box.querySelector('[data-card="a"] .lib-ver')).toBeNull();
+  });
+});

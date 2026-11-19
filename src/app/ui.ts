@@ -320,9 +320,9 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
                 <b>${f.name}</b>
                 <${ReachNote} frame=${f} />
                 ${f.summary && html`<span class="lib-sum">${f.summary}</span>`}
-                <small>${i.pages > 1 ? `${i.pages} pages · ` : ''}${manyBoards ? boardText(i) || 'Not on a board' : i.boards ? `${i.boards} board${i.boards > 1 ? 's' : ''}` : 'Not on a board'}${i.comments ? ` · ${i.comments} open` : ''}</small>
+                <small>${manyBoards ? boardText(i) || 'Not on a board' : i.boards ? `${i.boards} board${i.boards > 1 ? 's' : ''}` : 'Not on a board'}${i.comments ? ` · ${i.comments} open` : ''}</small>
                 ${card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
-                ${i.versions > 1 && html`<div class="lib-ver"><span class="ver-chip">${i.versions} versions</span></div>`}
+                ${metaOf(card) && html`<div class="lib-ver"><span class="ver-chip">${metaOf(card)}</span></div>`}
               </div>
             </div>`;
           })}
