@@ -6,22 +6,27 @@ import { tie } from '../../lib/words';
 <section class="band" id="open" aria-labelledby="h-open">
   <div class="bhead">
     <h2 id="h-open">{tie('Star it, note it, compare versions.')}</h2>
-    <p class="lede">{tie('Open a prototype and one bar holds what you need: note, star, versions and archive. Notes stay on your machine, with the prototype.')}</p>
+    <p class="lede">{tie('Open a prototype and one bar holds what you need. A new round becomes the next version of the same prototype. One with several pages opens as a map of its pages and the links between them. Notes stay on your machine, with the prototype.')}</p>
   </div>
-  <div class="canvas" role="img" aria-label="A welcome prototype open in Canon with one note pinned to it and a bar of actions underneath: note, star, versions and archive.">
+  <div class="canvas" role="img" aria-label="A welcome prototype open in Canon with one note pinned to it. A bar underneath reads version 3 of 3, with previous and next arrows, then Note, Star, Versions and Archive.">
     <div class="cmask" aria-hidden="true">
-      <div class="ctitle"><b>Welcome, three steps</b><span class="muted">Version 3 of 3</span></div>
+      <div class="ctitle"><b>Welcome, three steps</b><span class="muted">Claude Code · today</span></div>
       <div class="page"><Thumb k="w1" /></div>
       <span class="pin">1</span>
       <div class="note">Cut this to two&nbsp;steps.<small>You · today</small></div>
     </div>
     <div class="bbar" aria-hidden="true">
+      <span class="bitem bnav">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3 5 8l5 5"></path></svg>
+        <span class="vlabel">Version 3 of 3</span>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" class="dimmed"><path d="m6 3 5 5-5 5"></path></svg>
+      </span>
       <span class="bitem on">Note</span>
       <span class="bitem">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m8 1.6 1.9 4 4.4.6-3.2 3 .8 4.3L8 11.4l-3.9 2.1.8-4.3-3.2-3 4.4-.6z"></path></svg>
         Star
       </span>
-      <span class="bitem">Versions<span class="muted">3</span></span>
+      <span class="bitem">Versions</span>
       <span class="bitem">Archive</span>
     </div>
   </div>

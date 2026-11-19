@@ -13,13 +13,19 @@ const RESULTS: Array<[ThumbKey, string, string, string[], string, boolean]> = [
 <section class="band split" id="find" aria-labelledby="h-find">
   <div class="bhead">
     <h2 id="h-find">{tie('Search every prototype by what’s in it.')}</h2>
-    <p class="lede">{tie('Canon reads a linked prototype’s title and headings, then tags it for you. Search by name, tag, summary, source or note. Your agent can add or remove tags.')}</p>
+    <p class="lede">{tie('Canon reads a linked prototype’s title and headings, then tags it for you. Search by name, tag, summary, source or note. Your agent can add or remove tags, and tags filter Home in one click.')}</p>
   </div>
   <div class="bbody two">
-  <div class="results" role="img" aria-label="Search results for the word onboarding. Three prototypes, each with its tags.">
+  <div class="results" role="img" aria-label="Search results for the word onboarding. A row of tag chips sits above three prototypes, each with its tags.">
     <div class="q">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
       <span>onboarding</span><span class="caret" style="margin-left:-6px"></span>
+    </div>
+    <div class="tagrow" aria-hidden="true">
+      <span class="tag on">Onboarding</span>
+      <span class="tag">Dashboard</span>
+      <span class="tag">Claude Code</span>
+      <span class="tag">Lovable</span>
     </div>
     {
       RESULTS.map(([k, name, sub, tags, when, on]) => (

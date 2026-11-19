@@ -239,7 +239,7 @@ describe('what the copy claims', () => {
 
   it('does not promise tagging for dropped zips or tag controls', () => {
     expect(text(closed)).not.toMatch(/tags? (every|each) (zip|folder)/i);
-    expect(text(closed)).toContain('Your agent can add or remove tags.');
+    expect(text(closed)).toContain('Your agent can add or remove tags, and tags filter Home in one click.');
   });
 });
 
