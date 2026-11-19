@@ -116,11 +116,11 @@ export function RowMenu({ ids, name, className = '' }: { ids: string[]; name: st
     const r = button.current!.getBoundingClientRect();
     // Fixed, so a list's own scrolling never clips it; above the button when there is no room below.
     setAt(r.bottom + 330 > innerHeight && r.top > 330
-      ? { position: 'fixed', right: `${innerWidth - r.right}px`, bottom: `${innerHeight - r.top + 6}px` }
-      : { position: 'fixed', right: `${innerWidth - r.right}px`, top: `${r.bottom + 6}px` });
+      ? { position: 'fixed', left: 'auto', top: 'auto', right: `${innerWidth - r.right}px`, bottom: `${innerHeight - r.top + 6}px` }
+      : { position: 'fixed', left: 'auto', bottom: 'auto', right: `${innerWidth - r.right}px`, top: `${r.bottom + 6}px` });
     setStage('menu');
   };
-  return html`<div class=${`rowmenu ${className}`} ref=${wrap} onClick=${(e: Event) => e.stopPropagation()}>
+  return html`<div class=${`rowmenu ${className}${stage !== 'closed' ? ' open' : ''}`} ref=${wrap} onClick=${(e: Event) => e.stopPropagation()}>
     <button type="button" ref=${button} class="more" aria-haspopup="menu" aria-expanded=${stage !== 'closed'} aria-label=${`More actions for ${name}`} title="More actions" onClick=${toggle}><${Icon} name="more" size=${16} /></button>
     ${stage === 'menu' && html`<div class="menu rowmenu-pop" role="menu" style=${at}>
       <button type="button" role="menuitem" onClick=${() => setStage('move')}><${Icon} name="move" />Move to project</button>

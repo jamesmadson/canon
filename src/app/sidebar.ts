@@ -11,6 +11,7 @@ import { html, Icon, go, ago, useStore } from './shared';
 import { isMac, openSearch } from './palette';
 import { askProjectName } from './lib/naming';
 import { FeedbackFoot } from './feedback';
+import { Settings } from './settings';
 import { carries, draggedIds, moveTo } from './move';
 
 export function useBridge(): ReturnType<typeof bridgeView> {
@@ -143,6 +144,7 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
       ${me ? html`<div class="me"><${Avatar} name=${me} /><span>${me}</span></div>` : null}
       <${Storage} />
       <${Agents} />
+      <${Settings} />
       <${FeedbackFoot} />
     </div>
   </aside>`;
