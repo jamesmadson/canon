@@ -6,14 +6,15 @@
  */
 import { useEffect, useState } from 'preact/hooks';
 import type { Frame } from './db';
-import { html, frameSrc, SANDBOX } from './shared';
-import { decideShown, loopbackHost, probeLoopback, serverOffMessage, type Reach, type Shown } from './lib/probe';
+import { html, Icon, frameSrc, SANDBOX } from './shared';
+import { decideShown, hostsToProbe, loopbackHost, markOf, probeLoopback, serverOffMessage, type Reach, type Shown } from './lib/probe';
 import { LIVE_HINT } from './lib/viewer';
 import { record } from './lib/tester';
 
 const running = new Set<string>(); // frame ids switched to the running version, this session only
 const reach = new Map<string, 'up' | 'down'>(); // by host and port
 const checking = new Set<string>();
+const lastAt = new Map<string, number>(); // when each host was last asked, for the one-a-minute limit
 const listeners = new Set<() => void>();
 const tell = () => listeners.forEach((fn) => fn());
 
@@ -30,6 +31,7 @@ export function setLive(frameId: string, on: boolean) {
 export function resetLive(all = true) {
   reach.clear();
   checking.clear();
+  lastAt.clear();
   if (all) {
     running.clear();
     listeners.clear();
@@ -41,6 +43,7 @@ function check(url: string) {
   const host = loopbackHost(url);
   if (!host || checking.has(host)) return;
   checking.add(host);
+  lastAt.set(host, Date.now());
   void probeLoopback(url).then((r) => {
     checking.delete(host);
     if (r === 'skipped' || reach.get(host) === r) return;
@@ -70,6 +73,31 @@ export function useReach(url: string | null | undefined): Reach {
     return () => window.removeEventListener('focus', again);
   }, [url]);
   return host ? (reach.get(host) ?? 'checking') : 'none';
+}
+
+/**
+ * Home asks about the local servers its prototypes link to. It starts after
+ * first paint, asks each host and port at most once a minute and never more
+ * than 20 hosts at once, and only ever asks this machine.
+ */
+export function useHomeProbe(frames: Pick<Frame, 'kind' | 'url'>[]) {
+  const key = frames.map((f) => (f.kind === 'url' ? loopbackHost(f.url) ?? '' : '')).join('|');
+  useEffect(() => {
+    const run = () => { for (const { url } of hostsToProbe(frames, lastAt, Date.now())) check(url); };
+    const timer = setTimeout(run, 0);
+    window.addEventListener('focus', run);
+    return () => { clearTimeout(timer); window.removeEventListener('focus', run); };
+  }, [key]);
+}
+
+/** The quiet label beside a prototype's name when it will not load right now: server off, or opens in a new tab. */
+export function ReachNote({ frame }: { frame: Frame }) {
+  useChanges();
+  const host = frame.kind === 'url' ? loopbackHost(frame.url) : null;
+  const mark = markOf(frame, host ? reach.get(host) ?? 'checking' : 'none');
+  if (mark === 'server-off') return html`<span class="rnote" title=${serverOffMessage(frame.url!)}><i class="rdot" aria-hidden="true"></i>Server off</span>`;
+  if (mark === 'new-tab') return html`<span class="rnote" title="This page refuses to load inside another page."><${Icon} name="open" size=${11} />Opens in a new tab</span>`;
+  return null;
 }
 
 export function useLiveOn(frameId: string): boolean {

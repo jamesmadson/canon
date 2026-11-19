@@ -5,6 +5,7 @@ import * as store from './store';
 import type { Frame } from './db';
 import { type Card, whenLabel } from './lib/home';
 import { canLinkFolders } from './intake';
+import { ReachNote } from './live';
 import { html, Icon, frameSrc, SANDBOX, showsCover, coverSrc, type Way } from './shared';
 
 /* ── Thumbnails: the cover if there is one, a live page for files kept here, else a neutral drawing ── */
@@ -68,6 +69,7 @@ export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions,
     ${pick && html`<label class="pick"><input type="checkbox" checked=${pick.checked} onChange=${pick.onChange} aria-label=${`Select ${card.name}`} /></label>`}
     <${Thumb} card=${card} />
     <button type="button" class="nm" onClick=${() => onOpen(card)} onFocus=${() => onSelect?.(card)}>${card.name}</button>
+    <${ReachNote} frame=${card.frame} />
     <span class="sm">${card.summary}</span>
     <${Tags} tags=${card.tags} />
     ${versions !== undefined ? versions : label ? html`<span class="ver">${label}</span>` : html`<span class="ver"></span>`}
@@ -99,6 +101,7 @@ export function ShelfCard({ card, selected, arriving, showTags, onOpen, onSelect
       <b class="cname">${card.name}</b>
       <small class="cmeta">${card.source}${' · '}${whenLabel(card.updatedAt, now)}</small>
       ${metaOf(card) && html`<small class="cver">${metaOf(card)}</small>`}
+      <${ReachNote} frame=${card.frame} />
     </button>
     ${showTags && card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
     <${StarButton} card=${card} />

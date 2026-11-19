@@ -10,6 +10,7 @@ import { stackKey } from './lib/versions';
 import { isMac } from './palette';
 import { record } from './lib/tester';
 import { AddMenu, ProtoRow, ShelfCard } from './parts';
+import { useHomeProbe } from './live';
 import { addGroups, html, Icon, runWay, useStore, type Way } from './shared';
 import type { Project } from './db';
 
@@ -126,6 +127,7 @@ const EMPTY: Record<Scope['kind'], string> = {
 
 export function HomeBody(p: HomeBodyProps) {
   const [sel, setSel] = useState<string | null>(null);
+  useHomeProbe(p.cards.map((c) => c.frame));
   const [shut, setShut] = useState<Set<string>>(new Set());
   useEffect(() => setSel(null), [p.landed]);
   const filtering = p.chosenTags.length > 0;

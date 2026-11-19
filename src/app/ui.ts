@@ -18,6 +18,7 @@ import { SearchHost } from './palette';
 import { Sidebar, useBridge } from './sidebar';
 import { type Card, type Scope, cardOf, cardsOf, countPrototypes, scopeCards, tagCounts } from './lib/home';
 import { Avatar } from './comments';
+import { ReachNote, useHomeProbe } from './live';
 import { record } from './lib/tester';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
 
@@ -196,6 +197,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
     items.push({ ...lead, versions: stack.length });
   }
   const boards = store.boardsOf(projectId);
+  useHomeProbe(items.map((i) => i.frame));
   const toggle = (fid: string) => {
     const next = new Set(picked);
     next.has(fid) ? next.delete(fid) : next.add(fid);
@@ -276,6 +278,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
               <${StarButton} card=${card} />
               <div class="meta">
                 <b>${f.name}</b>
+                <${ReachNote} frame=${f} />
                 ${f.summary && html`<span class="lib-sum">${f.summary}</span>`}
                 <small>${i.pages > 1 ? `${i.pages} pages · ` : ''}${i.boards ? `${i.boards} board${i.boards > 1 ? 's' : ''}` : 'Not on a board'}${i.comments ? ` · ${i.comments} open` : ''}</small>
                 ${card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
