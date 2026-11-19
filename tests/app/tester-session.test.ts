@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { CAP, SESSION_LIMIT, listEvents, record, resetTester, sessionEvents, sessionFields, setTester } from '../../src/app/lib/tester';
+import { CAP, SESSION_LIMIT, describeEvent, listEvents, record, resetTester, sessionEvents, sessionFields, setTester } from '../../src/app/lib/tester';
 import { FeedbackDialog, TesterPanel } from '../../src/app/feedback';
 import { clear, click, mount, type } from './helpers/dom';
 
@@ -45,32 +45,22 @@ describe('a sent session carries the raw events too', () => {
     expect(JSON.parse(bodyOf(f).session_json)).toEqual(expected);
   });
 
-  it('keeps the whole payload under 60 KB by dropping the oldest events from the JSON first, and says so', () => {
+  it('keeps the whole payload under 60 KB by dropping the oldest events from lines and JSON together, and says so', () => {
     setTester(true);
-    const N = 900;
-    for (let i = 0; i < N; i++) record('search', { length: i, results: i });
+    for (let i = 0; i < CAP; i++) record('search', { length: i, results: i });
     const base = { _subject: 'x', canon_version: '0.1.0' };
     const out = sessionFields(listEvents(), base) as { session: string[]; session_json: string; session_note: string };
     expect(bytes({ ...base, ...out })).toBeLessThan(SESSION_LIMIT);
-    const kept = JSON.parse(out.session_json) as { d: { length: number } }[];
+    const kept = JSON.parse(out.session_json) as { t: number; e: string; d: { length: number } }[];
     expect(kept.length).toBeGreaterThan(0);
-    expect(kept.length).toBeLessThan(N);
-    expect(kept.at(-1)!.d.length).toBe(N - 1);
-    expect(out.session).toHaveLength(N);
+    expect(kept.length).toBeLessThan(CAP);
+    // Newest kept, and the lines describe exactly the same events.
+    expect(kept.at(-1)!.d.length).toBe(CAP - 1);
+    expect(kept[0].d.length).toBe(CAP - kept.length);
+    expect(out.session).toHaveLength(kept.length);
+    expect(out.session).toEqual(kept.map((e) => describeEvent(e as never)).reverse());
+    expect(out.session_note).toContain(String(CAP - kept.length));
     expect(out.session_note).toMatch(/oldest/);
-    expect(out.session_note).toContain(String(N - kept.length));
-  });
-
-  it('only when the JSON is empty and the lines alone are too big does it drop the oldest lines', () => {
-    setTester(true);
-    for (let i = 0; i < CAP; i++) record('search', { length: i, results: i });
-    const base = { _subject: 'x' };
-    const out = sessionFields(listEvents(), base) as { session: string[]; session_json: string; session_note: string };
-    expect(bytes({ ...base, ...out })).toBeLessThan(SESSION_LIMIT);
-    expect(out.session_json).toBe('[]');
-    expect(out.session.length).toBeLessThan(CAP);
-    expect(out.session[0]).toMatch(/Searched/);
-    expect(out.session_note).toMatch(/lines/);
   });
 
   it('adds no note when everything fits', () => {
