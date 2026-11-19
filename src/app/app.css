@@ -555,7 +555,7 @@ input, textarea { caret-color: var(--accent); }
 .chip-toggle:hover { background: var(--raised); color: var(--text); }
 .boards-note { margin: 0 0 16px; text-wrap: pretty; }
 .board-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.prow .brd { flex: 0 1 140px; min-width: 0; font-size: 12px; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prow .brd { min-width: 0; font-size: 12px; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chip-toggle[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
 .selection-bar {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 10px; border-radius: var(--r-md);
@@ -768,17 +768,21 @@ button.ver-chip:hover { color: var(--text); }
 .prow { position: relative; display: flex; align-items: center; gap: 12px; height: 40px; padding: 0 20px; border-bottom: 1px solid var(--line); }
 .prow.sel { background: var(--panel); }
 .prow.sel::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--accent); }
-.prow .nm { padding: 0; border: 0; background: none; font-weight: 500; white-space: nowrap; text-align: left; }
+.prow .nm { flex: 0 0.05 auto; min-width: 0; max-width: 100%; padding: 0; border: 0; background: none; font-weight: 500; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; text-align: left; }
 .prow .nm::after { content: ""; position: absolute; inset: 0; }
-.prow .sm { flex: 1; min-width: 0; color: var(--soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.prow .src { width: 84px; flex: none; font-size: 12px; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.prow .ver { flex: none; min-width: 112px; font-size: 12px; color: var(--faint); white-space: nowrap; }
-.prow .when { flex: none; width: 68px; text-align: right; font-size: 12px; color: var(--faint); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* When the row is short of room its columns give way in a set order: summary, then source, then tags. Name, version count, star and date keep theirs. */
+.prow .sm { flex: 1 1 0; min-width: 0; color: var(--soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prow .src { flex: 0 1000 84px; min-width: 0; font-size: 12px; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prow .brd { flex: 0 500 140px; }
+.prow .ver { flex: 0 0.05 112px; min-width: 0; font-size: 12px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prow .ver:empty { flex-shrink: 2000; }
+.prow .when { flex: none; min-width: 68px; text-align: right; font-size: 12px; color: var(--faint); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .prow .pick { position: relative; z-index: 1; display: grid; place-items: center; width: 20px; }
 .prow .pick input { accent-color: var(--text); width: 15px; height: 15px; }
 .prow .st, .prow .ver-btn { position: relative; z-index: 1; }
 .prow.older { opacity: 0.85; }
 .tags { display: flex; flex: none; gap: 4px; }
+.prow .tags { flex: 0 20 auto; min-width: 0; flex-wrap: wrap; align-content: flex-start; height: 22px; overflow: hidden; }
 .tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line-strong); font-size: 12px; color: var(--soft); white-space: nowrap; }
 .st { display: inline-grid; place-items: center; flex: none; width: 24px; height: 24px; border: 0; border-radius: 6px; background: transparent; color: var(--faint); transition: transform 120ms var(--ease); }
 .st:active { transform: scale(0.97); }
