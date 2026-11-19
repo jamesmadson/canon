@@ -44,7 +44,7 @@ describe('the usage text', () => {
     const text = run(['--help']).stdout;
     expect(text).toContain('prototypes');
     expect(text).not.toMatch(/boards/i);
-    expect(text).not.toMatch(/[–—]/);
+    expect(text).not.toMatch(/[\u2013\u2014]/);
   });
 
   it('prints usage and exits 1 with no command', () => {
