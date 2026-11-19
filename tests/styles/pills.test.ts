@@ -34,10 +34,10 @@ describe('every button is a pill', () => {
   });
 
   it('keeps squared corners on what is not a button', () => {
-    expect(radius(rule(app, '.seg'))).toBe('var(--r-sm)');
+    expect(radius(rule(app, '.seg'))).toBe('var(--r-md)');
     expect(radius(rule(app, '.dialog'))).toBe('14px');
     expect(radius(rule(app, '.setup'))).toBe('var(--r-md)');
-    expect(radius(rule(app, '.tabs a'))).toBe('var(--r-sm)');
+    expect(radius(rule(app, '.tabs a'))).toBe('var(--r-md)');
   });
 
   it('pads a pill by at least half its height on each side', () => {
