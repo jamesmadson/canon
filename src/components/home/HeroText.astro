@@ -58,6 +58,7 @@ const { waitlistUrl = '' } = Astro.props;
     --mp-ink: #f3f0eb;
     --mp-muted: #b0aba3;
     --mp-fill: rgba(255, 255, 255, 0.09);
+    --mp-hover: #3b3a38;
     --mp-line: #85817a;
     display: flow-root;
   }
@@ -67,6 +68,7 @@ const { waitlistUrl = '' } = Astro.props;
       --mp-ink: #1a1918;
       --mp-muted: #5c5954;
       --mp-fill: rgba(26, 25, 24, 0.07);
+      --mp-hover: #e4e2de;
     }
   }
   :root[data-app-theme='dark'] .mcp {
@@ -74,6 +76,7 @@ const { waitlistUrl = '' } = Astro.props;
     --mp-ink: #1a1918;
     --mp-muted: #5c5954;
     --mp-fill: rgba(26, 25, 24, 0.07);
+    --mp-hover: #e4e2de;
   }
   .mcp-panel {
     position: relative;
@@ -108,6 +111,14 @@ const { waitlistUrl = '' } = Astro.props;
   .mcp-panel .util {
     color: var(--mp-ink);
     border-color: var(--mp-line);
+  }
+  /* The site-wide .util hover paints the recess colour, which is the same
+     family as this panel's ink in either theme. Set both colours here. */
+  @media (hover: hover) and (pointer: fine) {
+    .mcp-panel .util:hover {
+      background: var(--mp-hover);
+      color: var(--mp-ink);
+    }
   }
   .home .mcp-panel .mcp-note {
     margin-top: 12px;
