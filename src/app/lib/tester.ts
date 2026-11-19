@@ -129,6 +129,54 @@ export function resetTester() {
   listeners.clear();
 }
 
+/* ── What is sent ──────────────────────────────────────────────────────── */
+
+export const SESSION_LIMIT = 60_000;
+
+/** The events as the downloaded file holds them: oldest first. The list the app shows is newest first. */
+export const sessionEvents = (newestFirst: TesterEvent[]): TesterEvent[] => [...newestFirst].reverse();
+
+const size = (o: unknown) => new TextEncoder().encode(JSON.stringify(o)).length;
+
+/** Largest count from 0 to max for which fits(count) holds, given that it holds for smaller counts. */
+function mostThatFit(max: number, fits: (n: number) => boolean): number {
+  let lo = 0;
+  let hi = max;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    if (fits(mid)) lo = mid; else hi = mid - 1;
+  }
+  return lo;
+}
+
+/**
+ * The fields a sent session adds: the readable lines, and the same events as
+ * compact JSON so sessions can be tallied. With the rest of the payload the
+ * total stays under the limit. The oldest events leave the JSON first, then
+ * the oldest lines, and a note says what was dropped.
+ */
+export function sessionFields(newestFirst: TesterEvent[], base: Record<string, unknown> = {}, limit = SESSION_LIMIT) {
+  const lines = newestFirst.map(describeEvent);
+  const chrono = sessionEvents(newestFirst);
+  const build = (jsonFrom: number, lineCount: number, note?: string) => ({
+    ...base, session: lines.slice(0, lineCount), session_json: JSON.stringify(chrono.slice(jsonFrom)), ...(note ? { session_note: note } : {}),
+  });
+  const total = chrono.length;
+  if (size(build(0, lines.length)) < limit) return pick(build(0, lines.length));
+  const noteFor = (jsonDropped: number, linesDropped: number) =>
+    `Over the 60 KB limit, so the oldest ${jsonDropped} ${jsonDropped === 1 ? 'event was' : 'events were'} left out of session_json${linesDropped ? ` and the oldest ${linesDropped} ${linesDropped === 1 ? 'line' : 'lines'} out of session` : ''}.`;
+  // Keep the newest `keep` events in the JSON; the note's length is part of the size.
+  const keep = mostThatFit(total, (k) => size(build(total - k, lines.length, noteFor(total - k, 0))) < limit);
+  if (keep > 0) return pick(build(total - keep, lines.length, noteFor(total - keep, 0)));
+  const kept = mostThatFit(lines.length, (k) => size(build(total, k, noteFor(total, lines.length - k))) < limit);
+  return pick(build(total, kept, noteFor(total, lines.length - kept)));
+
+  function pick(all: ReturnType<typeof build>) {
+    const { session, session_json, session_note } = all;
+    return { session, session_json, ...(session_note ? { session_note } : {}) };
+  }
+}
+
 /* ── Lines a person can read ───────────────────────────────────────────── */
 
 const pad = (n: number) => String(n).padStart(2, '0');

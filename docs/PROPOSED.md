@@ -155,6 +155,7 @@ My calls, for James to correct.
    without a board open the new prototype view. Should every agent link open
    the prototype view instead? That changes the link formats in `bridge/ops.ts`
    and their tests.
+   Answered by James on 2026-11-18: yes, every agent link to a prototype opens the prototype view, and older saved links redirect to it. Board links still open the board.
 2. **Multi-page prototypes open in the prototype view too**, with a page
    picker and a "Page map" link to the old map. The map has the note, star and
    archive bar but no versions menu or Live switch. Is that enough?
@@ -164,6 +165,7 @@ My calls, for James to correct.
    by hand in the browser shows a blank frame for a blocked site, with "Open in
    new tab" in the top bar. Should a link always carry a quiet "Blank? Open in
    new tab" line?
+   Answered by James on 2026-11-18: yes, a link always carries the quiet line, and it shares one line with any other hint.
 4. **Search matches the agent name too.** Searching the tag `claude-code` also
    finds prototypes whose source is Claude Code, so the count can exceed the tag
    count (the audit saw 12 results, the cap, not a wrong match). Results now say
@@ -177,5 +179,6 @@ My calls, for James to correct.
 6. **Tester mode lives in localStorage** (`canon-tester-*`), outside the
    library database, and is not part of backups. A sent session contains the
    readable lines only. Is that the form wanted for the owner's inbox?
+   Answered by James on 2026-11-18: a sent session also carries the raw events as compact JSON in session_json, so sessions can be tallied.
 7. **Disconnect** keeps the native confirm dialog, with new wording, and now
    sits in its own group above the feedback links.

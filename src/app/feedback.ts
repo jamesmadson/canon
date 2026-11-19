@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
 import * as store from './store';
 import { FEEDBACK_URL, CANON_VERSION, failureMessage, issueUrl, payloadOf, postJson, type Fields } from './lib/feedback';
-import { describeEvent, listEvents, record, setTester, stopAndDelete, subscribeTester, testerOn } from './lib/tester';
+import { describeEvent, listEvents, record, sessionEvents, sessionFields, setTester, stopAndDelete, subscribeTester, testerOn } from './lib/tester';
 import { html } from './shared';
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -70,8 +70,8 @@ export function FeedbackDialog({ onClose, returnTo, onSeeList, url = FEEDBACK_UR
     }
     setBusy(true);
     setProblem('');
-    const extra = on && withSession ? { session: listEvents().map(describeEvent) } : {};
-    const r = await postJson(url, payloadOf(f, extra));
+    const plain = payloadOf(f);
+    const r = await postJson(url, on && withSession ? { ...plain, ...sessionFields(listEvents(), plain) } : plain);
     setBusy(false);
     if (r.ok) {
       record('feedback_sent');
@@ -116,17 +116,16 @@ export function TesterPanel({ onClose, returnTo, url = FEEDBACK_URL }: { onClose
   const { on, events } = useTester();
   const [note, setNote] = useState('');
   const lines = events.map(describeEvent);
-  const sendable = () => ({ _subject: 'Canon tester session', _gotcha: '', canon_version: CANON_VERSION, session: lines });
-
   const send = async () => {
     setNote('');
-    const r = await postJson(url, sendable());
+    const base = { _subject: 'Canon tester session', _gotcha: '', canon_version: CANON_VERSION };
+    const r = await postJson(url, { ...base, ...sessionFields(events, base) });
     setNote(r.ok ? 'Sent. Thank you.' : failureMessage(r).replace(' What you typed is still here.', ' Your list is still here.'));
   };
   const copy = async () => {
     try { await navigator.clipboard.writeText(lines.join('\n')); setNote('Copied.'); } catch { setNote('Copying did not work. Use Download as a file instead.'); }
   };
-  const saveFile = () => download('canon-session.json', JSON.stringify({ canon_version: CANON_VERSION, events: [...events].reverse() }, null, 2));
+  const saveFile = () => download('canon-session.json', JSON.stringify({ canon_version: CANON_VERSION, events: sessionEvents(events) }, null, 2));
   const stop = () => {
     if (confirm('Stop keeping the list and delete it from this browser? This cannot be undone.')) { stopAndDelete(); onClose(); }
   };
@@ -135,7 +134,7 @@ export function TesterPanel({ onClose, returnTo, url = FEEDBACK_URL }: { onClose
     <ul class="tester-says">
       <li>Canon notes what you do, such as opening a prototype or searching, as counts and times. Never names, links or anything you type.</li>
       <li>The list stays in this browser.</li>
-      <li>Nothing is sent unless you press Send.</li>
+      <li>Nothing is sent unless you press Send. A sent session also carries the same events as compact data, so sessions can be counted. It holds the same fixed names, times and codes as the list below, and no more.</li>
     </ul>
     <label class="fb-check"><input type="checkbox" role="switch" checked=${on} onChange=${(e: Event) => setTester((e.target as HTMLInputElement).checked)} />Keep a list of what I do</label>
     ${on || events.length ? html`<ol class="session-list" aria-label="Your session list, newest first" tabindex="0">
