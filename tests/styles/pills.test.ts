@@ -34,10 +34,22 @@ describe('every button is a pill', () => {
   });
 
   it('keeps squared corners on what is not a button', () => {
-    expect(radius(rule(app, '.seg'))).toBe('var(--r-md)');
     expect(radius(rule(app, '.dialog'))).toBe('14px');
     expect(radius(rule(app, '.setup'))).toBe('var(--r-md)');
     expect(radius(rule(app, '.tabs a'))).toBe('var(--r-md)');
+  });
+
+  it('rounds every segmented switch and its segments fully, with the same inset all round', () => {
+    expect(radius(rule(app, '.seg'))).toBe('var(--r-btn)');
+    expect(radius(rule(app, '.seg button'))).toBe('var(--r-btn)');
+    expect(rule(app, '.seg')).toMatch(/padding: 3px;/);
+    // Every other rule that styles a switch or its segments agrees.
+    const rules = [...app.matchAll(/^([^{}\n]*\.seg\b[^{}\n]*) \{([^}]*)\}/gm)];
+    expect(rules.length).toBeGreaterThan(2);
+    for (const [, sel, body] of rules) {
+      const r = /border-radius: ([^;]+);/.exec(body)?.[1].trim();
+      if (r) expect(r, sel).toBe('var(--r-btn)');
+    }
   });
 
   it('pads a pill by at least half its height on each side', () => {

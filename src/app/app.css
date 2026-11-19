@@ -211,8 +211,8 @@ input, textarea { caret-color: var(--accent); }
 .btn.lg, .dialog .btn { height: var(--h-ctl-lg); padding: 0 22px; }
 .dialog .btn.icon { width: var(--h-ctl-lg); padding: 0; }
 .btn[disabled] { opacity: .45; cursor: default; }
-.seg { display: inline-flex; background: var(--panel); border-radius: var(--r-md); padding: 3px; gap: 2px; }
-.seg button { height: 30px; padding: 0 14px; border: 0; border-radius: 7px; background: none; color: var(--soft); font-size: var(--fs-meta); letter-spacing: 0; }
+.seg { display: inline-flex; background: var(--panel); border-radius: var(--r-btn); padding: 3px; gap: 2px; }
+.seg button { height: 30px; padding: 0 14px; border: 0; border-radius: var(--r-btn); background: none; color: var(--soft); font-size: var(--fs-meta); letter-spacing: 0; }
 .seg button[aria-pressed="true"] { background: var(--hover); color: var(--text); }
 
 /* ── Home ──────────────────────────────────────────────────────────────── */
@@ -745,8 +745,8 @@ button.ver-chip:hover { color: var(--text); }
   background: transparent; color: var(--soft); font-size: var(--fs-meta); letter-spacing: 0; transition: transform 120ms var(--ease);
 }
 .util:active { transform: scale(0.97); }
-.bar .seg, .focus .topbar .seg { padding: 3px; border-radius: var(--r-md); background: var(--panel); }
-.bar .seg button, .focus .topbar .seg button { height: 30px; padding: 0 14px; border-radius: 7px; transition: transform 120ms var(--ease); }
+.bar .seg, .focus .topbar .seg { padding: 3px; border-radius: var(--r-btn); background: var(--panel); }
+.bar .seg button, .focus .topbar .seg button { height: 30px; padding: 0 14px; border-radius: var(--r-btn); transition: transform 120ms var(--ease); }
 .bar .seg button:active, .focus .topbar .seg button:active { transform: scale(0.97); }
 .bar .seg button[aria-pressed="true"], .focus .topbar .seg button[aria-pressed="true"] { background: var(--ground); color: var(--text); font-weight: 500; box-shadow: 0 0 0 1px var(--line), 0 1px 1px var(--shadow); }
 .add {
