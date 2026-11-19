@@ -1,16 +1,23 @@
-/** The bottom bar's own controls: star, note and archive for a prototype, its versions, the Live switch and zoom. The canvas and the prototype view share them. */
+/** The bar under a prototype: its name, version and tags on the left, Note, Star, Versions, Archive, zoom and the Live switch on the right. The canvas toolbar shares the buttons. */
+import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import * as store from './store';
 import type { Frame } from './db';
 import { html, Icon } from './shared';
 import { currentOf, versionOf } from './lib/versions';
-import { versionLine, versionTitle } from './lib/viewer';
+import { neighbour, tagsForBar, versionLine, versionTitle } from './lib/viewer';
 import { LiveToggle } from './live';
 import { record } from './lib/tester';
 
 const NONE = 'select a prototype first';
 
-export function PrototypeActions({ frame }: { frame: Frame | undefined }) {
+/**
+ * Note, Star and Archive for a prototype, with whatever the caller puts between Star and Archive
+ * (the prototype view puts Versions there). Each has a word beside its icon. The stylesheet drops
+ * the words as the bar narrows, Archive first and Note last, and a compact bar (the canvas
+ * toolbar) never shows them. The accessible name and the tooltip stay either way.
+ */
+export function PrototypeActions({ frame, compact = false, children }: { frame: Frame | undefined; compact?: boolean; children?: ComponentChildren }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const field = useRef<HTMLTextAreaElement>(null);
@@ -51,11 +58,13 @@ export function PrototypeActions({ frame }: { frame: Frame | undefined }) {
     store.toast(next ? `Archived ${frame.name}. It is out of Home and the project list until you bring it back.` : `${frame.name} is back in Home and the project list.`);
   };
 
+  const starred = !!frame?.starred;
+  const archived = !!frame?.archived;
+  const word = (text: string, cls: string) => (compact ? null : html`<span class=${`lbl ${cls}`}>${text}</span>`);
   return html`<div class="bar-group" role="group" aria-label="Prototype">
-    <button type="button" class="btn icon" disabled=${!frame} aria-pressed=${!!frame?.starred} aria-label=${frame ? `Star ${name}` : `Star: ${NONE}`} title=${frame ? 'Star' : `Star: ${NONE}`} onClick=${star}><${Icon} name="star" fill=${!!frame?.starred} /></button>
     <div class="bar-note">
-      <button type="button" ref=${button} class="btn icon" disabled=${!frame} aria-expanded=${open} aria-haspopup="dialog" aria-label=${frame ? `Prototype note for ${name}${noteText ? ', has text' : ''}` : `Prototype note: ${NONE}`} title=${frame ? 'Prototype note' : `Prototype note: ${NONE}`} onClick=${toggleNote}>
-        <${Icon} name="note" />${noteText && html`<i class="badge" aria-hidden="true"></i>`}
+      <button type="button" ref=${button} class=${`btn vb-note${compact ? ' icon' : ''}`} disabled=${!frame} aria-expanded=${open} aria-haspopup="dialog" aria-label=${frame ? `Prototype note for ${name}${noteText ? ', has text' : ''}` : `Prototype note: ${NONE}`} title=${frame ? 'Note' : `Note: ${NONE}`} onClick=${toggleNote}>
+        <${Icon} name="note" />${word('Note', 'lbl-note')}${noteText && html`<i class="badge" aria-hidden="true"></i>`}
       </button>
       ${open && frame && html`<div class="bar-pop" role="dialog" aria-label=${`Prototype note for ${name}`}>
         <label class="sr" for="proto-note">Prototype note for ${name}</label>
@@ -68,13 +77,15 @@ export function PrototypeActions({ frame }: { frame: Frame | undefined }) {
         <div class="row"><button type="button" class="btn ghost" onClick=${() => close(false)}>Cancel</button><button type="button" class="btn" onClick=${() => close(true)}>Save</button></div>
       </div>`}
     </div>
-    <button type="button" class="btn icon" disabled=${!frame} aria-pressed=${!!frame?.archived} aria-label=${frame ? `Archive ${name}` : `Archive: ${NONE}`} title=${frame ? 'Archive' : `Archive: ${NONE}`} onClick=${archive}><${Icon} name="archive" /></button>
+    <button type="button" class=${`btn vb-star${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${starred} aria-label=${frame ? `Star ${name}` : `Star: ${NONE}`} title=${frame ? (starred ? 'Starred' : 'Star') : `Star: ${NONE}`} onClick=${star}><${Icon} name="star" fill=${starred} />${word(starred ? 'Starred' : 'Star', 'lbl-star')}</button>
+    ${children}
+    <button type="button" class=${`btn vb-archive${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${archived} aria-label=${frame ? `Archive ${name}` : `Archive: ${NONE}`} title=${frame ? (archived ? 'Archived' : 'Archive') : `Archive: ${NONE}`} onClick=${archive}><${Icon} name="archive" />${word(archived ? 'Archived' : 'Archive', 'lbl-archive')}</button>
   </div>`;
 }
 
 export function ZoomControls({ zoom, onOut, onIn, onReset, onFit }: { zoom: number; onOut?: () => void; onIn?: () => void; onReset?: () => void; onFit: () => void }) {
   const pct = `${Math.round(zoom * 100)}%`;
-  return html`<div class="bar-group" role="group" aria-label="Zoom">
+  return html`<div class="bar-group zoom-group" role="group" aria-label="Zoom">
     ${onOut && html`<button type="button" class="btn icon" aria-label="Zoom out" title="Zoom out (-)" onClick=${onOut}><${Icon} name="minus" /></button>`}
     <button type="button" class="btn zoom" aria-label=${`Zoom ${pct}${onReset ? ', press for 100%' : ', press to fit'}`} title=${onReset ? 'Zoom to 100%' : 'Fit (Shift+1)'} onClick=${onReset ?? onFit}>${pct}</button>
     ${onIn && html`<button type="button" class="btn icon" aria-label="Zoom in" title="Zoom in (+)" onClick=${onIn}><${Icon} name="plus" /></button>`}
@@ -112,7 +123,7 @@ export function VersionsMenu({ frame, stack, onShow }: { frame: Frame; stack: Fr
   const n = versionOf(stack, frame.id);
   const label = many ? `Versions of ${frame.name}, ${versionTitle(n, stack.length)}` : 'Versions: this prototype has only one';
   return html`<div class="bar-note" ref=${wrap}>
-    <button type="button" ref=${button} class="btn" disabled=${!many} aria-expanded=${open} aria-haspopup="true" aria-label=${label} title=${many ? 'Versions' : 'Only one version so far'} onClick=${() => { if (!open) record('versions_menu'); setOpen(!open); }}>Versions${many ? html`<span class="count">${stack.length}</span>` : null}</button>
+    <button type="button" ref=${button} class="btn vb-versions" disabled=${!many} aria-expanded=${open} aria-haspopup="true" aria-label=${label} title=${many ? 'Versions' : 'Only one version so far'} onClick=${() => { if (!open) record('versions_menu'); setOpen(!open); }}><${Icon} name="versions" /><span class="lbl lbl-versions">Versions</span>${many ? html`<span class="count">${stack.length}</span>` : null}</button>
     ${open && many && html`<div class="bar-pop versions-pop" role="group" aria-label="Versions">
       <ol>
         ${[...stack].reverse().map((v) => html`<li key=${v.id}><button type="button" class="vrow" aria-current=${v.id === frame.id ? 'true' : undefined} onClick=${() => { setOpen(false); onShow(v.id); }}>${versionLine(versionOf(stack, v.id), v, v.id === current.id)}</button></li>`)}
@@ -124,14 +135,49 @@ export function VersionsMenu({ frame, stack, onShow }: { frame: Frame; stack: Fr
   </div>`;
 }
 
-/** The whole bottom bar of a prototype: its actions, versions, the Live switch and zoom. */
-export function PrototypeBar({ frame, stack, onShow, zoom }: { frame: Frame; stack: Frame[]; onShow: (id: string) => void; zoom: { value: number; onOut: () => void; onIn: () => void; onReset: () => void; onFit: () => void } }) {
-  return html`<div class="toolbar viewer-bar" role="group" aria-label="Prototype controls">
-    <${PrototypeActions} frame=${frame} />
-    <span class="sep"></span>
-    <${VersionsMenu} frame=${frame} stack=${stack} onShow=${onShow} />
-    <${LiveToggle} frame=${frame} />
-    <span class="sep"></span>
-    <${ZoomControls} zoom=${zoom.value} onOut=${zoom.onOut} onIn=${zoom.onIn} onReset=${zoom.onReset} onFit=${zoom.onFit} />
+/** "Version 2 of 3" between the previous and next controls. Nothing for a prototype with one version. */
+function VersionStep({ frame, stack, onShow }: { frame: Frame; stack: Frame[]; onShow: (id: string) => void }) {
+  if (stack.length < 2) return null;
+  const prev = neighbour(stack, frame.id, -1);
+  const next = neighbour(stack, frame.id, 1);
+  const step = (to: Frame | undefined, dir: 'prev' | 'next') => {
+    if (!to) return;
+    record('version_step', { dir });
+    onShow(to.id);
+  };
+  return html`<div class="vb-ver" role="group" aria-label="Step through versions">
+    <button type="button" class="btn ghost icon" disabled=${!prev} aria-label="Previous version" title="Previous version (Left arrow)" onClick=${() => step(prev, 'prev')}><${Icon} name="back" /></button>
+    <span class="vb-vtext">${versionTitle(versionOf(stack, frame.id), stack.length)}</span>
+    <button type="button" class="btn ghost icon next" disabled=${!next} aria-label="Next version" title="Next version (Right arrow)" onClick=${() => step(next, 'next')}><${Icon} name="back" /></button>
+  </div>`;
+}
+
+/** The first three tags as quiet tags with "+N" for the rest, and a count that stands in for them when the bar is narrow. */
+function BarTags({ tags }: { tags: string[] }) {
+  if (!tags.length) return null;
+  const { shown, more } = tagsForBar(tags);
+  return html`<span class="vb-tags-wrap">
+    <span class="vb-tags" role="list" aria-label="Tags">${shown.map((t) => html`<span class="tag" role="listitem" key=${t}>${t}</span>`)}${more > 0 && html`<span class="tag more" role="listitem" title=${tags.slice(shown.length).join(', ')}>+${more}</span>`}</span>
+    <span class="tag vb-tagcount" title=${tags.join(', ')}>${tags.length === 1 ? '1 tag' : `${tags.length} tags`}</span>
+  </span>`;
+}
+
+/**
+ * The whole bar under a prototype, shared by the page view and the map. Left: the name, the version
+ * line with its step controls, the tags. Right: Note, Star, Versions, Archive, zoom, and the Live switch
+ * when it applies. All outlined, because the view has no solid primary of its own.
+ */
+export function PrototypeBar({ frame, stack, onShow, zoom, page }: { frame: Frame; stack: Frame[]; onShow: (id: string) => void; page?: string; zoom: { value: number; onOut: () => void; onIn: () => void; onReset: () => void; onFit: () => void } }) {
+  return html`<div class="viewer-bar" role="group" aria-label="Prototype controls">
+    <div class="vb-id">
+      <h2 class="vb-name" title=${frame.name}>${frame.name}${page ? html`<span class="faint"> · ${page}</span>` : null}</h2>
+      <${VersionStep} frame=${frame} stack=${stack} onShow=${onShow} />
+      <${BarTags} tags=${frame.tags ?? []} />
+    </div>
+    <div class="vb-acts">
+      <${PrototypeActions} frame=${frame}><${VersionsMenu} frame=${frame} stack=${stack} onShow=${onShow} /><//>
+      <${ZoomControls} zoom=${zoom.value} onOut=${zoom.onOut} onIn=${zoom.onIn} onReset=${zoom.onReset} onFit=${zoom.onFit} />
+      <${LiveToggle} frame=${frame} />
+    </div>
   </div>`;
 }

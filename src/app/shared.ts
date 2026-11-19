@@ -47,6 +47,7 @@ const P: Record<string, string> = {
   chevron: 'm4 6 4 4 4-4',
   note: 'M3 2.5h10v8l-3 3H3zM10 13.5v-3h3M5.5 6h5M5.5 8.5h3',
   copy: 'M5.5 5.5h7v8h-7zM3.5 10.5v-8h7',
+  versions: 'M8 2.5l5.5 3L8 8.5 2.5 5.5zM2.5 8.5L8 11.5l5.5-3M2.5 11.5L8 14.5l5.5-3',
 };
 export const Icon = ({ name, size = 16, fill = false }: { name: string; size?: number; fill?: boolean }) =>
   html`<svg width=${size} height=${size} viewBox="0 0 16 16" fill=${fill ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d=${P[name]} /></svg>`;

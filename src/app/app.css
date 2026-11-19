@@ -388,15 +388,11 @@ input, textarea { caret-color: var(--accent); }
 
 /* ── Focus ─────────────────────────────────────────────────────────────── */
 .focus { position: fixed; inset: 0; z-index: 50; background: var(--bg); display: flex; flex-direction: column; }
-.focus .topbar { background: var(--rail); }
 .focus-stage { flex: 1; display: grid; place-items: center; padding: 20px; overflow: auto; }
 .focus-stage { place-items: stretch center; }
 .focus-frame { height: 100%; max-width: 100%; position: relative; }
 .focus-stage iframe { border: 0; background: #fff; border-radius: 10px; max-width: none; transform-origin: 0 0; box-shadow: 0 0 0 1px var(--line-strong); }
-.focus .topbar h1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.focus .topbar .ver-title { margin-left: 10px; font-weight: 400; font-size: var(--fs-meta); letter-spacing: 0; color: var(--soft); }
-.focus .topbar .next svg { transform: rotate(180deg); }
-.focus-stage.map-stage { padding: 0; display: flex; overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.focus-stage.map-stage { padding: 0; display: flex; overflow: hidden; }
 /* Page-only controls keep their room on Map, so the View control does not move. */
 .focus .topbar .away { visibility: hidden; }
 .map-board { flex: 1; min-width: 0; }
@@ -404,8 +400,6 @@ input, textarea { caret-color: var(--accent); }
 .view-note { margin: 8px 24px 0; flex: none; text-wrap: pretty; }
 .view-note a, .view-note .link { color: var(--text); }
 .view-note.view-hints { margin: 0 24px 6px; min-height: 2.6em; text-wrap: balance; }
-.focus .toolbar.viewer-bar { position: static; transform: none; align-self: center; margin: 10px 0 16px; flex: none; }
-.viewer-bar .btn .count { margin-left: 6px; font: 500 var(--fs-meta) var(--mono); letter-spacing: 0; color: var(--soft); }
 .bar-pop.versions-pop { width: 380px; max-width: calc(100vw - 32px); padding: 6px; }
 .versions-pop ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; max-height: 260px; overflow: auto; }
 .versions-pop .vrow { width: 100%; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 40px; padding: 0 12px; border: 0; border-radius: var(--r-md); background: none; font-size: var(--fs-meta); letter-spacing: 0; color: var(--text); }
@@ -980,3 +974,83 @@ button.ver-chip:hover { color: var(--text); }
 
 /* Rows give up the source column before the name has to shrink much. */
 @container (max-width: 860px) { .prow .src { display: none; } }
+
+/* ── Prototype view: one panel with the top bar, the preview and the bottom bar ───────────
+   Every control here is outlined. The view has no solid primary of its own, so none is filled.
+   The bottom bar and the top bar are containers: as they narrow, labels give way to icons in a
+   set order (Archive, Versions, Star, Note) and the tags give way to a count. */
+.focus { padding: 8px; }
+.focus-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; border-radius: var(--r-lg); background: var(--panel); box-shadow: 0 0 0 1px var(--line), 0 1px 2px var(--shadow); overflow: hidden; }
+.focus .topbar { container-type: inline-size; flex: none; gap: 8px; padding: 0 16px; border-bottom: 0; background: none; }
+.focus .btn { background: none; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong); }
+@media (hover: hover) and (pointer: fine) {
+  .focus .btn:hover { background: var(--hover); }
+  .focus .btn.ghost:hover { background: var(--hover); color: var(--text); }
+}
+.focus .btn:active { background: var(--press); }
+.focus .btn.ghost { box-shadow: none; color: var(--soft); }
+.focus .btn[disabled] { opacity: .45; }
+.focus .topbar .seg { background: var(--raised); }
+.focus .topbar .seg button[aria-pressed="true"] { background: var(--ground); }
+.focus .topbar .select { height: var(--h-ctl); border-radius: var(--r-md); background: var(--raised); }
+.topbar .back { padding: 0 18px 0 12px; gap: 6px; }
+.topbar .w { color: var(--faint); }
+.focus-stage { padding: 4px 24px 12px; }
+.focus-stage.map-stage { margin: 4px 16px 12px; border-radius: var(--r-md); }
+.view-note.view-hints { margin: 0 24px 4px; }
+
+.viewer-bar { container-type: inline-size; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; padding: 8px 24px 16px; }
+.vb-id { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 auto; }
+.vb-name { margin: 0; flex: 0 1 auto; min-width: 0; font-size: var(--fs-name); letter-spacing: var(--ls-text); line-height: var(--lh-base); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vb-name .faint { font-weight: 400; }
+.vb-ver { display: flex; align-items: center; flex: none; color: var(--soft); }
+.vb-ver .btn.icon { width: 32px; height: 32px; }
+.vb-ver .next svg { transform: rotate(180deg); }
+.vb-vtext { padding: 0 4px; font-size: var(--fs-meta); letter-spacing: 0; white-space: nowrap; }
+.vb-tags-wrap { display: flex; flex: 0 1 auto; min-width: 0; }
+.vb-tags { display: flex; gap: 6px; min-width: 0; overflow: hidden; }
+.vb-tags .tag, .vb-tagcount { flex: none; background: var(--raised); box-shadow: none; }
+.vb-tagcount { display: none; }
+.vb-acts { display: flex; align-items: center; gap: 8px; flex: none; }
+.viewer-bar .bar-group { gap: 8px; }
+.viewer-bar .btn .lbl { white-space: nowrap; }
+.viewer-bar .btn { position: relative; }
+.viewer-bar .btn .badge { position: absolute; top: 7px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--text); }
+.viewer-bar .btn .count { font: 500 var(--fs-meta) var(--mono); letter-spacing: 0; color: var(--soft); }
+.viewer-bar .btn[aria-pressed="true"] { background: var(--raised); color: var(--text); font-weight: 600; }
+.viewer-bar .zoom-group { gap: 0; border-radius: var(--r-btn); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.viewer-bar .zoom-group .btn { box-shadow: none; }
+.viewer-bar .zoom-group .btn.icon { width: 34px; }
+.viewer-bar .zoom { min-width: 56px; padding: 0 6px; font: 500 var(--fs-meta) var(--mono); letter-spacing: 0; }
+.viewer-bar .bar-pop { left: auto; right: 0; transform: none; bottom: calc(100% + 12px); }
+.viewer-bar .live-wrap .tip { left: auto; right: 0; transform: none; bottom: calc(100% + 12px); }
+.viewer-bar .live-btn { padding: 0 16px; }
+
+@container (max-width: 1240px) {
+  .vb-tags { display: none; }
+  .vb-tagcount { display: inline-flex; }
+}
+@container (max-width: 1100px) {
+  .viewer-bar .vb-archive .lbl { display: none; }
+  .viewer-bar .vb-archive { width: var(--h-ctl); padding: 0; }
+}
+@container (max-width: 980px) {
+  .viewer-bar .vb-versions .lbl { display: none; }
+  .viewer-bar .vb-versions { padding: 0 12px; gap: 6px; }
+}
+@container (max-width: 860px) {
+  .viewer-bar .vb-star .lbl { display: none; }
+  .viewer-bar .vb-star { width: var(--h-ctl); padding: 0; }
+}
+@container (max-width: 740px) {
+  .viewer-bar .vb-note .lbl { display: none; }
+  .viewer-bar .vb-note { width: var(--h-ctl); padding: 0; }
+  .vb-tagcount { display: none; }
+}
+@container (max-width: 1180px) {
+  .topbar .w { display: none; }
+}
+@container (max-width: 1000px) {
+  .topbar .lbl { display: none; }
+  .topbar .btn:not(.back) { width: var(--h-ctl); padding: 0; }
+}

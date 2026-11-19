@@ -411,7 +411,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
           <button type="button" class="btn icon" aria-label="Select tool" aria-pressed=${tool === 'select'} onClick=${() => setTool('select')} title="Select (V)"><${Icon} name="cursor" /></button>
           ${html`<button type="button" class="btn icon" aria-label="Pin a note on the page" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Pin a note (N): click a prototype or the canvas"><${Icon} name="comment" /></button>`}
           <span class="sep"></span>
-          <${PrototypeActions} frame=${sel ?? undefined} />
+          <${PrototypeActions} frame=${sel ?? undefined} compact />
           <span class="sep"></span>
           <${ZoomControls} zoom=${cam.zoom} onOut=${() => zoomBy(0.8)} onIn=${() => zoomBy(1.25)} onFit=${fit}
             onReset=${() => setCam((c) => zoomAt(c, { x: canvasRef.current!.clientWidth / 2, y: canvasRef.current!.clientHeight / 2 }, 1))} />
