@@ -116,6 +116,8 @@
   --radius-sm: 9px;
   --radius-md: 11px;
   --radius-lg: 14px;
+  /* One radius for every button, link styled as a button and icon button. */
+  --radius-btn: 999px;
 
   /* Geist at 400 for display and body, with one step of emphasis between. The markup keeps its old class names and lands on the new ladder. */
   --font-weight-normal: 400;
@@ -274,8 +276,8 @@ summary,
   cursor: pointer;
 }
 
-/* Two shapes, four values. Pill for the two that carry a decision, rounded
-   rect for the two that carry a tool. No borders on any of them, the fill is
+/* One shape, four values: every button is a pill (--radius-btn). The four
+   differ by fill, not by corner. No borders on any of them, the fill is
    the control. One height, one press, one focus ring, written here rather than
    spelled out per screen so a fifth variant cannot quietly appear.
 
@@ -286,7 +288,7 @@ summary,
   align-items: center;
   justify-content: center;
   min-height: 44px;
-  padding-inline: 20px;
+  padding-inline: 22px;
   border: 0;
   font-size: 14px;
   font-weight: 500;
@@ -303,7 +305,7 @@ summary,
 }
 
 .btn-primary {
-  border-radius: 999px;
+  border-radius: var(--radius-btn);
   background-color: var(--color-ink);
   color: var(--color-ground);
 }
@@ -314,7 +316,7 @@ summary,
 }
 
 .btn-secondary {
-  border-radius: 999px;
+  border-radius: var(--radius-btn);
   background-color: var(--color-recess);
   color: var(--color-ink);
 }
@@ -325,7 +327,7 @@ summary,
 }
 
 .btn-utility {
-  border-radius: 9px;
+  border-radius: var(--radius-btn);
   background-color: var(--color-recess);
   color: var(--color-ink);
 }
@@ -336,7 +338,7 @@ summary,
 }
 
 .btn-quiet {
-  border-radius: 9px;
+  border-radius: var(--radius-btn);
   background-color: transparent;
   color: var(--color-ink-soft);
 }
