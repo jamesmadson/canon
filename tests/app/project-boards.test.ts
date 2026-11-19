@@ -40,7 +40,10 @@ const lib = async (view: 'grid' | 'list' = 'grid') => {
   return mount(Library, { projectId: 'p1', askUrl: async () => null });
 };
 const names = (box: HTMLElement) => Array.from(box.querySelectorAll('[data-card] .nm, [data-card] .meta b')).map((n) => n.textContent);
-const chips = (box: HTMLElement) => Array.from(box.querySelectorAll<HTMLButtonElement>('.board-chips button'));
+const pick = async (select: HTMLSelectElement, value: string) => {
+  select.value = value;
+  await (await import('preact/test-utils')).act(() => { select.dispatchEvent(new Event('change', { bubbles: true })); });
+};
 
 describe('boards in the project view', () => {
   beforeEach(two);
@@ -57,31 +60,30 @@ describe('boards in the project view', () => {
     expect(box.querySelector('[data-card="c"] .brd')!.textContent).toBe('Explorations, Round two');
   });
 
-  it('has a chip row to show one board, and one to show all again', async () => {
+  it('has a Board select to show one board, and one choice to show all again', async () => {
     const box = await lib('grid');
-    expect(chips(box).map((b) => b.textContent)).toEqual(['All boards', 'Explorations', 'Round two']);
-    expect(chips(box)[0].getAttribute('aria-pressed')).toBe('true');
-    await click(chips(box)[2]);
+    const sel = box.querySelector<HTMLSelectElement>('.lib-bar select[aria-label="Board"]')!;
+    expect(Array.from(sel.options).map((o) => o.textContent)).toEqual(['All boards', 'Explorations', 'Round two']);
+    expect(sel.value).toBe('');
+    await pick(sel, 'b2');
     expect(names(box).sort()).toEqual(['Both boards', 'Three tiers']);
-    expect(chips(box)[2].getAttribute('aria-pressed')).toBe('true');
-    expect(chips(box)[0].getAttribute('aria-pressed')).toBe('false');
-    await click(chips(box)[0]);
+    await pick(sel, '');
     expect(names(box)).toHaveLength(4);
   });
 });
 
 describe('with one board or none', () => {
-  it('shows no board names and no chip row', async () => {
+  it('shows no board names and no Board select', async () => {
     seed([board('b1', 'Explorations')]);
     const box = await lib('list');
-    expect(box.querySelector('.board-chips')).toBeNull();
+    expect(box.querySelector('select[aria-label="Board"]')).toBeNull();
     expect(box.querySelector('.brd')).toBeNull();
   });
-  it('shows no chip row when there are no boards', async () => {
+  it('shows no Board select when there are no boards', async () => {
     seed([]);
     db.lists.placements = [];
     const box = await lib('grid');
-    expect(box.querySelector('.board-chips')).toBeNull();
+    expect(box.querySelector('select[aria-label="Board"]')).toBeNull();
   });
 });
 

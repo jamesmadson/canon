@@ -615,7 +615,7 @@ input, textarea { caret-color: var(--accent); }
 .select {
   height: var(--h-ctl); border: 0; border-radius: var(--r-md); background: var(--panel); color: var(--text); padding: 0 12px; font-size: var(--fs-meta); letter-spacing: 0;
 }
-.select:hover { background: var(--raised); }
+.select:hover { background-color: var(--raised); }
 .library { display: flex; flex-direction: column; gap: 16px; }
 .lib-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .lib-bar .spacer { flex: 1; }
@@ -1221,4 +1221,63 @@ button.ver-chip:hover { color: var(--text); }
 @media (hover: hover) and (pointer: fine) {
   .quiet-link:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
   .menu a:hover { background: var(--hover); }
+}
+
+/* The storage prompt is one quiet line; its explanation is the tooltip and the screen reader text. */
+.store-cta { flex-direction: row; align-items: center; height: var(--h-chip); padding: 0 14px; background: none; border-radius: var(--r-btn); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.store-cta:has(small:not(.sr)) { height: auto; min-height: var(--h-chip); padding-block: 6px; flex-direction: column; align-items: flex-start; }
+
+/* Optical centring for every control with a label. Geist's caps sit about half a pixel
+   above the middle of a flex-centred line, so the label gets 1px of top padding (half a
+   pixel of drop) and an icon beside it gets the opposite margin, which keeps it on the
+   middle. One rule here, so no component sets its own. */
+:is(.btn, .util, .add, .chip-toggle, .seg button, .tag, .ver-chip, .pages-chip, .tabs a, .store-cta, .store-tools button, .foot-links button, .find, .toast-act) { padding-top: 1px; }
+:is(.btn, .util, .add, .chip-toggle, .seg button, .tabs a, .find) > svg { margin-top: -1px; }
+
+/* Selects draw their own chevron, so it sits the same distance from the edge as the label does from the other. */
+.select {
+  appearance: none; -webkit-appearance: none; padding: 0 32px 0 14px; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, var(--soft) 50%), linear-gradient(135deg, var(--soft) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat;
+}
+
+/* ── Project page: one header row, one toolbar row ─────────────────────── */
+.topbar .crumb { min-width: 0; }
+.crumb input { min-width: 0; width: min(260px, 40vw); }
+.lib-bar { gap: 8px; row-gap: 8px; }
+.search.small { flex: 1 1 220px; max-width: 320px; width: auto; min-width: 0; }
+.lib-bar .addwrap { flex: none; }
+.lib-bar .select, .lib-bar .seg { flex: none; }
+.active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.util .count {
+  display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; margin-inline-end: -8px; border-radius: 999px;
+  background: var(--text); color: var(--ground); font: 500 var(--fs-meta)/1 var(--sans); letter-spacing: 0;
+}
+.chip-toggle.chip-x { display: inline-flex; align-items: center; gap: 6px; height: var(--h-chip); padding: 0 10px 0 14px; }
+.chip-toggle.chip-x svg { flex: none; opacity: .8; }
+.filter-pop { width: min(340px, calc(100vw - 32px)); padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+.addwrap .filter-pop { left: 0; right: auto; min-width: 0; }
+.pop-group { display: flex; flex-direction: column; gap: 8px; }
+.pop-label { color: var(--soft); font-size: var(--fs-meta); line-height: var(--lh-meta); letter-spacing: 0; }
+.pop-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.filter-pop .chip-toggle { display: inline-flex; align-items: center; gap: 6px; width: auto; height: var(--h-chip); padding: 0 14px; background: var(--panel); color: var(--soft); }
+.filter-pop .chip-toggle small { margin: 0; color: inherit; opacity: .8; font: inherit; }
+.filter-pop .chip-toggle[aria-pressed="true"] { background: var(--accent-soft); color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
+.filter-pop .pop-clear { align-self: flex-start; width: auto; height: var(--h-chip); padding: 0 14px; margin-inline-start: -6px; }
+.main > .dropzone { position: absolute; inset: 8px; z-index: 30; }
+@media (max-width: 760px) {
+  .topbar { flex-wrap: wrap; height: auto; padding: 12px 16px; row-gap: 8px; }
+  .topbar .spacer { display: none; }
+  .topbar .crumb { flex: 1 1 0; }
+  .topbar .crumb input { flex: 1; width: auto; }
+  .topbar .tabs { order: 3; flex: 1 0 100%; margin-left: -8px; overflow-x: auto; }
+  .page { padding: 16px; }
+  .lib-bar .spacer { display: none; }
+  .search.small { flex: 1 1 200px; max-width: none; }
+  .active-filters { order: 1; flex: 1 0 100%; }
+  .lib-bar .select { order: 2; flex: 1 1 110px; min-width: 0; }
+  .lib-bar .seg { order: 2; }
+  .lib-bar { position: relative; }
+  .lib-bar .addwrap { position: static; }
+  .addwrap .filter-pop { left: 0; right: 0; width: auto; }
 }

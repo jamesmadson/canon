@@ -50,7 +50,7 @@ function Storage() {
   }
   if (v.status === 'none') {
     return html`<div class="store">
-      <button type="button" class="store-cta" onClick=${() => vault.chooseFolder()}><b>Save to a folder</b><small>Only in this browser right now. A folder keeps it safe if the browser is cleared.</small></button>
+      <button type="button" class="store-cta" title="Only in this browser right now. A folder keeps it safe if the browser is cleared." onClick=${() => vault.chooseFolder()}><b>Save to a folder</b><small class="sr">Only in this browser right now. A folder keeps it safe if the browser is cleared.</small></button>
       ${tools}
     </div>`;
   }

@@ -5,7 +5,8 @@ import { groupsFromDrop } from './intake';
 import { BoardView } from './canvas';
 import { PrototypeView, openPrototype } from './prototype';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
-import { FilterMenu, Home } from './home';
+import { Home } from './home';
+import { ActiveFilters, FilterPop } from './libfilter';
 import { AddMenu, ProtoRow, StarButton, Tags, metaOf } from './parts';
 import { MoveMenu, RowMenu, carries, startDrag, useDismiss } from './move';
 import { pagesOf } from './lib/pageview';
@@ -174,6 +175,7 @@ export function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes'
         <a href=${`#/p/${id}/comments`} aria-current=${tab === 'comments' ? 'page' : undefined}>Notes <span>${store.notesInProject(id).filter((n) => !n.resolved).length}</span></a>
       </div>
       <span class="spacer"></span>
+      ${tab === 'prototypes' && html`<${AddMenu} primary label="Add" onWay=${(w: Way) => runWay(w, id, undefined, askUrl)} />`}
       ${tab === 'boards' && html`<button class="btn primary" onClick=${newBoard}><${Icon} name="plus" />New board</button>`}
     </div>
     ${tab === 'prototypes' && html`<${Library} projectId=${id} askUrl=${askUrl} />`}
@@ -265,9 +267,6 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
     for (const fid of picked) await store.deleteFrame(fid);
     setPicked(new Set());
   };
-  const way = (w: Way) => runWay(w, projectId, undefined, askUrl);
-  const chip = (key: keyof LibraryFilter, label: string) =>
-    html`<button type="button" class="chip-toggle" aria-pressed=${!!filter[key]} onClick=${() => setFilter({ ...filter, [key]: !filter[key] })}>${label}</button>`;
   const clear = () => { setFilter({ source: 'all', tags: [] }); setBoard(null); };
   const tagList = tagCounts(scopeCards(cardsOf(all.map((i) => i.frame)), { kind: filter.archived ? 'archive' : 'home' }));
   const cardFor = (i: (typeof items)[number]) => ({ ...cardOf(i.frame), versions: i.versions });
@@ -280,23 +279,17 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
   return html`<div class="page library">
     <div class="lib-bar">
       <label class="search small"><${Icon} name="search" /><span class="sr">Search prototypes</span><input placeholder="Search prototypes" value=${filter.query ?? ''} onInput=${(e: Event) => setFilter({ ...filter, query: (e.target as HTMLInputElement).value })} /></label>
-      <${FilterMenu} tags=${tagList} chosen=${filter.tags ?? []} onChange=${(t: string[]) => setFilter({ ...filter, tags: t })} />
-      <select class="select" value=${filter.source} onChange=${(e: Event) => setFilter({ ...filter, source: (e.target as HTMLSelectElement).value as LibraryFilter['source'] })} aria-label="Source">
-        <option value="all">All sources</option><option value="files">Files</option><option value="linked">Linked folders</option><option value="url">URLs</option>
-      </select>
-      ${chip('multiPage', 'Multi-page')}${chip('hasComments', 'Open notes')}${chip('unplaced', 'Not on a board')}${chip('archived', 'Archived')}
+      <${FilterPop} filter=${filter} onChange=${setFilter} tags=${tagList} />
+      <${ActiveFilters} filter=${filter} onChange=${setFilter} />
       <span class="spacer"></span>
+      ${manyBoards && html`<select class="select" value=${shownBoard ?? ''} onChange=${(e: Event) => setBoard((e.target as HTMLSelectElement).value || null)} aria-label="Board">
+        <option value="">All boards</option>${boards.map((b) => html`<option key=${b.id} value=${b.id}>${b.name}</option>`)}
+      </select>`}
       <select class="select" value=${sort} onChange=${(e: Event) => setSort((e.target as HTMLSelectElement).value as LibrarySort)} aria-label="Sort">
         <option value="updated">Updated</option><option value="starred">Starred first</option><option value="added">Newest</option><option value="name">Name</option><option value="comments">Most notes</option>
       </select>
       <div class="seg" role="group" aria-label="View"><button type="button" aria-pressed=${view === 'grid'} onClick=${() => setView('grid')}>Grid</button><button type="button" aria-pressed=${view === 'list'} onClick=${() => setView('list')}>List</button></div>
-      <${AddMenu} primary label="Add" onWay=${way} />
     </div>
-
-    ${manyBoards && html`<div class="board-chips" role="group" aria-label="Show one board">
-      <button type="button" class="chip-toggle" aria-pressed=${!shownBoard} onClick=${() => setBoard(null)}>All boards</button>
-      ${boards.map((b) => html`<button type="button" class="chip-toggle" key=${b.id} aria-pressed=${shownBoard === b.id} onClick=${() => setBoard(b.id)}>${b.name}</button>`)}
-    </div>`}
 
     ${picked.size > 0 && html`<div class="selection-bar">
       <b>${picked.size} selected</b>
@@ -309,7 +302,7 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
       <button type="button" class="btn ghost" onClick=${() => setPicked(new Set())}>Clear</button>
     </div>`}
 
-    <div class="drop-hint" data-drop-hint><b>Drop a prototype here:</b> HTML, a zip or a folder</div>
+    ${all.length === 0 && html`<div class="drop-hint" data-drop-hint><b>Drop a prototype here:</b> HTML, a zip or a folder</div>`}
     ${all.length === 0 && html`<div class="empty-board" style="position:static;padding:40px 0"><div>
       <h2>No prototypes yet</h2><p>Or use Add, above, to pick files or link a folder.</p>
     </div></div>`}
