@@ -4,7 +4,9 @@ import type { VNode } from 'preact';
 import * as store from './store';
 import type { Frame } from './db';
 import { type Card, whenLabel } from './lib/home';
+import { tintOf } from '../lib/thumbTints';
 import { canLinkFolders } from './intake';
+import { ReachNote } from './live';
 import { html, Icon, frameSrc, SANDBOX, showsCover, coverSrc, type Way } from './shared';
 
 /* ── Thumbnails: the cover if there is one, a live page for files kept here, else a neutral drawing ── */
@@ -28,7 +30,7 @@ export function Thumb({ card, big = false }: { card: Card; big?: boolean }) {
   const f = card.frame;
   if (showsCover(f)) return html`<div class=${`th${big ? ' big' : ''}`} aria-hidden="true"><img src=${coverSrc(f)} alt="" loading="lazy" /></div>`;
   if (f.kind !== 'url') return html`<${LiveThumb} frame=${f} big=${big} />`;
-  return html`<div class=${`th${big ? ' big' : ''}`} aria-hidden="true"><i class="hd"></i><i class="ln"></i><i class="ln s"></i><i class="bt"></i></div>`;
+  return html`<div class=${`th${big ? ' big' : ''} tint-${tintOf(f.id)}`} aria-hidden="true"><i class="hd"></i><i class="ln"></i><i class="ln s"></i><i class="bt"></i></div>`;
 }
 
 /* ── Star ───────────────────────────────────────────────────────────────── */
@@ -60,18 +62,22 @@ export interface RowProps {
   pick?: { checked: boolean; onChange: () => void } | null;
   older?: boolean;
   now?: number;
+  /** The board names a project view shows when its project has several. Undefined leaves the column out. */
+  board?: string;
 }
 
-export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions, pick, older, now }: RowProps) {
+export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions, pick, older, now, board }: RowProps) {
   const label = metaOf(card);
   return html`<li class=${`prow${selected ? ' sel' : ''}${arriving ? ' arriving' : ''}${older ? ' older' : ''}`} data-card=${card.id}>
     ${pick && html`<label class="pick"><input type="checkbox" checked=${pick.checked} onChange=${pick.onChange} aria-label=${`Select ${card.name}`} /></label>`}
     <${Thumb} card=${card} />
-    <button type="button" class="nm" onClick=${() => onOpen(card)} onFocus=${() => onSelect?.(card)}>${card.name}</button>
-    <span class="sm">${card.summary}</span>
+    <button type="button" class="nm" title=${card.name} onClick=${() => onOpen(card)} onFocus=${() => onSelect?.(card)}>${card.name}</button>
+    <${ReachNote} frame=${card.frame} />
+    <span class="sm" title=${card.summary || undefined}>${card.summary}</span>
     <${Tags} tags=${card.tags} />
     ${versions !== undefined ? versions : label ? html`<span class="ver">${label}</span>` : html`<span class="ver"></span>`}
-    <span class="src">${card.source}</span>
+    ${board !== undefined && html`<span class="brd" title=${board}>${board}</span>`}
+    <span class="src" title=${card.source}>${card.source}</span>
     <${StarButton} card=${card} />
     <span class="when">${whenLabel(card.updatedAt, now)}</span>
   </li>`;
@@ -96,9 +102,10 @@ export function ShelfCard({ card, selected, arriving, showTags, onOpen, onSelect
         <${Thumb} card=${card} big />
         ${arriving?.zip && html`<span class="zip" aria-hidden="true"><i class="zl"></i><i class="zr"></i><i class="teeth"></i><i class="pull"></i><span class="zname">${arriving.zip}</span></span>`}
       </span>
-      <b class="cname">${card.name}</b>
+      <b class="cname" title=${card.name}>${card.name}</b>
       <small class="cmeta">${card.source}${' · '}${whenLabel(card.updatedAt, now)}</small>
       ${metaOf(card) && html`<small class="cver">${metaOf(card)}</small>`}
+      <${ReachNote} frame=${card.frame} />
     </button>
     ${showTags && card.tags.length > 0 && html`<${Tags} tags=${card.tags} />`}
     <${StarButton} card=${card} />

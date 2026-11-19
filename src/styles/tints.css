@@ -1,0 +1,15 @@
+/*
+ * The prototype tints: the one place the colours of a drawn or placeholder
+ * prototype page are named. Low saturation, light enough that the mini page's
+ * own text keeps 4.5:1 on them. Flat colours only, nothing saturated, no orange.
+ * The homepage's drawn pages and the app's placeholder thumbnails both read
+ * these. Names are listed in src/lib/thumbTints.ts and must match.
+ */
+:root {
+  --tint-sand: #efe6d6;
+  --tint-sage: #dce6d8;
+  --tint-clay: #edd9ce;
+  --tint-slate: #d8e1eb;
+  --tint-lilac: #e4deee;
+  --tint-warm: #e6e2dc;
+}

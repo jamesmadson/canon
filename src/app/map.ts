@@ -71,11 +71,13 @@ export function PageMap({ frame, cam, setCam, api, startPage, onPage }: MapProps
     [frameId, frame.w, frame.h, pages.join(), flow.length]
   );
 
+  // Room above the pages for the tool palette (12px inset, about 44px tall) and the labels that sit above each page.
+  const MAP_TOP = 124;
   const fit = (only?: string) => {
     const el = canvasRef.current;
     if (!el || !layout) return;
     const rects = (only ? [only] : pages).map((p) => ({ ...layout.positions[p], w: frame.w, h: frame.h }));
-    setCam(() => fitCamera(rects, { w: el.clientWidth, h: el.clientHeight }, only ? 120 : 80));
+    setCam(() => fitCamera(rects, { w: el.clientWidth, h: el.clientHeight }, only ? 120 : 80, MAP_TOP));
   };
   const zoomTo = (z: number) => {
     const el = canvasRef.current;
@@ -251,8 +253,8 @@ function PageInspector({ frame, page, onFocus, onPick, onComment, onOpenThread }
   return html`<aside class="inspector" onPointerDown=${(e: Event) => e.stopPropagation()}>
     <div class="insp-sec">
       <div class="label">Page</div>
-      <div style="font-size:15px;font-weight:500">${pageName(page)}</div>
-      <div class="mono faint" style="font-size:11.5px">${page}</div>
+      <div style="font-size:var(--fs-name);font-weight:500">${pageName(page)}</div>
+      <div class="mono faint" style="font-size:var(--fs-meta)">${page}</div>
       <div class="row">
         <button type="button" class="btn primary" onClick=${onFocus}><${Icon} name="open" />Open</button>
         <a class="btn ghost" href=${previewUrl(frame, page)} target="_blank" rel="noopener"><${Icon} name="open" />Open in new tab</a>

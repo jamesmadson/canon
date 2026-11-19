@@ -8,6 +8,8 @@
  * `?state=scattered` or `?state=filed` freezes the hero in one state.
  */
 
+import { avoidBox } from '../lib/scatterAvoid';
+
 type Spot = [x: number, y: number, rot: number, scale: number];
 
 /**
@@ -42,6 +44,9 @@ const PHONE: (Spot | null)[] = [
 
 /** The agents Canon supports, in the order the loop names them. */
 const AGENTS = ['Claude Code', 'Codex', 'Cursor'];
+
+/** How far a loose card stays from the prompt box, in pixels. */
+const CLEAR = 14;
 
 const TICK = 50; // ms
 const TYPE_AT = 30; // 1.5 seconds of loose cards, then the prompt types
@@ -82,7 +87,8 @@ function init(stage: HTMLElement) {
       const spot = (phone ? PHONE : WIDE)[i];
       const thumb = card.querySelector<HTMLElement>('.thumb');
       if (!spot || !thumb || card.offsetParent === null) return;
-      const [fx, fy, rot, scale] = spot;
+      const [fx, fy, rot, wished] = spot;
+      let scale = wished;
       // Layout position of the thumbnail's centre, which ignores transforms.
       let x = 0;
       let y = 0;
@@ -97,7 +103,19 @@ function init(stage: HTMLElement) {
       // Below 1100px the text spans the width, so nothing drifts above the stage.
       // Beside the text, no card may rise above the grey panel: the text column
       // is shorter or taller as the hero's lines change, and the stage moves with it.
-      const goalY = wide ? Math.max(fy, panelTop + halfH + 24) : Math.max(fy, halfH + margin);
+      let goalY = wide ? Math.max(fy, panelTop + halfH + 24) : Math.max(fy, halfH + margin);
+      // Beside the text, the prompt box sits on the stage, and no card may overlap it.
+      if (wide && box) {
+        const left = box.offsetLeft - stage.offsetLeft;
+        const top = box.offsetTop - stage.offsetTop;
+        const kept = avoidBox(
+          { x: goalX, y: goalY, halfW: thumb.offsetWidth / 2, halfH: thumb.offsetHeight / 2, scale, rot, wishedY: fy },
+          { x0: left - CLEAR, y0: top - CLEAR, x1: left + box.offsetWidth + CLEAR, y1: top + box.offsetHeight + CLEAR },
+          panelTop,
+        );
+        goalY = kept.y;
+        scale = kept.scale;
+      }
       card.style.setProperty('--tx', `${(goalX - (x + thumb.offsetWidth / 2)).toFixed(1)}px`);
       card.style.setProperty('--ty', `${(goalY - (y + thumb.offsetHeight / 2)).toFixed(1)}px`);
       card.style.setProperty('--rot', `${rot}deg`);

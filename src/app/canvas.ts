@@ -56,7 +56,7 @@ function LibraryPicker({ projectId, boardId, onClose }: { projectId: string; boa
       <div class="pick-list">
         ${items.length === 0 && html`<p class="hint">Everything in this project is already on this board.</p>`}
         ${items.map((f) => html`<button onClick=${async () => { await store.placeOnBoard(boardId, f.id); store.toast(`Added ${f.name}.`); }}>
-          <span>${f.name}</span><span class="faint mono" style="font-size:11px">${pageCount(f) > 1 ? `${pageCount(f)} pages · ` : ''}${f.w}×${f.h}</span><${Icon} name="plus" />
+          <span>${f.name}</span><span class="faint mono" style="font-size:var(--fs-meta)">${pageCount(f) > 1 ? `${pageCount(f)} pages · ` : ''}${f.w}×${f.h}</span><${Icon} name="plus" />
         </button>`)}
       </div>
       <div class="row" style="justify-content:flex-end"><button class="btn" onClick=${onClose}>Done</button></div>
@@ -411,7 +411,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
           <button type="button" class="btn icon" aria-label="Select tool" aria-pressed=${tool === 'select'} onClick=${() => setTool('select')} title="Select (V)"><${Icon} name="cursor" /></button>
           ${html`<button type="button" class="btn icon" aria-label="Pin a note on the page" aria-pressed=${tool === 'comment'} onClick=${() => setTool('comment')} title="Pin a note (N): click a prototype or the canvas"><${Icon} name="comment" /></button>`}
           <span class="sep"></span>
-          <${PrototypeActions} frame=${sel ?? undefined} />
+          <${PrototypeActions} frame=${sel ?? undefined} compact />
           <span class="sep"></span>
           <${ZoomControls} zoom=${cam.zoom} onOut=${() => zoomBy(0.8)} onIn=${() => zoomBy(1.25)} onFit=${fit}
             onReset=${() => setCam((c) => zoomAt(c, { x: canvasRef.current!.clientWidth / 2, y: canvasRef.current!.clientHeight / 2 }, 1))} />

@@ -74,3 +74,35 @@ export function decideShown(f: Pick<Frame, 'kind' | 'url' | 'liveUrl'>, liveOn: 
   if (liveOn && f.liveUrl) return reach === 'down' ? { show: 'off', url: f.liveUrl } : { show: 'live', url: f.liveUrl };
   return { show: 'stored' };
 }
+
+/* ── Marks on Home: which prototypes will not load right now ───────────── */
+export type Mark = 'server-off' | 'new-tab' | null;
+
+export const PROBE_EVERY_MS = 60_000;
+export const PROBE_MAX_HOSTS = 20;
+
+/**
+ * The quiet label a prototype gets on Home. Only a linked address is ever
+ * marked: a stored copy always shows its files. A server that is off wins
+ * over a page known to refuse framing, since it would not load either way.
+ */
+export function markOf(f: Pick<Frame, 'kind' | 'url' | 'frameBlocked'>, reach: Reach): Mark {
+  if (f.kind !== 'url') return null;
+  if (loopbackHost(f.url) && reach === 'down') return 'server-off';
+  return f.frameBlocked === true ? 'new-tab' : null;
+}
+
+/** The local servers to ask about now: one per host and port, none asked within a minute, at most 20. */
+export function hostsToProbe(frames: Pick<Frame, 'kind' | 'url'>[], lastAt: Map<string, number>, now: number): { host: string; url: string }[] {
+  const out = new Map<string, string>();
+  for (const f of frames) {
+    if (f.kind !== 'url' || !f.url) continue;
+    const host = loopbackHost(f.url);
+    if (!host || out.has(host)) continue;
+    const last = lastAt.get(host);
+    if (last !== undefined && now - last < PROBE_EVERY_MS) continue;
+    out.set(host, f.url);
+    if (out.size >= PROBE_MAX_HOSTS) break;
+  }
+  return [...out].map(([host, url]) => ({ host, url }));
+}

@@ -89,7 +89,8 @@ describe('the app in Canon colours', () => {
   });
   // Mutation: restore the 6px rectangle on .btn.primary or the grey disabled slab.
   it('draws the primary button as a pill with an outlined disabled state', () => {
-    expect(css).toMatch(/\.btn\.primary \{ border-radius: 999px/);
+    expect(css).toMatch(/--r-btn: 999px/);
+    expect(css).toMatch(/\.btn \{[^}]*border-radius: var\(--r-btn\)/);
     expect(css).toMatch(/\.btn\.primary\[disabled\] \{[^}]*background: none/);
   });
   // Mutation: bring back a hue palette for people.

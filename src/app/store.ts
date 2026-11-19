@@ -7,6 +7,7 @@ import { walkHandle, prepare } from './intake';
 import type { LibraryItem } from './lib/library';
 import { inheritedMeta, metaOf } from './lib/meta';
 import { SAMPLES, SAMPLE_SITE } from './samples';
+import { nameFromUrl } from './lib/linkname';
 import { stackFor, stackKey, swapsFor, versionOf, currentOf } from './lib/versions';
 
 export interface State {
@@ -327,7 +328,7 @@ async function makeUrlFrame(
     if (tags.length) meta.tags = tags;
   }
   const frame: Frame = {
-    id: uid(), projectId, name: opts.name || new URL(url).host || url, kind: 'url', url, x: 0, y: 0,
+    id: uid(), projectId, name: opts.name || nameFromUrl(url), kind: 'url', url, x: 0, y: 0,
     w: opts.size?.w ?? 1280, h: opts.size?.h ?? 800, rev: 0, createdAt: now(), updatedAt: now(), ...meta,
   };
   await insertFrame(frame, opts.boardId, opts.at);

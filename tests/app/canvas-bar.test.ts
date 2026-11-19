@@ -10,7 +10,7 @@ vi.mock('../../src/app/db', async (orig) => ({
 }));
 
 import * as store from '../../src/app/store';
-import { PrototypeActions, ZoomControls } from '../../src/app/bar';
+import { PrototypeActions, VersionsMenu, ZoomControls } from '../../src/app/bar';
 import { useStore } from '../../src/app/shared';
 import { clear, click, frame, key, mount, nameOf, project, type, unnamed } from './helpers/dom';
 
@@ -37,30 +37,72 @@ afterEach(clear);
 
 const btn = (box: HTMLElement, label: RegExp) => Array.from(box.querySelectorAll<HTMLButtonElement>('button')).find((b) => label.test(nameOf(b)))!;
 
+describe('button names start with the visible label', () => {
+  const Compact = ({ id, compact }: { id: string; compact: boolean }) => {
+    const s = useStore();
+    return h(PrototypeActions, { frame: s.frames.find((f) => f.id === id), compact });
+  };
+  const words = ['Note', 'Star', 'Archive'];
+
+  it('holds for Note, Star and Archive, full and icon only, off and on', async () => {
+    for (const compact of [false, true]) {
+      for (const on of [false, true]) {
+        db.lists.frames = [frame({ id: 'z', name: 'Zed', starred: on, archived: on, note: on ? 'Hi' : '', createdAt: 1, updatedAt: 1 })];
+        await store.load();
+        const box = await mount(Compact, { id: 'z', compact });
+        const buttons = Array.from(box.querySelectorAll<HTMLButtonElement>('button.vb-note, button.vb-star, button.vb-archive'));
+        expect(buttons).toHaveLength(3);
+        for (const b of buttons) {
+          const name = nameOf(b);
+          const visible = (b.textContent ?? '').trim();
+          if (visible) expect(name.startsWith(visible), `${visible} in ${name}`).toBe(true);
+          const word = words.find((w) => name.startsWith(w))!;
+          expect(word, name).toBeTruthy();
+          expect(name).toContain('Zed');
+        }
+        const star = buttons.find((b) => b.classList.contains('vb-star'))!;
+        expect(nameOf(star)).toBe(on ? 'Starred, Zed' : 'Star, Zed');
+        expect(star.getAttribute('aria-pressed')).toBe(String(on));
+        expect(nameOf(buttons.find((b) => b.classList.contains('vb-archive'))!)).toBe(on ? 'Archived, Zed' : 'Archive, Zed');
+        clear();
+      }
+    }
+  });
+
+  it('holds for Versions', async () => {
+    const a = frame({ id: 'v1', name: 'Zed', stackId: 's', createdAt: 1, updatedAt: 1 });
+    const b = frame({ id: 'v2', name: 'Zed', stackId: 's', createdAt: 2, updatedAt: 2 });
+    const box = await mount(VersionsMenu, { frame: b, stack: [a, b], onShow: () => {} });
+    const v = box.querySelector<HTMLButtonElement>('button.vb-versions')!;
+    expect(nameOf(v).startsWith('Versions')).toBe(true);
+    expect(nameOf(v)).toContain(v.querySelector('.lbl')!.textContent!);
+  });
+});
+
 describe('the canvas bottom bar', () => {
   it('stars the selected prototype, across its versions, and shows it pressed', async () => {
     const box = await mount(Bar, { id: 'a2' });
-    const star = btn(box, /^Star /);
-    expect(nameOf(star)).toBe('Star Annual toggle v2');
+    const star = btn(box, /^Star, /);
+    expect(nameOf(star)).toBe('Star, Annual toggle v2');
     expect(star.getAttribute('aria-pressed')).toBe('false');
     await click(star);
     await flush();
     expect(stored('a').at(-1)!.starred).toBe(true);
     expect(stored('a2').at(-1)!.starred).toBe(true);
-    expect(btn(box, /^Star /).getAttribute('aria-pressed')).toBe('true');
-    await click(btn(box, /^Star /));
+    expect(btn(box, /^Starred, /).getAttribute('aria-pressed')).toBe('true');
+    await click(btn(box, /^Starred, /));
     await flush();
     expect(stored('a2').at(-1)!.starred).toBe(false);
   });
 
   it('archives and unarchives, and says what happened', async () => {
     const box = await mount(Bar, { id: 'b' });
-    await click(btn(box, /^Archive /));
+    await click(btn(box, /^Archive, /));
     await flush();
     expect(stored('b').at(-1)!.archived).toBe(true);
-    expect(btn(box, /^Archive /).getAttribute('aria-pressed')).toBe('true');
+    expect(btn(box, /^Archived, /).getAttribute('aria-pressed')).toBe('true');
     expect(store.getState().toast).toMatch(/^Archived Three tiers\./);
-    await click(btn(box, /^Archive /));
+    await click(btn(box, /^Archived, /));
     await flush();
     expect(stored('b').at(-1)!.archived).toBe(false);
     expect(store.getState().toast).toBe('Three tiers is back in Home and the project list.');
@@ -68,8 +110,8 @@ describe('the canvas bottom bar', () => {
 
   it('opens the prototype note with its text, saves a change, and returns focus to the button', async () => {
     const box = await mount(Bar, { id: 'b' });
-    const open = btn(box, /^Prototype note for/);
-    expect(nameOf(open)).toBe('Prototype note for Three tiers, has text');
+    const open = btn(box, /^Note, /);
+    expect(nameOf(open)).toBe('Note, Three tiers, has text');
     await click(open);
     const field = box.querySelector<HTMLTextAreaElement>('textarea')!;
     expect(field.value).toBe('Ask Sam');
@@ -80,14 +122,14 @@ describe('the canvas bottom bar', () => {
     await flush();
     expect(stored('b').at(-1)!.note).toBe('Ask Sam about the copy');
     expect(box.querySelector('[role="dialog"]')).toBeNull();
-    expect(document.activeElement).toBe(btn(box, /^Prototype note for/));
+    expect(document.activeElement).toBe(btn(box, /^Note, /));
   });
 
   it('writes nothing when the note is left as it was, or cancelled', async () => {
     const box = await mount(Bar, { id: 'b' });
-    await click(btn(box, /^Prototype note for/));
+    await click(btn(box, /^Note, /));
     await click(Array.from(box.querySelectorAll('button')).find((b) => b.textContent === 'Cancel')!);
-    await click(btn(box, /^Prototype note for/));
+    await click(btn(box, /^Note, /));
     await key(box.querySelector('textarea')!, 'Escape');
     await flush();
     expect(stored('b')).toEqual([]);
@@ -95,7 +137,7 @@ describe('the canvas bottom bar', () => {
 
   it('keeps a typed note when another prototype is selected', async () => {
     const box = await mount(Bar, { id: 'b' });
-    await click(btn(box, /^Prototype note for/));
+    await click(btn(box, /^Note, /));
     await type(box.querySelector('textarea')!, 'Changed my mind');
     // The selection moves to another prototype: the bar re-renders for it.
     const { render } = await import('preact');
@@ -118,7 +160,7 @@ describe('the canvas bottom bar', () => {
   it('has a name on every control, open or closed', async () => {
     const box = await mount(Bar, { id: 'b' });
     expect(unnamed(box)).toEqual([]);
-    await click(btn(box, /^Prototype note for/));
+    await click(btn(box, /^Note, /));
     expect(unnamed(box)).toEqual([]);
   });
 });
@@ -130,7 +172,7 @@ describe('where the bar appears', () => {
     expect(src.match(/<\$\{PrototypeActions\} frame=/g)).toHaveLength(1);
     expect(src.match(/<\$\{ZoomControls\} zoom=/g)).toHaveLength(1);
     // The board bar acts on the selected prototype.
-    expect(src).toContain('<${PrototypeActions} frame=${sel ?? undefined} />');
+    expect(src).toContain('<${PrototypeActions} frame=${sel ?? undefined} compact />');
     // The map draws no bar of its own: the view shows one bar on Page and on Map.
     expect(readFileSync('src/app/map.ts', 'utf8')).not.toMatch(/PrototypeActions|ZoomControls|PrototypeBar/);
     expect(readFileSync('src/app/prototype.ts', 'utf8').match(/<\$\{PrototypeBar\}/g)).toHaveLength(1);

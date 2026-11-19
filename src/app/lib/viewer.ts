@@ -38,3 +38,6 @@ export function typingIn(target: EventTarget | null): boolean {
 
 export const FRAME_BLOCKED = 'This site does not allow itself to be shown inside other pages.';
 export const LIVE_HINT = 'Live shows the running version at its localhost address. Off shows the stored copy.';
+
+/** The first few tags the prototype bar shows, and how many more there are. */
+export const tagsForBar = (tags: string[], max = 3) => ({ shown: tags.slice(0, max), more: Math.max(0, tags.length - max) });

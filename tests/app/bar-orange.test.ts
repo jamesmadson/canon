@@ -34,6 +34,6 @@ describe('the bar buttons are never orange when pressed', () => {
 
   it('draws the star filled when starred', async () => {
     const { readFileSync } = await import('node:fs');
-    expect(readFileSync('src/app/bar.ts', 'utf8')).toContain('<${Icon} name="star" fill=${!!frame?.starred} />');
+    expect(readFileSync('src/app/bar.ts', 'utf8')).toContain('<${Icon} name="star" fill=${starred} />');
   });
 });

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { h } from 'preact';
 import { act } from 'preact/test-utils';
 import { useEffect, useState } from 'preact/hooks';
@@ -59,6 +60,16 @@ const open = async (id: string) => {
   return box;
 };
 
+describe('the map tool palette', () => {
+  it('sits at the top left of the stage, 12px in, not at the top centre', () => {
+    const css = readFileSync('src/app/app.css', 'utf8');
+    const rule = /^\.map-tools \{([^}]*)\}/m.exec(css)![1];
+    expect(rule).toMatch(/top: 12px/);
+    expect(rule).toMatch(/left: 12px/);
+    expect(rule).toMatch(/transform: none/);
+  });
+});
+
 describe('the Page and Map control', () => {
   it('appears only for a prototype with more than one page', async () => {
     expect(view(await open('four'))).toBeTruthy();
@@ -89,7 +100,7 @@ describe('the Page and Map control', () => {
 
   it('keeps the whole bottom bar and the top bar when switching', async () => {
     const box = await open('four');
-    const bars = () => [/^Star /, /^Prototype note for/, /^Versions/, /^Archive /, /^Zoom \d+%/, /^Zoom out/, /^Zoom in/, /^Fit everything/].map((l) => !!btn(box, l));
+    const bars = () => [/^Star, /, /^Note, /, /^Versions/, /^Archive, /, /^Zoom \d+%/, /^Zoom out/, /^Zoom in/, /^Fit everything/].map((l) => !!btn(box, l));
     expect(bars()).toEqual(Array(8).fill(true));
     expect(box.querySelector('.viewer-bar')).toBeTruthy();
     await click(btn(box, /^Page$/)!);

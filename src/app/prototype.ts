@@ -16,7 +16,7 @@ import { PageMap, START_CAMERA, type MapApi } from './map';
 import { chooseView, isMulti, takeStartPage, viewOf, type PageView } from './lib/pageview';
 import type { Camera } from './lib/layout';
 import { record } from './lib/tester';
-import { ServerOff, useShown } from './live';
+import { ServerOff, adoptTitle, useShown } from './live';
 import { html, Icon, useStore, frameSrc, pageName, previewUrl, SANDBOX, SIZES } from './shared';
 
 export type FullAddress = Extract<Address, { name: 'full' }>;
@@ -156,14 +156,12 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
   const fit = () => setManual(null);
   const inner = width ? `${width}px` : `${100 / z}%`;
 
+  const pageName_ = view === 'page' && pg && pg !== here.entry ? pageName(pg) : '';
   return html`<div class="focus" role="region" aria-label=${here.name}>
+    <div class="focus-panel">
     <div class="topbar">
-      <button type="button" class="btn ghost icon" aria-label="Back" onClick=${goBack} title="Back (Esc)"><${Icon} name="back" /></button>
-      <h1>${here.name}${view === 'page' && pg && pg !== here.entry ? html`<span class="faint"> · ${pageName(pg)}</span>` : ''}${total > 1 && html`<span class="ver-title" aria-live="polite">${versionTitle(n, total)}</span>`}</h1>
-      ${total > 1 && html`<div class="bar-group" role="group" aria-label="Step through versions">
-        <button type="button" class="btn ghost icon" disabled=${!prev} aria-label="Previous version" title="Previous version (Left arrow)" onClick=${() => step(prev, 'prev')}><${Icon} name="back" /></button>
-        <button type="button" class="btn ghost icon next" disabled=${!next} aria-label="Next version" title="Next version (Right arrow)" onClick=${() => step(next, 'next')}><${Icon} name="back" /></button>
-      </div>`}
+      <h1 class="sr">${here.name}${pageName_ ? html`<span> · ${pageName_}</span>` : ''}${total > 1 && html`<span class="ver-title" aria-live="polite"> ${versionTitle(n, total)}</span>`}</h1>
+      <button type="button" class="btn back" onClick=${goBack} title="Back (Esc)"><${Icon} name="back" />Back</button>
       <span class="spacer"></span>
       ${multi && html`<div class="seg" role="group" aria-label="View">
         <button type="button" aria-pressed=${view === 'page'} onClick=${() => choose('page')}>Page</button>
@@ -173,11 +171,12 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
         ${(here.pages ?? []).map((p) => html`<option value=${p} selected=${p === (pg ?? here.entry)}>${pageName(p)}</option>`)}
       </select>`}
       <div class=${`seg${view === 'map' ? ' away' : ''}`} role="group" aria-label="Width" inert=${view === 'map'}>
-        ${SIZES.map((sz) => html`<button type="button" aria-pressed=${width === sz.w} onClick=${() => { setManual(null); setWidth(sz.w); }}>${sz.name} ${sz.w}</button>`)}
+        ${SIZES.map((sz) => html`<button type="button" aria-pressed=${width === sz.w} onClick=${() => { setManual(null); setWidth(sz.w); }}>${sz.name}<span class="w"> ${sz.w}</span></button>`)}
         <button type="button" aria-pressed=${width === null} onClick=${() => { setManual(null); setWidth(null); }}>Fill</button>
       </div>
-      ${address && html`<button type="button" class="btn ghost" onClick=${copy}><${Icon} name="link" />Copy link</button>`}
-      <a class="btn ghost" href=${newTab} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}><${Icon} name="open" />Open in new tab</a>
+      <span class="spacer"></span>
+      ${address && html`<button type="button" class="btn" aria-label="Copy link" title="Copy link" onClick=${copy}><${Icon} name="link" /><span class="lbl">Copy link</span></button>`}
+      <a class="btn" href=${newTab} target="_blank" rel="noopener" aria-label="Open in new tab" title="Open in new tab" onClick=${() => record('open_new_tab')}><span class="lbl">Open in new tab</span><${Icon} name="open" /></a>
     </div>
     ${view === 'map'
       ? html`<div class="focus-stage map-stage"><${PageMap} key=${here.id} frame=${here} cam=${cam} setCam=${(fn: (c: Camera) => Camera) => setCam(fn)} api=${map} startPage=${startPage.current || undefined} onPage=${pickPage} /></div>`
@@ -189,12 +188,13 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
           : shown.show === 'wait'
             ? null
             : html`<div class="focus-frame" style=${{ width: width ? `${width * z}px` : '100%' }}>
-              <iframe key=${src} src=${src} title=${here.name} style=${{ width: inner, height: `${100 / z}%`, transform: `scale(${z})` }} sandbox=${SANDBOX} onLoad=${() => { noteOpen(Math.round(performance.now() - opening.current.t0)); }}></iframe>
+              <iframe key=${src} src=${src} title=${here.name} style=${{ width: inner, height: `${100 / z}%`, transform: `scale(${z})` }} sandbox=${SANDBOX} onLoad=${(e: Event) => { noteOpen(Math.round(performance.now() - opening.current.t0)); adoptTitle(here, e.currentTarget as HTMLIFrameElement); }}></iframe>
             </div>`}
     </div>`}
     <p class="hint view-note view-hints" role="status">${hints.map((h, i) => html`${i ? ' ' : ''}${h}`)}</p>
-    <${PrototypeBar} frame=${here} stack=${stack} onShow=${show} zoom=${view === 'map'
+    <${PrototypeBar} frame=${here} stack=${stack} onShow=${show} page=${pageName_} zoom=${view === 'map'
       ? { value: cam.zoom, onOut: () => map.current?.zoomBy(0.8), onIn: () => map.current?.zoomBy(1.25), onReset: () => map.current?.zoomTo(1), onFit: () => map.current?.fit() }
       : { value: z, onOut: () => zoomBy(0.8), onIn: () => zoomBy(1.25), onReset: () => setManual(1), onFit: fit }} />
+    </div>
   </div>`;
 }

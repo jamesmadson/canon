@@ -35,12 +35,11 @@ describe('every control has a real label', () => {
     expect(unnamed(box)).toEqual([]);
   });
 
-  it('in the Add menu and the filter panel when they are open', async () => {
+  it('in the Add menu and the tag row when the menu is open', async () => {
     const box = await mount(HomeBody, props());
     await click(box.querySelector('button.add')!);
-    await click(Array.from(box.querySelectorAll('button')).find((b) => b.textContent?.startsWith('Filter'))!);
     expect(box.querySelectorAll('[role="menuitem"]').length).toBe(4);
-    expect(box.querySelector('#filter-panel')).toBeTruthy();
+    expect(box.querySelectorAll('.tagbar .fchip').length).toBeGreaterThan(1);
     expect(unnamed(box)).toEqual([]);
   });
 
@@ -357,13 +356,12 @@ describe('a dropped prototype arrives', () => {
 });
 
 describe('tags', () => {
-  it('opens a filter that offers every tag with its count', async () => {
+  it('offers the most used tags as chips under the header and filters by the one clicked', async () => {
     const onTags = vi.fn();
     const box = await mount(HomeBody, props({ onTags }));
-    await click(Array.from(box.querySelectorAll('button')).find((b) => b.textContent?.startsWith('Filter'))!);
-    const first = box.querySelector<HTMLButtonElement>('#filter-panel button[aria-pressed]')!;
+    const first = box.querySelectorAll<HTMLButtonElement>('.tagbar .fchip')[1];
     await click(first);
-    expect(onTags).toHaveBeenCalledWith([first.querySelector('span')!.textContent]);
+    expect(onTags).toHaveBeenCalledWith([first.textContent]);
   });
 });
 
