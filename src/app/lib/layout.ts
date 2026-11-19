@@ -42,12 +42,12 @@ export function tidyPositions(
 }
 
 /** The camera that fits a set of rectangles inside a viewport, with margin. */
-export function fitCamera(rects: { x: number; y: number; w: number; h: number }[], view: { w: number; h: number }, margin = 80): Camera {
+export function fitCamera(rects: { x: number; y: number; w: number; h: number }[], view: { w: number; h: number }, margin = 80, top = margin): Camera {
   if (rects.length === 0) return { x: view.w / 2, y: view.h / 2, zoom: 1 };
   const minX = Math.min(...rects.map((r) => r.x));
   const minY = Math.min(...rects.map((r) => r.y));
   const maxX = Math.max(...rects.map((r) => r.x + r.w));
   const maxY = Math.max(...rects.map((r) => r.y + r.h));
-  const zoom = clampZoom(Math.min((view.w - margin * 2) / (maxX - minX), (view.h - margin * 2) / (maxY - minY), 1));
-  return { zoom, x: (view.w - (maxX - minX) * zoom) / 2 - minX * zoom, y: (view.h - (maxY - minY) * zoom) / 2 - minY * zoom };
+  const zoom = clampZoom(Math.min((view.w - margin * 2) / (maxX - minX), (view.h - top - margin) / (maxY - minY), 1));
+  return { zoom, x: (view.w - (maxX - minX) * zoom) / 2 - minX * zoom, y: top + (view.h - top - margin - (maxY - minY) * zoom) / 2 - minY * zoom };
 }

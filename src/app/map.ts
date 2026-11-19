@@ -71,11 +71,13 @@ export function PageMap({ frame, cam, setCam, api, startPage, onPage }: MapProps
     [frameId, frame.w, frame.h, pages.join(), flow.length]
   );
 
+  // Room above the pages for the tool palette (12px inset, about 44px tall) and the labels that sit above each page.
+  const MAP_TOP = 124;
   const fit = (only?: string) => {
     const el = canvasRef.current;
     if (!el || !layout) return;
     const rects = (only ? [only] : pages).map((p) => ({ ...layout.positions[p], w: frame.w, h: frame.h }));
-    setCam(() => fitCamera(rects, { w: el.clientWidth, h: el.clientHeight }, only ? 120 : 80));
+    setCam(() => fitCamera(rects, { w: el.clientWidth, h: el.clientHeight }, only ? 120 : 80, MAP_TOP));
   };
   const zoomTo = (z: number) => {
     const el = canvasRef.current;

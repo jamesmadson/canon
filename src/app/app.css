@@ -396,7 +396,7 @@ input, textarea { caret-color: var(--accent); }
 /* Page-only controls keep their room on Map, so the View control does not move. */
 .focus .topbar .away { visibility: hidden; }
 .map-board { flex: 1; min-width: 0; }
-.map-tools { top: 12px; bottom: auto; }
+.map-tools { top: 12px; left: 12px; bottom: auto; transform: none; }
 .view-note { margin: 8px 24px 0; flex: none; text-wrap: pretty; }
 .view-note a, .view-note .link { color: var(--text); }
 .view-note.view-hints { margin: 0 24px 6px; min-height: 2.6em; text-wrap: balance; }

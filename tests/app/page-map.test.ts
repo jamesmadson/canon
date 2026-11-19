@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { h } from 'preact';
 import { act } from 'preact/test-utils';
 import { useEffect, useState } from 'preact/hooks';
@@ -58,6 +59,16 @@ const open = async (id: string) => {
   await act(() => { openPrototype({ id }); });
   return box;
 };
+
+describe('the map tool palette', () => {
+  it('sits at the top left of the stage, 12px in, not at the top centre', () => {
+    const css = readFileSync('src/app/app.css', 'utf8');
+    const rule = /^\.map-tools \{([^}]*)\}/m.exec(css)![1];
+    expect(rule).toMatch(/top: 12px/);
+    expect(rule).toMatch(/left: 12px/);
+    expect(rule).toMatch(/transform: none/);
+  });
+});
 
 describe('the Page and Map control', () => {
   it('appears only for a prototype with more than one page', async () => {

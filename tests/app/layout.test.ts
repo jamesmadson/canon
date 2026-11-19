@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { tidyPositions, clampZoom, screenToWorld, zoomAt } from '../../src/app/lib/layout';
+import { fitCamera, tidyPositions, clampZoom, screenToWorld, zoomAt } from '../../src/app/lib/layout';
 
 const f = (id: string, w = 1280, h = 800) => ({ id, w, h });
 
@@ -32,5 +32,22 @@ describe('camera', () => {
     const next = zoomAt(cam, { x: 300, y: 200 }, 2);
     expect(screenToWorld({ x: 300, y: 200 }, next)).toEqual(screenToWorld({ x: 300, y: 200 }, cam));
     expect(next.zoom).toBe(2);
+  });
+});
+
+describe('fitCamera with room kept at the top', () => {
+  const view = { w: 1200, h: 800 };
+  const rects = (n: number) => Array.from({ length: n }, (_, i) => ({ x: (i % 4) * 1500, y: Math.floor(i / 4) * 1000, w: 1280, h: 800 }));
+  it('keeps every page below the top inset for one, four and twelve pages', () => {
+    for (const n of [1, 4, 12]) {
+      const cam = fitCamera(rects(n), view, 80, 124);
+      const top = cam.y + Math.min(...rects(n).map((r) => r.y)) * cam.zoom;
+      const bottom = cam.y + Math.max(...rects(n).map((r) => r.y + r.h)) * cam.zoom;
+      expect(top, `${n} pages`).toBeGreaterThanOrEqual(124 - 0.5);
+      expect(bottom, `${n} pages`).toBeLessThanOrEqual(view.h - 80 + 0.5);
+    }
+  });
+  it('is the old fit when no inset is given', () => {
+    expect(fitCamera(rects(4), view)).toEqual(fitCamera(rects(4), view, 80, 80));
   });
 });
