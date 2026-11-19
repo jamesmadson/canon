@@ -18,6 +18,8 @@ export interface State {
   notes: Note[];
   ready: boolean;
   toast: string | null;
+  /** A button on the toast, such as Undo. */
+  toastAction?: { label: string; run: () => void } | null;
   vault: Vault;
 }
 
@@ -49,10 +51,14 @@ const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(
 const now = () => Date.now();
 
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
-export function toast(message: string) {
-  set({ toast: message });
+export function toast(message: string, action?: { label: string; run: () => void }, ms = action ? 8000 : 3200) {
+  set({ toast: message, toastAction: action ?? null });
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => set({ toast: null }), 3200);
+  toastTimer = setTimeout(() => set({ toast: null, toastAction: null }), ms);
+}
+export function dismissToast() {
+  clearTimeout(toastTimer);
+  set({ toast: null, toastAction: null });
 }
 
 db.onStaleConnection(() => toast('Canon was updated in another tab. Reload this one.'));
@@ -220,8 +226,8 @@ export async function deleteBoard(id: string) {
 
 /* ── Prototypes and placements ─────────────────────────────────────────── */
 /** Where the next prototype goes on a board: to the right of everything there. */
-function nextSlot(boardId: string) {
-  const frames = framesOf(boardId);
+function nextSlot(boardId: string, pending: Placement[] = []) {
+  const frames = [...framesOf(boardId), ...pending.flatMap((p) => state.frames.filter((f) => f.id === p.frameId).map((f) => ({ ...f, x: p.x, y: p.y })))];
   if (!frames.length) return { x: 0, y: 0 };
   return { x: Math.max(...frames.map((f) => f.x + f.w)) + 120, y: Math.min(...frames.map((f) => f.y)) };
 }
@@ -365,13 +371,17 @@ export async function addUrlVersion(frameId: string, url: string, opts: { force?
   return { frame: state.frames.find((f) => f.id === frame.id) ?? frame, added: true };
 }
 
-/** Move a prototype's spot to another board of the same project. */
+/** Move a prototype's spot to another board. A board in another project moves the whole prototype to that project, onto that board. */
 export async function moveToBoard(placementId: string, boardId: string) {
   const pl = state.placements.find((p) => p.id === placementId);
   if (!pl || pl.boardId === boardId) return;
   const from = state.boards.find((b) => b.id === pl.boardId);
   const to = state.boards.find((b) => b.id === boardId);
-  if (!from || !to || from.projectId !== to.projectId) return;
+  if (!from || !to) return;
+  if (from.projectId !== to.projectId) {
+    await moveToProject([pl.frameId], { id: to.projectId }, { boardId: to.id, quiet: true });
+    return;
+  }
   const key = (() => {
     const f = state.frames.find((x) => x.id === pl.frameId);
     return f ? stackKey(f) : pl.frameId;
@@ -384,6 +394,153 @@ export async function moveToBoard(placementId: string, boardId: string) {
   await removeFromBoard(placementId);
   await touchBoard(from.id);
   if (shows) await touchBoard(to.id);
+}
+
+/* ── Moving prototypes between projects ────────────────────────────────── */
+/** Everything a move changed, so it can be put back exactly. */
+interface MoveRecord {
+  frames: { id: string; projectId: string }[];
+  notes: { id: string; boardId: string }[];
+  removed: Placement[];
+  added: string[];
+  boards: Board[];
+  projects: Project[];
+  created: string | null;
+}
+export interface MoveResult {
+  /** The project the prototypes are in now. */
+  project: Project;
+  /** How many prototypes moved. Prototypes already in that project are left alone. */
+  moved: number;
+  undo(): Promise<void>;
+}
+
+/**
+ * Move whole prototypes, every version of each, to another project. Nothing is
+ * copied: the versions keep their ids, files, note, star, tags, comments and
+ * cover, and only the project they belong to changes. They leave every board
+ * of the old project and land on the target project's first board, if it has
+ * one, in the next free spot. Comments written on a prototype follow it and
+ * point at the landing board; comments on a board's own canvas stay with that
+ * board.
+ *
+ * Writes go new side first: the new spots, then the prototypes' project, then
+ * the old spots, so an interrupted move leaves a prototype in a project, never
+ * in none. `target` is an existing project, or `{ name }` for a new one made in
+ * the same step. `boardId` picks the board to land on instead of the first.
+ */
+export async function moveToProject(
+  frameIds: string[], target: { id: string } | { name: string }, opts: { boardId?: string; quiet?: boolean } = {},
+): Promise<MoveResult | null> {
+  const seen = new Set<string>();
+  const stacksToMove: Frame[][] = [];
+  for (const id of frameIds) {
+    const f = state.frames.find((x) => x.id === id);
+    if (!f || seen.has(stackKey(f))) continue;
+    seen.add(stackKey(f));
+    stacksToMove.push(stackOf(id));
+  }
+  if (!stacksToMove.length) return null;
+  let created: string | null = null;
+  let targetId: string;
+  if ('id' in target) {
+    if (!state.projects.some((p) => p.id === target.id)) throw new Error('That project is not in the library.');
+    targetId = target.id;
+  } else {
+    const name = target.name.trim();
+    if (!name) throw new Error('Give the new project a name.');
+    targetId = (await createProject(name)).id;
+    created = targetId;
+  }
+  const todo = stacksToMove.filter((st) => st.some((f) => f.projectId !== targetId));
+  if (!todo.length) return null;
+
+  const landing = (opts.boardId ? state.boards.find((b) => b.id === opts.boardId && b.projectId === targetId) : undefined) ?? boardsOf(targetId)[0];
+  const memberIds = new Set(todo.flatMap((st) => st.map((f) => f.id)));
+  const oldProjects = new Set(todo.flatMap((st) => st.map((f) => f.projectId)));
+  const oldBoards = state.boards.filter((b) => oldProjects.has(b.projectId));
+  const record: MoveRecord = {
+    frames: todo.flatMap((st) => st.map((f) => ({ id: f.id, projectId: f.projectId }))),
+    notes: [],
+    removed: state.placements.filter((p) => memberIds.has(p.frameId) && oldBoards.some((b) => b.id === p.boardId)),
+    added: [],
+    boards: [],
+    projects: state.projects.filter((p) => p.id === targetId || oldProjects.has(p.id)).map((p) => ({ ...p })),
+    created,
+  };
+  record.boards = [...oldBoards.filter((b) => record.removed.some((p) => p.boardId === b.id)), ...(landing ? [landing] : [])].map((b) => ({ ...b }));
+
+  // 1. The new spots, one per prototype, each after the last.
+  if (landing) {
+    const adds: Placement[] = [];
+    for (const st of todo) {
+      if (state.placements.some((p) => st.some((f) => f.id === p.frameId) && state.boards.some((b) => b.id === p.boardId && b.projectId === targetId))) continue;
+      const spot = nextSlot(landing.id, adds);
+      adds.push({ id: uid(), boardId: landing.id, frameId: currentOf(st).id, x: Math.round(spot.x), y: Math.round(spot.y) });
+    }
+    await db.putMany('placements', adds);
+    record.added = adds.map((p) => p.id);
+    set({ placements: [...state.placements, ...adds] });
+  }
+  // 2. The prototypes, and the comments written on them.
+  const movedFrames = state.frames.filter((f) => memberIds.has(f.id)).map((f) => ({ ...f, projectId: targetId }));
+  await db.putMany('frames', movedFrames);
+  set({ frames: state.frames.map((f) => movedFrames.find((m) => m.id === f.id) ?? f) });
+  const targetBoards = new Set(state.boards.filter((b) => b.projectId === targetId).map((b) => b.id));
+  const movedNotes = state.notes.filter((n) => n.frameId && memberIds.has(n.frameId) && !targetBoards.has(n.boardId)).map((n) => ({ ...n, boardId: landing?.id ?? '' }));
+  if (movedNotes.length) {
+    record.notes = state.notes.filter((n) => movedNotes.some((m) => m.id === n.id)).map((n) => ({ id: n.id, boardId: n.boardId }));
+    await db.putMany('notes', movedNotes);
+    set({ notes: state.notes.map((n) => movedNotes.find((m) => m.id === n.id) ?? n) });
+  }
+  // 3. The old spots.
+  for (const pl of record.removed) await db.remove('placements', pl.id);
+  set({ placements: state.placements.filter((p) => !record.removed.some((r) => r.id === p.id)) });
+  // 4. Both sides count as just used.
+  const stamp = now();
+  const boards = record.boards.map((b) => ({ ...state.boards.find((x) => x.id === b.id)!, updatedAt: stamp }));
+  if (boards.length) {
+    await db.putMany('boards', boards);
+    set({ boards: state.boards.map((b) => boards.find((x) => x.id === b.id) ?? b) });
+  }
+  const projects = record.projects.map((p) => ({ ...state.projects.find((x) => x.id === p.id)!, updatedAt: stamp }));
+  await db.putMany('projects', projects);
+  set({ projects: state.projects.map((p) => projects.find((x) => x.id === p.id) ?? p) });
+
+  const project = state.projects.find((p) => p.id === targetId)!;
+  const result: MoveResult = { project, moved: todo.length, undo: () => undoMove(record) };
+  if (!opts.quiet) toast(`Moved to ${project.name}.`, { label: 'Undo', run: () => { void result.undo(); } });
+  return result;
+}
+
+/** Put a move back: the old spots and project first, then take away what the move added. */
+async function undoMove(r: MoveRecord) {
+  dismissToast();
+  const back = r.removed.filter((p) => state.frames.some((f) => f.id === p.frameId) && state.boards.some((b) => b.id === p.boardId));
+  await db.putMany('placements', back);
+  set({ placements: [...state.placements.filter((p) => !back.some((b) => b.id === p.id)), ...back] });
+  const frames = r.frames.flatMap((o) => { const f = state.frames.find((x) => x.id === o.id); return f ? [{ ...f, projectId: o.projectId }] : []; });
+  await db.putMany('frames', frames);
+  set({ frames: state.frames.map((f) => frames.find((m) => m.id === f.id) ?? f) });
+  const notes = r.notes.flatMap((o) => { const n = state.notes.find((x) => x.id === o.id); return n ? [{ ...n, boardId: o.boardId }] : []; });
+  if (notes.length) {
+    await db.putMany('notes', notes);
+    set({ notes: state.notes.map((n) => notes.find((m) => m.id === n.id) ?? n) });
+  }
+  for (const id of r.added) await db.remove('placements', id);
+  set({ placements: state.placements.filter((p) => !r.added.includes(p.id)) });
+  const boards = r.boards.filter((b) => state.boards.some((x) => x.id === b.id));
+  if (boards.length) {
+    await db.putMany('boards', boards);
+    set({ boards: state.boards.map((b) => boards.find((x) => x.id === b.id) ?? b) });
+  }
+  const projects = r.projects.filter((p) => state.projects.some((x) => x.id === p.id));
+  await db.putMany('projects', projects);
+  set({ projects: state.projects.map((p) => projects.find((x) => x.id === p.id) ?? p) });
+  if (r.created) {
+    await db.remove('projects', r.created);
+    set({ projects: state.projects.filter((p) => p.id !== r.created) });
+  }
 }
 
 /* ── Other tabs ────────────────────────────────────────────────────────── */
