@@ -263,6 +263,12 @@ export async function saveAgent(link: PairLink) {
   // Re-pairing the same agent keeps this browser's tabId, so a claim the MCP already holds still matches.
   const tabId = (await db.get<Agent>('agents', link.agentId))?.tabId ?? newTabId();
   await db.put('agents', { id: link.agentId, name: link.name, secret: link.secret, tabId, pairedAt: Date.now() } satisfies Agent);
+  // A new pairing starts from nothing: the old secret's connection and any old block do not count.
+  for (const [port, l] of [...byPort]) if (l.id === link.agentId) byPort.delete(port);
+  connected = new Set([...connected].filter((id) => id !== link.agentId));
+  connecting = new Set([...connecting].filter((id) => id !== link.agentId));
+  blocked = false;
+  emit();
   post({ type: 'agents' });
   await refreshAgents();
 }
@@ -273,6 +279,9 @@ export async function removeAgent(id: string) {
   await refreshAgents();
 }
 
+/** For tests: set a port's link, and the blocked flag. */
+export const _setLink = (port: number, id: string | null, verified = false) => setLink(port, id, verified);
+export const setBlockedForTest = (v: boolean) => setBlocked(v);
 const byPort = new Map<number, { id: string; verified: boolean }>();
 const postStatus = () => post({ type: 'status', connected: [...connected], connecting: [...connecting], blocked });
 function setBlocked(v: boolean) {
@@ -436,6 +445,7 @@ async function pollLoopInner(port: number, agent: Agent, ctx: Ctx, own: AbortSig
       warnOnce(port);
       return 'bad';
     }
+    if (!currentAgent(agent)) return 'changed';
     setLink(port, agent.id, true);
     setBlocked(false);
     // Disconnected while the poll was out: run nothing.

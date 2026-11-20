@@ -117,6 +117,7 @@ function PairDialog({ pair, onClose }: { pair: PairLink; onClose: () => void }) 
       void waitForConnection(pair.agentId).then((out) => {
         if (out === 'connected') store.toast(`Connected ${pair.name}.`);
         else if (out === 'blocked') store.toast(CHROME_BLOCKED);
+        else store.toast("Canon couldn't reach your agent. Check that it is running and that Chrome allows local network access for this site, then reload.");
       });
     } catch {
       store.toast(`Could not save ${pair.name}. Try the link again.`);

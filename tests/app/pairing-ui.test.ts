@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ComponentType } from 'preact';
+import { render, type ComponentType } from 'preact';
 import { act } from 'preact/test-utils';
 
 const db = vi.hoisted(() => ({ tables: {} as Record<string, any[]> }));
@@ -10,12 +10,13 @@ vi.mock('../../src/app/db', async (orig) => ({
   getAll: async (n: string) => structuredClone(table(n)),
   put: async (n: string, v: any) => { const t = table(n); const i = t.findIndex((x) => x.id === v.id); if (i >= 0) t[i] = v; else t.push(v); },
   remove: async () => {},
+  get: async () => undefined,
 }));
 
 import * as store from '../../src/app/store';
 import { App } from '../../src/app/ui';
 import { CHROME_BLOCKED, connectionOutcome, localNetworkDenied } from '../../src/app/bridge/client';
-import { clear, mount } from './helpers/dom';
+import { clear, click, mount } from './helpers/dom';
 
 const secret = 'ab'.repeat(32);
 const link = `#pair=claude-code.47801.${secret}&name=Claude%20Code`;
@@ -26,7 +27,8 @@ beforeEach(async () => {
   await store.load();
   history.replaceState(null, '', '#/');
 });
-afterEach(() => clear());
+// Unmount, so an earlier App's hashchange listener does not eat the next test's link.
+afterEach(() => { document.body.querySelectorAll(':scope > div').forEach((b) => render(null, b)); clear(); });
 
 describe('a pairing link that arrives in an open Canon tab', () => {
   it('opens the pairing dialog, as a fresh load does, and clears the secret from the address', async () => {
@@ -47,6 +49,23 @@ describe('a pairing link that arrives in an open Canon tab', () => {
     await flush();
     expect(box.querySelector('[role="dialog"]')).toBeNull();
     expect(store.getState().toast).toContain('incomplete');
+  });
+});
+
+describe('when the agent never answers', () => {
+  it('replaces the waiting toast with a way to fix it after 20 seconds', async () => {
+    const box = await mount(App as ComponentType<any>, {});
+    await act(() => { location.hash = link; });
+    await flush();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const connect = Array.from(box.querySelectorAll<HTMLButtonElement>('[role="dialog"] button')).find((b) => b.textContent === 'Connect')!;
+      await click(connect);
+      await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+      expect(store.getState().toast).toBe('Saved Claude Code. Waiting for it to answer.');
+      await act(async () => { await vi.advanceTimersByTimeAsync(20_001); });
+      expect(store.getState().toast).toBe("Canon couldn't reach your agent. Check that it is running and that Chrome allows local network access for this site, then reload.");
+    } finally { vi.useRealTimers(); }
   });
 });
 
