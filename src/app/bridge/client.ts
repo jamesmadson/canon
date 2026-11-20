@@ -105,7 +105,51 @@ let connecting = new Set<string>(); // polling, nothing verified yet
 let holding = false;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((fn) => fn());
-export const bridgeView = () => ({ agents, connected, connecting });
+let blocked = false; // Chrome refused this tab's request to the agent's bridge on this machine
+export const bridgeView = () => ({ agents, connected, connecting, blocked });
+export const CHROME_BLOCKED = 'Chrome is blocking Canon from reaching your agent. Allow local network access for this site, then reload.';
+
+/** The permission names Chrome has used for a site's access to this machine's own network. */
+const LOCAL_NETWORK_PERMISSIONS = ['local-network-access', 'loopback-network', 'local-network'];
+
+/** True when the browser says this site may not reach the local network. A name it does not know counts as no answer. */
+export async function localNetworkDenied(query?: (d: { name: string }) => Promise<{ state: string }>): Promise<boolean> {
+  const ask = query ?? (typeof navigator !== 'undefined' && navigator.permissions ? (d: { name: string }) => navigator.permissions.query(d as PermissionDescriptor) : null);
+  if (!ask) return false;
+  for (const name of LOCAL_NETWORK_PERMISSIONS) {
+    try {
+      if ((await ask({ name })).state === 'denied') return true;
+    } catch {
+      // this browser does not know that name
+    }
+  }
+  return false;
+}
+
+/** What a pairing came to, read off the bridge's state: connected once a signed answer came back, blocked when Chrome refused, else null. */
+export function connectionOutcome(view: { connected: Set<string>; blocked: boolean }, agentId: string): 'connected' | 'blocked' | null {
+  if (view.connected.has(agentId)) return 'connected';
+  return view.blocked ? 'blocked' : null;
+}
+
+/** Waits for the first poll to an agent to succeed, or for Chrome to be seen blocking it. Resolves null when neither happens in time. */
+export function waitForConnection(agentId: string, ms = 20_000): Promise<'connected' | 'blocked' | null> {
+  return new Promise((resolve) => {
+    const check = () => {
+      const out = connectionOutcome(bridgeView(), agentId);
+      if (out) done(out);
+    };
+    const t = setTimeout(() => done(null), ms);
+    const off = subscribeBridge(check);
+    function done(out: 'connected' | 'blocked' | null) {
+      clearTimeout(t);
+      off();
+      resolve(out);
+    }
+    check();
+  });
+}
+
 export function subscribeBridge(fn: () => void) {
   listeners.add(fn);
   return () => listeners.delete(fn);
@@ -116,7 +160,7 @@ const channel = typeof BroadcastChannel === 'undefined' ? null : new BroadcastCh
 type Msg =
   | { type: 'agents' }
   | { type: 'ask' }
-  | { type: 'status'; connected: string[]; connecting: string[] }
+  | { type: 'status'; connected: string[]; connecting: string[]; blocked?: boolean }
   | { type: 'here'; tab: string; hash: string; at: number }
   | { type: 'gone'; tab: string }
   | { type: 'navigate'; tab: string; hash: string };
@@ -230,7 +274,24 @@ export async function removeAgent(id: string) {
 }
 
 const byPort = new Map<number, { id: string; verified: boolean }>();
-const postStatus = () => post({ type: 'status', connected: [...connected], connecting: [...connecting] });
+const postStatus = () => post({ type: 'status', connected: [...connected], connecting: [...connecting], blocked });
+function setBlocked(v: boolean) {
+  if (blocked === v) return;
+  blocked = v;
+  emit();
+  postStatus();
+}
+let checkingBlock = false;
+/** A request to the bridge failed outright: ask the browser whether it is the one refusing. */
+async function noteUnreachable() {
+  if (checkingBlock || blocked) return;
+  checkingBlock = true;
+  try {
+    if (await localNetworkDenied()) setBlocked(true);
+  } finally {
+    checkingBlock = false;
+  }
+}
 function setLink(port: number, agentId: string | null, verified = false) {
   const was = byPort.get(port);
   if ((was?.id ?? null) === agentId && (was?.verified ?? false) === verified) return;
@@ -310,8 +371,13 @@ async function who(port: number, ctx: Ctx): Promise<string | null> {
     const res = await fetch(`http://127.0.0.1:${port}/who`, { cache: 'no-store', signal: ctx.signal });
     if (!res.ok) return null;
     const body = await res.json();
-    return typeof body?.agentId === 'string' ? body.agentId : null;
+    if (typeof body?.agentId === 'string') {
+      setBlocked(false);
+      return body.agentId;
+    }
+    return null;
   } catch {
+    if (!ctx.stopped) void noteUnreachable();
     return null;
   }
 }
@@ -371,6 +437,7 @@ async function pollLoopInner(port: number, agent: Agent, ctx: Ctx, own: AbortSig
       return 'bad';
     }
     setLink(port, agent.id, true);
+    setBlocked(false);
     // Disconnected while the poll was out: run nothing.
     if (!currentAgent(agent) || ctx.stopped) return 'changed';
     const deps = opsDeps(ctx, agent);
@@ -440,6 +507,7 @@ export function startBridgeClient(opts: { appBase: string; ports?: number[] }): 
         const ids = (v: unknown) => new Set(Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []);
         connected = ids(m.connected);
         connecting = ids(m.connecting);
+        blocked = m.blocked === true;
         emit();
       }
     };

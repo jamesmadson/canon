@@ -817,6 +817,7 @@ button.ver-chip:hover { color: var(--text); }
 .agent .dot[data-state="on"] { background: #1F7A54; box-shadow: 0 0 0 3px rgba(31, 122, 84, 0.16); }
 .agent .dot[data-state="wait"] { background: none; box-shadow: inset 0 0 0 1.5px var(--soft); }
 .agent b { font-weight: 500; color: var(--text); }
+.agent-note { margin: 4px 6px 6px; color: var(--text); font-size: var(--fs-meta); letter-spacing: 0; text-wrap: pretty; }
 .agent .btn { margin-left: auto; height: 32px; padding: 0 14px; font-size: var(--fs-meta); letter-spacing: 0; }
 
 /* header */

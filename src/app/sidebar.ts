@@ -5,7 +5,7 @@ import * as vault from './vault';
 import { type Address, buildAddress } from './lib/address';
 import { askTagMenu, sameTag } from './lib/tagbar';
 import { cardsOf, countPrototypes, scopeCards, tagCounts } from './lib/home';
-import { bridgeView, removeAgent, subscribeBridge } from './bridge/client';
+import { CHROME_BLOCKED, bridgeView, removeAgent, subscribeBridge } from './bridge/client';
 import { Avatar } from './comments';
 import { html, Icon, go, ago, useStore } from './shared';
 import { isMac, openSearch } from './palette';
@@ -41,7 +41,7 @@ function Storage() {
 
 /* ── The paired agent ──────────────────────────────────────────────────── */
 function Agents() {
-  const { agents, connected, connecting } = useBridge();
+  const { agents, connected, connecting, blocked } = useBridge();
   if (!agents.length) return null;
   const disconnect = (id: string, name: string) => {
     if (confirm(`Disconnect ${name}? It will stop adding prototypes to Canon, and nothing already here is deleted. To connect it again, ask it to run canon_pair and open the link it gives you.`)) removeAgent(id).catch(() => store.toast(`Could not disconnect ${name}.`));
@@ -56,6 +56,7 @@ function Agents() {
         <button type="button" class="btn ghost" aria-label=${`Disconnect ${a.name}`} onClick=${() => disconnect(a.id, a.name)}>Disconnect</button>
       </div>`;
     })}
+    ${blocked && html`<p class="agent-note" role="alert">${CHROME_BLOCKED}</p>`}
   </div>`;
 }
 

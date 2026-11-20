@@ -224,7 +224,7 @@ export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, r
     // Never approved here: the pairing link is what's missing.
     if (!entry || !entry.claimedBy) {
       let out = `Canon isn't connected. Open it: ${appBase}`;
-      if (entry) out += `\nThen approve this agent: ${link(entry.secret)}`;
+      if (entry) out += `\nThen open this link in a new browser tab to approve this agent: ${link(entry.secret)}`;
       return text(out, true);
     }
     // Approved before: most likely a background tab that hasn't knocked yet. canon_pair would
@@ -291,7 +291,7 @@ export function makeTools({ bridge, appBase, pairing, readPage = realReadPage, r
       if (problem) return text(problem, true);
       if (name === 'canon_pair') {
         const { secret } = rotatePairing(pairing.file, pairing.agentId, pairing.name);
-        return text(`Open this link in Canon to approve this agent: ${link(secret)}`);
+        return text(`Open this link in a new browser tab to approve this agent in Canon: ${link(secret)}`);
       }
       if (name === 'canon_add' || name === 'canon_update') {
         if (args.url !== undefined) {

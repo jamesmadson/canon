@@ -17,7 +17,7 @@ import { takeProjectNameAsk } from './lib/naming';
 import { type Address, buildAddress } from './lib/address';
 import { currentAddress, openHash, replaceAddress } from './lib/nav';
 import { chooseView, setStartPage } from './lib/pageview';
-import { type PairLink, pairNotice, parsePairLink, saveAgent } from './bridge/client';
+import { CHROME_BLOCKED, type PairLink, pairNotice, parsePairLink, saveAgent, waitForConnection } from './bridge/client';
 import { SearchHost } from './palette';
 import { Sidebar, useBridge } from './sidebar';
 import { type Card, type Scope, cardOf, cardsOf, countPrototypes, scopeCards, tagCounts } from './lib/home';
@@ -102,7 +102,12 @@ function PairDialog({ pair, onClose }: { pair: PairLink; onClose: () => void }) 
     try {
       await saveAgent(pair);
       record('pair_done');
-      store.toast(`Connected ${pair.name}.`);
+      // Connected means a signed answer came back from the agent, so the toast waits for one.
+      store.toast(`Saved ${pair.name}. Waiting for it to answer.`);
+      void waitForConnection(pair.agentId).then((out) => {
+        if (out === 'connected') store.toast(`Connected ${pair.name}.`);
+        else if (out === 'blocked') store.toast(CHROME_BLOCKED);
+      });
     } catch {
       store.toast(`Could not save ${pair.name}. Try the link again.`);
     }
@@ -401,14 +406,16 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
   const url = useUrlDialog();
   useEffect(() => { record('view', { view: ({ full: 'prototype', bundle: 'prototype' } as Record<string, string>)[route.name] ?? route.name }); }, [route.name]);
   const [pair, setPair] = useState<PairLink | null>(pairAtLoad);
-  // A pairing link counts only when it opened this page (main.ts reads it). Anything
-  // holding a reference to this tab can rewrite its hash, so a later #pair is cleared.
+  // A pairing link that arrives while Canon is open is read like one at load: cleared from the
+  // address at once, then asked about in the dialog. Nothing connects until the person says so.
   useEffect(() => {
     const later = () => {
-      if (parsePairLink(location.hash) === null) return;
+      const link = parsePairLink(location.hash);
+      if (link === null) return;
       history.replaceState(null, '', location.pathname + location.search);
       dispatchEvent(new HashChangeEvent('hashchange'));
-      store.toast('Open the pairing link in a new tab to connect an agent.');
+      if (link === 'bad') store.toast('That pairing link is incomplete, so nothing was connected. Ask the agent for a new one.');
+      else setPair(link);
     };
     addEventListener('hashchange', later);
     return () => removeEventListener('hashchange', later);

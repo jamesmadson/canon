@@ -36,7 +36,7 @@ describe('canon tools', () => {
     const r = await tools.call('canon_status', {});
     expect(r.isError).toBe(true);
     expect(r.content[0].text).toContain("Canon isn't connected. Open it: https://app/");
-    expect(r.content[0].text).toContain(`Then approve this agent: https://app/#pair=agent.47800.${secret}`);
+    expect(r.content[0].text).toContain(`Then open this link in a new browser tab to approve this agent: https://app/#pair=agent.47800.${secret}`);
   });
   it('tells a claimed agent to try again first, and mentions canon_pair only second', async () => {
     const { tools, secret } = setup({ ok: false, error: 'not-connected' }, { claimed: true });
@@ -129,6 +129,7 @@ describe('canon tools', () => {
     const { tools, secret } = setup();
     const r = await tools.call('canon_pair', {});
     expect(r.content[0].text).toContain('#pair=agent.47800.');
+    expect(r.content[0].text).toContain('Open this link in a new browser tab');
     expect(r.content[0].text).not.toContain(secret);
   });
   it('turns many into an error with candidates', async () => {
