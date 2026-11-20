@@ -51,6 +51,9 @@ type Dir = FileSystemDirectoryHandle & {
   requestPermission?: (o: { mode: 'read' | 'readwrite' }) => Promise<PermissionState>;
 };
 
+/** Off until the folder library is safe. Backup and restore by file do not depend on it. */
+export const FOLDER_LIBRARY = false;
+
 export const folderSupported = () => typeof window !== 'undefined' && 'showDirectoryPicker' in window;
 
 const dataOf = (s: LibraryData): LibraryData => ({
@@ -273,6 +276,8 @@ function onChange() {
 
 /** On boot: find the folder from last time and pick up saving if the browser still allows it. */
 export async function initVault() {
+  // The folder library is parked: it can lose data, so nothing connects or saves to a folder.
+  if (!FOLDER_LIBRARY) return store.setVault({ status: 'unsupported' });
   store.subscribe(onChange);
   if (!folderSupported()) return store.setVault({ status: 'unsupported' });
   const rec = await db.get<{ id: string; handle: Dir }>('handles', VAULT_ID).catch(() => undefined);

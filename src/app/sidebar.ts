@@ -29,34 +29,13 @@ export function pickBackup() {
 }
 
 /* ── Where the library is kept ─────────────────────────────────────────── */
+/** The folder library is parked (it lost data in review), so the rail offers only a downloaded backup and a restore. */
 function Storage() {
-  const { vault: v } = useStore();
-  const tools = html`<div class="store-tools">
-    <button type="button" onClick=${() => vault.downloadBackup()}>Back up</button><button type="button" onClick=${pickBackup}>Restore</button>
-    ${v.status === 'connected' && html`<button type="button" onClick=${() => vault.forgetFolder()}>Stop saving</button>`}
-  </div>`;
-  if (v.status === 'connected') {
-    const when = v.saving ? 'Saving…' : v.savedAt ? `Saved ${ago(v.savedAt)}` : 'Connected';
-    return html`<div class="store">
-      <div class=${`store-line${v.error ? ' warn' : ''}`}><span class="dot"></span><span><b>${v.name}</b> folder · ${v.error ?? when}</span></div>
-      ${tools}
-    </div>`;
-  }
-  if (v.status === 'needs-permission') {
-    return html`<div class="store">
-      <button type="button" class="store-cta" onClick=${() => vault.reconnect()}><b>Reconnect “${v.name}”</b><small>The browser needs your OK to keep saving there.</small></button>
-      ${tools}
-    </div>`;
-  }
-  if (v.status === 'none') {
-    return html`<div class="store">
-      <button type="button" class="store-cta" title="Only in this browser right now. A folder keeps it safe if the browser is cleared." onClick=${() => vault.chooseFolder()}><b>Save to a folder</b><small class="sr">Only in this browser right now. A folder keeps it safe if the browser is cleared.</small></button>
-      ${tools}
-    </div>`;
-  }
   return html`<div class="store">
     <div class="store-line warn"><span class="dot"></span><span>Only in this browser. Back up now and then.</span></div>
-    ${tools}
+    <div class="store-tools">
+      <button type="button" onClick=${() => vault.downloadBackup()}>Back up</button><button type="button" onClick=${pickBackup}>Restore</button>
+    </div>
   </div>`;
 }
 
