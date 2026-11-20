@@ -1,6 +1,6 @@
 {
   "name": "usecanon",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Canon for coding agents: a local MCP server that lets your agent put prototypes, as links or stored copies of a build, into the projects in your Canon app.",
   "type": "module",
   "license": "MIT",
