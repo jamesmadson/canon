@@ -152,8 +152,8 @@ describe('Move to project in a row menu', () => {
     const more = box.querySelector<HTMLButtonElement>('.prow .more')!;
     expect(nameOf(more)).toMatch(/^More actions for /);
     await click(more);
-    const item = box.querySelector<HTMLElement>('[role="menuitem"]')!;
-    expect(item.textContent).toContain('Move to project');
+    expect(Array.from(box.querySelectorAll('[role="menuitem"]')).map((i) => i.textContent)).toEqual(['Rename', 'Move to project']);
+    const item = by(box, '[role="menuitem"]', /Move to project/);
     await click(item);
     await click(by(box, '.move-item', /Search/));
     await settle();

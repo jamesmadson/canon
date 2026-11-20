@@ -62,3 +62,15 @@ describe('a new project asks for its name', () => {
     expect(field.closest('[role="dialog"]')).toBeNull();
   });
 });
+
+describe('an empty project name', () => {
+  it('is refused with a message, and the old name comes back', async () => {
+    const field = nameField(await view());
+    await type(field, '   ');
+    await fire(field, new Event('change', { bubbles: true }));
+    expect(renames()).toEqual([]);
+    expect(field.value).toBe('Untitled project');
+    expect(store.getState().toast).toBe('A project needs a name. Type one and press Enter.');
+  });
+});
+

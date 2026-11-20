@@ -19,6 +19,7 @@ import { currentAddress, openHash, replaceAddress } from './lib/nav';
 import { chooseView, setStartPage } from './lib/pageview';
 import { CHROME_BLOCKED, type PairLink, pairNotice, parsePairLink, saveAgent, waitForConnection } from './bridge/client';
 import { SearchHost } from './palette';
+import { RenameHost } from './rename';
 import { Sidebar, useBridge } from './sidebar';
 import { type Card, type Scope, cardOf, cardsOf, countPrototypes, scopeCards, tagCounts } from './lib/home';
 import { Avatar } from './comments';
@@ -176,7 +177,13 @@ export function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes'
     <div class="topbar">
       <div class="crumb"><a href="#/">Projects</a><span class="faint">/</span>
         <input ref=${nameBox} value=${project.name} aria-label="Project name"
-          onChange=${(e: Event) => { if (escaped.current) escaped.current = false; else store.renameProject(id, (e.target as HTMLInputElement).value); }}
+          onChange=${(e: Event) => {
+            const input = e.target as HTMLInputElement;
+            if (escaped.current) { escaped.current = false; return; }
+            if (input.value.trim()) { void store.renameProject(id, input.value); return; }
+            input.value = project.name;
+            store.toast('A project needs a name. Type one and press Enter.');
+          }}
           onKeyDown=${(e: KeyboardEvent) => {
             const input = e.target as HTMLInputElement;
             if (e.key === 'Enter') input.blur();
@@ -466,6 +473,7 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
               ? html`<${ProjectView} id=${route.project} tab=${route.tab} askUrl=${url.ask} />`
               : html`<${Home} scope=${scope ?? SCOPES.home} askUrl=${url.ask} onOpen=${open} tags=${tags} onTags=${chooseTags} />`}
     ${url.view}
+    <${RenameHost} />
     <${SearchHost} cards=${cards} projectName=${projectName} onPick=${open} />
     ${pair && html`<${PairDialog} pair=${pair} onClose=${() => setPair(null)} />`}
     ${s.toast && html`<div class="toast" role="status"><span>${s.toast}</span>${s.toastAction && html`<button type="button" class="toast-act" onClick=${() => { const run = s.toastAction!.run; store.dismissToast(); run(); }}>${s.toastAction.label}</button>`}</div>`}

@@ -9,6 +9,7 @@ import { neighbour, tagsForBar, versionLine, versionTitle } from './lib/viewer';
 import { LiveToggle } from './live';
 import { record } from './lib/tester';
 import { MoveMenu, useDismiss } from './move';
+import { askRename } from './rename';
 
 const NONE = 'select a prototype first';
 
@@ -188,6 +189,7 @@ export function PrototypeBar({ frame, stack, onShow, onAdd, zoom, page }: { fram
   return html`<div class="viewer-bar" role="group" aria-label="Prototype controls">
     <div class="vb-id">
       <h2 class="vb-name" title=${frame.name}>${frame.name}${page ? html`<span class="faint"> · ${page}</span>` : null}</h2>
+      <button type="button" class="btn icon vb-rename" aria-label=${`Rename ${frame.name}`} title="Rename" onClick=${() => askRename(frame.id)}><${Icon} name="edit" /></button>
       <${VersionStep} frame=${frame} stack=${stack} onShow=${onShow} />
       <${BarTags} tags=${frame.tags ?? []} />
     </div>

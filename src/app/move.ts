@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import * as store from './store';
 import { html, Icon, useStore } from './shared';
+import { askRename } from './rename';
 
 /** What a dragged row or card carries: the ids of the prototypes. */
 export const DRAG_TYPE = 'application/x-canon-prototypes';
@@ -123,6 +124,7 @@ export function RowMenu({ ids, name, className = '' }: { ids: string[]; name: st
   return html`<div class=${`rowmenu ${className}${stage !== 'closed' ? ' open' : ''}`} ref=${wrap} onClick=${(e: Event) => e.stopPropagation()}>
     <button type="button" ref=${button} class="more" aria-haspopup="menu" aria-expanded=${stage !== 'closed'} aria-label=${`More actions for ${name}`} title="More actions" onClick=${toggle}><${Icon} name="more" size=${16} /></button>
     ${stage === 'menu' && html`<div class="menu rowmenu-pop" role="menu" style=${at}>
+      ${ids.length === 1 && html`<button type="button" role="menuitem" onClick=${() => { setStage('closed'); askRename(ids[0]); }}><${Icon} name="edit" />Rename</button>`}
       <button type="button" role="menuitem" onClick=${() => setStage('move')}><${Icon} name="move" />Move to project</button>
     </div>`}
     ${stage === 'move' && html`<div class="bar-pop move-pop" role="dialog" aria-label=${`Move ${name} to a project`} style=${at}><${MoveMenu} ids=${ids} onDone=${() => setStage('closed')} /></div>`}

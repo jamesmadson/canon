@@ -53,6 +53,7 @@ const P: Record<string, string> = {
   chevron: 'm4 6 4 4 4-4',
   close: 'M4.5 4.5l7 7M11.5 4.5l-7 7',
   note: 'M3 2.5h10v8l-3 3H3zM10 13.5v-3h3M5.5 6h5M5.5 8.5h3',
+  edit: 'M3 13h2.5l7-7L10 3.5l-7 7zM8.8 4.7l2.5 2.5',
   copy: 'M5.5 5.5h7v8h-7zM3.5 10.5v-8h7',
   versions: 'M8 2.5l5.5 3L8 8.5 2.5 5.5zM2.5 8.5L8 11.5l5.5-3M2.5 11.5L8 14.5l5.5-3',
 };

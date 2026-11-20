@@ -193,12 +193,14 @@ export async function createProject(name = 'Untitled project'): Promise<Project>
   set({ projects: [...state.projects, project] });
   return project;
 }
-export async function renameProject(id: string, name: string) {
+/** False when the name is empty or the project is gone, and nothing changed. */
+export async function renameProject(id: string, name: string): Promise<boolean> {
   const p = state.projects.find((x) => x.id === id);
-  if (!p || !name.trim()) return;
+  if (!p || !name.trim()) return false;
   const next = { ...p, name: name.trim(), updatedAt: now() };
   await db.put('projects', next);
   set({ projects: state.projects.map((x) => (x.id === id ? next : x)) });
+  return true;
 }
 
 export async function createBoard(projectId: string, name = 'Untitled board'): Promise<Board> {
@@ -675,6 +677,14 @@ const metaNow = (frameId: string): FrameMeta => {
 const projectOf = (frameId: string) => state.frames.find((f) => f.id === frameId)?.projectId ?? '';
 
 export const setStarred = (id: string, starred: boolean) => updateMeta(id, { starred }, false);
+/** Renames a prototype, every version of it. False when the name is empty, and nothing changed. */
+export async function renameFrame(id: string, name: string): Promise<boolean> {
+  const next = name.trim();
+  if (!next || !state.frames.some((f) => f.id === id)) return false;
+  for (const f of stackOf(id)) if (f.name !== next) await updateFrame(f.id, { name: next }, true, false);
+  return true;
+}
+
 export const setNote = (id: string, note: string) => updateMeta(id, { note }, false);
 export const setArchived = (id: string, archived: boolean) => updateMeta(id, { archived }, false);
 
