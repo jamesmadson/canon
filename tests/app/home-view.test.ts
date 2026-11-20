@@ -176,11 +176,11 @@ describe('home paints quickly with 50 prototypes', () => {
 });
 
 describe('first run', () => {
-  it('shows the setup line and a drop target and nothing else', async () => {
+  it('shows the setup line, a drop target and a way to add a link, and nothing else', async () => {
     const box = await mount(Home, { scope: { kind: 'home' as const }, askUrl: async () => null, onOpen: () => {} });
     expect(box.textContent).toContain(SETUP_COMMAND);
     const controls = Array.from(box.querySelectorAll('button, a, input, select')).map((c) => nameOf(c));
-    expect(controls).toEqual(['Copy', 'Drop a link or a zip here or choose files']);
+    expect(controls).toEqual(['Copy', 'Drop a link or a zip here or choose files', 'Add a link']);
     expect(box.querySelector('.bar')).toBeNull();
     expect(box.querySelector('.hint-bar')).toBeNull();
   });
@@ -194,6 +194,15 @@ describe('first run', () => {
     expect(writeText).toHaveBeenCalledWith('claude mcp add canon -- npx -y usecanon mcp');
     expect(box.querySelector('.setup button')!.textContent).toContain('Copied');
     expect(box.querySelector('[role="status"]')!.textContent).toContain('Copied');
+  });
+
+  it('adds a link from a visible button, and says a paste works too', async () => {
+    const linked = vi.fn();
+    const box = await mount(FirstRun, { onChoose: () => {}, onLink: linked });
+    const add = Array.from(box.querySelectorAll('button')).find((b) => b.textContent?.includes('Add a link'))!;
+    expect(box.querySelector('.first-link')!.textContent).toMatch(/paste one with\s*(⌘|Ctrl)\s*V/);
+    await click(add);
+    expect(linked).toHaveBeenCalledOnce();
   });
 
   it('opens the file chooser from the drop target', async () => {

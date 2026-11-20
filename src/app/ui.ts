@@ -7,7 +7,7 @@ import { PrototypeView, openPrototype } from './prototype';
 import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort } from './lib/library';
 import { Home } from './home';
 import { ActiveFilters, FilterPop } from './libfilter';
-import { AddMenu, ProtoRow, StarButton, Tags, metaOf } from './parts';
+import { AddMenu, LinkTile, ProtoRow, StarButton, Tags, metaOf } from './parts';
 import { MoveMenu, RowMenu, carries, startDrag, useDismiss } from './move';
 import { pagesOf } from './lib/pageview';
 import { currentOf, stackKey } from './lib/versions';
@@ -63,13 +63,14 @@ function useUrlDialog() {
 }
 
 export function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) {
-  const [value, setValue] = useState('http://localhost:5173/');
+  const [value, setValue] = useState('');
   // The name follows the address until the person types one of their own.
   const [typedName, setTypedName] = useState<string | null>(null);
-  const nameBox = useRef<HTMLInputElement>(null);
+  const addressBox = useRef<HTMLInputElement>(null);
   const checked = checkPrototypeUrl(value, location.origin);
   const name = typedName ?? nameFromUrl(checked.ok ? checked.url : value);
-  useEffect(() => { nameBox.current?.focus(); nameBox.current?.select(); }, []);
+  // The address comes first, empty, so a paste lands in it. The name follows the address.
+  useEffect(() => { addressBox.current?.focus(); }, []);
   const submit = (e: Event) => {
     e.preventDefault();
     if (checked.ok) {
@@ -79,12 +80,12 @@ export function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) 
   };
   return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose(null)}>
     <form class="dialog" onSubmit=${submit} role="dialog" aria-modal="true" aria-labelledby="url-title">
-      <h3 id="url-title">Link a running prototype</h3>
-      <p class="soft" style="margin:0">A dev server or a preview deploy. Canon frames the page and keeps no copy. Some sites refuse to be framed and stay blank.</p>
+      <h3 id="url-title">Add a link</h3>
+      <p class="soft" style="margin:0">Paste the address of a page that is already online, such as a Lovable or v0 link, or one running on your machine. Canon keeps the link and shows the live page. A site that does not allow being shown inside other pages gets an Open in a new tab button instead.</p>
       <label class="fb-label" for="url-address">Address</label>
-      <input class="field" id="url-address" value=${value} onInput=${(e: Event) => setValue((e.target as HTMLInputElement).value)} />
+      <input class="field" id="url-address" ref=${addressBox} type="url" inputmode="url" autocomplete="off" placeholder="https://" value=${value} onInput=${(e: Event) => setValue((e.target as HTMLInputElement).value)} />
       <label class="fb-label" for="url-name">Name</label>
-      <input class="field" id="url-name" ref=${nameBox} value=${name} onInput=${(e: Event) => setTypedName((e.target as HTMLInputElement).value)} />
+      <input class="field" id="url-name" value=${name} onInput=${(e: Event) => setTypedName((e.target as HTMLInputElement).value)} />
       <div class="row" style="justify-content:flex-end">
         <button type="button" class="btn ghost" onClick=${() => onClose(null)}>Cancel</button>
         <button class="btn primary">Add</button>
@@ -320,6 +321,8 @@ export function Library({ projectId, askUrl }: { projectId: string; askUrl: () =
                 <span class="lib-frame" style=${{ width: f.w * s, height: f.h * s }}>
                   ${showsCover(f)
                     ? html`<img class="frame-cover" src=${coverSrc(f)} alt="" />`
+                    : f.kind === 'url'
+                    ? html`<${LinkTile} frame=${f} />`
                     : html`<iframe src=${frameSrc(f)} tabindex="-1" loading="lazy" sandbox=${SANDBOX} aria-hidden="true" style=${{ width: f.w, height: f.h, transform: `scale(${s})` }}></iframe>`}
                 </span>
               </button>
@@ -427,7 +430,7 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
         : route.name === 'board' || (route.name === 'full' && route.board)
           ? html`<${BoardView} id=${route.board} frameId=${route.name === 'board' ? route.frame ?? route.show ?? null : route.frame} full=${route.name === 'full' ? route : null} askUrl=${url.ask} />`
           : route.name === 'full'
-            ? html`<${PrototypeView} address=${route} />`
+            ? html`<${PrototypeView} address=${route} askUrl=${url.ask} />`
             : route.name === 'project'
               ? html`<${ProjectView} id=${route.project} tab=${route.tab} askUrl=${url.ask} />`
               : html`<${Home} scope=${scope ?? SCOPES.home} askUrl=${url.ask} onOpen=${open} tags=${tags} onTags=${chooseTags} />`}

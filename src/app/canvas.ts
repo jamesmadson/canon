@@ -17,7 +17,7 @@ import { PrototypeActions, ZoomControls } from './bar';
 import { FrameBody, LiveSwitch } from './live';
 import {
   html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES, showsCover, coverSrc,
-  addGroups, runWay, NoteItem, type Way,
+  addGroups, addVersion, runWay, WayButtons, NoteItem, type Way,
 } from './shared';
 
 /* ── The hover tease: up to four more pages, peeking out from behind ────── */
@@ -401,10 +401,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
             <button class="btn" onClick=${() => setMenu(!menu)} title="Add prototypes"><${Icon} name="plus" />Add</button>
             ${menu && html`<div class="menu">
               <button onClick=${() => { setMenu(false); setPicker(true); }}><${Icon} name="grid" />From the library…</button>
-              <button onClick=${() => way('files')}><${Icon} name="file" />HTML or zip files…</button>
-              <button onClick=${() => way('folder')}><${Icon} name="folder" />A folder…</button>
-              <button onClick=${() => way('link')} disabled=${!canLinkFolders()}><${Icon} name="link" />Link a folder on your machine…${!canLinkFolders() && html`<small>Chromium</small>`}</button>
-              <button onClick=${() => way('url')}><${Icon} name="globe" />A running URL…</button>
+              <${WayButtons} pick=${way} />
             </div>`}
           </div>
           <span class="sep"></span>`}
@@ -423,7 +420,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
         : sel && html`<${Inspector} frame=${sel} askUrl=${askUrl} onFocus=${() => openFocus(sel.id)} onEnter=${() => enter(sel)} onRemove=${removeSelected} onComment=${() => setTool('comment')} onOpenThread=${jumpTo} />`}
     </div>
     ${picker && html`<${LibraryPicker} projectId=${board.projectId} boardId=${id} onClose=${() => setPicker(false)} />`}
-    ${focused && full && html`<${Focus} frame=${focused} address=${full} onClose=${closeFocus} />`}
+    ${focused && full && html`<${Focus} frame=${focused} address=${full} askUrl=${askUrl} onClose=${closeFocus} />`}
   </div>`;
 }
 
@@ -445,12 +442,8 @@ function Versions({ frame, askUrl }: { frame: BoardFrame; askUrl: () => Promise<
   const current = stack.length ? currentOf(stack) : frame;
   const add = async (w: Way) => {
     setMenu(false);
-    const before = new Set(store.getState().frames.map((f) => f.id));
-    await runWay(w, frame.projectId, undefined, askUrl);
-    const added = store.getState().frames.filter((f) => !before.has(f.id));
-    const next = added[added.length - 1];
+    const next = await addVersion(frame, w, askUrl);
     if (!next) return;
-    await store.joinStack(next.id, frame.id);
     // A new round of the same thing takes the same space on the board.
     await store.updateFrame(next.id, { w: frame.w, h: frame.h });
     await store.swapOnBoard(frame.placementId, next.id);
@@ -477,10 +470,7 @@ function Versions({ frame, askUrl }: { frame: BoardFrame; askUrl: () => Promise<
       <button class="btn" onClick=${() => setMenu(!menu)}><${Icon} name="plus" />Add a version</button>
       ${stack.length > 1 && html`<button class="btn ghost" onClick=${() => store.unstack(frame.id)} title="Take this one out of the stack">Unstack</button>`}
       ${menu && html`<div class="menu" style="top:40px;left:0">
-        <button onClick=${() => add('files')}><${Icon} name="file" />HTML or zip files…</button>
-        <button onClick=${() => add('folder')}><${Icon} name="folder" />A folder…</button>
-        ${canLinkFolders() && html`<button onClick=${() => add('link')}><${Icon} name="link" />Link a folder on your machine…</button>`}
-        <button onClick=${() => add('url')}><${Icon} name="globe" />A running URL…</button>
+        <${WayButtons} pick=${add} />
       </div>`}
     </div>
   </div>`;

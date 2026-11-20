@@ -49,7 +49,7 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-export function FirstRun({ onChoose }: { onChoose: () => void }) {
+export function FirstRun({ onChoose, onLink }: { onChoose: () => void; onLink?: () => void }) {
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -71,6 +71,10 @@ export function FirstRun({ onChoose }: { onChoose: () => void }) {
         <b>Drop a link or a zip here</b>${" "}
         <span>or choose files</span>
       </button>
+      ${onLink && html`<div class="first-link">
+        <button type="button" class="btn" onClick=${onLink}><${Icon} name="link" size=${14} />Add a link</button>
+        <span>or paste one with <kbd>${isMac ? '⌘' : 'Ctrl '}V</kbd></span>
+      </div>`}
     </div>
   </div>`;
 }
@@ -267,7 +271,7 @@ export function Home({ scope, askUrl, onOpen, tags = [], onTags }: { scope: Scop
   const first = s.frames.length === 0 && scope.kind === 'home';
   const dropName = drag?.project ? s.projects.find((p) => p.id === drag.project)?.name : null;
   const body = first
-    ? html`<main class="main" aria-label="Home"><${FirstRun} onChoose=${() => way('files', null)} /></main>`
+    ? html`<main class="main" aria-label="Home"><${FirstRun} onChoose=${() => way('files', null)} onLink=${() => way('url', null)} /></main>`
     : html`<${HomeBody} scope=${scope} cards=${cards} projects=${s.projects} view=${view} onView=${setView} chosenTags=${tags} onTags=${onTags}
         tagList=${tagList} onOpen=${onOpen} onWay=${way} arriving=${arriving} landed=${landed} />`;
   return html`<div class="home-drop" onDragOver=${(e: DragEvent) => { if (!accepts(e)) return; e.preventDefault(); setDrag({ project: hitOf(e) }); }}

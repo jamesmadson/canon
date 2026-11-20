@@ -5,7 +5,7 @@ import * as store from './store';
 import type { Frame, Note } from './db';
 import { SIZES } from './lib/sizes';
 import { safeFrameUrl } from './lib/resolve';
-import { groupsFromFiles, linkFolder, prepare, type Group } from './intake';
+import { canLinkFolders, groupsFromFiles, linkFolder, prepare, type Group } from './intake';
 import { record } from './lib/tester';
 import { takeLinkName } from './lib/linkname';
 
@@ -126,6 +126,25 @@ function pickFiles(opts: { folder?: boolean }): Promise<FileList | null> {
 }
 
 export type Way = 'files' | 'folder' | 'link' | 'url';
+
+/** The four ways in, as menu buttons. A link and a linked folder are different things, so each says which. */
+export function WayButtons({ pick }: { pick: (w: Way) => void }) {
+  return html`<button type="button" role="menuitem" onClick=${() => pick('files')}><${Icon} name="file" />HTML or zip files…</button>
+    <button type="button" role="menuitem" onClick=${() => pick('folder')}><${Icon} name="folder" />A folder…</button>
+    <button type="button" role="menuitem" onClick=${() => pick('url')}><${Icon} name="globe" />A link…</button>
+    <button type="button" role="menuitem" onClick=${() => pick('link')} disabled=${!canLinkFolders()}><${Icon} name="link" />Link a folder on your machine…${!canLinkFolders() && html`<small>Chromium</small>`}</button>`;
+}
+
+/** Adds something by one of the ways and stacks it as a new version of `frame`. Returns the new version, or undefined when nothing was added. */
+export async function addVersion(frame: Frame, w: Way, askUrl: () => Promise<string | null>): Promise<Frame | undefined> {
+  const before = new Set(store.getState().frames.map((f) => f.id));
+  await runWay(w, frame.projectId, undefined, askUrl);
+  const added = store.getState().frames.filter((f) => !before.has(f.id));
+  const next = added[added.length - 1];
+  if (!next) return undefined;
+  await store.joinStack(next.id, frame.id);
+  return store.getState().frames.find((f) => f.id === next.id) ?? next;
+}
 /** Runs one way in. Returns how many prototypes were added. */
 export async function runWay(way: Way, projectId: string, boardId: string | undefined, askUrl: () => Promise<string | null>): Promise<number> {
   const kind = way === 'url' ? 'link' : way === 'files' ? 'file' : 'folder';
