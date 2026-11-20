@@ -89,6 +89,20 @@ describe('the prototype view', () => {
     expect(title(box)).toContain('Version 2 of 2');
   });
 
+  it('carries the name, star, note, tags and archive state onto a version added from the view', async () => {
+    db.lists.frames = db.lists.frames.map((f: any) => (f.id === 'b' ? { ...f, starred: true, note: 'Check the tiers', tags: ['pricing'], archived: true } : f));
+    await store.load();
+    const box = await open('b');
+    await click(btn(box, /^Versions/));
+    await click(Array.from(box.querySelectorAll('.add-version button')).find((b) => b.textContent === 'A link…')!);
+    await flush();
+    await flush();
+    const made = db.writes.filter(([n, v]) => n === 'frames' && v.kind === 'url' && v.url === 'https://new.example/').at(-1)![1];
+    const now = stored(made.id).at(-1)!;
+    expect(now).toMatchObject({ name: 'Three tiers', starred: true, note: 'Check the tiers', archived: true });
+    expect(now.tags).toEqual(expect.arrayContaining(['pricing']));
+  });
+
   it('stars and notes in place, with no trip to another page', async () => {
     const box = await open('b');
     await click(btn(box, /^Star, /));

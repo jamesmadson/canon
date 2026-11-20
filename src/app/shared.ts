@@ -8,6 +8,8 @@ import { safeFrameUrl } from './lib/resolve';
 import { canLinkFolders, groupsFromFiles, linkFolder, prepare, type Group } from './intake';
 import { record } from './lib/tester';
 import { takeLinkName } from './lib/linkname';
+import { inheritedMeta } from './lib/meta';
+import { currentOf } from './lib/versions';
 
 export const html = htm.bind(h);
 export const BASE = import.meta.env.BASE_URL.replace(/\/?$/, '/');
@@ -138,11 +140,14 @@ export function WayButtons({ pick }: { pick: (w: Way) => void }) {
 /** Adds something by one of the ways and stacks it as a new version of `frame`. Returns the new version, or undefined when nothing was added. */
 export async function addVersion(frame: Frame, w: Way, askUrl: () => Promise<string | null>): Promise<Frame | undefined> {
   const before = new Set(store.getState().frames.map((f) => f.id));
+  const kept = inheritedMeta(currentOf(store.stackOf(frame.id)));
   await runWay(w, frame.projectId, undefined, askUrl);
   const added = store.getState().frames.filter((f) => !before.has(f.id));
   const next = added[added.length - 1];
   if (!next) return undefined;
   await store.joinStack(next.id, frame.id);
+  // The prototype keeps its name, star, note, tags and archive state, the way a stacked drop does.
+  await store.updateFrame(next.id, { name: frame.name, ...kept }, true, false);
   return store.getState().frames.find((f) => f.id === next.id) ?? next;
 }
 /** Runs one way in. Returns how many prototypes were added. */
