@@ -3,7 +3,6 @@ The public roadmap lives at `/canon/roadmap/`. The same lists, as plain Markdown
 ## Now
 
 - Usability sessions with five designers
-- A calmer project page
 
 ## Next
 

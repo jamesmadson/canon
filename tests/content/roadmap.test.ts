@@ -23,10 +23,10 @@ beforeAll(() => {
 describe('the hidden roadmap page', () => {
   const page = () => text(join(out, 'roadmap/index.html')).replace(/ |&nbsp;/g, ' ');
 
-  it('shows three columns and eight items', () => {
+  it('shows three columns and seven items', () => {
     const html = page();
     for (const name of ['Now', 'Next', 'Later']) expect(html).toMatch(new RegExp(`class="rm-name"[^>]*>${name}<`));
-    expect((html.match(/<li>/g) ?? []).length).toBe(8);
+    expect((html.match(/<li>/g) ?? []).length).toBe(7);
     expect(html).toContain('Roadmap');
     expect(html).toContain('Join the waitlist');
     expect(html).toContain('https://github.com/jamesmadson/canon/issues/new');

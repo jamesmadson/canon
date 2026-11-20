@@ -18,7 +18,6 @@ export const ROADMAP: RoadmapColumn[] = [
     name: 'Now',
     items: [
       { text: 'Usability sessions with five designers' },
-      { text: 'A calmer project page' },
     ],
   },
   {
