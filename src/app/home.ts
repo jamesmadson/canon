@@ -223,7 +223,8 @@ export function Home({ scope, askUrl, onOpen, tags = [], onTags }: { scope: Scop
   const ensureProject = async (id: string | null) => id ?? (await store.createProject('My prototypes')).id;
 
   const way = async (w: Way, projectId: string | null) => {
-    const target = await ensureProject(projectId ?? dropTarget(store.getState().projects, null));
+    // With no project yet, "My prototypes" is made only once the dialog or picker returns something to add.
+    const target = projectId ?? dropTarget(store.getState().projects, null) ?? (async () => (await store.createProject('My prototypes')).id);
     await track(null, () => runWay(w, target, undefined, askUrl));
   };
   const addLinks = async (links: string[], projectId: string | null) => {

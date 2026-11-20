@@ -157,8 +157,11 @@ export async function addVersion(frame: Frame, w: Way, askUrl: () => Promise<str
   await store.updateFrame(next.id, { name: frame.name, ...kept }, true, false);
   return store.getState().frames.find((f) => f.id === next.id) ?? next;
 }
+/** A project, or a way to make one that runs only once there is something to put in it. */
+export type ProjectRef = string | (() => Promise<string>);
+
 /** Runs one way in. Returns how many prototypes were added. */
-export async function runWay(way: Way, projectId: string, boardId: string | undefined, askUrl: () => Promise<string | null>): Promise<number> {
+export async function runWay(way: Way, projectId: ProjectRef, boardId: string | undefined, askUrl: () => Promise<string | null>): Promise<number> {
   const kind = way === 'url' ? 'link' : way === 'files' ? 'file' : 'folder';
   const t0 = Date.now();
   record('add_start', { kind });
@@ -172,11 +175,12 @@ export async function runWay(way: Way, projectId: string, boardId: string | unde
   }
 }
 
-async function runWayInner(way: Way, projectId: string, boardId: string | undefined, askUrl: () => Promise<string | null>): Promise<number> {
+async function runWayInner(way: Way, projectId: ProjectRef, boardId: string | undefined, askUrl: () => Promise<string | null>): Promise<number> {
+  const target = () => (typeof projectId === 'string' ? Promise.resolve(projectId) : projectId());
   if (way === 'url') {
     const url = await askUrl();
     if (!url) return 0;
-    await store.addUrl(projectId, url, { boardId, name: takeLinkName(url) });
+    await store.addUrl(await target(), url, { boardId, name: takeLinkName(url) });
     return 1;
   }
   let groups: Group[] = [];
@@ -192,7 +196,7 @@ async function runWayInner(way: Way, projectId: string, boardId: string | undefi
     groups = [g];
   }
   if (!groups.length) return 0;
-  return addGroups(projectId, groups, { boardId });
+  return addGroups(await target(), groups, { boardId });
 }
 
 /* ── A note, wherever it is listed ──────────────────────────────────────── */
