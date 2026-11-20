@@ -506,6 +506,13 @@ input, textarea { caret-color: var(--accent); }
   box-shadow: 0 0 0 1px var(--line-strong), 0 12px 32px var(--shadow-lg);
 }
 
+.narrow { display: none; }
+.narrow h1 { margin: 0; font-size: var(--fs-title); font-weight: 400; line-height: 1.3; text-wrap: balance; }
+.narrow p { margin: 0; color: var(--soft); font-size: var(--fs-base); text-wrap: pretty; }
+@media (max-width: 759.98px) {
+  .shell { display: none; }
+  .narrow { display: flex; min-height: 100vh; flex-direction: column; align-items: flex-start; justify-content: center; gap: 12px; padding: 24px 16px; background: var(--bg); }
+}
 @media (max-width: 760px) {
   .shell { grid-template-columns: 1fr; }
   .rail { display: none; }

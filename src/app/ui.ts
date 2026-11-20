@@ -400,6 +400,22 @@ function ProjectComments({ projectId }: { projectId: string }) {
 /* ── App ───────────────────────────────────────────────────────────────── */
 const SCOPES: Record<string, Scope> = { home: { kind: 'home' }, starred: { kind: 'starred' }, archive: { kind: 'archive' } };
 
+/** What a window under 760px shows in place of the app: one plain screen, no menu. */
+function NarrowScreen() {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(location.origin + location.pathname);
+      setCopied(true);
+    } catch { /* the button stays as it was */ }
+  };
+  return html`<div class="narrow">
+    <h1>Canon needs a wider\u00a0window</h1>
+    <p>Widen the window or open Canon on a\u00a0laptop.</p>
+    <button type="button" class="btn" onClick=${copy}>${copied ? 'Copied' : 'Copy link'}</button>
+  </div>`;
+}
+
 export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
   const s = useStore();
   const route = useRoute();
@@ -445,5 +461,5 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
     <${SearchHost} cards=${cards} projectName=${projectName} onPick=${open} />
     ${pair && html`<${PairDialog} pair=${pair} onClose=${() => setPair(null)} />`}
     ${s.toast && html`<div class="toast" role="status"><span>${s.toast}</span>${s.toastAction && html`<button type="button" class="toast-act" onClick=${() => { const run = s.toastAction!.run; store.dismissToast(); run(); }}>${s.toastAction.label}</button>`}</div>`}
-  </div>`;
+  </div><${NarrowScreen} />`;
 }
