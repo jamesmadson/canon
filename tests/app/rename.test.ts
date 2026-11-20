@@ -104,3 +104,30 @@ describe('Rename in the prototype view', () => {
     expect(box.querySelector('h2.vb-name')!.textContent).toBe('Tiers');
   });
 });
+
+describe('Esc in a dialog opened from the prototype view', () => {
+  const stays = () => expect(location.hash).toBe('#/f/b/full');
+
+  it('closes only the Rename dialog', async () => {
+    history.replaceState(null, '', '#/f/b/full');
+    const box = await mount(App as ComponentType<any>, {});
+    await click(Array.from(box.querySelectorAll('button')).find((b) => nameOf(b) === 'Rename Three tiers')!);
+    await key(field(box), 'Escape');
+    expect(dialog(box)).toBeNull();
+    stays();
+  });
+
+  it('closes only the Add a link dialog', async () => {
+    history.replaceState(null, '', '#/f/b/full');
+    const box = await mount(App as ComponentType<any>, {});
+    await click(Array.from(box.querySelectorAll('button')).find((b) => /^Versions/.test(nameOf(b)))!);
+    await click(Array.from(box.querySelectorAll('.add-version button')).find((b) => b.textContent === 'A link…')!);
+    await flush();
+    const address = box.querySelector<HTMLInputElement>('#url-address')!;
+    expect(address).not.toBeNull();
+    await key(address, 'Escape');
+    expect(box.querySelector('#url-address')).toBeNull();
+    stays();
+  });
+});
+

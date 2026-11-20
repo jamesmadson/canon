@@ -33,9 +33,10 @@ function RenameDialog({ frame, onClose }: { frame: Frame; onClose: () => void })
   const box = useRef<HTMLInputElement>(null);
   useEffect(() => { box.current?.focus(); box.current?.select(); }, []);
   useEffect(() => {
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    addEventListener('keydown', esc);
-    return () => removeEventListener('keydown', esc);
+    // Captured, so the view behind the dialog never sees this Esc and stays where it is.
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onClose(); } };
+    addEventListener('keydown', esc, true);
+    return () => removeEventListener('keydown', esc, true);
   }, [onClose]);
   const save = async (e: Event) => {
     e.preventDefault();

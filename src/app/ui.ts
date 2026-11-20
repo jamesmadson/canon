@@ -76,9 +76,10 @@ export function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) 
   // The address comes first, empty, so a paste lands in it. The name follows the address.
   useEffect(() => { addressBox.current?.focus(); }, []);
   useEffect(() => {
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(null); };
-    addEventListener('keydown', esc);
-    return () => removeEventListener('keydown', esc);
+    // Captured, so the view behind the dialog never sees this Esc and stays where it is.
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onClose(null); } };
+    addEventListener('keydown', esc, true);
+    return () => removeEventListener('keydown', esc, true);
   }, [onClose]);
   const submit = (e: Event) => {
     e.preventDefault();
