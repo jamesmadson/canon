@@ -824,7 +824,7 @@ describe('openerFor', () => {
 describe('the executable', () => {
   it('runs help without throwing', () => {
     const out = execFileSync('node', [binPath, '--help'], { encoding: 'utf8' });
-    expect(out).toContain('Usage: canon mcp');
+    expect(out).toContain('What your agent can do');
   });
 
   /**
@@ -840,7 +840,7 @@ describe('the executable', () => {
     expect(execFileSync('node', [link, '--version'], { encoding: 'utf8' })).toMatch(
       /^\d+\.\d+\.\d+\n$/,
     );
-    expect(execFileSync('node', [link, '--help'], { encoding: 'utf8' })).toContain('Usage: canon mcp');
+    expect(execFileSync('node', [link, '--help'], { encoding: 'utf8' })).toContain('What your agent can do');
   });
 
   it('runs every parked command end to end in a scratch repository', async () => {

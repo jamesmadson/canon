@@ -7,24 +7,9 @@ import { readFileSync, realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { mcp } from '../src/mcp/index.js';
+import { renderHelp } from '../src/mcp/help.js';
 
 const COMMANDS = { mcp };
-
-const USAGE = [
-  'canon lets your coding agent put prototypes into the Canon app open in your browser.',
-  '',
-  'Usage: canon mcp [--dev [--dev-port N]]',
-  '',
-  '  mcp                  serve Canon to an agent over stdio (MCP)',
-  '    --dev              talk to a Canon app on http://localhost:4321',
-  '    --dev-port N       use another local port with --dev',
-  '',
-  '  --help               this text',
-  '  --version            the version',
-  '',
-  'Set up: claude mcp add canon -- npx -y usecanon mcp',
-  'It runs on your machine and sends nothing to a server.',
-].join('\n');
 
 /** The flags that take a value, and the key each one lands under. */
 const VALUE_FLAGS = { '--dev-port': 'devPort' };
@@ -66,6 +51,17 @@ function version() {
   return manifest.version;
 }
 
+/** The banner and colour only reach a person at a terminal, never a pipe. */
+function helpText(io) {
+  const tty = Boolean(io.stdout?.isTTY);
+  return renderHelp({
+    version: version(),
+    tty,
+    color: tty && !process.env.NO_COLOR,
+    columns: io.stdout?.columns || 80,
+  });
+}
+
 export async function main(argv, io) {
   const parsed = parseArgv(argv);
 
@@ -73,22 +69,21 @@ export async function main(argv, io) {
     io.out(version());
     return 0;
   }
-  if (parsed.help || !parsed.command) {
-    io.out(USAGE);
-    return parsed.command || parsed.help ? 0 : 1;
+  if (parsed.help || !parsed.command || parsed.command === 'help') {
+    io.out(helpText(io));
+    return 0;
   }
   if (parsed.missingValue) {
     io.err(`${parsed.missingValue} needs a value.`);
     return 1;
   }
   if (parsed.unknown) {
-    io.err(`${parsed.unknown} is not an option. Run canon --help for the list.`);
+    io.err(`${parsed.unknown} is not an option. Run canon help to see what is available.`);
     return 1;
   }
   const command = COMMANDS[parsed.command];
   if (!command) {
-    io.err(`${parsed.command} is not a command. canon mcp is the only one.`);
-    io.err(USAGE);
+    io.err(`${parsed.command} is not a command. Run canon help to see what is available.`);
     return 1;
   }
   return command(parsed, io);

@@ -25,7 +25,7 @@ describe('the canon binary', () => {
     const result = run(['init']);
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain('init is not a command');
-    expect(result.stderr).toContain('canon mcp is the only one');
+    expect(result.stderr).toContain('canon help');
   });
 
   it('prints the version in package.json', () => {
@@ -47,10 +47,10 @@ describe('the usage text', () => {
     expect(text).not.toMatch(/[\u2013\u2014]/);
   });
 
-  it('prints usage and exits 1 with no command', () => {
+  it('prints the help and exits 0 with no command', () => {
     const result = run([]);
-    expect(result.status).toBe(1);
-    expect(result.stdout).toContain('Usage: canon mcp');
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('What your agent can do');
   });
 
   it('names an unknown option and exits 1', () => {
