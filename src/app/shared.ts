@@ -61,8 +61,14 @@ export const Icon = ({ name, size = 16, fill = false }: { name: string; size?: n
 
 export function useStore() {
   const [, force] = useState(0);
-  useEffect(() => store.subscribe(() => force((n) => n + 1)), []);
-  return store.getState();
+  const drawn = store.getState();
+  useEffect(() => {
+    const off = store.subscribe(() => force((n) => n + 1));
+    // Effects run after the first paint: a change that landed since then still redraws.
+    if (store.getState() !== drawn) force((n) => n + 1);
+    return off;
+  }, []);
+  return drawn;
 }
 
 export const go = (to: string) => (location.hash = to);

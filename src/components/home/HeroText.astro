@@ -27,6 +27,7 @@ const { waitlistUrl = '' } = Astro.props;
       <button type="button" class="hbtn" data-mcp-toggle aria-expanded="false" aria-controls="mcp-panel">Try the MCP</button>
       {waitlistOpen(waitlistUrl) && <a class="hbtn" href="#hosted">Join the hosted waitlist</a>}
     </div>
+    <p class="fine install-line rise rise-3">{tie('Install it from Chrome and it opens in its own window.')}</p>
     <div class="mcp">
       <div class="mcp-panel" id="mcp-panel" role="group" aria-labelledby="mcp-label">
         <p class="mcp-label" id="mcp-label">{tie('Connect your agent')}</p>
@@ -191,6 +192,9 @@ const { waitlistUrl = '' } = Astro.props;
   }
   .mcp-scope [aria-expanded='true'] {
     background: var(--color-recess);
+  }
+  .fine.install-line {
+    margin-top: 12px;
   }
   .fine[data-mcp-after] {
     margin-top: 16px;

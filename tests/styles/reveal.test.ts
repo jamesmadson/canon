@@ -63,6 +63,14 @@ describe('the Try the MCP reveal markup', () => {
     expect(panel).toMatch(/<a href="https:\/\/github\.com\/jamesmadson\/canon#connect-your-agent"[^>]*>the(&nbsp;| )README<\/a>/);
   });
 
+  it('says under Open the app that Chrome can install it, in one muted line', () => {
+    const h = hero();
+    const line = h.match(/<p class="fine install-line[^"]*">([^<]*)<\/p>/)![1];
+    expect(line.replace(/&nbsp;|\u00a0/g, ' ')).toBe('Install it from Chrome and it opens in its own window.');
+    expect(h.indexOf('install-line')).toBeGreaterThan(h.indexOf('Open the app'));
+    expect(h.indexOf('install-line')).toBeLessThan(h.indexOf('id="mcp-panel"'));
+  });
+
   it('keeps the free and open source line outside the panel, below it', () => {
     const h = hero();
     const fine = h.indexOf('Free and open source.');
