@@ -264,8 +264,10 @@ describe('words', () => {
 
   // Mutation: type a straight apostrophe in prose.
   it('uses curly apostrophes and quotes in prose', () => {
-    expect(text(closed)).not.toMatch(/[A-Za-z]'[A-Za-z]/);
-    expect(text(closed)).not.toMatch(/(^|\s)"[A-Za-z]/);
+    // Code and commands keep straight quotes.
+    const prose = text(closed.replace(/<code>[\s\S]*?<\/code>/g, ''));
+    expect(prose).not.toMatch(/[A-Za-z]'[A-Za-z]/);
+    expect(prose).not.toMatch(/(^|\s)"[A-Za-z]/);
     expect(text(closed)).toContain('what’s in it');
   });
 

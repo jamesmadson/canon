@@ -63,6 +63,16 @@ document.querySelectorAll<HTMLElement>('[data-mcp]').forEach((scope) => {
 
   button.addEventListener('click', () => set(!isOpen()));
 
+  // One agent's setup lines at a time. Without script every agent's lines are shown.
+  const picks = Array.from(scope.querySelectorAll<HTMLButtonElement>('[data-mcp-pick]'));
+  const cmds = Array.from(scope.querySelectorAll<HTMLElement>('[data-mcp-agent]'));
+  const pick = (name: string) => {
+    picks.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mcpPick === name)));
+    cmds.forEach((c) => { c.hidden = c.dataset.mcpAgent !== name; });
+  };
+  picks.forEach((b) => b.addEventListener('click', () => pick(b.dataset.mcpPick!)));
+  if (picks.length) pick('Claude Code');
+
   scope.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || !isOpen()) return;
     const inside = box.contains(document.activeElement);

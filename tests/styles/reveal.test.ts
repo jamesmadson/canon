@@ -39,14 +39,28 @@ describe('the Try the MCP reveal markup', () => {
     expect(h.indexOf('id="mcp-panel"')).toBeGreaterThan(h.indexOf('data-mcp-toggle'));
   });
 
-  it('holds the label, the command with a named Copy button, and the one line with the README link', () => {
+  it('holds the label and three numbered steps, with the setup command in the first', () => {
     const panel = hero().slice(hero().indexOf('id="mcp-panel"'));
-    expect(panel).toMatch(/Connect your[\s ]agent/);
-    expect(panel).toContain('<code>claude mcp add canon -- npx -y usecanon mcp</code>');
-    expect(panel).toContain('data-copy="claude mcp add canon -- npx -y usecanon mcp"');
-    expect(panel).toContain('aria-label="Copy the setup command"');
-    expect(panel).toContain('One line connects Claude Code. Codex and Cursor take a few lines in their config, ');
-    expect(panel).toMatch(/<a href="https:\/\/github\.com\/jamesmadson\/canon#connect-your-agent"[^>]*>written up in the(&nbsp;| )README<\/a>/);
+    expect(panel).toMatch(/Connect your[\s ]agent/);
+    const steps = panel.match(/<ol class="mcp-steps"[^>]*>([\s\S]*?)<\/ol>/)![1];
+    expect(steps.match(/<li\b/g)).toHaveLength(3);
+    expect(steps).toMatch(/Add the server/);
+    expect(steps).toMatch(/Open[\s\S]*Canon[\s\S]*in Chrome/);
+    expect(steps).toMatch(/Ask your agent to connect[\s\S]*new tab[\s\S]*local network/);
+    expect(steps).toContain('<code>claude mcp add canon -- npx -y usecanon mcp</code>');
+    expect(steps).toContain('data-copy="claude mcp add canon -- npx -y usecanon mcp"');
+    expect(steps).toContain('aria-label="Copy the setup command"');
+  });
+
+  it('gives Codex and Cursor their exact lines beside Claude Code', () => {
+    const panel = hero().slice(hero().indexOf('id="mcp-panel"'));
+    expect(panel).toContain('~/.codex/config.toml');
+    expect(panel).toContain('[mcp_servers.canon]');
+    expect(panel).toContain('args = [&quot;-y&quot;, &quot;usecanon&quot;, &quot;mcp&quot;]');
+    expect(panel).toContain('.cursor/mcp.json');
+    expect(panel).toContain('{ &quot;mcpServers&quot;: { &quot;canon&quot;: { &quot;command&quot;: &quot;npx&quot;, &quot;args&quot;: [&quot;-y&quot;, &quot;usecanon&quot;, &quot;mcp&quot;] } } }');
+    for (const name of ['Claude Code', 'Codex', 'Cursor']) expect(panel).toContain(`data-mcp-agent="${name}"`);
+    expect(panel).toMatch(/<a href="https:\/\/github\.com\/jamesmadson\/canon#connect-your-agent"[^>]*>the(&nbsp;| )README<\/a>/);
   });
 
   it('keeps the free and open source line outside the panel, below it', () => {

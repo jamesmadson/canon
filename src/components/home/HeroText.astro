@@ -1,6 +1,6 @@
 ---
 import CopyField from './CopyField.astro';
-import { REPO_URL, SETUP_COMMAND } from '../../lib/site';
+import { CODEX_CONFIG, CURSOR_CONFIG, REPO_URL, SETUP_COMMAND } from '../../lib/site';
 import { withBase } from '../../lib/withBase';
 import { waitlistOpen } from '../../lib/waitlist';
 import { tie } from '../../lib/words';
@@ -30,11 +30,32 @@ const { waitlistUrl = '' } = Astro.props;
     <div class="mcp">
       <div class="mcp-panel" id="mcp-panel" role="group" aria-labelledby="mcp-label">
         <p class="mcp-label" id="mcp-label">{tie('Connect your agent')}</p>
-        <div class="mcp-cmd">
-          <CopyField command={SETUP_COMMAND} name="the setup command" location="hero" />
-        </div>
+        <ol class="mcp-steps">
+          <li>
+            <p>{tie('Add the server for your agent.')}</p>
+            <div class="mcp-switch" role="group" aria-label="Agent" data-mcp-switch>
+              <button type="button" aria-pressed="true" data-mcp-pick="Claude Code">Claude Code</button>
+              <button type="button" aria-pressed="false" data-mcp-pick="Codex">Codex</button>
+              <button type="button" aria-pressed="false" data-mcp-pick="Cursor">Cursor</button>
+            </div>
+            <div class="mcp-cmd" data-mcp-agent="Claude Code">
+              <p class="mcp-where">{tie('Claude Code, in your terminal')}</p>
+              <CopyField command={SETUP_COMMAND} name="the setup command" location="hero" />
+            </div>
+            <div class="mcp-cmd" data-mcp-agent="Codex">
+              <p class="mcp-where">{tie('Codex, in ~/.codex/config.toml')}</p>
+              <CopyField command={CODEX_CONFIG} name="the Codex config" location="hero" />
+            </div>
+            <div class="mcp-cmd" data-mcp-agent="Cursor">
+              <p class="mcp-where">{tie('Cursor, in .cursor/mcp.json')}</p>
+              <CopyField command={CURSOR_CONFIG} name="the Cursor config" location="hero" />
+            </div>
+          </li>
+          <li><p>Open <a href={withBase('/app/')} data-ga="open_app" data-ga-location="hero_steps">Canon</a> in Chrome.</p></li>
+          <li><p>{tie('Ask your agent to connect to Canon. Open the link it gives you in a new tab and approve it. Chrome asks to allow local network access: allow it.')}</p></li>
+        </ol>
         <p class="mcp-note">
-          {'One line connects Claude Code. Codex and Cursor take a few lines in their config, '}<a href={`${REPO_URL}#connect-your-agent`} data-ga="readme_click">written up in the&nbsp;README</a>.
+          {'Every agent, in more detail: '}<a href={`${REPO_URL}#connect-your-agent`} data-ga="readme_click">the&nbsp;README</a>.
         </p>
       </div>
     </div>
@@ -83,6 +104,56 @@ const { waitlistUrl = '' } = Astro.props;
   }
   .mcp-cmd {
     margin-top: 10px;
+  }
+  .mcp-steps {
+    margin: 12px 0 0;
+    padding: 0 0 0 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 15px;
+    line-height: 22px;
+  }
+  .mcp-steps li::marker {
+    color: var(--mp-muted);
+  }
+  .mcp-steps a {
+    color: var(--mp-ink);
+    text-underline-offset: 3px;
+  }
+  .home .mcp-panel .mcp-where {
+    margin-bottom: 6px;
+    font-size: 13px;
+    line-height: 20px;
+    color: var(--mp-muted);
+  }
+  .mcp-switch {
+    display: none;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .js .mcp-switch {
+    display: flex;
+  }
+  .mcp-switch button {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 9px;
+    border: 1px solid var(--mp-line);
+    background: none;
+    color: var(--mp-ink);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .mcp-switch button[aria-pressed='true'] {
+    background: var(--mp-fill);
+  }
+  .js .mcp-cmd[hidden] {
+    display: none;
+  }
+  .mcp-panel .setup code {
+    white-space: pre;
   }
   .mcp-panel .setup {
     width: 100%;
@@ -225,7 +296,7 @@ const { waitlistUrl = '' } = Astro.props;
       padding: 12px;
     }
     .mcp-panel .setup code {
-      white-space: normal;
+      white-space: pre-wrap;
       overflow-wrap: anywhere;
       overflow: visible;
       font-size: 13px;
