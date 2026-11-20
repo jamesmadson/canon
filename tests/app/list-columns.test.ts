@@ -14,6 +14,14 @@ describe('a list row that is short of room', () => {
     expect(shrink('.prow .tags')).toBeGreaterThan(shrink('.prow .nm'));
   });
 
+  it('gives the note the room of an empty summary instead of splitting it', () => {
+    expect(css).toMatch(/\.prow \.sm:empty:has\(\+ \.pn\) \{ flex: 0 0 0; \}/);
+  });
+
+  it('lets a long note show in full in the view, with no clipped height', () => {
+    expect(ruleOf('.view-note.view-note-text')).not.toMatch(/max-height|overflow/);
+  });
+
   it('never fixes the width of the date, so a long label like "33 min ago" is not clipped', () => {
     const when = ruleOf('.prow .when');
     expect(when).toMatch(/flex: none/);

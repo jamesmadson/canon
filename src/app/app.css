@@ -474,7 +474,7 @@ input, textarea { caret-color: var(--accent); }
 .link-bar .btn { flex: none; }
 .view-note { margin: 8px 24px 0; flex: none; text-wrap: pretty; }
 .view-note a, .view-note .link { color: var(--text); }
-.view-note.view-note-text { margin: 0 24px 6px; max-height: 4.5em; overflow: auto; white-space: pre-wrap; color: var(--soft); text-wrap: pretty; }
+.view-note.view-note-text { margin: 0 24px 6px; white-space: pre-wrap; color: var(--soft); text-wrap: pretty; }
 .view-note.view-hints { margin: 0 24px 6px; min-height: 2.6em; text-wrap: balance; }
 .bar-pop.versions-pop { width: 380px; max-width: calc(100vw - 32px); padding: 6px; }
 .versions-pop ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; max-height: 260px; overflow: auto; }
@@ -875,6 +875,7 @@ button.ver-chip:hover { color: var(--text); }
 .prow .nm::after { content: ""; position: absolute; inset: 0; }
 /* When the row is short of room its columns give way in a set order: summary, then source, then tags. Name, version count, star and date keep theirs. */
 .prow .sm { flex: 1 1 0; min-width: 0; color: var(--soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prow .sm:empty:has(+ .pn) { flex: 0 0 0; }
 .prow .pn { flex: 1 1 0; min-width: 0; color: var(--soft); font-size: var(--fs-meta); letter-spacing: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .prow .src { flex: 0 1000 96px; min-width: 0; font-size: var(--fs-meta); letter-spacing: 0; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .prow .brd { flex: 0 500 150px; }
