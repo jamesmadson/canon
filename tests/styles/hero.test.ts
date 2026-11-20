@@ -27,7 +27,7 @@ describe('the scattered hero at /', () => {
     expect(html).toMatch(/Canon keeps them in one[\s\u00a0]place\./);
     expect(html).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/"[^>]*>Open the app<\/a>/);
     expect(html).toMatch(/Connect your[\s\u00a0]agent/);
-    expect(html).toContain('claude mcp add canon -- npx -y usecanon mcp');
+    expect(html).toContain('claude mcp add canon --scope user -- npx -y usecanon mcp');
     expect(html).not.toContain('class="term');
   });
 

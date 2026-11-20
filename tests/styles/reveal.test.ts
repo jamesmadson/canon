@@ -47,8 +47,8 @@ describe('the Try the MCP reveal markup', () => {
     expect(steps).toMatch(/Add the server/);
     expect(steps).toMatch(/Open[\s\S]*Canon[\s\S]*in Chrome/);
     expect(steps).toMatch(/Ask your agent to connect[\s\S]*new tab[\s\S]*local network/);
-    expect(steps).toContain('<code>claude mcp add canon -- npx -y usecanon mcp</code>');
-    expect(steps).toContain('data-copy="claude mcp add canon -- npx -y usecanon mcp"');
+    expect(steps).toContain('<code>claude mcp add canon --scope user -- npx -y usecanon mcp</code>');
+    expect(steps).toContain('data-copy="claude mcp add canon --scope user -- npx -y usecanon mcp"');
     expect(steps).toContain('aria-label="Copy the setup command"');
   });
 
@@ -88,7 +88,7 @@ describe('the Try the MCP reveal markup', () => {
 
   it('keeps the agent band beside its own copy field', () => {
     const agents = html.slice(html.indexOf('id="agents"'), html.indexOf('id="find"'));
-    expect(agents).toContain('data-copy="claude mcp add canon -- npx -y usecanon mcp"');
+    expect(agents).toContain('data-copy="claude mcp add canon --scope user -- npx -y usecanon mcp"');
   });
 });
 

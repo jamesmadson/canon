@@ -36,8 +36,8 @@ describe('the commands and feedback link', () => {
   // Mutation: change a character of the setup line.
   it('shows the setup line exactly, with a Copy button that has a name', () => {
     for (const html of [closed, open]) {
-      expect(html).toContain('<code>claude mcp add canon -- npx -y usecanon mcp</code>');
-      expect(html).toContain('data-copy="claude mcp add canon -- npx -y usecanon mcp"');
+      expect(html).toContain('<code>claude mcp add canon --scope user -- npx -y usecanon mcp</code>');
+      expect(html).toContain('data-copy="claude mcp add canon --scope user -- npx -y usecanon mcp"');
       expect(html).toContain('aria-label="Copy the setup command"');
     }
   });
@@ -47,7 +47,7 @@ describe('the commands and feedback link', () => {
     for (const html of [closed, open]) {
       const hero = html.slice(html.indexOf('class="hero'), html.indexOf('id="projects"'));
       expect(hero).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/"[^>]*>Open the app<\/a>/);
-      expect(hero).toContain('claude mcp add canon -- npx -y usecanon mcp');
+      expect(hero).toContain('claude mcp add canon --scope user -- npx -y usecanon mcp');
       expect(text(html).replaceAll('npx -y usecanon mcp', '')).not.toMatch(/npx\s+usecanon/);
       expect(html).not.toContain('data-copy="npx usecanon"');
     }

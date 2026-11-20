@@ -45,6 +45,6 @@ describe('dropTarget', () => {
 
 describe('the agent setup line', () => {
   it('is the command that adds Canon to an agent', () => {
-    expect(SETUP_COMMAND).toBe('claude mcp add canon -- npx -y usecanon mcp');
+    expect(SETUP_COMMAND).toBe('claude mcp add canon --scope user -- npx -y usecanon mcp');
   });
 });

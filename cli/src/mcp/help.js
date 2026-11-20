@@ -60,7 +60,7 @@ export function renderHelp({ version, tty = false, color = false, columns = 80 }
   }
 
   out.push('Set up', '');
-  out.push('  Claude Code:  claude mcp add canon -- npx -y usecanon mcp');
+  out.push('  Claude Code:  claude mcp add canon --scope user -- npx -y usecanon mcp');
   out.push('  Codex:        add a canon server to ~/.codex/config.toml');
   out.push('  Cursor:       add a canon server to .cursor/mcp.json');
   out.push('  The README has the exact lines for Codex and Cursor.', '');

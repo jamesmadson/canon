@@ -53,7 +53,7 @@ describe('the help text', () => {
   });
 
   it('names the three setups, the commands and the closing pointers', () => {
-    expect(text).toContain('claude mcp add canon -- npx -y usecanon mcp');
+    expect(text).toContain('claude mcp add canon --scope user -- npx -y usecanon mcp');
     expect(text).toContain('~/.codex/config.toml');
     expect(text).toContain('.cursor/mcp.json');
     expect(text).toContain('/mcp shows Canon');

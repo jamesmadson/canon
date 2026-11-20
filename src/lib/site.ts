@@ -14,7 +14,7 @@ export const GA_ID = 'G-F4MW70DVD4';
 
 export const REPO_URL = 'https://github.com/jamesmadson/canon';
 export const ISSUES_URL = 'https://github.com/jamesmadson/canon/issues';
-export const SETUP_COMMAND = 'claude mcp add canon -- npx -y usecanon mcp';
+export const SETUP_COMMAND = 'claude mcp add canon --scope user -- npx -y usecanon mcp';
 /** The exact lines for the other agents, the same as the README's. */
 export const CODEX_CONFIG = '[mcp_servers.canon]\ncommand = "npx"\nargs = ["-y", "usecanon", "mcp"]';
 export const CURSOR_CONFIG = '{ "mcpServers": { "canon": { "command": "npx", "args": ["-y", "usecanon", "mcp"] } } }';

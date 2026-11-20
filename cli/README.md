@@ -12,7 +12,7 @@ You need Node 20 or newer.
 Claude Code:
 
 ```
-claude mcp add canon -- npx -y usecanon mcp
+claude mcp add canon --scope user -- npx -y usecanon mcp
 ```
 
 Codex, in `~/.codex/config.toml`:

@@ -191,7 +191,7 @@ describe('first run', () => {
     const box = await mount(FirstRun, { onChoose: () => {} });
     await click(box.querySelector('.setup button')!);
     await act(async () => { await new Promise((r) => setTimeout(r, 0)); });
-    expect(writeText).toHaveBeenCalledWith('claude mcp add canon -- npx -y usecanon mcp');
+    expect(writeText).toHaveBeenCalledWith('claude mcp add canon --scope user -- npx -y usecanon mcp');
     expect(box.querySelector('.setup button')!.textContent).toContain('Copied');
     expect(box.querySelector('[role="status"]')!.textContent).toContain('Copied');
   });
