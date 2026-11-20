@@ -212,6 +212,7 @@ export function Focus({ frame, page, onClose, address, askUrl }: { frame: Frame;
               <iframe key=${src} src=${src} title=${here.name} style=${{ width: inner, height: `${100 / z}%`, transform: `scale(${z})` }} sandbox=${SANDBOX} onLoad=${(e: Event) => { noteOpen(Math.round(performance.now() - opening.current.t0)); adoptTitle(here, e.currentTarget as HTMLIFrameElement); }}></iframe>
             </div>`}
     </div>`}
+    ${here.note && html`<p class="hint view-note view-note-text">${here.note}</p>`}
     <p class="hint view-note view-hints" role="status">${hints.map((h, i) => html`${i ? ' ' : ''}${h}`)}</p>
     <${PrototypeBar} frame=${here} stack=${stack} onShow=${show} onAdd=${add} page=${pageName_} zoom=${view === 'map'
       ? { value: cam.zoom, onOut: () => map.current?.zoomBy(0.8), onIn: () => map.current?.zoomBy(1.25), onReset: () => map.current?.zoomTo(1), onFit: () => map.current?.fit() }

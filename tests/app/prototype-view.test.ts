@@ -103,6 +103,15 @@ describe('the prototype view', () => {
     expect(now.tags).toEqual(expect.arrayContaining(['pricing']));
   });
 
+  it('shows the whole note in the view, and nothing when there is none', async () => {
+    db.lists.frames = db.lists.frames.map((f: any) => (f.id === 'b' ? { ...f, note: 'Check the tiers\nthen the footer' } : f));
+    await store.load();
+    const box = await open('b');
+    expect(box.querySelector('.view-note-text')!.textContent).toBe('Check the tiers\nthen the footer');
+    clear();
+    expect((await open('u')).querySelector('.view-note-text')).toBeNull();
+  });
+
   it('stars and notes in place, with no trip to another page', async () => {
     const box = await open('b');
     await click(btn(box, /^Star, /));

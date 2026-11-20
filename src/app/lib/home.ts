@@ -50,6 +50,9 @@ export function cardOf(f: Frame, stack: Frame[] = [f]): Card {
   };
 }
 
+/** The first line of a note with any text, for a row or a card that has room for one line. */
+export const noteLine = (note: string | undefined): string => (note ?? '').split('\n').map((l) => l.trim()).find(Boolean) ?? '';
+
 export const cardsOf = (frames: Frame[]): Card[] => stacks(frames).map((stack) => cardOf(currentOf(stack), stack));
 
 /**

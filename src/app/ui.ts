@@ -391,7 +391,7 @@ function ProjectComments({ projectId }: { projectId: string }) {
       <div class="seg"><button aria-pressed=${show === 'open'} onClick=${() => setShow('open')}>Open</button><button aria-pressed=${show === 'resolved'} onClick=${() => setShow('resolved')}>Resolved</button></div>
       <span class="spacer"></span>
     </div>
-    ${notes.length === 0 && html`<div class="empty">${show === 'open' ? 'Nothing open. Press N on a board and click anywhere.' : 'Nothing resolved yet.'}</div>`}
+    ${notes.length === 0 && html`<div class="empty">${show === 'open' ? (s.boards.some((b) => b.projectId === projectId) ? 'Nothing open. Press N on a board and click anywhere.' : 'Nothing open yet.') : 'Nothing resolved yet.'}</div>`}
     ${notes.map((n) => {
       const w = where(n);
       return html`<a class="comment-row" href=${w.href}>

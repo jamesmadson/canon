@@ -5,7 +5,7 @@ import * as store from './store';
 import type { Board, Frame } from './db';
 import { type Address, buildAddress } from './lib/address';
 import { openHash } from './lib/nav';
-import { type Card, whenLabel } from './lib/home';
+import { type Card, noteLine, whenLabel } from './lib/home';
 import { tintOf } from '../lib/thumbTints';
 import { hostOf, monogramOf } from './lib/linktile';
 import { ReachNote } from './live';
@@ -88,6 +88,7 @@ export function ProtoRow({ card, selected, arriving, onOpen, onSelect, versions,
     <button type="button" class="nm" title=${card.name} onClick=${() => onOpen(card)} onFocus=${() => onSelect?.(card)}>${card.name}</button>
     <${ReachNote} frame=${card.frame} />
     <span class="sm" title=${card.summary || undefined}>${card.summary}</span>
+    ${card.note && html`<span class="pn" title=${card.note}>${noteLine(card.note)}</span>`}
     <${Tags} tags=${card.tags} />
     ${versions !== undefined ? versions : label ? html`<span class="ver">${label}</span>` : html`<span class="ver"></span>`}
     ${board !== undefined && html`<span class="brd" title=${board}>${board}</span>`}
@@ -119,6 +120,7 @@ export function ShelfCard({ card, selected, arriving, showTags, onOpen, onSelect
       </span>
       <b class="cname" title=${card.name}>${card.name}</b>
       <small class="cmeta">${card.source}${' · '}${whenLabel(card.updatedAt, now)}</small>
+      ${card.note && html`<small class="cnote" title=${card.note}>${noteLine(card.note)}</small>`}
       ${metaOf(card) && html`<small class="cver">${metaOf(card)}</small>`}
       <${ReachNote} frame=${card.frame} />
     </button>
