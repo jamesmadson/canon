@@ -7,6 +7,7 @@ import { type Address, buildAddress } from './lib/address';
 import { openHash } from './lib/nav';
 import { type Card, whenLabel } from './lib/home';
 import { tintOf } from '../lib/thumbTints';
+import { hostOf, monogramOf } from './lib/linktile';
 import { canLinkFolders } from './intake';
 import { ReachNote } from './live';
 import { html, Icon, frameSrc, SANDBOX, showsCover, coverSrc, type Way } from './shared';
@@ -34,6 +35,15 @@ export function Thumb({ card, big = false }: { card: Card; big?: boolean }) {
   if (showsCover(f)) return html`<div class=${`th${big ? ' big' : ''}`} aria-hidden="true"><img src=${coverSrc(f)} alt="" loading="lazy" /></div>`;
   if (f.kind !== 'url') return html`<${LiveThumb} frame=${f} big=${big} />`;
   return html`<div class=${`th${big ? ' big' : ''} tint-${tintOf(f.id)}`} aria-hidden="true"><i class="hd"></i><i class="ln"></i><i class="ln s"></i><i class="bt"></i></div>`;
+}
+
+/** In place of a live picture of a link: a link has no stored copy, and many sites will not load inside another page. */
+export function LinkTile({ frame }: { frame: Frame }) {
+  const host = hostOf(frame.url);
+  return html`<span class=${`link-tile tint-${tintOf(frame.id)}`} aria-hidden="true">
+    <span class="mono-mark">${monogramOf(frame.url, frame.name)}</span>
+    ${host && html`<span class="mono-host">${host}</span>`}
+  </span>`;
 }
 
 /* ── Star ───────────────────────────────────────────────────────────────── */

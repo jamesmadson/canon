@@ -60,13 +60,13 @@ describe('titleFromSameOrigin', () => {
 describe('the add dialog', () => {
   afterEach(clear);
 
-  it('puts the cursor in the name with the suggestion selected, so typing replaces it', async () => {
+  it('puts the cursor in the address with the example selected, so a pasted link replaces it', async () => {
     const box = await mount(UrlDialog, { onClose: () => {} });
-    const name = box.querySelector<HTMLInputElement>('#url-name')!;
-    expect(document.activeElement).toBe(name);
-    expect(name.value).toBe('localhost:5173');
-    expect(name.selectionStart).toBe(0);
-    expect(name.selectionEnd).toBe(name.value.length);
+    const address = box.querySelector<HTMLInputElement>('#url-address')!;
+    expect(document.activeElement).toBe(address);
+    expect(address.selectionStart).toBe(0);
+    expect(address.selectionEnd).toBe(address.value.length);
+    expect(box.querySelector<HTMLInputElement>('#url-name')!.value).toBe('localhost:5173');
   });
 
   it('suggests a name from the address until one is typed, and hands it on', async () => {

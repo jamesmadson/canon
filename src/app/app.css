@@ -642,6 +642,16 @@ input, textarea { caret-color: var(--accent); }
 }
 .lib-frame { position: relative; display: block; overflow: hidden; border-radius: 6px; background: #fff; box-shadow: 0 6px 20px var(--shadow-lg); }
 .lib-frame iframe { border: 0; transform-origin: 0 0; pointer-events: none; display: block; }
+/* a link with no screenshot: its first letter and host on a tint, never a white rectangle */
+.link-tile { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px; background: var(--tint-warm); color: #1A1918; }
+.link-tile.tint-sand { background: var(--tint-sand); }
+.link-tile.tint-sage { background: var(--tint-sage); }
+.link-tile.tint-clay { background: var(--tint-clay); }
+.link-tile.tint-slate { background: var(--tint-slate); }
+.link-tile.tint-lilac { background: var(--tint-lilac); }
+.link-tile.tint-warm { background: var(--tint-warm); }
+.link-tile .mono-mark { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; background: rgba(255, 255, 255, 0.7); box-shadow: inset 0 0 0 1px rgba(26, 25, 24, 0.12); font: 400 20px/1 var(--sans, inherit); }
+.link-tile .mono-host { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 var(--fs-meta) var(--mono); color: #5C5954; }
 .lib-sheet { position: absolute; width: 70%; height: 60%; top: 14%; border-radius: 6px; background: var(--hover); }
 .lib-check { position: absolute; left: 10px; top: 10px; opacity: 0; transition: opacity .12s; }
 .lib-card:hover .lib-check, .lib-card.picked .lib-check { opacity: 1; }
@@ -916,6 +926,8 @@ button.ver-chip:hover { color: var(--text); }
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 180px; border-radius: var(--r-lg);
   border: 1.5px dashed var(--input-border); background: none; color: var(--soft); transition: transform 120ms var(--ease);
 }
+.first-link { display: flex; align-items: center; gap: 12px; color: var(--soft); }
+.first-link kbd { font: 500 var(--fs-meta) var(--mono); letter-spacing: 0; background: var(--raised); color: var(--soft); border-radius: 4px; padding: 1px 5px; }
 .first-drop b { color: var(--text); font-weight: 500; }
 .first-drop:active { transform: scale(0.97); }
 
