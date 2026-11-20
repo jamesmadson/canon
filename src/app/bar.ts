@@ -3,7 +3,7 @@ import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import * as store from './store';
 import type { Frame } from './db';
-import { html, Icon } from './shared';
+import { html, Icon, WayButtons, type Way } from './shared';
 import { currentOf, versionOf } from './lib/versions';
 import { neighbour, tagsForBar, versionLine, versionTitle } from './lib/viewer';
 import { LiveToggle } from './live';
@@ -113,7 +113,7 @@ export function ZoomControls({ zoom, onOut, onIn, onReset, onFit }: { zoom: numb
  * one shows it. Making one the current version is a separate action, so
  * looking never changes what Home and the project show.
  */
-export function VersionsMenu({ frame, stack, onShow }: { frame: Frame; stack: Frame[]; onShow: (id: string) => void }) {
+export function VersionsMenu({ frame, stack, onShow, onAdd }: { frame: Frame; stack: Frame[]; onShow: (id: string) => void; onAdd?: (w: Way) => void }) {
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
@@ -136,16 +136,18 @@ export function VersionsMenu({ frame, stack, onShow }: { frame: Frame; stack: Fr
   const current = stack.length ? currentOf(stack) : frame;
   const isCurrent = current.id === frame.id;
   const n = versionOf(stack, frame.id);
-  const label = many ? `Versions of ${frame.name}, ${versionTitle(n, stack.length)}` : 'Versions: this prototype has only one';
+  const label = many ? `Versions of ${frame.name}, ${versionTitle(n, stack.length)}` : onAdd ? `Versions of ${frame.name}, one so far` : 'Versions: this prototype has only one';
   return html`<div class="bar-note" ref=${wrap}>
-    <button type="button" ref=${button} class="btn vb-versions" disabled=${!many} aria-expanded=${open} aria-haspopup="true" aria-label=${label} title=${many ? 'Versions' : 'Only one version so far'} onClick=${() => { if (!open) record('versions_menu'); setOpen(!open); }}><${Icon} name="versions" /><span class="lbl lbl-versions">Versions</span>${many ? html`<span class="count">${stack.length}</span>` : null}</button>
-    ${open && many && html`<div class="bar-pop versions-pop" role="group" aria-label="Versions">
-      <ol>
+    <button type="button" ref=${button} class="btn vb-versions" disabled=${!many && !onAdd} aria-expanded=${open} aria-haspopup="true" aria-label=${label} title=${many || onAdd ? 'Versions' : 'Only one version so far'} onClick=${() => { if (!open) record('versions_menu'); setOpen(!open); }}><${Icon} name="versions" /><span class="lbl lbl-versions">Versions</span>${many ? html`<span class="count">${stack.length}</span>` : null}</button>
+    ${open && (many || onAdd) && html`<div class="bar-pop versions-pop" role="group" aria-label="Versions">
+      ${!many && html`<p class="hint">Only one version so far.</p>`}
+      ${many && html`<ol>
         ${[...stack].reverse().map((v) => html`<li key=${v.id}><button type="button" class="vrow" aria-current=${v.id === frame.id ? 'true' : undefined} onClick=${() => { setOpen(false); onShow(v.id); }}>${versionLine(versionOf(stack, v.id), v, v.id === current.id)}</button></li>`)}
-      </ol>
-      ${isCurrent
+      </ol>`}
+      ${many && (isCurrent
         ? html`<p class="hint">Version ${n} is the current version, the one Home and the project show.</p>`
-        : html`<button type="button" class="btn" onClick=${() => { record('make_current'); void store.makeCurrent(frame.id); store.toast(`Version ${n} is now the current version.`); setOpen(false); }}>Make this the current version</button>`}
+        : html`<button type="button" class="btn" onClick=${() => { record('make_current'); void store.makeCurrent(frame.id); store.toast(`Version ${n} is now the current version.`); setOpen(false); }}>Make this the current version</button>`)}
+      ${onAdd && html`<div class="add-version" role="menu" aria-label="Add a version"><p class="hint">Add a version</p><${WayButtons} pick=${(w: Way) => { setOpen(false); onAdd(w); }} /></div>`}
     </div>`}
   </div>`;
 }
@@ -182,7 +184,7 @@ function BarTags({ tags }: { tags: string[] }) {
  * line with its step controls, the tags. Right: Note, Star, Versions, Archive, zoom, and the Live switch
  * when it applies. All outlined, because the view has no solid primary of its own.
  */
-export function PrototypeBar({ frame, stack, onShow, zoom, page }: { frame: Frame; stack: Frame[]; onShow: (id: string) => void; page?: string; zoom: { value: number; onOut: () => void; onIn: () => void; onReset: () => void; onFit: () => void } }) {
+export function PrototypeBar({ frame, stack, onShow, onAdd, zoom, page }: { frame: Frame; stack: Frame[]; onShow: (id: string) => void; onAdd?: (w: Way) => void; page?: string; zoom: { value: number; onOut: () => void; onIn: () => void; onReset: () => void; onFit: () => void } }) {
   return html`<div class="viewer-bar" role="group" aria-label="Prototype controls">
     <div class="vb-id">
       <h2 class="vb-name" title=${frame.name}>${frame.name}${page ? html`<span class="faint"> · ${page}</span>` : null}</h2>
@@ -190,7 +192,7 @@ export function PrototypeBar({ frame, stack, onShow, zoom, page }: { frame: Fram
       <${BarTags} tags=${frame.tags ?? []} />
     </div>
     <div class="vb-acts">
-      <${PrototypeActions} frame=${frame}><${VersionsMenu} frame=${frame} stack=${stack} onShow=${onShow} /><//>
+      <${PrototypeActions} frame=${frame}><${VersionsMenu} frame=${frame} stack=${stack} onShow=${onShow} onAdd=${onAdd} /><//>
       <${ZoomControls} zoom=${zoom.value} onOut=${zoom.onOut} onIn=${zoom.onIn} onReset=${zoom.onReset} onFit=${zoom.onFit} />
       <${LiveToggle} frame=${frame} />
     </div>

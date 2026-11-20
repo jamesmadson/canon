@@ -18,6 +18,7 @@ import { resetLive } from '../../src/app/live';
 import { clear, click, frame, key, mount, nameOf, project } from './helpers/dom';
 
 /** The route the app reads: whatever the hash says now. */
+const askUrl = async () => 'https://new.example/';
 const Router = () => {
   const [hash, setHash] = useState(location.hash);
   useEffect(() => {
@@ -26,7 +27,7 @@ const Router = () => {
     return () => removeEventListener('hashchange', on);
   }, []);
   const a = parseAddress(hash);
-  return a.name === 'full' ? h(PrototypeView, { address: a }) : h('div', { id: 'elsewhere' }, hash);
+  return a.name === 'full' ? h(PrototypeView, { address: a, askUrl }) : h('div', { id: 'elsewhere' }, hash);
 };
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
@@ -63,7 +64,29 @@ describe('the prototype view', () => {
   it('has the whole bar: star, note, versions, archive and zoom', async () => {
     const box = await open('b');
     for (const label of [/^Star, /, /^Note, /, /^Versions/, /^Archive, /, /^Zoom \d+%/, /^Zoom out/, /^Zoom in/]) expect(btn(box, label), String(label)).toBeTruthy();
-    expect(btn(box, /^Versions/).disabled).toBe(true);
+  });
+
+  it('puts Add a version in the Versions control, even with one version', async () => {
+    const box = await open('b');
+    const versions = btn(box, /^Versions/);
+    expect(versions.disabled).toBe(false);
+    await click(versions);
+    expect(box.querySelector('.versions-pop')!.textContent).toContain('Only one version so far.');
+    const add = box.querySelector('.add-version')!;
+    expect(add.textContent).toContain('Add a version');
+    expect(Array.from(add.querySelectorAll('button')).map((b) => b.textContent)).toEqual(['HTML or zip files…', 'A folder…', 'A link…', expect.stringMatching(/^Link a folder on your machine…/)]);
+  });
+
+  it('adds a link as a new version and shows it', async () => {
+    const box = await open('b');
+    await click(btn(box, /^Versions/));
+    await click(Array.from(box.querySelectorAll('.add-version button')).find((b) => b.textContent === 'A link…')!);
+    await flush();
+    await flush();
+    const made = db.writes.filter(([n, v]) => n === 'frames' && v.kind === 'url' && v.url === 'https://new.example/').at(-1)?.[1];
+    expect(made).toBeTruthy();
+    expect(stored(made.id).at(-1)!.stackId).toBe(stored('b').at(-1)!.stackId);
+    expect(title(box)).toContain('Version 2 of 2');
   });
 
   it('stars and notes in place, with no trip to another page', async () => {
@@ -182,31 +205,35 @@ describe('a page that will not show', () => {
 
   const hints = (box: HTMLElement) => Array.from(box.querySelectorAll('.view-hints'));
 
-  it('always carries a quiet way out under a link, from the first paint', async () => {
+  it('always shows a bar above a link with an Open in a new tab button, from the first paint', async () => {
     const box = await open('u');
-    const line = box.querySelector('.view-hints')!;
-    expect(line.textContent).toBe('Blank? Some sites refuse to load inside other pages. Open in new tab.');
-    const a = line.querySelector('a')!;
-    expect(a.textContent).toBe('Open in new tab');
+    const bar = box.querySelector('.link-bar')!;
+    expect(bar.textContent).toContain('the site may not allow being shown inside other pages');
+    const a = bar.querySelector('a')!;
+    expect(a.textContent).toBe('Open in a new tab');
     expect(a.getAttribute('href')).toBe('https://example.org/');
+    expect(a.getAttribute('target')).toBe('_blank');
+    expect(a.getAttribute('rel')).toBe('noopener');
     expect(box.querySelector('.slow')).toBeNull();
   });
 
-  it('keeps the line after the frame loads and after time passes', async () => {
+  it('keeps the bar after the frame loads and after time passes', async () => {
     vi.useFakeTimers();
     const box = await open('u');
     await act(() => { box.querySelector('iframe')!.dispatchEvent(new Event('load')); });
     await act(() => { vi.advanceTimersByTime(5000); });
-    expect(box.querySelector('.view-hints')!.textContent).toContain('Blank?');
+    expect(box.querySelector('.link-bar')).not.toBeNull();
   });
 
   it('has no way out line for a stored copy, and a blocked link keeps its fuller message instead', async () => {
     const stored = await open('b');
     expect(stored.querySelector('.view-hints')!.textContent).toBe('');
+    expect(stored.querySelector('.link-bar')).toBeNull();
     clear();
     const blocked = await open('k');
     expect(blocked.querySelector('.view-hints')!.textContent).toBe('');
     expect(blocked.querySelector('.frame-blocked')).not.toBeNull();
+    expect(blocked.querySelector('.link-bar')).toBeNull();
   });
 
   it('reserves the line in every view, so nothing moves when it appears', async () => {
@@ -222,6 +249,5 @@ describe('a page that will not show', () => {
     expect(hints(box)).toHaveLength(1);
     const text = box.querySelector('.view-hints')!.textContent!;
     expect(text).toContain('not the current version');
-    expect(text).toContain('Blank? Some sites refuse');
   });
 });

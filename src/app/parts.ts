@@ -8,9 +8,8 @@ import { openHash } from './lib/nav';
 import { type Card, whenLabel } from './lib/home';
 import { tintOf } from '../lib/thumbTints';
 import { hostOf, monogramOf } from './lib/linktile';
-import { canLinkFolders } from './intake';
 import { ReachNote } from './live';
-import { html, Icon, frameSrc, SANDBOX, showsCover, coverSrc, type Way } from './shared';
+import { html, Icon, frameSrc, SANDBOX, showsCover, coverSrc, WayButtons, type Way } from './shared';
 import { RowMenu, startDrag, useDismiss } from './move';
 
 /* ── Thumbnails: the cover if there is one, a live page for files kept here, else a neutral drawing ── */
@@ -174,10 +173,7 @@ export function AddMenu({ onWay, label = 'Add prototype', primary = false }: { o
       ? html`<button type="button" class="add" aria-haspopup="menu" aria-expanded=${open} onClick=${() => setOpen(!open)}><${Icon} name="plus" size=${14} />${label}</button>`
       : html`<button type="button" class="ibtn" aria-haspopup="menu" aria-expanded=${open} aria-label=${label} onClick=${() => setOpen(!open)}><${Icon} name="plus" size=${14} /></button>`}
     ${open && html`<div class="menu" role="menu">
-      <button type="button" role="menuitem" onClick=${() => pick('files')}><${Icon} name="file" />HTML or zip files…</button>
-      <button type="button" role="menuitem" onClick=${() => pick('folder')}><${Icon} name="folder" />A folder…</button>
-      <button type="button" role="menuitem" onClick=${() => pick('link')} disabled=${!canLinkFolders()}><${Icon} name="link" />Link a folder on your machine…</button>
-      <button type="button" role="menuitem" onClick=${() => pick('url')}><${Icon} name="globe" />A running URL…</button>
+      <${WayButtons} pick=${pick} />
     </div>`}
   </div>`;
 }

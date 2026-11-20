@@ -18,7 +18,7 @@ import { chooseView, isMulti, takeStartPage, viewOf, type PageView } from './lib
 import type { Camera } from './lib/layout';
 import { record } from './lib/tester';
 import { ServerOff, adoptTitle, useShown } from './live';
-import { html, Icon, useStore, frameSrc, pageName, previewUrl, SANDBOX, SIZES } from './shared';
+import { addVersion, html, Icon, useStore, type Way, frameSrc, pageName, previewUrl, SANDBOX, SIZES } from './shared';
 
 export type FullAddress = Extract<Address, { name: 'full' }>;
 
@@ -34,12 +34,23 @@ function Blocked({ href }: { href: string }) {
   </div>`;
 }
 
-export function PrototypeView({ address }: { address: FullAddress }) {
+/**
+ * Above the frame of every link. Canon cannot read another site's headers, so it cannot know
+ * whether a site refuses to be framed. A bar that is always there is the one answer that never lies.
+ */
+function LinkBar({ href }: { href: string }) {
+  return html`<div class="link-bar" role="note">
+    <p>If the page below is blank, the site may not allow being shown inside other pages.</p>
+    <a class="btn" href=${href} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}><${Icon} name="open" />Open in a new tab</a>
+  </div>`;
+}
+
+export function PrototypeView({ address, askUrl }: { address: FullAddress; askUrl?: () => Promise<string | null> }) {
   const s = useStore();
   const frame = s.frames.find((f) => f.id === address.frame);
   if (!s.ready) return html`<div class="main"></div>`;
   if (!frame) return html`<div class="focus"><div class="empty">That prototype is not in this browser. <a href="#/">All projects</a></div></div>`;
-  return html`<${Focus} frame=${frame} address=${address} onClose=${() => leave(buildAddress({ name: 'project', project: frame.projectId, tab: 'prototypes' }))} />`;
+  return html`<${Focus} frame=${frame} address=${address} askUrl=${askUrl} onClose=${() => leave(buildAddress({ name: 'project', project: frame.projectId, tab: 'prototypes' }))} />`;
 }
 
 /**
@@ -47,7 +58,7 @@ export function PrototypeView({ address }: { address: FullAddress }) {
  * the hash and change it in place, so Back leaves the view rather than
  * stepping through widths. Without one (the page map) it keeps its own state.
  */
-export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: string; onClose: () => void; address?: FullAddress }) {
+export function Focus({ frame, page, onClose, address, askUrl }: { frame: Frame; page?: string; onClose: () => void; address?: FullAddress; askUrl?: () => Promise<string | null> }) {
   useStore();
   const [localWidth, setLocalWidth] = useState<number | null>(frame.w);
   const [localId, setLocalId] = useState(frame.id);
@@ -106,8 +117,15 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
   const hints = [
     !isCurrent && `This is ${versionTitle(n, total).toLowerCase()}, not the current version. Use Versions, below, to make it the current one.`,
     address && here.kind === 'url' && !isCurrent && isLocal(here.url ?? '') && `This is localhost, so it shows what is running now, not version ${n}.`,
-    wayOut && html`Blank? Some sites refuse to load inside other pages. <a href=${newTab} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}>Open in new tab</a>.`,
   ].filter(Boolean);
+
+  // A new version of this prototype, shown as soon as it is added.
+  const add = askUrl ? async (w: Way) => {
+    const next = await addVersion(here, w, askUrl);
+    if (!next) return;
+    store.toast(`Version ${versionOf(store.stackOf(next.id), next.id)} added.`);
+    show(next.id);
+  } : undefined;
 
   const prev = neighbour(stack, here.id, -1);
   const next = neighbour(stack, here.id, 1);
@@ -184,7 +202,7 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
     </div>
     ${view === 'map'
       ? html`<div class="focus-stage map-stage"><${PageMap} key=${here.id} frame=${here} cam=${cam} setCam=${(fn: (c: Camera) => Camera) => setCam(fn)} api=${map} startPage=${startPage.current || undefined} onPage=${pickPage} /></div>`
-      : html`<div class="focus-stage" ref=${stage}>
+      : html`${wayOut && html`<${LinkBar} href=${newTab} />`}<div class="focus-stage" ref=${stage}>
       ${shown.show === 'off'
         ? html`<${ServerOff} url=${shown.url} />`
         : known
@@ -196,7 +214,7 @@ export function Focus({ frame, page, onClose, address }: { frame: Frame; page?: 
             </div>`}
     </div>`}
     <p class="hint view-note view-hints" role="status">${hints.map((h, i) => html`${i ? ' ' : ''}${h}`)}</p>
-    <${PrototypeBar} frame=${here} stack=${stack} onShow=${show} page=${pageName_} zoom=${view === 'map'
+    <${PrototypeBar} frame=${here} stack=${stack} onShow=${show} onAdd=${add} page=${pageName_} zoom=${view === 'map'
       ? { value: cam.zoom, onOut: () => map.current?.zoomBy(0.8), onIn: () => map.current?.zoomBy(1.25), onReset: () => map.current?.zoomTo(1), onFit: () => map.current?.fit() }
       : { value: z, onOut: () => zoomBy(0.8), onIn: () => zoomBy(1.25), onReset: () => setManual(1), onFit: fit }} />
     </div>

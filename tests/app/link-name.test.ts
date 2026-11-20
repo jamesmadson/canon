@@ -60,13 +60,20 @@ describe('titleFromSameOrigin', () => {
 describe('the add dialog', () => {
   afterEach(clear);
 
-  it('puts the cursor in the address with the example selected, so a pasted link replaces it', async () => {
+  it('opens with an empty address that has the cursor and a placeholder', async () => {
     const box = await mount(UrlDialog, { onClose: () => {} });
     const address = box.querySelector<HTMLInputElement>('#url-address')!;
     expect(document.activeElement).toBe(address);
-    expect(address.selectionStart).toBe(0);
-    expect(address.selectionEnd).toBe(address.value.length);
-    expect(box.querySelector<HTMLInputElement>('#url-name')!.value).toBe('localhost:5173');
+    expect(address.value).toBe('');
+    expect(address.placeholder).toBe('https://');
+  });
+
+  it('is called Add a link and says Canon keeps the link and shows the live page', async () => {
+    const box = await mount(UrlDialog, { onClose: () => {} });
+    expect(box.querySelector('h3')!.textContent).toBe('Add a link');
+    const copy = box.querySelector('p')!.textContent!;
+    expect(copy).toContain('Canon keeps the link and shows the live page.');
+    expect(copy).not.toMatch(/no copy|running prototype/i);
   });
 
   it('suggests a name from the address until one is typed, and hands it on', async () => {
@@ -82,5 +89,17 @@ describe('the add dialog', () => {
     await fire(box.querySelector('form')!, new Event('submit', { bubbles: true, cancelable: true }));
     expect(closed).toBe('https://example.com/work/other-page');
     expect(takeLinkName('https://example.com/work/other-page')).toBe('Mine');
+  });
+});
+
+describe('the Add menu', () => {
+  it('says A link for an address and keeps Link a folder on your machine apart', async () => {
+    const { AddMenu } = await import('../../src/app/parts');
+    const box = await mount(AddMenu, { onWay: () => {}, label: 'Add', primary: true });
+    await fire(box.querySelector('button.add')!, new MouseEvent('click', { bubbles: true }));
+    const items = Array.from(box.querySelectorAll('[role="menuitem"]')).map((b) => b.textContent);
+    expect(items).toContain('A link…');
+    expect(items.some((t) => t!.startsWith('Link a folder on your machine…'))).toBe(true);
+    expect(items.join(' ')).not.toMatch(/running URL/i);
   });
 });

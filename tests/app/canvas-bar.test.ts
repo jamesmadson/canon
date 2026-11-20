@@ -195,3 +195,11 @@ describe('zoom', () => {
     expect(nameOf(box.querySelector('.zoom')!)).toBe('Zoom 30%, press to fit');
   });
 });
+
+describe('Versions with one version', () => {
+  it('stays off unless the caller can add a version', async () => {
+    const only = frame({ id: 'one', name: 'Solo' });
+    const off = await mount(VersionsMenu, { frame: only, stack: [only], onShow: () => {} });
+    expect(off.querySelector<HTMLButtonElement>('button.vb-versions')!.disabled).toBe(true);
+  });
+});
