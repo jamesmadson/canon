@@ -11,7 +11,7 @@ import { AddMenu, LinkTile, ProtoRow, StarButton, Tags, metaOf } from './parts';
 import { MoveMenu, RowMenu, carries, startDrag, useDismiss } from './move';
 import { pagesOf } from './lib/pageview';
 import { currentOf, stackKey } from './lib/versions';
-import { checkPrototypeUrl } from './lib/resolve';
+import { ENTER_ADDRESS, OWN_ORIGIN_MESSAGE, checkPrototypeUrl } from './lib/resolve';
 import { nameFromUrl, rememberLinkName } from './lib/linkname';
 import { takeProjectNameAsk } from './lib/naming';
 import { type Address, buildAddress } from './lib/address';
@@ -67,23 +67,31 @@ export function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) 
   // The name follows the address until the person types one of their own.
   const [typedName, setTypedName] = useState<string | null>(null);
   const addressBox = useRef<HTMLInputElement>(null);
+  // Shown under the address after Add is pressed, until the address changes.
+  const [problem, setProblem] = useState<string | null>(null);
   const checked = checkPrototypeUrl(value, location.origin);
   const name = typedName ?? nameFromUrl(checked.ok ? checked.url : value);
   // The address comes first, empty, so a paste lands in it. The name follows the address.
   useEffect(() => { addressBox.current?.focus(); }, []);
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(null); };
+    addEventListener('keydown', esc);
+    return () => removeEventListener('keydown', esc);
+  }, [onClose]);
   const submit = (e: Event) => {
     e.preventDefault();
     if (checked.ok) {
       rememberLinkName(checked.url, name);
       onClose(checked.url);
-    } else store.toast(checked.message);
+    } else setProblem(checked.message === OWN_ORIGIN_MESSAGE ? OWN_ORIGIN_MESSAGE : ENTER_ADDRESS);
   };
   return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose(null)}>
     <form class="dialog" onSubmit=${submit} role="dialog" aria-modal="true" aria-labelledby="url-title">
       <h3 id="url-title">Add a link</h3>
       <p class="soft" style="margin:0">Paste the address of a page that is already online, such as a Lovable or v0 link, or one running on your machine. Canon keeps the link and shows the live page. A site that does not allow being shown inside other pages gets an Open in a new tab button instead.</p>
       <label class="fb-label" for="url-address">Address</label>
-      <input class="field" id="url-address" ref=${addressBox} type="url" inputmode="url" autocomplete="off" placeholder="https://" value=${value} onInput=${(e: Event) => setValue((e.target as HTMLInputElement).value)} />
+      <input class="field" id="url-address" ref=${addressBox} type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://" value=${value} aria-invalid=${problem ? 'true' : undefined} aria-describedby=${problem ? 'url-error' : undefined} onInput=${(e: Event) => { setValue((e.target as HTMLInputElement).value); setProblem(null); }} />
+      ${problem && html`<p class="field-error" id="url-error" role="alert">${problem}</p>`}
       <label class="fb-label" for="url-name">Name</label>
       <input class="field" id="url-name" value=${name} onInput=${(e: Event) => setTypedName((e.target as HTMLInputElement).value)} />
       <div class="row" style="justify-content:flex-end">

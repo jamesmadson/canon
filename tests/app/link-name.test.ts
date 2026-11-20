@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
 import { UrlDialog } from '../../src/app/ui';
-import { clear, fire, mount, type } from './helpers/dom';
+import { clear, fire, key, mount, type } from './helpers/dom';
 import { nameFromUrl, rememberLinkName, takeLinkName, titleFromSameOrigin } from '../../src/app/lib/linkname';
 
 describe('nameFromUrl', () => {
@@ -89,6 +89,55 @@ describe('the add dialog', () => {
     await fire(box.querySelector('form')!, new Event('submit', { bubbles: true, cancelable: true }));
     expect(closed).toBe('https://example.com/work/other-page');
     expect(takeLinkName('https://example.com/work/other-page')).toBe('Mine');
+  });
+});
+
+describe('the address field in the add dialog', () => {
+  afterEach(clear);
+  const submit = (box: HTMLElement) => fire(box.querySelector('form')!, new Event('submit', { bubbles: true, cancelable: true }));
+  const problem = (box: HTMLElement) => box.querySelector('#url-error');
+
+  it('is a text field with a URL keyboard, so a bare host such as example.org is accepted', async () => {
+    let closed: string | null = 'unset';
+    const box = await mount(UrlDialog, { onClose: (v: string | null) => { closed = v; } });
+    const address = box.querySelector<HTMLInputElement>('#url-address')!;
+    expect(address.type).toBe('text');
+    expect(address.getAttribute('inputmode')).toBe('url');
+    await type(address, 'example.org');
+    await submit(box);
+    expect(closed).toBe('http://example.org/');
+    expect(problem(box)).toBeNull();
+  });
+
+  it('shows a problem under the field, marks the field invalid, and sends no toast', async () => {
+    let closed: string | null = 'unset';
+    const box = await mount(UrlDialog, { onClose: (v: string | null) => { closed = v; } });
+    const address = box.querySelector<HTMLInputElement>('#url-address')!;
+    expect(address.getAttribute('aria-invalid')).toBeNull();
+    await type(address, 'not an address');
+    await submit(box);
+    expect(closed).toBe('unset');
+    expect(problem(box)!.textContent).toBe('Enter a web address, like example.com.');
+    expect(address.getAttribute('aria-invalid')).toBe('true');
+    expect(address.getAttribute('aria-describedby')).toBe('url-error');
+    expect(address.nextElementSibling).toBe(problem(box));
+    await type(address, 'example.com');
+    expect(problem(box)).toBeNull();
+    expect(address.getAttribute('aria-invalid')).toBeNull();
+  });
+
+  it('says so under the field when the address is Canon itself', async () => {
+    const box = await mount(UrlDialog, { onClose: () => {} });
+    await type(box.querySelector<HTMLInputElement>('#url-address')!, location.origin + '/canon/app/');
+    await submit(box);
+    expect(problem(box)!.textContent).toBe("That address is Canon itself. Add the prototype's own address.");
+  });
+
+  it('closes on Esc', async () => {
+    let closed: string | null = 'unset';
+    await mount(UrlDialog, { onClose: (v: string | null) => { closed = v; } });
+    await key(window, 'Escape');
+    expect(closed).toBeNull();
   });
 });
 

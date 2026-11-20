@@ -36,6 +36,9 @@ export function resolveStack<T extends { id: string; name: string }>(stacks: T[]
 const BARE_HOST = /^(localhost|\d{1,3}(\.\d{1,3}){3}|\[[0-9a-f:]+\]|[a-z0-9-]+(\.[a-z0-9-]+)+)(:\d+)?([/?#].*)?$/i;
 
 /** A prototype URL we are willing to frame: http or https only. A bare host gets http://. */
+export const OWN_ORIGIN_MESSAGE = "That address is Canon itself. Add the prototype's own address.";
+export const ENTER_ADDRESS = 'Enter a web address, like example.com.';
+
 /**
  * ownOrigin is Canon's own origin: a page there would run with Canon's storage, so it is refused.
  */
@@ -45,7 +48,7 @@ export function checkPrototypeUrl(input: string, ownOrigin?: string): { ok: true
   const candidate = !text.includes('://') && BARE_HOST.test(text) ? `http://${text}` : text;
   try {
     const u = new URL(candidate);
-    if (ownOrigin && u.origin === ownOrigin) return { ok: false, message: "That address is Canon itself. Add the prototype's own address." };
+    if (ownOrigin && u.origin === ownOrigin) return { ok: false, message: OWN_ORIGIN_MESSAGE };
     return u.protocol === 'http:' || u.protocol === 'https:' ? { ok: true, url: u.href } : refuse;
   } catch {
     return refuse;

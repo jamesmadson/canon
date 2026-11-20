@@ -449,6 +449,8 @@ input, textarea { caret-color: var(--accent); }
 .field { box-shadow: inset 0 0 0 1px var(--input-border); }
 .dialog .field { min-height: var(--h-ctl-lg); padding: 10px 14px; }
 .dialog textarea.field { min-height: 0; }
+.field[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--text); }
+.field-error { margin: -4px 0 0; color: var(--text); font-size: var(--fs-meta); letter-spacing: 0; text-wrap: pretty; }
 .field:focus { box-shadow: inset 0 0 0 1px var(--focus), 0 0 0 1px var(--focus); }
 .composer .row { justify-content: flex-end; }
 
