@@ -109,13 +109,21 @@ export function initAnalytics({ doc, win: plainWin, enabled, delay = 600, onChoi
       win.gtag!('consent', 'update', { analytics_storage: 'denied' });
     }
     hide();
-    openers[0]?.focus();
+    // Focus goes back only to the footer button that opened the bar, and the
+    // page never scrolls to it. A first-visit choice leaves the reader in place.
+    opener?.focus({ preventScroll: true });
+    opener = null;
     onChoice?.(choice);
   }
 
+  let opener: HTMLElement | null = null;
   bar.querySelector('[data-ga-allow]')?.addEventListener('click', () => choose('allow'));
   bar.querySelector('[data-ga-deny]')?.addEventListener('click', () => choose('deny'));
-  for (const o of openers) o.addEventListener('click', show);
+  for (const o of openers)
+    o.addEventListener('click', () => {
+      opener = o;
+      show();
+    });
 
   // A choice made earlier wins. With none, a privacy signal counts as no.
   const stored = readChoice(win);

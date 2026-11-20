@@ -105,6 +105,26 @@ describe('the consent bar and gtag', () => {
     expect(localStorage.getItem(CHOICE_KEY)).toBe('allow');
   });
 
+  it('a first-visit choice leaves focus and scroll where they were', () => {
+    initAnalytics({ doc: document, win: window, enabled: true });
+    vi.advanceTimersByTime(600);
+    const footerButton = document.querySelector<HTMLElement>('[data-ga-open]')!;
+    const focus = vi.spyOn(footerButton, 'focus');
+    document.querySelector<HTMLElement>('[data-ga-allow]')!.click();
+    expect(focus).not.toHaveBeenCalled();
+    expect(document.activeElement).not.toBe(footerButton);
+  });
+
+  it('a choice made from the reopened bar returns focus to its button without scrolling', () => {
+    localStorage.setItem(CHOICE_KEY, 'deny');
+    initAnalytics({ doc: document, win: window, enabled: true });
+    const footerButton = document.querySelector<HTMLElement>('[data-ga-open]')!;
+    const focus = vi.spyOn(footerButton, 'focus');
+    footerButton.click();
+    document.querySelector<HTMLElement>('[data-ga-deny]')!.click();
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+  });
+
   it('does nothing when disabled, as in the dev server', () => {
     expect(initAnalytics({ doc: document, win: window, enabled: false })).toBeNull();
     vi.advanceTimersByTime(2000);
