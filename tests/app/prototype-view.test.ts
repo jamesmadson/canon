@@ -205,15 +205,16 @@ describe('a page that will not show', () => {
 
   const hints = (box: HTMLElement) => Array.from(box.querySelectorAll('.view-hints'));
 
-  it('always shows a bar above a link with an Open in a new tab button, from the first paint', async () => {
+  it('always shows a bar above a link, and offers Open in new tab once, in the toolbar', async () => {
     const box = await open('u');
     const bar = box.querySelector('.link-bar')!;
     expect(bar.textContent).toContain('the site may not allow being shown inside other pages');
-    const a = bar.querySelector('a')!;
-    expect(a.textContent).toBe('Open in a new tab');
-    expect(a.getAttribute('href')).toBe('https://example.org/');
-    expect(a.getAttribute('target')).toBe('_blank');
-    expect(a.getAttribute('rel')).toBe('noopener');
+    expect(bar.querySelector('a')).toBeNull();
+    const opens = Array.from(box.querySelectorAll('a')).filter((a) => /open in (a )?new tab/i.test(a.getAttribute('aria-label') ?? a.textContent ?? ''));
+    expect(opens).toHaveLength(1);
+    expect(opens[0].getAttribute('href')).toBe('https://example.org/');
+    expect(opens[0].getAttribute('target')).toBe('_blank');
+    expect(opens[0].getAttribute('rel')).toBe('noopener');
     expect(box.querySelector('.slow')).toBeNull();
   });
 

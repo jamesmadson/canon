@@ -38,10 +38,9 @@ function Blocked({ href }: { href: string }) {
  * Above the frame of every link. Canon cannot read another site's headers, so it cannot know
  * whether a site refuses to be framed. A bar that is always there is the one answer that never lies.
  */
-function LinkBar({ href }: { href: string }) {
+function LinkBar() {
   return html`<div class="link-bar" role="note">
-    <p>If the page below is blank, the site may not allow being shown inside other pages.</p>
-    <a class="btn" href=${href} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}><${Icon} name="open" />Open in a new tab</a>
+    <p>If the page below is blank, the site may not allow being shown inside other pages. Use Open in new tab above.</p>
   </div>`;
 }
 
@@ -202,7 +201,7 @@ export function Focus({ frame, page, onClose, address, askUrl }: { frame: Frame;
     </div>
     ${view === 'map'
       ? html`<div class="focus-stage map-stage"><${PageMap} key=${here.id} frame=${here} cam=${cam} setCam=${(fn: (c: Camera) => Camera) => setCam(fn)} api=${map} startPage=${startPage.current || undefined} onPage=${pickPage} /></div>`
-      : html`${wayOut && html`<${LinkBar} href=${newTab} />`}<div class="focus-stage" ref=${stage}>
+      : html`${wayOut && html`<${LinkBar} />`}<div class="focus-stage" ref=${stage}>
       ${shown.show === 'off'
         ? html`<${ServerOff} url=${shown.url} />`
         : known

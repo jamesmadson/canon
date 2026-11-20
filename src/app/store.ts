@@ -8,6 +8,7 @@ import type { LibraryItem } from './lib/library';
 import { inheritedMeta, metaOf } from './lib/meta';
 import { SAMPLES, SAMPLE_SITE } from './samples';
 import { nameFromUrl } from './lib/linkname';
+import { refusesFraming } from './lib/framing';
 import { stackFor, stackKey, swapsFor, versionOf, currentOf } from './lib/versions';
 
 export interface State {
@@ -336,6 +337,8 @@ async function makeUrlFrame(
   const frame: Frame = {
     id: uid(), projectId, name: opts.name || nameFromUrl(url), kind: 'url', url, x: 0, y: 0,
     w: opts.size?.w ?? 1280, h: opts.size?.h ?? 800, rev: 0, createdAt: now(), updatedAt: now(), ...meta,
+    // Hosts known to refuse framing get the flag at once, the same one an agent sets.
+    ...(refusesFraming(url) ? { frameBlocked: true } : {}),
   };
   await insertFrame(frame, opts.boardId, opts.at);
   if (opts.stack !== false) await autoStack(frame);
