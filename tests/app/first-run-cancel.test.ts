@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ComponentType } from 'preact';
 import { act } from 'preact/test-utils';
 
 const db = vi.hoisted(() => ({ tables: {} as Record<string, any[]> }));
@@ -26,7 +27,7 @@ afterEach(clear);
 
 describe('the first-run Add a link', () => {
   it('creates no project when the dialog is cancelled, so Try the sample project stays', async () => {
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     await click(by(box, '.first-link button', /Add a link/));
     await flush();
     await click(by(box, '[role="dialog"] button', /Cancel/));
@@ -36,7 +37,7 @@ describe('the first-run Add a link', () => {
   });
 
   it('creates My prototypes once there is a link to add', async () => {
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     await click(by(box, '.first-link button', /Add a link/));
     await flush();
     await type(box.querySelector<HTMLInputElement>('#url-address')!, 'example.com/page');

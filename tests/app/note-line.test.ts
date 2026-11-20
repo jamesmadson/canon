@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import type { ComponentType } from 'preact';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const db = vi.hoisted(() => ({ tables: {} as Record<string, any[]> }));
@@ -57,7 +58,7 @@ describe('the project Notes tab with no boards', () => {
   afterEach(clear);
 
   it('does not point at boards', async () => {
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     const empty = box.querySelector('.record .empty')!;
     expect(empty.textContent).toBe('Nothing open yet.');
   });
@@ -65,7 +66,7 @@ describe('the project Notes tab with no boards', () => {
   it('keeps the board hint when the project has a board', async () => {
     db.tables.boards = [{ id: 'b1', projectId: 'p1', name: 'Board', createdAt: 1, updatedAt: 1, arrangement: 'free' }];
     await store.load();
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     expect(box.querySelector('.record .empty')!.textContent).toBe('Nothing open. Press N on a board and click anywhere.');
   });
 });

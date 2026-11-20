@@ -1,3 +1,4 @@
+import { Fragment } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import * as store from './store';
 import type { Board, Frame, Note } from './db';
@@ -459,7 +460,7 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
   const tags = route.name === 'home' || route.name === 'starred' || route.name === 'archive' ? route.tags ?? [] : [];
   const chooseTags = (next: string[]) => openHash(buildAddress({ name: route.name === 'starred' || route.name === 'archive' ? route.name : 'home', tags: next }));
 
-  return html`<div class="shell">
+  return html`<${Fragment}><div class="shell">
     <${Sidebar} route=${route} activeProject=${projectOf(route)} />
     ${!s.ready
       ? html`<div class="main"></div>`
@@ -477,5 +478,5 @@ export function App({ pairAtLoad = null }: { pairAtLoad?: PairLink | null }) {
     <${SearchHost} cards=${cards} projectName=${projectName} onPick=${open} />
     ${pair && html`<${PairDialog} pair=${pair} onClose=${() => setPair(null)} />`}
     ${s.toast && html`<div class="toast" role="status"><span>${s.toast}</span>${s.toastAction && html`<button type="button" class="toast-act" onClick=${() => { const run = s.toastAction!.run; store.dismissToast(); run(); }}>${s.toastAction.label}</button>`}</div>`}
-  </div><${NarrowScreen} />`;
+  </div><${NarrowScreen} /><//>`;
 }

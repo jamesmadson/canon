@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ComponentType } from 'preact';
 import { act } from 'preact/test-utils';
 
 const db = vi.hoisted(() => ({ tables: {} as Record<string, any[]>, writes: [] as [string, any][] }));
@@ -55,7 +56,7 @@ describe('Rename in a row menu', () => {
   };
 
   it('opens a small dialog with the name selected, and Enter saves it', async () => {
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     await openRename(box, 'Three tiers');
     expect(dialog(box)).not.toBeNull();
     expect(field(box).value).toBe('Three tiers');
@@ -68,7 +69,7 @@ describe('Rename in a row menu', () => {
   });
 
   it('closes on Esc without renaming', async () => {
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     await openRename(box, 'Three tiers');
     await type(field(box), 'Changed');
     await key(window, 'Escape');
@@ -77,7 +78,7 @@ describe('Rename in a row menu', () => {
   });
 
   it('refuses an empty name with a message under the field and keeps the dialog open', async () => {
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     await openRename(box, 'Three tiers');
     await type(field(box), '  ');
     await submit(box);
@@ -92,7 +93,7 @@ describe('Rename in a row menu', () => {
 describe('Rename in the prototype view', () => {
   it('has a Rename button next to the name that opens the same dialog', async () => {
     history.replaceState(null, '', '#/f/b/full');
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     const button = Array.from(box.querySelectorAll('button')).find((b) => nameOf(b) === 'Rename Three tiers')!;
     expect(button).toBeTruthy();
     await click(button);

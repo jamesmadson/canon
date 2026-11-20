@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import type { ComponentType } from 'preact';
 import { act } from 'preact/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -23,7 +24,7 @@ afterEach(() => { clear(); vi.unstubAllGlobals(); });
 
 describe('the screen for a window under 760px', () => {
   it('says the window is too narrow, how to fix it, and has a Copy link button', async () => {
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     const narrow = box.querySelector('.narrow')!;
     expect(narrow.querySelector('h1')!.textContent).toBe('Canon needs a wider window');
     expect(narrow.querySelector('p')!.textContent).toBe('Widen the window or open Canon on a laptop.');
@@ -35,7 +36,7 @@ describe('the screen for a window under 760px', () => {
     const writeText = vi.fn(async () => {});
     vi.stubGlobal('navigator', { ...navigator, clipboard: { writeText } });
     history.replaceState(null, '', '/canon/app/#/p/p1');
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     const copy = box.querySelector<HTMLButtonElement>('.narrow button')!;
     await click(copy);
     await act(() => new Promise<void>((r) => setTimeout(r, 0)));

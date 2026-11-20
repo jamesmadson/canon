@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ComponentType } from 'preact';
 import { act } from 'preact/test-utils';
 
 const db = vi.hoisted(() => ({ tables: {} as Record<string, any[]> }));
@@ -29,7 +30,7 @@ afterEach(() => clear());
 
 describe('a pairing link that arrives in an open Canon tab', () => {
   it('opens the pairing dialog, as a fresh load does, and clears the secret from the address', async () => {
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     expect(box.querySelector('[role="dialog"]')).toBeNull();
     await act(() => { location.hash = link; });
     await flush();
@@ -41,7 +42,7 @@ describe('a pairing link that arrives in an open Canon tab', () => {
   });
 
   it('says a malformed link connected nothing', async () => {
-    const box = await mount(App, {});
+    const box = await mount(App as ComponentType<any>, {});
     await act(() => { location.hash = '#pair=nope'; });
     await flush();
     expect(box.querySelector('[role="dialog"]')).toBeNull();
