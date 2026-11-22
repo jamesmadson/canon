@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -23,6 +25,35 @@ import {
 
 const cliDir = fileURLToPath(new URL('..', import.meta.url));
 const repo = fileURLToPath(new URL('../..', import.meta.url));
+
+// A small repository with main and two prototype branches. CI checks out one
+// detached, shallow commit with no local branches, so tests that need
+// branches read this instead of the checkout they run in.
+function makeFixtureRepo() {
+  const dir = mkdtempSync(join(tmpdir(), 'canon-git-fixture-'));
+  const git = (args, date) =>
+    execFileSync('git', ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.com', ...args], {
+      cwd: dir,
+      env: date ? { ...process.env, GIT_AUTHOR_DATE: date, GIT_COMMITTER_DATE: date } : process.env,
+      stdio: 'pipe',
+    });
+  const commit = (file, date) => {
+    writeFileSync(join(dir, file), file);
+    git(['add', file]);
+    git(['commit', '-m', file], date);
+  };
+  git(['init', '-q', '-b', 'main']);
+  commit('base.txt', '2026-01-01T12:00:00Z');
+  git(['switch', '-q', '-c', 'prototype-a']);
+  commit('a.txt', '2026-01-02T12:00:00Z');
+  git(['switch', '-q', 'main']);
+  commit('main.txt', '2026-01-03T12:00:00Z');
+  git(['switch', '-q', '-c', 'prototype-b']);
+  commit('b.txt', '2026-01-04T12:00:00Z');
+  return dir;
+}
+
+const fixture = makeFixtureRepo();
 
 function sourceFiles(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -114,9 +145,9 @@ describe('the tool never writes to a repo it did not create', () => {
   });
 });
 
-describe('reading this repo', () => {
+describe('reading a repo', () => {
   it('recognises a work tree', () => {
-    expect(isWorkTree(repo)).toBe(true);
+    expect(isWorkTree(fixture)).toBe(true);
   });
 
   it('does not mistake a plain directory for one', () => {
@@ -124,16 +155,16 @@ describe('reading this repo', () => {
   });
 
   it('finds the repository root and its name', () => {
-    expect(statSync(repoRoot(repo)).isDirectory()).toBe(true);
-    expect(typeof repoName(repo)).toBe('string');
+    expect(statSync(repoRoot(fixture)).isDirectory()).toBe(true);
+    expect(typeof repoName(fixture)).toBe('string');
   });
 
   it('reads the branch this work is on', () => {
-    expect(currentBranch(repo)).toBeTruthy();
+    expect(currentBranch(fixture)).toBeTruthy();
   });
 
   it('lists local branches with a date and a short sha', () => {
-    const branches = listBranches(repo);
+    const branches = listBranches(fixture);
     expect(branches.length).toBeGreaterThan(0);
     for (const branch of branches) {
       expect(branch.name).toBeTruthy();
@@ -143,9 +174,9 @@ describe('reading this repo', () => {
   });
 
   it('reads a fork date against the default branch', () => {
-    const names = listBranches(repo).map((b) => b.name);
-    const base = pickDefaultBranch(names, currentBranch(repo));
-    const date = forkDate(currentBranch(repo), base, repo);
+    const names = listBranches(fixture).map((b) => b.name);
+    const base = pickDefaultBranch(names, currentBranch(fixture));
+    const date = forkDate(currentBranch(fixture), base, fixture);
     expect(date === null || /^\d{4}-\d{2}-\d{2}$/.test(date)).toBe(true);
   });
 });
@@ -159,10 +190,10 @@ describe('how many times git is spawned', () => {
    * micro-optimisation: they are what keeps the tool quick on a real repository.
    */
   it('resolves many fork dates in one log call', () => {
-    const names = listBranches(repo).map((b) => b.name);
-    const base = pickDefaultBranch(names, currentBranch(repo));
+    const names = listBranches(fixture).map((b) => b.name);
+    const base = pickDefaultBranch(names, currentBranch(fixture));
     const others = names.filter((n) => n !== base).slice(0, 4);
-    const dates = forkDates(others, base, repo);
+    const dates = forkDates(others, base, fixture);
     expect(Object.keys(dates).length).toBeGreaterThan(0);
     for (const date of Object.values(dates)) {
       expect(date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
@@ -170,19 +201,19 @@ describe('how many times git is spawned', () => {
   });
 
   it('agrees with reading the dates one at a time', () => {
-    const names = listBranches(repo).map((b) => b.name);
-    const base = pickDefaultBranch(names, currentBranch(repo));
+    const names = listBranches(fixture).map((b) => b.name);
+    const base = pickDefaultBranch(names, currentBranch(fixture));
     const others = names.filter((n) => n !== base).slice(0, 3);
-    const batched = forkDates(others, base, repo);
+    const batched = forkDates(others, base, fixture);
     for (const name of others) {
-      expect(batched[name] ?? null, name).toBe(forkDate(name, base, repo));
+      expect(batched[name] ?? null, name).toBe(forkDate(name, base, fixture));
     }
   });
 
   it('answers both questions about the work tree in one call', () => {
-    const found = locateRepo(repo);
+    const found = locateRepo(fixture);
     expect(found.isWorkTree).toBe(true);
-    expect(found.root).toBe(repoRoot(repo));
+    expect(found.root).toBe(repoRoot(fixture));
   });
 
   it('says plainly when a directory is not a work tree', () => {
@@ -192,7 +223,7 @@ describe('how many times git is spawned', () => {
   });
 
   it('takes an empty list of branches without spawning anything', () => {
-    expect(forkDates([], 'main', repo)).toEqual({});
+    expect(forkDates([], 'main', fixture)).toEqual({});
   });
 });
 
