@@ -13,24 +13,35 @@ export function Modal({ id, title, onClose, returnTo, style, children }: { id: s
   const box = useRef<HTMLDivElement>(null);
   // Without an explicit opener, whatever had focus when the dialog first rendered gets it back.
   const opener = useRef<HTMLElement | null>(returnTo === undefined ? (document.activeElement as HTMLElement | null) : returnTo);
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
     const first = box.current?.querySelector<HTMLElement>('textarea, input, button');
     first?.focus();
-    return () => { const back = opener.current; if (back?.isConnected) back.focus(); };
+    // One capture listener on the window, so Escape and Tab still belong to the dialog after focus falls to the page.
+    const onKey = (e: KeyboardEvent) => {
+      const node = box.current;
+      if (!node) return;
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close.current(); return; }
+      if (e.key !== 'Tab') return;
+      const items = Array.from(node.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (!items.length) { e.preventDefault(); node.focus(); return; }
+      const firstItem = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      if (!node.contains(active)) { e.preventDefault(); (e.shiftKey ? last : firstItem).focus(); }
+      else if (e.shiftKey && active === firstItem) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && active === last) { e.preventDefault(); firstItem.focus(); }
+    };
+    addEventListener('keydown', onKey, true);
+    return () => {
+      removeEventListener('keydown', onKey, true);
+      const back = opener.current;
+      if (back?.isConnected) back.focus();
+    };
   }, []);
-  const onKey = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onClose(); return; }
-    if (e.key !== 'Tab' || !box.current) return;
-    const items = Array.from(box.current.querySelectorAll<HTMLElement>(FOCUSABLE));
-    if (!items.length) return;
-    const first = items[0];
-    const last = items[items.length - 1];
-    const active = document.activeElement;
-    if (e.shiftKey && (active === first || !box.current.contains(active))) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && (active === last || !box.current.contains(active))) { e.preventDefault(); first.focus(); }
-  };
   return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose()}>
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby=${id} style=${style} ref=${box} onKeyDown=${onKey}>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby=${id} tabindex="-1" style=${style} ref=${box}>
       <h3 id=${id}>${title}</h3>
       ${children}
     </div>

@@ -76,12 +76,6 @@ export function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) 
   const name = typedName ?? nameFromUrl(checked.ok ? checked.url : value);
   // The address comes first, empty, so a paste lands in it. The name follows the address.
   useEffect(() => { addressBox.current?.focus(); }, []);
-  useEffect(() => {
-    // Captured, so the view behind the dialog never sees this Esc and stays where it is.
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onClose(null); } };
-    addEventListener('keydown', esc, true);
-    return () => removeEventListener('keydown', esc, true);
-  }, [onClose]);
   const submit = (e: Event) => {
     e.preventDefault();
     if (checked.ok) {
@@ -126,7 +120,7 @@ export function PairDialog({ pair, onClose }: { pair: PairLink; onClose: () => v
     onClose();
   };
   return html`<${Modal} id="pair-title" title=${`Connect ${pair.name} to Canon?`} onClose=${onClose}>
-    <p class="soft" style="margin:0">It will be able to add prototypes to your projects, add versions, move them between boards and open views. It can't delete anything or read your files.</p>
+    <p class="soft" style="margin:0">It will be able to add prototypes to your projects, add versions, move them between boards and open views. It can’t delete anything or read your files.</p>
     ${notice && html`<p role="alert" style="margin:0;color:var(--text)">${notice}</p>`}
     <div class="row" style="justify-content:flex-end">
       <button type="button" class="btn ghost" onClick=${onClose}>Cancel</button>
