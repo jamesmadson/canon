@@ -79,9 +79,9 @@ export function PrototypeActions({ frame, compact = false, children }: { frame: 
         <div class="row"><button type="button" class="btn ghost" onClick=${() => close(false)}>Cancel</button><button type="button" class="btn" onClick=${() => close(true)}>Save</button></div>
       </div>`}
     </div>
-    <button type="button" class=${`btn vb-star${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${starred} aria-label=${frame ? `Star, ${name}` : `Star: ${NONE}`} title=${frame ? (starred ? 'Starred' : 'Star') : `Star: ${NONE}`} onClick=${star}><${Icon} name="star" fill=${starred} />${word(starred ? 'Starred' : 'Star', 'lbl-star')}</button>
+    <button type="button" class=${`btn vb-star${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${starred} aria-label=${frame ? `${starred ? 'Starred' : 'Star'}, ${name}` : `Star: ${NONE}`} title=${frame ? (starred ? 'Starred' : 'Star') : `Star: ${NONE}`} onClick=${star}><${Icon} name="star" fill=${starred} />${word(starred ? 'Starred' : 'Star', 'lbl-star')}</button>
     ${children}
-    <button type="button" class=${`btn vb-archive${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${archived} aria-label=${frame ? `Archive, ${name}` : `Archive: ${NONE}`} title=${frame ? (archived ? 'Archived' : 'Archive') : `Archive: ${NONE}`} onClick=${archive}><${Icon} name="archive" />${word(archived ? 'Archived' : 'Archive', 'lbl-archive')}</button>
+    <button type="button" class=${`btn vb-archive${compact ? ' icon' : ''}`} disabled=${!frame} aria-pressed=${archived} aria-label=${frame ? `${archived ? 'Archived' : 'Archive'}, ${name}` : `Archive: ${NONE}`} title=${frame ? (archived ? 'Archived' : 'Archive') : `Archive: ${NONE}`} onClick=${archive}><${Icon} name="archive" />${word(archived ? 'Archived' : 'Archive', 'lbl-archive')}</button>
     ${!compact && frame && html`<${MoveButton} frame=${frame} />`}
   </div>`;
 }

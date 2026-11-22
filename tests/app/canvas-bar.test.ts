@@ -55,15 +55,15 @@ describe('button names start with the visible label', () => {
         for (const b of buttons) {
           const name = nameOf(b);
           const visible = (b.textContent ?? '').trim();
-          if (visible) expect(visible.startsWith(name.split(',')[0]) || name.startsWith(visible), `${visible} in ${name}`).toBe(true);
+          if (visible) expect(name.startsWith(visible), `${visible} in ${name}`).toBe(true);
           const word = words.find((w) => name.startsWith(w))!;
           expect(word, name).toBeTruthy();
           expect(name).toContain('Zed');
         }
         const star = buttons.find((b) => b.classList.contains('vb-star'))!;
-        expect(nameOf(star)).toBe('Star, Zed');
+        expect(nameOf(star)).toBe(on ? 'Starred, Zed' : 'Star, Zed');
         expect(star.getAttribute('aria-pressed')).toBe(String(on));
-        expect(nameOf(buttons.find((b) => b.classList.contains('vb-archive'))!)).toBe('Archive, Zed');
+        expect(nameOf(buttons.find((b) => b.classList.contains('vb-archive'))!)).toBe(on ? 'Archived, Zed' : 'Archive, Zed');
         clear();
       }
     }
@@ -89,23 +89,10 @@ describe('the canvas bottom bar', () => {
     await flush();
     expect(stored('a').at(-1)!.starred).toBe(true);
     expect(stored('a2').at(-1)!.starred).toBe(true);
-    expect(btn(box, /^Star, /).getAttribute('aria-pressed')).toBe('true');
-    await click(btn(box, /^Star, /));
+    expect(btn(box, /^Starred, /).getAttribute('aria-pressed')).toBe('true');
+    await click(btn(box, /^Starred, /));
     await flush();
     expect(stored('a2').at(-1)!.starred).toBe(false);
-  });
-
-  it('keeps one name for Star and Archive and lets aria-pressed carry the state', async () => {
-    const box = await mount(Bar, { id: 'b' });
-    for (const [cls, name] of [['vb-star', 'Star, Three tiers'], ['vb-archive', 'Archive, Three tiers']]) {
-      const b = box.querySelector<HTMLButtonElement>(`button.${cls}`)!;
-      expect(b.getAttribute('aria-label')).toBe(name);
-      expect(b.getAttribute('aria-pressed')).toBe('false');
-      await click(b);
-      await flush();
-      expect(b.getAttribute('aria-label')).toBe(name);
-      expect(b.getAttribute('aria-pressed')).toBe('true');
-    }
   });
 
   it('archives and unarchives, and says what happened', async () => {
@@ -113,9 +100,9 @@ describe('the canvas bottom bar', () => {
     await click(btn(box, /^Archive, /));
     await flush();
     expect(stored('b').at(-1)!.archived).toBe(true);
-    expect(btn(box, /^Archive, /).getAttribute('aria-pressed')).toBe('true');
+    expect(btn(box, /^Archived, /).getAttribute('aria-pressed')).toBe('true');
     expect(store.getState().toast).toMatch(/^Archived Three tiers\./);
-    await click(btn(box, /^Archive, /));
+    await click(btn(box, /^Archived, /));
     await flush();
     expect(stored('b').at(-1)!.archived).toBe(false);
     expect(store.getState().toast).toBe('Three tiers is back in Home and the project list.');
