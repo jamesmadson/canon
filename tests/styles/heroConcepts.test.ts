@@ -50,7 +50,7 @@ describe('the two hidden hero concepts', () => {
   it('keep the hero text block, both buttons and the Connect your agent panel exactly as on the homepage', () => {
     expect(text(heroC)).toBe(text(home));
     expect(text(heroD)).toBe(text(home));
-    expect(text(home)).toContain('Connect your agent');
+    expect(text(home)).toContain('Try it with your agent');
   });
 
   it('hold a decorative, hidden stage with no layout of their own that can scroll sideways', () => {

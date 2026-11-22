@@ -21,11 +21,11 @@ describe('the page grid', () => {
   });
 
   it('gives each section a head with the title and the lede under it', () => {
-    for (const id of ['projects', 'agents', 'find', 'open', 'hosted']) {
+    for (const id of ['projects', 'agents', 'find', 'open', 'skills', 'hosted']) {
       const sec = html.slice(html.indexOf(`id="${id}"`));
       expect(sec.slice(0, sec.indexOf('</h2>'))).toContain('class="bhead"');
     }
-    expect(html.match(/class="band/g)).toHaveLength(6);
+    expect(html.match(/class="band/g)).toHaveLength(7);
   });
 
   it('sets the head in the left four columns and the picture in the right eight for search', () => {

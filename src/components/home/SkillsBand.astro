@@ -1,0 +1,90 @@
+---
+import { getCollection } from 'astro:content';
+import { withBase } from '../../lib/withBase';
+import { SKILL_LINES, ORDER } from '../../lib/skillLines';
+import { tie } from '../../lib/words';
+
+/**
+ * The skills, one tile each, linking to their own pages. They are free like
+ * the rest of local Canon (D-140), so they sit before the plans.
+ */
+const skills = (await getCollection('skills', ({ data }) => data.status === 'active')).sort(
+  (a, b) => ORDER.indexOf(a.data.slug) - ORDER.indexOf(b.data.slug),
+);
+---
+
+<section class="band" id="skills" aria-labelledby="h-skills">
+  <div class="bhead">
+    <h2 id="h-skills"><span class="sent">{tie('Skills for your agent.')}</span><span class="sent">{tie('Free, like the rest.')}</span></h2>
+    <p class="lede">{tie('A skill is a plain text file your agent reads before a piece of work. These four are written for Canon.')}</p>
+  </div>
+  <ul class="skill-tiles">
+    {skills.map((s) => (
+      <li>
+        <a class="panel skill-tile" href={withBase(`/skills/${s.data.slug}/`)}>
+          <h3>{s.data.name}</h3>
+          <p set:html={SKILL_LINES[s.data.slug] ?? s.data.tagline} />
+        </a>
+      </li>
+    ))}
+  </ul>
+  <p class="skills-all"><a href={withBase('/skills/')}>{tie('See every skill and how to install them')}</a></p>
+</section>
+
+<style is:global>
+  .skill-tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+  }
+  .skill-tile {
+    display: block;
+    height: 100%;
+    padding: 20px 20px 24px;
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: transform 160ms var(--ease);
+  }
+  .skill-tile:active {
+    transform: scale(0.97);
+  }
+  .skill-tile:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .skill-tile:hover {
+      background: var(--color-recess);
+    }
+  }
+  .skill-tile h3 {
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 400;
+  }
+  .skill-tile p {
+    margin-top: 8px;
+    font-size: 15px;
+    line-height: 22px;
+    color: var(--color-ink-soft);
+    text-wrap: pretty;
+  }
+  .skills-all {
+    margin-top: 32px;
+    font-size: 15px;
+  }
+  .skills-all a {
+    color: var(--color-ink);
+    text-underline-offset: 3px;
+  }
+  @media (max-width: 960px) {
+    .skill-tiles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .skill-tiles {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

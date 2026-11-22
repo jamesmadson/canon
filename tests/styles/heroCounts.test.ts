@@ -23,14 +23,14 @@ beforeAll(() => {
 const heroText = () => html.slice(html.indexOf('class="htext"'), html.indexOf('class="hpanel"'));
 
 describe('the hero’s words', () => {
-  it('has the heading, one lede line, two buttons and one fine-print line', () => {
+  it('has the heading, one lede line, two buttons and no fine print', () => {
     const h = heroText();
     expect(h).toContain('Your prototypes are everywhere.');
     expect(h.match(/<p class="lede[^"]*"/g)).toHaveLength(1);
     expect(flat(h.match(/<p class="lede[^"]*">([\s\S]*?)<\/p>/)![1]).trim()).toBe('Links, zips and agent builds, filed by project on your machine.');
     const cta = h.match(/<div class="cta[^"]*">([\s\S]*?)<\/div>/)![1];
     expect(cta.match(/class="hbtn/g)).toHaveLength(2);
-    expect(h.match(/<p class="fine/g)).toHaveLength(1);
+    expect(h).not.toMatch(/<p class="fine/);
   });
 
   it('has no waitlist button in the hero, and the page still links to the hosted section', () => {

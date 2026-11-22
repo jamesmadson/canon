@@ -1,10 +1,16 @@
 ---
 import { withBase } from '../../lib/withBase';
+
+interface Props {
+  /** Show Open the app. Pages whose hero has its own copy of it leave it out. */
+  app?: boolean;
+}
+const { app = true } = Astro.props;
 ---
 
 <div class="home">
   <header class="wrap top">
     <a class="lockup" href={withBase('/')} aria-label="Canon, home">Canon</a>
-    <a class="hbtn hbtn-small" href={withBase('/app/')} data-ga="open_app" data-ga-location="header">Open the app</a>
+    {app && <a class="hbtn hbtn-small" href={withBase('/app/')} data-ga="open_app" data-ga-location="header">Open the app</a>}
   </header>
 </div>

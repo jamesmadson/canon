@@ -6,6 +6,7 @@ import WaysIn from './WaysIn.astro';
 import AgentBand from './AgentBand.astro';
 import FindBand from './FindBand.astro';
 import OpenBand from './OpenBand.astro';
+import SkillsBand from './SkillsBand.astro';
 import Plans from './Plans.astro';
 
 interface Props {
@@ -24,6 +25,7 @@ const { waitlistUrl = '', hero = 'tabs' } = Astro.props;
     <AgentBand />
     <FindBand />
     <OpenBand />
+    <SkillsBand />
     <Plans waitlistUrl={waitlistUrl} />
   </div>
 </div>

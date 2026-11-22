@@ -16,6 +16,11 @@ interface Props {
    * The homepage is the only thing that needs it.
    */
   wide?: boolean;
+  /**
+   * The page opens on the homepage hero, which has its own Open the app
+   * button, so the header leaves its copy out.
+   */
+  hero?: boolean;
   /** Keeps the page out of search results, for pages that are only for comparing. */
   noindex?: boolean;
   /** With noindex, also asks crawlers not to follow the page's links. */
@@ -26,6 +31,7 @@ const {
   title,
   description = 'Every prototype, from any tool, in one place.',
   wide = false,
+  hero = false,
   noindex = false,
   nofollow = false,
 } = Astro.props;
@@ -70,7 +76,7 @@ const {
     >
       Skip to content
     </a>
-    <SiteHeader />
+    <SiteHeader app={!hero} />
     <main
       id="main"
       class:list={[

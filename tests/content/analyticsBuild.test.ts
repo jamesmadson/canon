@@ -59,8 +59,9 @@ describe('analytics in the built site', () => {
 
   it('marks the homepage links and buttons for the delegated listener', () => {
     const html = text(join(out, 'index.html'));
-    expect(html).toMatch(/data-ga="open_app" data-ga-location="header"/);
+    expect(html).not.toMatch(/data-ga-location="header"/);
     expect(html).toMatch(/data-ga="open_app" data-ga-location="hero"/);
+    expect(text(join(out, 'skills', 'index.html'))).toMatch(/data-ga="open_app" data-ga-location="header"/);
     expect(html).toMatch(/data-ga="nav_section" data-ga-section="agents"/);
     expect(html).toMatch(/data-ga="github_click"/);
     expect(html).toMatch(/data-ga="readme_click"/);

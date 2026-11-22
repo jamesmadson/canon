@@ -213,7 +213,7 @@ describe('what the copy claims', () => {
     for (const html of [closed, open]) {
       const hosted = html.slice(html.indexOf('id="hosted"'));
       expect(text(hosted)).toContain('Not built yet.');
-      expect(text(hosted.slice(0, hosted.indexOf('Canon, hosted')))).toContain('Available now.');
+      expect(text(hosted.slice(0, hosted.indexOf('Canon, hosted')))).toContain('Nothing leaves your machine.');
     }
   });
 
@@ -282,7 +282,7 @@ describe('words', () => {
   // Mutation: go back to a line break, or drop the tie on a sentence's last two words.
   it('sets each sentence of a two-sentence heading in its own block span, tied at the end', () => {
     const heads = [...closed.matchAll(/<h([12])\b[^>]*>((?:<span class="sent">[^<]*<\/span>)+)<\/h\1>/g)];
-    expect(heads).toHaveLength(4);
+    expect(heads).toHaveLength(5);
     for (const h of heads) {
       const spans = [...h[2].matchAll(/<span class="sent">([^<]*)<\/span>/g)].map((m) => m[1]);
       expect(spans).toHaveLength(2);

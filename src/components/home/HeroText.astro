@@ -5,8 +5,8 @@ import { withBase } from '../../lib/withBase';
 import { tie } from '../../lib/words';
 
 /**
- * The hero's words and actions, shared by every hero variant. "Connect your
- * agent" opens a panel under the buttons with the setup command. Without
+ * The hero's words and actions, shared by every hero variant. "Try it with
+ * your agent" opens a panel under the buttons with the setup command. Without
  * script the panel is simply open and its button is hidden. The hosted
  * waitlist is not in the hero; the hosted section lower down has its own form.
  */
@@ -21,7 +21,7 @@ interface Props {
   <div class="mcp-scope" data-mcp>
     <div class="cta rise rise-3">
       <a class="hbtn hbtn-primary" href={withBase('/app/')} data-ga="open_app" data-ga-location="hero">Open the app</a>
-      <button type="button" class="hbtn" data-mcp-toggle aria-expanded="false" aria-controls="mcp-panel">Connect your agent</button>
+      <button type="button" class="hbtn" data-mcp-toggle aria-expanded="false" aria-controls="mcp-panel">Try it with your agent</button>
     </div>
     <div class="mcp">
       <div class="mcp-panel" id="mcp-panel" role="group" aria-labelledby="mcp-label">
@@ -56,7 +56,6 @@ interface Props {
       </div>
     </div>
   </div>
-  <p class="fine rise rise-3" data-mcp-after>{tie('Free and open source. Nothing leaves your machine.')}</p>
 </div>
 
 <script>
@@ -192,9 +191,6 @@ interface Props {
   .htext .hbtn:not(.hbtn-primary) {
     border-color: transparent;
     background: var(--color-panel);
-  }
-  .fine[data-mcp-after] {
-    margin-top: 16px;
   }
 
   /* No script: the panel is open and the button that would open it is gone. */
