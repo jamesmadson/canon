@@ -307,7 +307,7 @@ export interface BuildOpts {
   entry?: string;
 }
 export async function addBuild(projectId: string, files: { path: string; bytes: Uint8Array }[], opts: BuildOpts) {
-  const prepared = await prepare({ name: opts.name || opts.fallbackName, files: files.map((f) => ({ path: f.path, blob: new Blob([f.bytes]) })) }, opts.entry);
+  const prepared = await prepare({ name: opts.name || opts.fallbackName, files: files.map((f) => ({ path: f.path, blob: new Blob([new Uint8Array(f.bytes)]) })) }, opts.entry);
   if (!prepared) throw new Error('The build has no HTML file, so there is nothing to show.');
   if (opts.name) prepared.name = opts.name;
   return addPrepared(projectId, prepared, { boardId: opts.boardId, size: opts.size, stack: false, meta: opts.meta, liveUrl: opts.liveUrl });

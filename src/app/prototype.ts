@@ -100,7 +100,7 @@ export function Focus({ frame, page, onClose, address, askUrl }: { frame: Frame;
   const src = shown.show === 'live' ? shown.url : address && here.kind === 'url' ? joinPath(safeFrameUrl(here.url), address.path) : frameSrc(here, pg);
   const newTab = here.kind === 'url' ? safeFrameUrl(here.url) : previewUrl(here, pg);
   // The host list is checked here too, so links saved before a host joined it still get the notice.
-  const known = shown.show === 'link' && here.kind === 'url' && (here.frameBlocked === true || refusesFraming(here.url));
+  const known = shown.show === 'link' && here.kind === 'url' && (here.frameBlocked === true || (typeof here.url === 'string' && refusesFraming(here.url)));
   const remote = shown.show === 'link' || shown.show === 'live';
 
   // The room the page has, so a wide page fits until the person picks a size.

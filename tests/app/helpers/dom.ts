@@ -3,7 +3,7 @@ import { act } from 'preact/test-utils';
 import type { Frame, Project } from '../../../src/app/db';
 
 /** Mounts a component into the document and returns its container. */
-export async function mount<P>(Comp: ComponentType<P>, props: P): Promise<HTMLElement> {
+export async function mount<P>(Comp: ComponentType<P>, props: NoInfer<P>): Promise<HTMLElement> {
   const box = document.createElement('div');
   document.body.appendChild(box);
   await act(() => { render(h(Comp as ComponentType<any>, props as any), box); });
@@ -16,7 +16,7 @@ export const fire = (el: Element, event: Event) => act(() => { el.dispatchEvent(
 export const click = (el: Element) => fire(el, new MouseEvent('click', { bubbles: true, cancelable: true }));
 export const key = (el: Element | Window, k: string, mods: KeyboardEventInit = {}) =>
   act(() => { el.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true, ...mods })); });
-export const type = (input: HTMLInputElement, value: string) => {
+export const type = (input: HTMLInputElement | HTMLTextAreaElement, value: string) => {
   input.value = value;
   return fire(input, new Event('input', { bubbles: true }));
 };

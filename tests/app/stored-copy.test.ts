@@ -21,9 +21,7 @@ import * as store from '../../src/app/store';
 import { runOp, type OpsDeps } from '../../src/app/bridge/ops';
 import { createStaging } from '../../src/app/lib/stage';
 import { currentOf, stacks } from '../../src/app/lib/versions';
-// @ts-expect-error: plain JavaScript, no declarations
 import { makeTools } from '../../cli/src/mcp/tools.js';
-// @ts-expect-error: plain JavaScript, no declarations
 import { ensurePairing } from '../../cli/src/mcp/pairing.js';
 import { project } from './helpers/dom';
 
