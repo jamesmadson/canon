@@ -46,49 +46,68 @@ describe('the scattered hero at /', () => {
     }
   });
 
+  const BOX = () => html.slice(html.indexOf('class="pterm pbox"'), html.indexOf('data-scatter'));
+  const flat = (x: string) => x.replace(/<[^>]+>/g, '').replace(/&nbsp;| /g, ' ').replace(/&gt;/g, '>').replace(/&#39;|&#x27;/g, '’').replace(/\s+/g, ' ').trim();
+
   it('has a decorative terminal that types the request and then shows the reply', () => {
-    const box = html.slice(html.indexOf('class="pbox"'), html.indexOf('data-scatter'));
+    const box = BOX();
     expect(box).toContain('role="img"');
     expect(box).toContain('data-prompt="Put all my prototypes in Canon, by project."');
-    expect(box.replace(/<[^>]+>/g, '').replace(/&gt;/g, '>').replace(/\s/g, '')).toContain('>Putallmyprototypesin Canon,byproject.'.replace(' ', ''));
     expect(box.match(/class="pc"/g)).toHaveLength('Put all my prototypes in Canon, by project.'.replaceAll(' ', '').length);
-    expect(box).toContain('class="pcaret"');
     expect(box).not.toMatch(/<(a|button|input|select|textarea)\b|tabindex/);
   });
 
-  it('shows a Claude Code session: title bar, four lines, and the input box with its hint', () => {
-    const box = html.slice(html.indexOf('class="pbox"'), html.indexOf('data-scatter'));
-    const flat = (x: string) => x.replace(/<[^>]+>/g, '').replace(/&nbsp;| /g, ' ').replace(/&gt;/g, '>').replace(/&#39;|&#x27;/g, '’');
+  it('has one place that types: a single cursor, inside the input box, and none in the transcript', () => {
+    const box = BOX();
+    expect(box.match(/class="pcaret"/g)).toHaveLength(1);
+    const input = box.slice(box.indexOf('class="pinput"'));
+    expect(input).toContain('class="pcaret"');
+    expect(box.slice(0, box.indexOf('class="pinput"'))).not.toContain('pcaret');
+    // The typed characters live only in the input; the transcript holds the request as plain text.
+    expect(box.slice(0, box.indexOf('class="pinput"'))).not.toContain('class="pc"');
+    expect(box).not.toContain('pcur');
+  });
+
+  it('has no shortcuts hint', () => {
+    expect(html).not.toContain('? for shortcuts');
+    expect(html).not.toContain('phint');
+    expect(read('src/components/home/HeroScatter.astro')).not.toContain('shortcuts');
+    expect(read('src/components/home/Terminal.astro')).not.toContain('shortcuts');
+  });
+
+  it('shows a Claude Code session: title bar, the request sent, a quiet tool call, its result and the reply', () => {
+    const box = BOX();
     expect(flat(box.slice(box.indexOf('class="pbar"'), box.indexOf('class="pbody"')))).toContain('fieldnote · claude');
-    expect(box.match(/class="pdots"><i><\/i><i><\/i><i><\/i>/g)).toHaveLength(1);
-    // 1 the typed request, 2 the tool call, 3 its result, 4 the answer.
-    expect(box.indexOf('class="ptext"')).toBeLessThan(box.indexOf('canon - canon_add (MCP)'));
-    const steps = [...box.matchAll(/<div class="pstep[^"]*">([\s\S]*?)<\/div>/g)].map((m) => flat(m[1]).trim());
+    const steps = [...box.matchAll(/<div class="pstep ([^"]*)">([\s\S]*?)<\/div>/g)].map((m) => [m[1], flat(m[2])]);
     expect(steps).toEqual([
-      '⏺canon - canon_add (MCP)',
-      '⎿  Added 8 prototypes to 3 projects',
-      '⏺Done. They’re in Canon under Web app, Marketing site and iPhone app.',
+      ['pask', '>Put all my prototypes in Canon, by project.'],
+      ['pcall', 'canon_addcanon · MCP'],
+      ['pres', 'Added 8 prototypes to 3 projects'],
+      ['pnote', 'Done. They’re in Canon under Web app, Marketing site and iPhone app.'],
     ]);
-    expect(box).toContain('<span class="pmark pblue">⏺</span>');
+    // The input box comes last, below the transcript.
     expect(box.indexOf('class="pinput"')).toBeGreaterThan(box.indexOf('Done.'));
-    expect(flat(box.slice(box.indexOf('class="pinput"')))).toContain('? for shortcuts');
-    expect(box).toContain('class="pcur"');
-    // No Claude or Anthropic logo, no picture at all.
     expect(box).not.toMatch(/<img|<svg|anthropic/i);
-    // The label says what happened, for people who cannot see it.
     expect(box).toMatch(/aria-label="A Claude Code session[^"]*8 prototypes to 3 projects[^"]*Web app, Marketing site and iPhone app/);
   });
 
-  it('is a dark terminal in the site’s mono, with no orange', () => {
-    const css = read('src/components/home/HeroScatter.astro');
-    const pbox = css.match(/\.pbox \{[^}]*\}/)![0];
-    expect(pbox).toContain('background: #1a1918');
-    expect(pbox).toContain('border-radius: 11px');
-    expect(pbox).toContain('font-family: var(--font-mono)');
-    expect(pbox).toContain('font-size: 13px');
+  it('is a dark terminal in the site’s mono, with a soft filled input and no outline', () => {
+    const css = read('src/components/home/TerminalStyles.astro');
+    const pterm = css.match(/\.pterm \{[^}]*\}/)![0];
+    expect(pterm).toContain('background: #1a1918');
+    expect(pterm).toContain('font-family: var(--font-mono)');
+    expect(pterm).toContain('font-size: 13px');
     expect(css).toMatch(/--pt-ink: #edebe6/);
     expect(css).toMatch(/--pt-muted: #a29e96/);
+    expect(css.match(/\.pinput \{[^}]*\}/)![0]).toMatch(/background: var\(--pt-fill\)/);
+    expect(css).not.toMatch(/\.pinput \{[^}]*(border:|outline|inset 0 0 0)/);
     expect(css).not.toMatch(/ff4f00|--color-orange/i);
+    expect(css).toMatch(/\.pbody \{[^}]*padding: 4px 20px 20px/);
+  });
+
+  it('fades the bottom of the Canon window into the hero', () => {
+    const css = read('src/components/home/HeroScatter.astro');
+    expect(css).toMatch(/\.sclip \{[^}]*mask-image: linear-gradient\(to bottom, #000 0, #000 calc\(100% - 110px\), transparent 100%\)/);
   });
 
   it('is decorative: hidden from assistive tech, with nothing to focus', () => {
@@ -162,14 +181,15 @@ describe('the scattered hero styles and script', () => {
       }
     }
     // The one animation is the cursor's blink, which changes opacity only.
-    expect([...css.matchAll(/@keyframes (\w+)/g)].map((m) => m[1])).toEqual(['pblink']);
-    expect(css.match(/@keyframes pblink \{([\s\S]*?\n {2}\})/)![1]).not.toMatch(/transform|width|height|left|top|margin/);
-    // The cursor in the line and the one in the input box blink; reduced motion stops the second.
-    expect([...css.matchAll(/animation:/g)]).toHaveLength(3);
-    // The session is shown whole, without its typing cursor, under reduced motion.
-    expect(css).toMatch(/prefers-reduced-motion: reduce\) \{[\s\S]*?\.pbox \.pcaret \{\s*display: none !important/);
-    // The cursor is the one place the box uses Canon orange.
-    expect(css).toMatch(/\.pcaret \{[^}]*background: var\(--sel\)/);
+    const term = read('src/components/home/TerminalStyles.astro');
+    expect([...term.matchAll(/@keyframes (\w+)/g)].map((m) => m[1])).toEqual(['pblink']);
+    expect(term.match(/@keyframes pblink \{([\s\S]*?\n {2}\})/)![1]).not.toMatch(/transform|width|height|left|top|margin/);
+    expect([...term.matchAll(/animation:/g)]).toHaveLength(1);
+    // Reduced motion shows the session as sent, with the cursor still.
+    expect(css).toMatch(/prefers-reduced-motion: reduce\) \{[\s\S]*?\.pbox \.pcaret \{\s*animation: none !important/);
+    expect(css).toMatch(/prefers-reduced-motion: reduce\) \{[\s\S]*?\.pbox \.pc \{\s*opacity: 0 !important/);
+    // The cursor is the selection blue.
+    expect(term).toMatch(/\.pcaret \{[^}]*background: var\(--sel\)/);
     for (const m of css.matchAll(/(\d+)ms/g)) expect(Number(m[1]) >= 100 && Number(m[1]) <= 400, `${m[1]}ms`).toBe(true);
   });
 

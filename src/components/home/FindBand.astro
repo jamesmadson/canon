@@ -3,10 +3,11 @@ import Thumb from './Thumb.astro';
 import { tie } from '../../lib/words';
 import type { ThumbKey } from '../../lib/thumbs';
 
+/** One match per row. The word searched for is marked in its summary. */
 const RESULTS: Array<[ThumbKey, string, string, string[], string, boolean]> = [
-  ['w1', 'Welcome, three steps', 'Name, workspace and first notebook, one step at a time.', ['Onboarding', 'Three steps', 'Claude Code'], 'Today', true],
-  ['w2', 'Welcome, single screen', 'Everything on one screen, with starter templates.', ['Onboarding', 'Single screen', 'Lovable'], 'Tuesday', false],
-  ['w3', 'Invite a teammate', 'Shows the invite list under the welcome message.', ['Onboarding', 'Invite', 'Figma Make'], 'Last week', false],
+  ['people', 'People', 'Everyone on the <mark>team</mark>, with roles and last active.', ['Web app', 'People', 'localhost:5173'], 'Tuesday', true],
+  ['price', 'Pricing', 'Free, <mark>Team</mark> and Company plans, billed monthly.', ['Marketing site', 'Pricing', 'Lovable'], 'Last week', false],
+  ['land', 'Landing page', 'One place for every notebook your <mark>team</mark> writes.', ['Marketing site', 'Landing page', 'Bolt'], 'Monday', false],
 ];
 ---
 
@@ -16,16 +17,16 @@ const RESULTS: Array<[ThumbKey, string, string, string[], string, boolean]> = [
     <p class="lede">{tie('Canon reads a linked prototype’s title and headings, then tags it for you. Search by name, tag, summary, source or note. Your agent can add or remove tags, and tags filter Home in one click.')}</p>
   </div>
   <div class="bbody two">
-  <div class="results" role="img" aria-label="Search results for the word onboarding. A row of tag chips sits above three prototypes, each with its tags.">
+  <div class="results" role="img" aria-label="Search results for the word team. A row of project chips sits above three prototypes, People, Pricing and Landing page, each with its tags.">
     <div class="q">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3 3"></path></svg>
-      <span>onboarding</span><span class="caret" style="margin-left:-6px"></span>
+      <span>team</span><span class="caret" style="margin-left:-6px"></span>
     </div>
     <div class="tagrow" aria-hidden="true">
-      <span class="tag on">Onboarding</span>
-      <span class="tag">Dashboard</span>
-      <span class="tag">Claude Code</span>
-      <span class="tag">Lovable</span>
+      <span class="tag on">All</span>
+      <span class="tag">Web app</span>
+      <span class="tag">Marketing site</span>
+      <span class="tag">iPhone app</span>
     </div>
     {
       RESULTS.map(([k, name, sub, tags, when, on]) => (
@@ -33,7 +34,7 @@ const RESULTS: Array<[ThumbKey, string, string, string[], string, boolean]> = [
           <div class="mini-t"><Thumb k={k} /></div>
           <div>
             <b>{name}</b>
-            <small>{sub}</small>
+            <small set:html={sub} />
             <div class="tags">{tags.map((t) => <span class="tag">{t}</span>)}</div>
           </div>
           <span class="muted">{when}</span>
@@ -41,12 +42,12 @@ const RESULTS: Array<[ThumbKey, string, string, string[], string, boolean]> = [
       ))
     }
   </div>
-    <div class="read" role="img" aria-label="A welcome prototype and the five tags Canon gave it.">
-      <Thumb k="w1" />
+    <div class="read" role="img" aria-label="The Pricing prototype and the five tags Canon gave it.">
+      <Thumb k="price" />
       <div>
         <small>Tagged when it was added</small>
         <div class="tags" aria-hidden="true">
-          {['Onboarding', 'Welcome', 'Three steps', 'Claude Code', 'fieldnote-web'].map((t) => <span class="tag">{t}</span>)}
+          {['Marketing site', 'Pricing', 'Team plan', 'Lovable', 'fieldnote-pricing'].map((t) => <span class="tag">{t}</span>)}
         </div>
       </div>
     </div>

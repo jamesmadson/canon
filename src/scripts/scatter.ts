@@ -235,7 +235,7 @@ function init(stage: HTMLElement) {
     place();
     stage.classList.toggle('is-filed', frozen === 'filed');
     if (variant === 'tabs') openTabs(frozen === 'start' || !frozen ? opening() : squeezed());
-    type(frozen === 'filed' ? chars.length : 0);
+    type(0);
     reply?.classList.toggle('on', frozen === 'filed');
   });
   requestAnimationFrame(() => parts.forEach((p) => p.classList.add('ready')));
@@ -260,7 +260,11 @@ function init(stage: HTMLElement) {
     const steps = crowd();
     if (variant === 'tabs' && t >= CROWD_AT && (t - CROWD_AT) % CROWD_STEP === 0 && (t - CROWD_AT) / CROWD_STEP < steps.length) openTabs(steps[(t - CROWD_AT) / CROWD_STEP]);
     if (box && t >= typeAt && t <= typeAt + TYPE_TICKS) type(Math.ceil(((t - typeAt) / TYPE_TICKS) * chars.length));
-    else if (box && t === replyAt) reply?.classList.add('on');
+    else if (box && t === replyAt) {
+      // Sent: the input box empties and its text moves up into the transcript.
+      type(0);
+      reply?.classList.add('on');
+    }
     else if (t === filedAt) stage.classList.add('is-filed');
     else if (t === outAt) mark('out', true);
     else if (t === outAt + FADE) {

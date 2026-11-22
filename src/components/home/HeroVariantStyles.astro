@@ -21,6 +21,10 @@
   /* The cards may cross the container and the viewport. The page clips them at
      the viewport, so nothing can add a horizontal scroll. */
   .hero-c .sclip {
+    inset: 0;
+    padding: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
     clip-path: inset(-700px -50vw 0 -50vw);
   }
   .xcards {
@@ -86,7 +90,8 @@
   }
   .bframe {
     position: absolute;
-    inset: 0;
+    /* The clip box is padded 700px above and 120px aside (see .sclip). */
+    inset: 700px 120px 0;
     border-radius: 14px;
     background: var(--wn-rail);
     box-shadow:

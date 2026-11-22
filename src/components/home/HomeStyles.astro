@@ -1682,18 +1682,51 @@
     line-height: 1;
     font-weight: 500;
   }
+  /* The three pictures share one height and are not faded, so every word in
+     them can be read. */
   .three .shot {
-    height: 200px;
-    padding-top: 44px;
+    height: 216px;
+    padding: 52px 20px 20px;
+    -webkit-mask-image: none;
+    mask-image: none;
   }
-  /* Where it works with: quiet lines, as in a studio's service list. */
-  .srcs {
-    list-style: none;
-    margin: 14px 0 0;
-    padding: 0;
-    font-size: 15px;
-    line-height: 22px;
+  .three .tx2 .marks {
+    margin-top: 16px;
+  }
+  .three .tx2 p {
+    max-width: 30ch;
+  }
+  .ways-note {
+    margin-top: 16px;
+    max-width: 64ch;
+    font-size: 13px;
+    line-height: 20px;
     color: var(--color-ink-soft);
+  }
+  /* The first picture is the terminal itself, set a little smaller. */
+  .three .shot.term-shot {
+    display: block;
+    padding: 0;
+    background: none;
+    border-radius: 14px;
+  }
+  .term-shot .pmini {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: none;
+  }
+  .term-shot .pmini .pbody {
+    flex: 1;
+    justify-content: space-between;
+  }
+  .pmini .pdots {
+    display: none;
+  }
+  .pmini .pinput {
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 9px;
   }
   .shot {
     height: 176px;
@@ -1793,8 +1826,7 @@
   .q {
     height: 40px;
     border-radius: 9px;
-    border: 1px solid var(--color-input-border);
-    background: var(--color-ground);
+    background: var(--color-panel);
     display: flex;
     align-items: center;
     padding: 0 6px 0 12px;
@@ -1814,8 +1846,8 @@
     margin-left: auto;
     flex: 0 0 auto;
     height: 28px;
-    padding: 0 10px;
-    border-radius: 7px;
+    padding: 0 12px;
+    border-radius: 999px;
     background: var(--color-ink);
     color: var(--color-ground);
     font-size: 12px;
@@ -1841,15 +1873,69 @@
     width: 96px;
     border-radius: 6px;
   }
-  .dropz {
-    height: 136px;
-    border-radius: 9px;
-    border: 1px dashed var(--color-input-border);
-    display: grid;
-    place-items: center;
-    align-content: center;
+  /* The zip card: a file chip held over a project, above the slot it will fill. */
+  .three .shot.zipshot {
+    position: relative;
+    display: block;
+    padding: 0;
+  }
+  .zproj {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 92px;
+    bottom: 0;
+    padding: 12px 12px 0;
+    border-radius: 11px 11px 0 0;
+    background: var(--color-panel);
+  }
+  .zhead {
+    display: flex;
+    justify-content: space-between;
     gap: 8px;
-    font-size: 13px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+  .zhead b {
+    font-weight: 500;
+  }
+  .zslots {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .zslot {
+    min-width: 0;
+    aspect-ratio: 16 / 10;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .zslot .thumb {
+    width: 100%;
+  }
+  .zslot.zdrop {
+    background: var(--color-recess);
+  }
+  .zfile {
+    position: absolute;
+    right: 22px;
+    top: 66px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 9px;
+    background: var(--color-ground);
+    color: var(--color-ink);
+    transform: rotate(-4deg);
+    box-shadow:
+      0 14px 24px -8px rgba(26, 25, 24, 0.28),
+      0 2px 5px rgba(26, 25, 24, 0.12);
+  }
+  .zfile .mono {
+    font-size: 12px;
   }
 
   /* The ink panel, the same in both themes */
@@ -1860,7 +1946,7 @@
     border-radius: 14px;
     background: var(--pbg);
     color: var(--pink);
-    padding: 56px 56px 48px;
+    padding: 40px 40px 36px;
     overflow: hidden;
   }
   .say {
@@ -1876,18 +1962,18 @@
   }
   .home .big {
     margin-top: 10px;
-    font-size: 44px;
-    line-height: 50px;
+    font-size: 32px;
+    line-height: 40px;
     font-weight: 400;
-    letter-spacing: -0.035em;
-    min-height: 100px;
-    max-width: 20ch;
+    letter-spacing: -0.03em;
+    min-height: 80px;
+    max-width: 26ch;
   }
   .big .caret {
     background: var(--color-orange);
     width: 3px;
-    height: 38px;
-    vertical-align: -7px;
+    height: 28px;
+    vertical-align: -5px;
     margin-left: 3px;
   }
   .moves {
@@ -1895,7 +1981,7 @@
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.25fr);
     gap: 20px;
     align-items: start;
-    margin-top: 40px;
+    margin-top: 28px;
   }
   .mvarrow {
     margin-top: 8px;
@@ -1903,8 +1989,7 @@
   }
   .mvbox {
     border-radius: 11px;
-    background: #211f1e;
-    box-shadow: 0 0 0 1px rgba(237, 235, 230, 0.1);
+    background: #232120;
     overflow: hidden;
   }
   .mvhead {
@@ -1914,8 +1999,7 @@
     height: 36px;
     padding: 0 14px;
     align-items: center;
-    background: #282624;
-    box-shadow: inset 0 -1px 0 rgba(237, 235, 230, 0.08);
+    background: #2b2927;
     font-size: 13px;
   }
   .mvhead b {
@@ -1928,6 +2012,11 @@
   .mvbody {
     position: relative;
     min-height: 132px;
+    padding: 4px 0;
+  }
+  /* The loose box holds two rows, so it is not taller than it needs to be. */
+  .moves .mvbox:first-child .mvbody {
+    min-height: 96px;
   }
   .mvrow {
     display: flex;
@@ -1935,13 +2024,12 @@
     gap: 12px;
     height: 44px;
     padding: 0 14px;
-    box-shadow: inset 0 -1px 0 rgba(237, 235, 230, 0.08);
     font-size: 13px;
     white-space: nowrap;
   }
   .mvrow .thumb {
     flex: none;
-    width: 40px;
+    width: 48px;
     border-radius: 4px;
     box-shadow: none;
   }
@@ -1994,23 +2082,22 @@
 
   /* The project the three sources feed: one header and a row of prototypes */
   .proj {
-    margin-top: 20px;
-    padding: 18px 22px 36px;
+    margin-top: 28px;
+    padding: 20px 20px 22px;
     border-radius: 14px;
-    background: var(--wn-main);
-    box-shadow:
-      0 0 0 1px var(--edge),
-      inset 0 1px 0 var(--hi),
-      0 30px 70px -30px var(--shadow);
-    overflow: hidden;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 80%, transparent 100%), linear-gradient(to right, #000 0, #000 95%, transparent 100%);
-    -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(to bottom, #000 0, #000 80%, transparent 100%), linear-gradient(to right, #000 0, #000 95%, transparent 100%);
-    mask-composite: intersect;
+    background: var(--color-panel);
+  }
+  .proj .shead {
+    margin-bottom: 14px;
   }
   .proj .shelf {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
   }
+  .proj .thumb {
+    box-shadow: 0 1px 2px var(--shadow);
+  }
+
 
   /* Search and open */
   .two {
@@ -2053,8 +2140,6 @@
     white-space: nowrap;
   }
   .results {
-    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 80%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0, #000 80%, transparent 100%);
     border-radius: 14px;
     background: var(--color-panel);
     padding: 14px;
@@ -2090,20 +2175,16 @@
   }
   .canvas {
     position: relative;
-    height: 520px;
+    height: 430px;
   }
   .cmask {
     position: absolute;
     inset: 0;
     border-radius: 14px;
     background-color: var(--color-panel);
-    background-image: radial-gradient(var(--edge) 1px, transparent 1px);
-    background-size: 22px 22px;
     overflow: hidden;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 56%, transparent 94%), linear-gradient(to right, #000 0, #000 88%, transparent 100%);
-    -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(to bottom, #000 0, #000 56%, transparent 94%), linear-gradient(to right, #000 0, #000 88%, transparent 100%);
-    mask-composite: intersect;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 62%, transparent 96%);
+    mask-image: linear-gradient(to bottom, #000 0, #000 62%, transparent 96%);
   }
   .ctitle {
     position: absolute;
@@ -2117,24 +2198,27 @@
   .ctitle b {
     font-weight: 500;
   }
+  /* The page, the pin and the note share one box, so the pin stays on the
+     Team plan whatever the width. */
   .page {
     position: absolute;
-    left: 48px;
-    top: 64px;
+    left: 50%;
+    top: 60px;
+    width: min(680px, calc(100% - 48px));
+    transform: translateX(-50%);
   }
   .page .thumb {
-    width: 800px;
+    width: 100%;
     border-radius: 11px;
-    box-shadow:
-      0 0 0 1px rgba(26, 25, 24, 0.1),
-      0 24px 60px -12px rgba(26, 25, 24, 0.25);
+    box-shadow: 0 24px 60px -12px rgba(26, 25, 24, 0.22);
   }
   .pin {
     position: absolute;
-    left: 292px;
-    top: 169px;
+    left: 64%;
+    top: 44%;
     width: 28px;
     height: 28px;
+    margin: -14px 0 0 -14px;
     border-radius: 50% 50% 50% 4px;
     background: var(--color-ink);
     color: var(--color-ground);
@@ -2145,14 +2229,13 @@
   }
   .note {
     position: absolute;
-    left: 346px;
-    top: 156px;
+    left: calc(64% + 24px);
+    top: 44%;
     width: 232px;
+    margin-top: -14px;
     border-radius: 11px;
     background: var(--color-ground);
-    box-shadow:
-      0 0 0 1px var(--edge),
-      0 12px 32px var(--shadow);
+    box-shadow: 0 12px 32px var(--shadow);
     padding: 12px 14px;
     font-size: 14px;
     line-height: 20px;
@@ -2175,9 +2258,7 @@
     padding: 6px;
     border-radius: 14px;
     background: var(--color-ground);
-    box-shadow:
-      0 0 0 1px var(--edge),
-      0 12px 32px var(--shadow);
+    box-shadow: 0 12px 32px var(--shadow);
     white-space: nowrap;
   }
   .bitem {
@@ -2214,25 +2295,21 @@
       flex: 1 0 100%;
       justify-content: center;
     }
-    .canvas .note {
-      bottom: 132px;
-    }
   }
   .stored {
-    position: absolute;
-    left: 8px;
-    top: 8px;
     display: inline-flex;
+    margin-left: 8px;
+    vertical-align: 1px;
     align-items: center;
-    height: 22px;
+    height: 20px;
     padding: 0 8px;
     border-radius: 999px;
-    background: var(--color-ground);
+    background: var(--color-recess);
     color: var(--color-ink-soft);
     font-size: 12px;
     line-height: 1;
+    font-weight: 400;
     white-space: nowrap;
-    box-shadow: 0 0 0 1px var(--edge);
   }
   .tagrow {
     display: flex;
@@ -2245,8 +2322,15 @@
     padding: 0 10px;
     border-radius: 999px;
   }
+  /* The chosen chip is a fill in the selection blue, with ink type. */
   .tag.on {
-    box-shadow: inset 0 0 0 1px var(--color-ink);
+    background: color-mix(in srgb, var(--sel) 16%, var(--color-ground));
+  }
+  .res mark {
+    padding: 0 2px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--sel) 18%, transparent);
+    color: inherit;
   }
 
   /* Plans */
@@ -2664,27 +2748,24 @@
       margin: 0;
     }
     .proj .shelf {
-      grid-template-columns: repeat(5, 150px);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .proj .shelf .slot:nth-child(n + 3) {
+      display: block;
     }
     .canvas {
-      height: 400px;
+      height: 480px;
     }
     .page {
-      left: 16px;
       top: 56px;
-    }
-    .page .thumb {
-      width: 470px;
-    }
-    .pin {
-      left: 166px;
-      top: 114px;
+      width: calc(100% - 32px);
     }
     .note {
-      left: 16px;
-      top: auto;
-      bottom: 84px;
-      width: min(232px, calc(100% - 32px));
+      left: 0;
+      top: calc(100% + 10px);
+      margin-top: 0;
+      width: min(240px, 100%);
     }
     .band {
       padding: 20px 0 88px;
@@ -2745,6 +2826,12 @@
     }
     .form {
       margin: 12px 8px 8px;
+    }
+  }
+  @media (max-width: 640px) {
+    .proj .shelf {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
     }
   }
 </style>

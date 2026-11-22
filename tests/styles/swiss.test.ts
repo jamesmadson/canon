@@ -25,7 +25,7 @@ describe('the page grid', () => {
       const sec = html.slice(html.indexOf(`id="${id}"`));
       expect(sec.slice(0, sec.indexOf('</h2>'))).toContain('class="bhead"');
     }
-    expect(html.match(/class="band/g)).toHaveLength(5);
+    expect(html.match(/class="band/g)).toHaveLength(6);
   });
 
   it('sets the head in the left four columns and the picture in the right eight for search', () => {
@@ -50,11 +50,10 @@ describe('the ways in cards', () => {
     expect(num).not.toMatch(/orange|ff4f00|b83a00/i);
   });
 
-  it('list their tools as quiet muted lines', () => {
+  it('list their tools as logo chips, one list on each card', () => {
     const ways = html.slice(html.indexOf('id="projects"'), html.indexOf('id="agents"'));
-    expect(ways.match(/<ul class="srcs">/g)).toHaveLength(3);
-    expect(ways).toContain('<li>Claude Code</li>');
-    expect(css).toMatch(/\.srcs \{[^}]*color: var\(--color-ink-soft\)/);
+    expect(ways.match(/<ul class="marks"/g)).toHaveLength(3);
+    expect(ways).not.toContain('class="srcs"');
   });
 });
 

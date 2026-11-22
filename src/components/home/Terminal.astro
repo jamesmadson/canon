@@ -1,0 +1,61 @@
+---
+import TerminalStyles from './TerminalStyles.astro';
+import { tie } from '../../lib/words';
+
+/**
+ * A Claude Code session, drawn. In the hero ("live") the request is typed into
+ * the input box at the bottom and, once sent, moves up into the transcript;
+ * the script in scatter.ts drives that. In the first "ways in" card (mini) it
+ * is a still frame. Either way it is a picture: one label says what happened
+ * and nothing in it can be focused.
+ */
+interface Props {
+  prompt: string;
+  /** The tool's result, shown indented under the call. */
+  added: string;
+  /** The agent's answer. Left out in the small version. */
+  reply?: string;
+  label: string;
+  title: string;
+  mini?: boolean;
+}
+const { prompt, added, reply, label, title, mini = false } = Astro.props;
+const words = prompt.split(' ');
+---
+
+<div class:list={['pterm', mini ? 'pmini' : 'pbox']} role="img" aria-label={label} data-prompt={mini ? undefined : prompt}>
+  <div class="pbar"><span class="pdots"><i></i><i></i><i></i></span><span class="ptitle">{title}</span></div>
+  <div class="pbody">
+    <div class="preply">
+      <div class="pstep pask"><span class="pdim">&gt;</span><span>{prompt}</span></div>
+      <div class="pstep pcall"><i class="pdot"></i><span>canon_add</span><span class="pvia">canon · MCP</span></div>
+      <div class="pstep pres">{added}</div>
+      {reply && <div class="pstep pnote">{tie(reply)}</div>}
+    </div>
+    {
+      mini && (
+        <div class="pinput">
+          <span class="pdim">&gt;</span>
+        </div>
+      )
+    }
+    {
+      !mini && (
+        <div class="pinput">
+          <span class="pdim">&gt;</span>
+          <span class="ptext">
+            <span class="pcaret" />
+            {words.map((w, i) => (
+              <>
+                <span class="pw">{[...w].map((ch) => <span class="pc">{ch}</span>)}</span>
+                {i < words.length - 1 ? ' ' : ''}
+              </>
+            ))}
+          </span>
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<TerminalStyles />

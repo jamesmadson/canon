@@ -1,6 +1,10 @@
 ---
+import BrandList from './BrandList.astro';
+import Terminal from './Terminal.astro';
 import Thumb from './Thumb.astro';
 import { tie } from '../../lib/words';
+
+const TERMINAL_LABEL = 'A Claude Code session. You ask it to add the People page to Canon. It calls canon_add, and the page is added to the Web app project.';
 ---
 
 <section class="band" id="projects" aria-labelledby="h-projects">
@@ -10,84 +14,79 @@ import { tie } from '../../lib/words';
   </div>
   <div class="three">
     <div class="panel">
-        <span class="num" aria-hidden="true">1</span>
-      <div class="shot dark" role="img" aria-label="A terminal where you ask your agent to add a page to Canon.">
-        <div><span class="dim">&gt;</span> add this page to Canon</div>
-        <div><span class="dim">⏺ canon_add</span> “Invite a teammate”</div>
-        <div class="dim">{tie('Added to Onboarding.')}</div>
+      <span class="num" aria-hidden="true">1</span>
+      <div class="shot term-shot">
+        <Terminal mini prompt="Add the People page to Canon." added="Added to Web app" label={TERMINAL_LABEL} title="fieldnote · claude" />
       </div>
       <div class="tx2">
         <h3>{tie('Ask your agent')}</h3>
-        <p>{tie('Your coding agent adds what it just built, names it and notes where it came from. A build from code keeps a stored copy that opens without its dev server running, and a Live switch shows the running version when the server is on.')}</p>
-        <ul class="srcs"><li>Claude Code</li><li>Codex</li><li>Cursor</li></ul>
+        <p>{tie('Your agent adds what it just built, named and filed.')}</p>
+        <BrandList keys={['claude', 'codex', 'cursor']} label="Agents that can add prototypes" />
       </div>
     </div>
     <div class="panel">
-        <span class="num" aria-hidden="true">2</span>
-      <div class="shot" role="img" aria-label="A link pasted into Canon becomes a card.">
-        <div class="q"><span class="mono">welcome-single-screen.lovable.app</span><span class="mini">Add</span></div>
+      <span class="num" aria-hidden="true">2</span>
+      <div class="shot" role="img" aria-label="A link pasted into Canon becomes a card for the Pricing prototype.">
+        <div class="q"><span class="mono">fieldnote-pricing.lovable.app</span><span class="mini">Add</span></div>
         <div class="lrow">
-          <div class="mini-t"><Thumb k="w2" /></div>
-          <div><b>Welcome, single screen</b><span class="muted">Lovable · added just now</span></div>
+          <div class="mini-t"><Thumb k="price" /></div>
+          <div><b>Pricing</b><span class="muted">Lovable · added just now</span></div>
         </div>
       </div>
       <div class="tx2">
         <h3>{tie('Paste a link')}</h3>
-        <p>{tie('A share link from any tool becomes a card on your project.')}</p>
-        <ul class="srcs"><li>Figma</li><li>v0</li><li>Lovable</li><li>GitHub Pages</li></ul>
+        <p>{tie('A share link from any tool becomes a card.')}</p>
+        <BrandList keys={['figma', 'v0', 'lovable', 'bolt', 'replit', 'githubpages']} label="Tools whose links Canon can add" />
       </div>
     </div>
     <div class="panel">
-        <span class="num" aria-hidden="true">3</span>
-      <div class="shot" role="img" aria-label="A zip file dropped onto a project.">
-        <div class="dropz"><span class="chip mono">mobile-sign-up.zip</span><span class="muted">Drop it on a project</span></div>
+      <span class="num" aria-hidden="true">3</span>
+      <div class="shot zipshot" role="img" aria-label="A zip file called settings-new dot zip being dropped onto the Web app project, which already holds two prototypes.">
+        <div class="zproj" aria-hidden="true">
+          <div class="zhead"><b>Web app</b><span class="muted">2 prototypes</span></div>
+          <div class="zslots">
+            <div class="zslot"><Thumb k="dash" /></div>
+            <div class="zslot"><Thumb k="people" /></div>
+            <div class="zslot zdrop"></div>
+          </div>
+        </div>
+        <div class="zfile" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path><path d="M11 9h2M11 12h2M11 15h2"></path></svg>
+          <span class="mono">settings-new.zip</span>
+        </div>
       </div>
       <div class="tx2">
         <h3>{tie('Drop a zip')}</h3>
-        <p>{tie('Drag a zip of built pages onto a project. Canon keeps a copy on your machine and opens it from there.')}</p>
-        <ul class="srcs"><li>.zip</li><li>A folder</li></ul>
+        <p>{tie('Drop built pages on a project and Canon keeps a copy.')}</p>
+        <BrandList keys={['zip', 'folder']} label="What you can drop" />
       </div>
     </div>
   </div>
-  <div class="proj" role="img" aria-label="The Onboarding project with five prototypes in a row, one from each source: Claude Code, Lovable, Figma Make, v0 and a zip. The Claude Code one is marked as a stored copy.">
-    <div class="shead" aria-hidden="true"><b>Onboarding</b><span class="muted">5 prototypes</span></div>
+  <p class="fine ways-note">{tie('v0 links work once the project is deployed. Claude artifacts and Webflow staging sites do not allow framing, so add those as a zip.')}</p>
+  <div class="proj" role="img" aria-label="The Web app project with three prototypes in a row, one from each way in: Dashboard from a v0 link, People from your agent's dev server, and Settings from a zip. People is marked as a stored copy.">
+    <div class="shead" aria-hidden="true"><b>Web app</b><span class="muted">3 prototypes</span></div>
     <div class="shelf" aria-hidden="true">
-        <div class="slot">
-          <div class="scard">
-            <Thumb k="w1" />
-            <span class="stored">Stored copy</span>
-            <div class="pname">Welcome, three steps</div>
-            <div class="pmeta">Claude Code</div>
-          </div>
+      <div class="slot">
+        <div class="scard">
+          <Thumb k="dash" />
+          <div class="pname">Dashboard</div>
+          <div class="pmeta">v0 · just now</div>
         </div>
-        <div class="slot">
-          <div class="scard">
-            <Thumb k="w2" />
-            <div class="pname">Welcome, single screen</div>
-            <div class="pmeta">Lovable</div>
-          </div>
+      </div>
+      <div class="slot">
+        <div class="scard">
+          <Thumb k="people" />
+          <div class="pname">People<span class="stored">Stored copy</span></div>
+          <div class="pmeta"><span class="mono">localhost:5173</span> · Tuesday</div>
         </div>
-        <div class="slot">
-          <div class="scard">
-            <Thumb k="w3" />
-            <div class="pname">Invite a teammate</div>
-            <div class="pmeta">Figma Make</div>
-          </div>
+      </div>
+      <div class="slot">
+        <div class="scard">
+          <Thumb k="settings" />
+          <div class="pname">Settings</div>
+          <div class="pmeta"><span class="mono">settings-new.zip</span> · 2 Nov</div>
         </div>
-        <div class="slot">
-          <div class="scard">
-            <Thumb k="w4" />
-            <div class="pname">Empty dashboard, with sample data</div>
-            <div class="pmeta">v0</div>
-          </div>
-        </div>
-        <div class="slot">
-          <div class="scard">
-            <Thumb k="w5" />
-            <div class="pname">Mobile sign-up</div>
-            <div class="pmeta">zip</div>
-          </div>
-        </div>
+      </div>
     </div>
   </div>
 </section>

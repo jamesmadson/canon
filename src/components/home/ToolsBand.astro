@@ -1,0 +1,24 @@
+---
+import { tie } from '../../lib/words';
+
+/**
+ * Why Canon exists at all, in one short band between the hero and the first
+ * section: the tools keep changing and the work is spread over several of them.
+ */
+---
+
+<section class="band tools" id="tools" aria-labelledby="h-tools">
+  <div class="bhead">
+    <h2 id="h-tools"><span class="sent">{tie('New tools every month.')}</span><span class="sent">{tie('One place for the work.')}</span></h2>
+    <p class="lede">{tie('Your team tries whatever launched this week, across every project. Canon files it all beside the rest, so you never have to remember which tool a prototype lives in.')}</p>
+  </div>
+</section>
+
+<style is:global>
+  .band.tools {
+    padding-bottom: 72px;
+  }
+  .band.tools > .bhead {
+    margin-bottom: 0;
+  }
+</style>

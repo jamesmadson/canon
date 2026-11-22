@@ -1,0 +1,62 @@
+---
+import { MARKS } from '../../lib/brandMarks';
+
+/**
+ * A row of tools, each a one-colour mark with its name beside it. A tool with
+ * no mark of its own is a name in the same chip, never a made-up logo. The
+ * marks are decorative; the visible name is what a reader hears.
+ */
+interface Props {
+  keys: string[];
+  label: string;
+}
+const { keys, label } = Astro.props;
+---
+
+<ul class="marks" role="list" aria-label={label}>
+  {
+    keys.map((k) => {
+      const m = MARKS[k] ?? { name: k, path: null };
+      return (
+        <li class:list={['mk', !m.path && 'mk-name']}>
+          {m.path && (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d={m.path} />
+            </svg>
+          )}
+          <span>{m.name}</span>
+        </li>
+      );
+    })
+  }
+</ul>
+
+<style is:global>
+  .marks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .mk {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 12px 0 10px;
+    border-radius: 999px;
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .mk svg {
+    flex: none;
+  }
+  .mk-name {
+    padding-left: 12px;
+  }
+</style>

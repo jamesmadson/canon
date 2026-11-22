@@ -1,7 +1,7 @@
 ---
 import Hero from './Hero.astro';
 import HeroScatter from './HeroScatter.astro';
-import WorksWith from './WorksWith.astro';
+import ToolsBand from './ToolsBand.astro';
 import WaysIn from './WaysIn.astro';
 import AgentBand from './AgentBand.astro';
 import FindBand from './FindBand.astro';
@@ -19,7 +19,7 @@ const { waitlistUrl = '', hero = 'tabs' } = Astro.props;
 <div class="home">
   <div class="wrap">
     {hero === 'terminal' ? <Hero waitlistUrl={waitlistUrl} /> : <HeroScatter waitlistUrl={waitlistUrl} variant={hero} />}
-    <WorksWith />
+    <ToolsBand />
     <WaysIn />
     <AgentBand />
     <FindBand />

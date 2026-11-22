@@ -5,6 +5,7 @@ import type { ThumbKey } from '../../lib/thumbs';
 import { withBase } from '../../lib/withBase';
 import HeroVariantStyles from './HeroVariantStyles.astro';
 import { EXTRAS, TABS, TAB_OF_CARD } from './heroVariants';
+import Terminal from './Terminal.astro';
 import { tie } from '../../lib/words';
 
 /**
@@ -72,8 +73,7 @@ const PROMPT = 'Put all my prototypes in Canon, by project.';
 const names = PROJECTS.map((p) => p.name);
 const DONE = `Done. They’re in Canon under ${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}.`;
 const LABEL = `A Claude Code session. You ask it: “${PROMPT}” It adds ${total} prototypes to ${PROJECTS.length} projects with the canon_add tool, then says they are in Canon under ${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}.`;
-const ADDED = `  ⎿  Added ${total} prototypes to ${PROJECTS.length} projects`;
-const words = PROMPT.split(' ');
+const ADDED = `Added ${total} prototypes to ${PROJECTS.length} projects`;
 ---
 
 <section class:list={['hero hero-b', variant === 'cards' && 'hero-c', variant === 'tabs' && 'hero-tabs']} aria-labelledby="h-hero">
@@ -95,26 +95,7 @@ const words = PROMPT.split(' ');
   </div>
 
   {variant !== 'cards' && (
-  <div class="pbox" role="img" aria-label={LABEL} data-prompt={PROMPT}>
-    <div class="pbar"><span class="pdots"><i></i><i></i><i></i></span><span class="ptitle">fieldnote · claude</span></div>
-    <div class="pbody">
-      <div class="ptext"><span class="pdim">&gt;</span>{' '}{
-        words.map((w, i) => (
-          <>
-            <span class="pw">{[...w].map((ch) => <span class="pc">{ch}</span>)}</span>
-            {i < words.length - 1 ? ' ' : ''}
-          </>
-        ))
-      }<span class="pcaret"></span></div>
-      <div class="preply">
-        <div class="pstep pline"><span class="pmark pblue">⏺</span><span>canon - canon_add (MCP)</span></div>
-        <div class="pstep pres">{ADDED}</div>
-        <div class="pstep pline"><span class="pmark">⏺</span><span>{tie(DONE)}</span></div>
-      </div>
-      <div class="pinput"><span class="pdim">&gt;</span><span class="pcur"></span></div>
-      <div class="phint">? for shortcuts</div>
-    </div>
-  </div>
+    <Terminal prompt={PROMPT} added={ADDED} reply={DONE} label={LABEL} title="fieldnote · claude" />
   )}
 
   <div class="sstage" aria-hidden="true" data-scatter data-variant={variant}>
@@ -323,135 +304,20 @@ const words = PROMPT.split(' ');
     }
   }
 
-  /* The prompt: a dark terminal running Claude Code, as it draws in a dark
-     window. It types the request, then the tool call, its result and the
-     answer appear in turn. The whole text is in the layout from the start;
+  /* The prompt: a dark terminal running Claude Code (the look is in
+     TerminalStyles). It types the request into its input box, sends it so the
+     text moves up into the transcript, and then the tool call, its result and
+     the answer appear in turn. The whole text is in the layout from the start;
      characters and lines are only revealed. */
   .pbox {
-    --pt-ink: #edebe6;
-    --pt-muted: #a29e96;
     grid-area: prompt;
-    position: relative;
     z-index: 3;
     margin-top: 32px;
-    border-radius: 11px;
-    background: #1a1918;
-    color: var(--pt-ink);
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 21px;
-    box-shadow:
-      0 0 0 1px rgb(255 255 255 / 0.08),
-      0 24px 60px -20px var(--shadow);
-    pointer-events: none;
   }
   @media (min-width: 1100px) {
     .pbox {
       margin-top: 0;
     }
-  }
-  .pbar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 36px;
-    padding: 0 14px;
-  }
-  .pdots {
-    position: absolute;
-    left: 14px;
-    top: 13px;
-    display: flex;
-    gap: 6px;
-  }
-  .pdots i {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #4a4845;
-  }
-  .ptitle {
-    font-size: 12px;
-    line-height: 16px;
-    color: var(--pt-muted);
-  }
-  .pbody {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 6px 16px 16px;
-  }
-  .ptext {
-    color: var(--pt-ink);
-  }
-  .pdim {
-    color: var(--pt-muted);
-  }
-  .pw {
-    white-space: nowrap;
-  }
-  .preply {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .pline {
-    display: grid;
-    grid-template-columns: 2ch minmax(0, 1fr);
-  }
-  .pblue {
-    color: var(--sel);
-  }
-  .pres {
-    color: var(--pt-muted);
-    white-space: pre-wrap;
-  }
-  /* Claude Code's input box: a rounded rectangle with a thin muted border. */
-  .pinput {
-    display: flex;
-    align-items: center;
-    gap: 1ch;
-    height: 36px;
-    margin-top: 6px;
-    padding: 0 12px;
-    border-radius: 9px;
-    box-shadow: inset 0 0 0 1px #77736b;
-  }
-  .phint {
-    margin-top: -2px;
-    padding-left: 2px;
-    font-size: 12px;
-    line-height: 16px;
-    color: var(--pt-muted);
-  }
-  /* The cursors take no room, so moving them never reflows the line. */
-  .pcaret {
-    display: none;
-    width: 2px;
-    height: 16px;
-    margin-right: -2px;
-    vertical-align: -3px;
-    background: var(--sel);
-    animation: pblink 1.1s steps(1) infinite;
-  }
-  .pcur {
-    display: block;
-    width: 8px;
-    height: 16px;
-    background: var(--sel);
-    animation: pblink 1.1s steps(1) infinite;
-  }
-  @keyframes pblink {
-    50% {
-      opacity: 0;
-    }
-  }
-  .pbox.live .pcaret {
-    display: inline-block;
-  }
-  .pbox.live .pc:not(.on) {
-    opacity: 0;
   }
   .motion .pbox {
     opacity: 0;
@@ -462,19 +328,26 @@ const words = PROMPT.split(' ');
   }
   .pbox.live .ptext,
   .pbox.live .pstep {
-    transition: opacity 300ms var(--ease);
+    transition:
+      opacity 300ms var(--ease),
+      transform 300ms var(--ease);
   }
   .pbox.live .pstep {
     opacity: 0;
+    transform: translateY(6px);
   }
   .pbox.live .preply.on .pstep {
     opacity: 1;
+    transform: none;
   }
   .pbox.live .preply.on .pstep:nth-child(2) {
-    transition-delay: 160ms;
+    transition-delay: 120ms;
   }
   .pbox.live .preply.on .pstep:nth-child(3) {
-    transition-delay: 320ms;
+    transition-delay: 240ms;
+  }
+  .pbox.live .preply.on .pstep:nth-child(4) {
+    transition-delay: 400ms;
   }
   .pbox.live.out .ptext,
   .pbox.live.out .pstep {
@@ -502,10 +375,17 @@ const words = PROMPT.split(' ');
       margin: 24px 0 0;
     }
   }
+  /* The clip box reaches 700px above and 120px either side, so loose cards can
+     drift out of the window. Its padding keeps the window where it was. A mask
+     fades the bottom 110px into the panel, so the window never ends in a hard
+     cut. */
   .sclip {
     position: absolute;
-    inset: 0;
-    clip-path: inset(-700px -120px 0 -120px);
+    inset: -700px -120px 0;
+    padding: 700px 120px 0;
+    box-sizing: border-box;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 110px), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 110px), transparent 100%);
   }
   .sapp {
     position: relative;
@@ -732,23 +612,22 @@ const words = PROMPT.split(' ');
     .sstage .sh {
       opacity: 0 !important;
     }
-    /* The session shows whole, with its reply and a still cursor. */
+    /* The session shows as sent, with its reply and an empty input box. */
     .pbox {
       opacity: 1;
     }
     .pbox * {
       transition: none !important;
     }
-    .pbox .pc,
-    .pbox .ptext,
     .pbox .pstep {
       opacity: 1 !important;
+      transform: none !important;
+    }
+    .pbox .pc {
+      opacity: 0 !important;
     }
     .pbox .pcaret {
-      display: none !important;
-    }
-    .pbox .pcur {
-      animation: none;
+      animation: none !important;
     }
   }
 
