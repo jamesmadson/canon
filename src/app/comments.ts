@@ -18,7 +18,7 @@ export function Pin({ n, note, left, top, active, onOpen }: { n: number; note: N
   const comment = isComment(note);
   const cls = `pin${comment ? ` comment${personTone(authorOf(note)) === 'pin' ? ' alt' : ''}` : ''}${note.source === 'preview' && !comment ? ' from-preview' : ''}${note.resolved ? ' resolved' : ''}${active ? ' active' : ''}`;
   const style = comment ? { left, top } : { left, top };
-  return html`<button class=${cls} style=${style} title=${note.said}
+  return html`<button class=${cls} style=${style} title=${note.said} aria-label=${`Note ${n} by ${authorOf(note)}${note.resolved ? ', resolved' : ''}`}
     onPointerDown=${(e: Event) => { e.stopPropagation(); onOpen(); }}>${comment ? initials(authorOf(note)) : n}${(note.replies?.length ?? 0) > 0 && html`<i>${note.replies!.length + 1}</i>`}</button>`;
 }
 
@@ -27,7 +27,7 @@ function NameField({ onDone }: { onDone: () => void }) {
   return html`<div class="name-ask">
     <div class="label">First, your name</div>
     <div class="row" style="flex-wrap:nowrap">
-      <input class="field" autofocus placeholder="How teammates see you" value=${name} onInput=${(e: Event) => setName((e.target as HTMLInputElement).value)}
+      <input class="field" autofocus aria-label="Your name" autocomplete="name" placeholder="How teammates see you" value=${name} onInput=${(e: Event) => setName((e.target as HTMLInputElement).value)}
         onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && name.trim() && (e.preventDefault(), store.setMyName(name), onDone())} />
       <button type="button" class="btn primary" disabled=${!name.trim()} onClick=${() => { store.setMyName(name); onDone(); }}>Save</button>
     </div>
@@ -48,7 +48,7 @@ export function Composer({ at, onCancel, onSave }: { at: Draft; onCancel: () => 
     ${!me && html`<${NameField} onDone=${() => bump((n) => n + 1)} />`}
     <div class="row" style="flex-wrap:nowrap;align-items:flex-start">
       <${Avatar} name=${me || 'You'} />
-      <textarea class="field" rows="3" autofocus placeholder="Add a note" value=${body}
+      <textarea class="field" rows="3" autofocus aria-label="Add a note" placeholder="Add a note" value=${body}
         onInput=${(e: Event) => setBody((e.target as HTMLTextAreaElement).value)}
         onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), submit())}></textarea>
     </div>
@@ -70,9 +70,9 @@ export function Thread({ note, sx, sy, onClose }: { note: Note; sx: number; sy: 
     <div class="thread-head">
       <span class="label">Note</span>
       <span class="spacer"></span>
-      <button class="btn ghost icon" title=${note.resolved ? 'Reopen' : 'Resolve'} onClick=${() => store.setResolved(note.id, !note.resolved)}>${note.resolved ? html`<${Icon} name="refresh" />` : html`<${Icon} name="check" />`}</button>
-      <button class="btn ghost icon" title="Delete thread" onClick=${() => confirm('Delete this thread?') && (store.deleteNote(note.id), onClose())}><${Icon} name="trash" /></button>
-      <button class="btn ghost icon" title="Close (Esc)" onClick=${onClose}><${Icon} name="x" /></button>
+      <button class="btn ghost icon" title=${note.resolved ? 'Reopen' : 'Resolve'} aria-label=${note.resolved ? 'Reopen' : 'Resolve'} onClick=${() => store.setResolved(note.id, !note.resolved)}>${note.resolved ? html`<${Icon} name="refresh" />` : html`<${Icon} name="check" />`}</button>
+      <button class="btn ghost icon" title="Delete thread" aria-label="Delete thread" onClick=${() => confirm('Delete this thread?') && (store.deleteNote(note.id), onClose())}><${Icon} name="trash" /></button>
+      <button class="btn ghost icon" title="Close (Esc)" aria-label="Close" onClick=${onClose}><${Icon} name="x" /></button>
     </div>
     <div class="msg">
       <${Avatar} name=${authorOf(note)} />
@@ -85,7 +85,7 @@ export function Thread({ note, sx, sy, onClose }: { note: Note; sx: number; sy: 
     ${note.resolved && html`<div class="hint" style="padding:0 2px">Resolved. Reopen to pick it back up.</div>`}
     <form class="reply" onSubmit=${send}>
       <${Avatar} name=${store.myName() || 'You'} />
-      <input class="field" placeholder="Reply" value=${text} onInput=${(e: Event) => setText((e.target as HTMLInputElement).value)} />
+      <input class="field" aria-label="Reply to this note" autocomplete="off" placeholder="Reply" value=${text} onInput=${(e: Event) => setText((e.target as HTMLInputElement).value)} />
       <button class="btn primary" disabled=${!text.trim()}>Reply</button>
     </form>
   </div>`;
@@ -100,7 +100,7 @@ export function CommentsPanel({ notes, onPick, onClose }: { notes: Note[]; onPic
     <div class="insp-sec" style="flex-direction:row;align-items:center">
       <div class="label" style="flex:1">Notes</div>
       <div class="seg"><button aria-pressed=${show === 'open'} onClick=${() => setShow('open')}>Open</button><button aria-pressed=${show === 'resolved'} onClick=${() => setShow('resolved')}>Resolved</button></div>
-      <button class="btn ghost icon" onClick=${onClose} title="Close"><${Icon} name="x" /></button>
+      <button class="btn ghost icon" onClick=${onClose} title="Close" aria-label="Close notes"><${Icon} name="x" /></button>
     </div>
     <div class="insp-sec" style="border:0;gap:8px">
       ${list.length === 0 && html`<p class="hint" style="margin:0">${show === 'open' ? 'No open threads. Press C and click anywhere to start one.' : 'Nothing resolved yet.'}</p>`}

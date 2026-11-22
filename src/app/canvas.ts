@@ -316,7 +316,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
         <input value=${board.name} onChange=${(e: Event) => store.renameBoard(id, (e.target as HTMLInputElement).value)} onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} aria-label="Board name" />
       </div>
       <span class="spacer"></span>
-      ${tidy && html`<label class="search small"><${Icon} name="search" /><input placeholder="Find on board" value=${query} onInput=${(e: Event) => setQuery((e.target as HTMLInputElement).value)} /></label>
+      ${tidy && html`<label class="search small"><${Icon} name="search" /><input aria-label="Find on board" autocomplete="off" placeholder="Find on board" value=${query} onInput=${(e: Event) => setQuery((e.target as HTMLInputElement).value)} /></label>
         <select class="select" value=${sort} onChange=${(e: Event) => setSort((e.target as HTMLSelectElement).value as LibrarySort)} aria-label="Sort">
           <option value="added">Newest</option><option value="name">Name</option><option value="comments">Most notes</option><option value="updated">Last changed</option>
         </select>`}
@@ -324,7 +324,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
         <button aria-pressed=${!tidy} onClick=${() => store.setArrangement(id, 'free')}>Free</button>
         <button aria-pressed=${tidy} onClick=${() => store.setArrangement(id, 'tidy')}>Tidy</button>
       </div>
-      <button class=${`btn ghost${panel ? ' on' : ''}`} onClick=${() => setPanel(!panel)} title="Notes"><${Icon} name="comment" />${openCount}</button>
+      <button class=${`btn ghost${panel ? ' on' : ''}`} onClick=${() => setPanel(!panel)} title="Notes" aria-label=${`Notes, ${openCount} open`}><${Icon} name="comment" />${openCount}</button>
     </div>
     <div class="board">
       <div
@@ -505,7 +505,7 @@ function Inspector({ frame, askUrl, onFocus, onEnter, onRemove, onComment, onOpe
   return html`<aside class="inspector" onPointerDown=${(e: Event) => e.stopPropagation()}>
     <div class="insp-sec">
       <div class="label">Prototype</div>
-      <input class="insp-name" value=${frame.name} key=${frame.id} onChange=${(e: Event) => store.updateFrame(frame.id, { name: (e.target as HTMLInputElement).value || frame.name })} />
+      <input class="insp-name" aria-label="Prototype name" autocomplete="off" value=${frame.name} key=${frame.id} onChange=${(e: Event) => store.updateFrame(frame.id, { name: (e.target as HTMLInputElement).value || frame.name })} />
       <dl class="kv">
         <dt>Source</dt><dd>${KIND[frame.kind]}</dd>
         ${frame.kind === 'url' ? html`<dt>URL</dt><dd title=${frame.url}>${frame.url}</dd>` : html`<dt>Opens</dt><dd class="mono" title=${frame.entry}>${frame.entry}</dd><dt>Files</dt><dd>${frame.fileCount}</dd>${frame.liveUrl ? html`<dt>Live address</dt><dd class="mono" title=${frame.liveUrl}>${frame.liveUrl}</dd>` : null}`}
