@@ -103,9 +103,9 @@
   --color-ink-soft: #5C5954;
   --color-ink: #1A1918;
   --color-input-border: #85817A;
-  --color-pin: #B83A00;
-  /* Canon orange. The mark, selection, the cursor, pins, the branch you are on. */
-  --color-orange: #FF4F00;
+  --color-pin: #0062CC;
+  /* Canon blue. The mark, selection, the cursor, pins, the branch you are on. */
+  --color-orange: #007FFF;
   /* Not a seventh colour: the hairline, carried toward the ink far enough to
      read as a deliberate divider where a section genuinely needs one. The live
      value is the color-mix on :root below; this literal only exists so Tailwind
@@ -125,8 +125,8 @@
   --font-weight-semibold: 500;
   --font-weight-bold: 500;
 
-  /* International orange, the dot in the wordmark. The same in both themes. */
-  --brand-orange: #FF4F00;
+  /* Canon blue, the dot in the wordmark. The same in both themes. */
+  --brand-orange: #007FFF;
 }
 
 /* Unlayered, so these win over the @theme block Tailwind emits into a layer.
@@ -175,9 +175,9 @@ body {
   line-height: 1.6;
 }
 
-/* Browser surfaces the page didn't draw, themed like the dashboard: orange
-   selection with ink type (ground on orange would not hold contrast, so the
-   ink is fixed in both themes), an orange caret, and scrollbars drawn from
+/* Browser surfaces the page didn't draw, themed like the dashboard: blue
+   selection with ink type (ground on blue would not hold contrast, so the
+   ink is fixed in both themes), a blue caret, and scrollbars drawn from
    the site's own tokens so dark follows the theme. */
 ::selection {
   background-color: var(--color-orange);
@@ -567,7 +567,7 @@ summary,
 }
 
 /* ── The mark ─────────────────────────────────────────────────────────────
-   One orange circle. Wordmark.astro sets its diameter. */
+   One blue circle. Wordmark.astro sets its diameter. */
 .wordmark-dot {
   display: inline-block;
   border-radius: 50%;

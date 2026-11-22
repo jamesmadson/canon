@@ -41,7 +41,7 @@ describe('markRemoved', () => {
     const marked = markRemoved(before, lineDiff(before, after));
     expect(marked.match(/<tr data-cut="/g)).toHaveLength(4);
     expect(marked).toContain(`outline:2px solid ${CUT_OUTLINE}`);
-    expect(CUT_OUTLINE).toBe('#FF4F00');
+    expect(CUT_OUTLINE).toBe('#007FFF');
     // Unmarked, it is the page as it was.
     expect(marked.replace(/ data-cut="[^"]*"/g, '').replace(/<style>\[data-cut\][^\n]*<\/style>\n/, '')).toBe(before);
   });

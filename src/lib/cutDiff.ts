@@ -49,10 +49,10 @@ export function lineDiff(before: string, after: string): DiffLine[] {
   return out;
 }
 
-export const CUT_OUTLINE = '#FF4F00';
+export const CUT_OUTLINE = '#007FFF';
 
 // The page as it was, with every removed line that opens an element marked
-// and outlined in Canon's orange, the colour of a pin. Neighbouring cut lines
+// and outlined in Canon's blue, the colour of a pin. Neighbouring cut lines
 // form one run, marked "start" and "end", so a run of table rows draws as one
 // box. Rows take their outline from their cells, which a row cannot carry.
 export function markRemoved(before: string, diff: DiffLine[]): string {

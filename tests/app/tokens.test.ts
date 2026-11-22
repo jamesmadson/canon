@@ -35,13 +35,17 @@ describe('colour tokens', () => {
 
   it('uses the approved palette', () => {
     expect(light['--ground'].toUpperCase()).toBe('#FFFFFF');
-    expect(light['--bg'].toUpperCase()).toBe('#F7F5F2');
+    expect(light['--bg'].toUpperCase()).toBe('#F2EDDB');
     expect(light['--text'].toUpperCase()).toBe('#1A1918');
     expect(dark['--ground'].toUpperCase()).toBe('#1C1B19');
     expect(dark['--bg'].toUpperCase()).toBe('#151413');
     expect(dark['--text'].toUpperCase()).toBe('#EDEBE6');
-    expect(light['--accent'].toUpperCase()).toBe('#FF4F00');
-    expect(dark['--accent'].toUpperCase()).toBe('#FF4F00');
+    expect(light['--accent'].toUpperCase()).toBe('#007FFF');
+    expect(light['--pin'].toUpperCase()).toBe('#0062CC');
+    expect(dark['--pin'].toUpperCase()).toBe('#0062CC');
+    expect(light['--ground'].toUpperCase()).toBe('#FFFFFF');
+    expect(light['--bg'].toUpperCase()).toBe('#F2EDDB');
+    expect(dark['--accent'].toUpperCase()).toBe('#3D9BFF');
   });
 
   for (const [scheme, t] of [['light', light], ['dark', dark]] as const) {
