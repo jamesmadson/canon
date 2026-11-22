@@ -1111,6 +1111,7 @@ button.ver-chip:hover { color: var(--text); }
 .vb-name { margin: 0; flex: 0 1 auto; min-width: 0; font-size: var(--fs-name); letter-spacing: var(--ls-text); line-height: var(--lh-base); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vb-name .faint { font-weight: 400; }
 .vb-ver { display: flex; align-items: center; flex: none; color: var(--soft); }
+.vb-id .vb-rename { flex: none; }
 .vb-ver .btn.icon { width: 32px; height: 32px; }
 .vb-ver .next svg { transform: rotate(180deg); }
 .vb-vtext { padding: 0 4px; font-size: var(--fs-meta); letter-spacing: 0; white-space: nowrap; }
@@ -1149,10 +1150,16 @@ button.ver-chip:hover { color: var(--text); }
   .viewer-bar .vb-star .lbl { display: none; }
   .viewer-bar .vb-star { width: var(--h-ctl); padding: 0; }
 }
+/* The name comes first: below these widths the tag count and then the version text give way to it. */
+@container (max-width: 920px) {
+  .vb-tags-wrap { display: none; }
+}
+@container (max-width: 820px) {
+  .vb-ver .vb-vtext { display: none; }
+}
 @container (max-width: 740px) {
   .viewer-bar .vb-note .lbl { display: none; }
   .viewer-bar .vb-note { width: var(--h-ctl); padding: 0; }
-  .vb-tagcount { display: none; }
 }
 @container (max-width: 1180px) {
   .topbar .w { display: none; }
@@ -1328,3 +1335,7 @@ button.ver-chip:hover { color: var(--text); }
   .lib-bar .addwrap { position: static; }
   .addwrap .filter-pop { left: 0; right: 0; width: auto; }
 }
+
+/* Icon-only buttons: no padding and no optical nudge, so the glyph sits at the exact centre of its circle. */
+:is(.ibtn, .st, .more, .btn.icon) { padding: 0; }
+:is(.ibtn, .st, .more, .btn.icon) > svg { margin: 0; flex: none; }
