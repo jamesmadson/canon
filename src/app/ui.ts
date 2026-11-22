@@ -9,7 +9,7 @@ import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort 
 import { Home } from './home';
 import { ActiveFilters, FilterPop } from './libfilter';
 import { AddMenu, LinkTile, ProtoRow, StarButton, Tags, metaOf } from './parts';
-import { MoveMenu, RowMenu, carries, startDrag, useDismiss } from './move';
+import { MoveMenu, RowMenu, carries, startDrag, useDismiss, useMenuKeys } from './move';
 import { pagesOf } from './lib/pageview';
 import { currentOf, stackKey } from './lib/versions';
 import { ENTER_ADDRESS, OWN_ORIGIN_MESSAGE, checkPrototypeUrl } from './lib/resolve';
@@ -159,7 +159,7 @@ export function ProjectMenu({ id, name, pinned }: { id: string; name: string; pi
   const wrap = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
   useDismiss(open, () => setOpen(false), wrap, button);
-  useEffect(() => { if (open) wrap.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus(); }, [open]);
+  useMenuKeys(open, wrap);
   return html`<div class=${`rowmenu${open ? ' open' : ''}`} ref=${wrap} style="position:relative">
     <button type="button" ref=${button} class="more" aria-haspopup="menu" aria-expanded=${open} aria-label=${`More actions for ${name}`} title="More actions" onClick=${() => setOpen(!open)}><${Icon} name="more" size=${16} /></button>
     ${open && html`<div class="menu rowmenu-pop" role="menu" style="top:calc(100% + 6px);bottom:auto;left:auto;right:0">
