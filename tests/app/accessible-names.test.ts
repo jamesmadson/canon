@@ -13,13 +13,19 @@ const note = (p: Partial<Note> = {}): Note => ({ id: 'n1', frameId: 'f1', kind: 
 const label = (el: Element | null) => el?.getAttribute('aria-label');
 
 describe('note pins', () => {
-  it('say which note they are and who wrote it, not just initials', async () => {
+  it('start with the initials they show, then say who wrote it', async () => {
     const box = await mount(Pin, { n: 3, note: note(), left: 0, top: 0, onOpen: () => {} });
-    expect(label(box.querySelector('button'))).toBe('Note 3 by Jo Mills');
+    const button = box.querySelector('button')!;
+    expect(label(button)).toBe('JM, note 3 by Jo Mills');
+    expect(label(button)!.startsWith(button.firstChild!.textContent!)).toBe(true);
   });
   it('say when a note is resolved', async () => {
     const box = await mount(Pin, { n: 3, note: note({ resolved: true }), left: 0, top: 0, onOpen: () => {} });
-    expect(label(box.querySelector('button'))).toBe('Note 3 by Jo Mills, resolved');
+    expect(label(box.querySelector('button'))).toBe('JM, note 3 by Jo Mills, resolved');
+  });
+  it('name a numbered note by its number', async () => {
+    const box = await mount(Pin, { n: 3, note: note({ kind: 'note', author: undefined }), left: 0, top: 0, onOpen: () => {} });
+    expect(label(box.querySelector('button'))).toMatch(/^Note 3/);
   });
 });
 

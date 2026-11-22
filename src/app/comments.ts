@@ -18,7 +18,7 @@ export function Pin({ n, note, left, top, active, onOpen }: { n: number; note: N
   const comment = isComment(note);
   const cls = `pin${comment ? ` comment${personTone(authorOf(note)) === 'pin' ? ' alt' : ''}` : ''}${note.source === 'preview' && !comment ? ' from-preview' : ''}${note.resolved ? ' resolved' : ''}${active ? ' active' : ''}`;
   const style = comment ? { left, top } : { left, top };
-  return html`<button class=${cls} style=${style} title=${note.said} aria-label=${`Note ${n} by ${authorOf(note)}${note.resolved ? ', resolved' : ''}`}
+  return html`<button class=${cls} style=${style} title=${note.said} aria-label=${`${comment ? `${initials(authorOf(note))}, note` : 'Note'} ${n} by ${authorOf(note)}${note.resolved ? ', resolved' : ''}`}
     onPointerDown=${(e: Event) => { e.stopPropagation(); onOpen(); }}>${comment ? initials(authorOf(note)) : n}${(note.replies?.length ?? 0) > 0 && html`<i>${note.replies!.length + 1}</i>`}</button>`;
 }
 
