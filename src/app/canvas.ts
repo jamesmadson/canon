@@ -15,6 +15,7 @@ import { useWheel } from './map';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
 import { PrototypeActions, ZoomControls } from './bar';
 import { FrameBody, LiveSwitch } from './live';
+import { Modal } from './feedback';
 import {
   html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES, showsCover, coverSrc,
   addGroups, addVersion, runWay, WayButtons, NoteItem, type Way,
@@ -45,23 +46,20 @@ function Teases({ frame, onEnter }: { frame: Frame; onEnter: (page: string) => v
 }
 
 /* ── Pick from the library ─────────────────────────────────────────────── */
-function LibraryPicker({ projectId, boardId, onClose }: { projectId: string; boardId: string; onClose: () => void }) {
+export function LibraryPicker({ projectId, boardId, onClose }: { projectId: string; boardId: string; onClose: () => void }) {
   const [q, setQ] = useState('');
   const placed = new Set(store.placementsOf(boardId).map((p) => p.frameId));
   const items = store.prototypesOf(projectId).filter((f) => !placed.has(f.id) && f.name.toLowerCase().includes(q.toLowerCase()));
-  return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose()}>
-    <div class="dialog" style="width:460px">
-      <h3>Add from the library</h3>
-      <input class="field" autofocus placeholder="Search prototypes" value=${q} onInput=${(e: Event) => setQ((e.target as HTMLInputElement).value)} />
-      <div class="pick-list">
-        ${items.length === 0 && html`<p class="hint">Everything in this project is already on this board.</p>`}
-        ${items.map((f) => html`<button onClick=${async () => { await store.placeOnBoard(boardId, f.id); store.toast(`Added ${f.name}.`); }}>
-          <span>${f.name}</span><span class="faint mono" style="font-size:var(--fs-meta)">${pageCount(f) > 1 ? `${pageCount(f)} pages · ` : ''}${f.w}×${f.h}</span><${Icon} name="plus" />
-        </button>`)}
-      </div>
-      <div class="row" style="justify-content:flex-end"><button class="btn" onClick=${onClose}>Done</button></div>
+  return html`<${Modal} id="pick-title" title="Add from the library" onClose=${onClose} style="width:460px">
+    <input class="field" aria-label="Search prototypes" autocomplete="off" placeholder="Search prototypes" value=${q} onInput=${(e: Event) => setQ((e.target as HTMLInputElement).value)} />
+    <div class="pick-list">
+      ${items.length === 0 && html`<p class="hint">Everything in this project is already on this board.</p>`}
+      ${items.map((f) => html`<button onClick=${async () => { await store.placeOnBoard(boardId, f.id); store.toast(`Added ${f.name}.`); }}>
+        <span>${f.name}</span><span class="faint mono" style="font-size:var(--fs-meta)">${pageCount(f) > 1 ? `${pageCount(f)} pages · ` : ''}${f.w}×${f.h}</span><${Icon} name="plus" />
+      </button>`)}
     </div>
-  </div>`;
+    <div class="row" style="justify-content:flex-end"><button class="btn" onClick=${onClose}>Done</button></div>
+  <//>`;
 }
 
 /* ── Board ─────────────────────────────────────────────────────────────── */
@@ -318,7 +316,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
         <input value=${board.name} onChange=${(e: Event) => store.renameBoard(id, (e.target as HTMLInputElement).value)} onKeyDown=${(e: KeyboardEvent) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()} aria-label="Board name" />
       </div>
       <span class="spacer"></span>
-      ${tidy && html`<label class="search small"><${Icon} name="search" /><input placeholder="Find on board" value=${query} onInput=${(e: Event) => setQuery((e.target as HTMLInputElement).value)} /></label>
+      ${tidy && html`<label class="search small"><${Icon} name="search" /><input aria-label="Find on board" autocomplete="off" placeholder="Find on board" value=${query} onInput=${(e: Event) => setQuery((e.target as HTMLInputElement).value)} /></label>
         <select class="select" value=${sort} onChange=${(e: Event) => setSort((e.target as HTMLSelectElement).value as LibrarySort)} aria-label="Sort">
           <option value="added">Newest</option><option value="name">Name</option><option value="comments">Most notes</option><option value="updated">Last changed</option>
         </select>`}
@@ -326,7 +324,7 @@ export function BoardView({ id, frameId, full, askUrl }: { id: string; frameId: 
         <button aria-pressed=${!tidy} onClick=${() => store.setArrangement(id, 'free')}>Free</button>
         <button aria-pressed=${tidy} onClick=${() => store.setArrangement(id, 'tidy')}>Tidy</button>
       </div>
-      <button class=${`btn ghost${panel ? ' on' : ''}`} onClick=${() => setPanel(!panel)} title="Notes"><${Icon} name="comment" />${openCount}</button>
+      <button class=${`btn ghost${panel ? ' on' : ''}`} onClick=${() => setPanel(!panel)} title="Notes" aria-label=${`Notes, ${openCount} open`}><${Icon} name="comment" />${openCount}</button>
     </div>
     <div class="board">
       <div
@@ -507,7 +505,7 @@ function Inspector({ frame, askUrl, onFocus, onEnter, onRemove, onComment, onOpe
   return html`<aside class="inspector" onPointerDown=${(e: Event) => e.stopPropagation()}>
     <div class="insp-sec">
       <div class="label">Prototype</div>
-      <input class="insp-name" value=${frame.name} key=${frame.id} onChange=${(e: Event) => store.updateFrame(frame.id, { name: (e.target as HTMLInputElement).value || frame.name })} />
+      <input class="insp-name" aria-label="Prototype name" autocomplete="off" value=${frame.name} key=${frame.id} onChange=${(e: Event) => store.updateFrame(frame.id, { name: (e.target as HTMLInputElement).value || frame.name })} />
       <dl class="kv">
         <dt>Source</dt><dd>${KIND[frame.kind]}</dd>
         ${frame.kind === 'url' ? html`<dt>URL</dt><dd title=${frame.url}>${frame.url}</dd>` : html`<dt>Opens</dt><dd class="mono" title=${frame.entry}>${frame.entry}</dd><dt>Files</dt><dd>${frame.fileCount}</dd>${frame.liveUrl ? html`<dt>Live address</dt><dd class="mono" title=${frame.liveUrl}>${frame.liveUrl}</dd>` : null}`}

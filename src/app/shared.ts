@@ -211,7 +211,7 @@ export function NoteItem({ note, n, about }: { note: Note; n?: number; about?: s
       ${onPage && html`<span>${onPage}</span>`}
       ${note.source === 'preview' && html`<span>from preview</span>`}
       <span>${ago(note.createdAt)}</span>
-      <button title="Delete note" onClick=${() => confirm('Delete this note?') && store.deleteNote(note.id)}><${Icon} name="x" size=${14} /></button>
+      <button title="Delete note" aria-label="Delete note" onClick=${() => confirm('Delete this note?') && store.deleteNote(note.id)}><${Icon} name="x" size=${14} /></button>
     </div>
   </div>`;
 }
