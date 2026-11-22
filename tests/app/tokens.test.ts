@@ -37,7 +37,7 @@ describe('colour tokens', () => {
     expect(light['--ground'].toUpperCase()).toBe('#FFFFFF');
     expect(light['--bg'].toUpperCase()).toBe('#F7F5F2');
     expect(light['--text'].toUpperCase()).toBe('#1A1918');
-    expect(dark['--ground'].toUpperCase()).toBe('#191817');
+    expect(dark['--ground'].toUpperCase()).toBe('#1C1B19');
     expect(dark['--bg'].toUpperCase()).toBe('#151413');
     expect(dark['--text'].toUpperCase()).toBe('#EDEBE6');
     expect(light['--accent'].toUpperCase()).toBe('#FF4F00');
