@@ -763,9 +763,9 @@ button.ver-chip:hover { color: var(--text); }
 .nav-item.find { width: 100%; background: none; border: 0; text-align: left; font: inherit; color: var(--soft); }
 .nav-item.find kbd { margin-left: auto; font: 500 var(--fs-meta) var(--mono); letter-spacing: 0; color: var(--faint); }
 .switcher { position: absolute; top: 14vh; left: 50%; transform: translateX(-50%); width: min(560px, calc(100vw - 32px)); background: var(--panel); border-radius: var(--r-lg); box-shadow: 0 0 0 1px var(--line-strong), 0 24px 60px var(--shadow-lg); overflow: hidden; }
-.switcher .search { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); color: var(--faint); }
+.switcher .search { display: flex; align-items: center; gap: 10px; height: 44px; margin: 8px 8px 0; padding: 0 16px; border-radius: var(--r-btn); background: var(--raised); color: var(--faint); }
 .switcher .search input { flex: 1; background: none; border: 0; outline: 0; font-size: var(--fs-base); letter-spacing: var(--ls-text); color: var(--text); }
-.switcher ul { list-style: none; margin: 0; padding: 6px; max-height: 52vh; overflow: auto; }
+.switcher ul { list-style: none; margin: 0; padding: 8px; max-height: 52vh; overflow: auto; }
 .switcher li { display: flex; align-items: center; gap: 8px; border-radius: var(--r-md); padding-right: 8px; }
 .switcher li.on { background: var(--raised); }
 .switcher .sw-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; background: none; border: 0; padding: 10px 12px; color: var(--text); }
@@ -797,9 +797,10 @@ button.ver-chip:hover { color: var(--text); }
 .rail .mark::after { width: 10px; height: 10px; }
 .find {
   display: flex; align-items: center; gap: 8px; width: 100%; height: var(--h-ctl); margin: 8px 0 10px; padding: 0 16px;
-  border: 1px solid var(--input-border); border-radius: var(--r-btn); background: var(--ground); color: var(--soft); text-align: left;
+  border: 0; border-radius: var(--r-btn); background: var(--rail-hover); color: var(--soft); text-align: left;
   transition: transform 120ms var(--ease);
 }
+@media (hover: hover) and (pointer: fine) { .find:hover { background: var(--raised); color: var(--text); } }
 .find:active { transform: scale(0.97); }
 .find kbd { margin-left: auto; font: 400 var(--fs-meta) var(--sans); letter-spacing: 0; color: var(--faint); }
 .rail-scroll { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 2px; }
@@ -819,6 +820,8 @@ button.ver-chip:hover { color: var(--text); }
   background: transparent; color: var(--soft); transition: transform 120ms var(--ease);
 }
 .ibtn:active { transform: scale(0.97); }
+/* The section's plus sits in the count column: its centre lines up with the numbers below. */
+.sh .ibtn { width: 24px; height: 24px; margin-right: -8px; }
 .rail-foot { margin-top: 6px; padding: 8px 4px 0; border-top: 1px solid var(--line); color: var(--faint); font-size: var(--fs-meta); letter-spacing: 0; display: flex; flex-direction: column; gap: 8px; }
 .rail-foot .me { display: flex; align-items: center; gap: 8px; color: var(--soft); }
 .agents { display: flex; flex-direction: column; gap: 2px; }
@@ -959,7 +962,7 @@ button.ver-chip:hover { color: var(--text); }
 
 /* the search palette */
 .switcher li { cursor: pointer; }
-.switcher .search:focus-within { outline: 2px solid var(--focus); outline-offset: -2px; }
+.switcher .search:focus-within { outline: 1.5px solid var(--focus); outline-offset: 0; }
 .switcher .sw-star { color: var(--text); display: grid; place-items: center; }
 
 /* a dropped prototype arrives: a zip slides the others over, runs its zipper, parts, then the text rises */
