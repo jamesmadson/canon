@@ -959,7 +959,6 @@ button.ver-chip:hover { color: var(--text); }
 
 /* the search palette */
 .switcher li { cursor: pointer; }
-.switcher li.on { box-shadow: inset 2px 0 0 var(--accent); }
 .switcher .search:focus-within { outline: 2px solid var(--focus); outline-offset: -2px; }
 .switcher .sw-star { color: var(--text); display: grid; place-items: center; }
 
