@@ -11,7 +11,7 @@ export type Role = 'view' | 'comment' | 'edit';
 /** Legacy: sharing was removed. Only the shape is kept so old stored boards still type-check. */
 export interface Share { link: 'off' | Role; invites: { email: string; role: Role }[] }
 /** A project holds the prototype library and the boards that arrange it. */
-export interface Project { id: string; name: string; createdAt: number; updatedAt: number }
+export interface Project { id: string; name: string; createdAt: number; updatedAt: number; /** Kept at the top of the sidebar's Projects list. Absent on older saved projects. */ pinned?: boolean }
 export interface Board { id: string; projectId: string; name: string; createdAt: number; updatedAt: number; arrangement: Arrangement; /** Legacy, no longer read or written. */ share?: Share }
 /** Where a prototype sits on one board. A prototype can sit on many boards, or none. */
 export interface Placement { id: string; boardId: string; frameId: string; x: number; y: number }

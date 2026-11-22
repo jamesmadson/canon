@@ -9,6 +9,7 @@ import { CHROME_BLOCKED, bridgeView, removeAgent, subscribeBridge } from './brid
 import { Avatar } from './comments';
 import { html, Icon, go, ago, useStore } from './shared';
 import { isMac, openSearch } from './palette';
+import { orderProjects } from './lib/projects';
 import { askProjectName } from './lib/naming';
 import { FeedbackFoot } from './feedback';
 import { Settings } from './settings';
@@ -73,7 +74,7 @@ export function Sidebar({ route, activeProject }: { route: Address; activeProjec
   const starred = scopeCards(cards, { kind: 'starred' }).length;
   const allTags = tagCounts(live);
   const tags = allTags.slice(0, 8);
-  const projects = [...s.projects].sort((a, b) => b.updatedAt - a.updatedAt);
+  const projects = orderProjects(s.projects);
   const countIn = (id: string) => countPrototypes(s.frames, { projectId: id });
   const me = store.myName();
   const sample = async () => {

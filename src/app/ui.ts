@@ -155,6 +155,22 @@ function BoardThumb({ rects }: { rects: { x: number; y: number; w: number; h: nu
 }
 const boardRects = (boardId: string) => store.framesOf(boardId).map((f) => ({ x: f.x, y: f.y, w: f.w, h: f.h, multi: pageCount(f) > 1 }));
 
+/** The project page's "more" menu. It holds one item that pins the project to the top of the sidebar, or unpins it. */
+export const pinLabel = (pinned: boolean) => (pinned ? 'Unpin' : 'Pin to top');
+export function ProjectMenu({ id, name, pinned }: { id: string; name: string; pinned: boolean }) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  useDismiss(open, () => setOpen(false), wrap, button);
+  useEffect(() => { if (open) wrap.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus(); }, [open]);
+  return html`<div class=${`rowmenu${open ? ' open' : ''}`} ref=${wrap} style="position:relative">
+    <button type="button" ref=${button} class="more" aria-haspopup="menu" aria-expanded=${open} aria-label=${`More actions for ${name}`} title="More actions" onClick=${() => setOpen(!open)}><${Icon} name="more" size=${16} /></button>
+    ${open && html`<div class="menu rowmenu-pop" role="menu" style="top:calc(100% + 6px);bottom:auto;left:auto;right:0">
+      <button type="button" role="menuitem" onClick=${() => { setOpen(false); void store.pinProject(id, !pinned); }}><${Icon} name="pin" />${pinLabel(pinned)}</button>
+    </div>`}
+  </div>`;
+}
+
 /* ── Project ───────────────────────────────────────────────────────────── */
 export function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes' | 'boards' | 'comments'; askUrl: () => Promise<string | null> }) {
   const s = useStore();
@@ -199,6 +215,7 @@ export function ProjectView({ id, tab, askUrl }: { id: string; tab: 'prototypes'
         <a href=${`#/p/${id}/comments`} aria-current=${tab === 'comments' ? 'page' : undefined}>Notes <span>${store.notesInProject(id).filter((n) => !n.resolved).length}</span></a>
       </div>
       <span class="spacer"></span>
+      <${ProjectMenu} id=${id} name=${project.name} pinned=${!!project.pinned} />
       ${tab === 'prototypes' && html`<${AddMenu} primary label="Add" onWay=${(w: Way) => runWay(w, id, undefined, askUrl)} />`}
       ${tab === 'boards' && html`<button class="btn primary" onClick=${newBoard}><${Icon} name="plus" />New board</button>`}
     </div>

@@ -203,6 +203,16 @@ export async function renameProject(id: string, name: string): Promise<boolean> 
   return true;
 }
 
+/** Pins a project to the top of the sidebar, or unpins it. Leaves updatedAt alone, so an unpinned project returns to its place. */
+export async function pinProject(id: string, pinned: boolean): Promise<boolean> {
+  const p = state.projects.find((x) => x.id === id);
+  if (!p) return false;
+  const next = { ...p, pinned };
+  await db.put('projects', next);
+  set({ projects: state.projects.map((x) => (x.id === id ? next : x)) });
+  return true;
+}
+
 export async function createBoard(projectId: string, name = 'Untitled board'): Promise<Board> {
   const board: Board = { id: uid(), projectId, name, createdAt: now(), updatedAt: now(), arrangement: 'free' };
   await db.put('boards', board);
