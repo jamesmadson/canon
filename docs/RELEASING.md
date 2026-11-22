@@ -23,7 +23,14 @@ Pushing a version tag publishes the `usecanon` package to npm and creates a GitH
 - The tag and `cli/package.json` disagree. The tag must be `v` plus the package version.
 - The changelog section is missing or empty. Add it to `CHANGELOG.md`.
 
-Nothing is published when a refusal happens before the publish step. Delete the bad tag with `git push origin :v0.1.2`, fix the cause, and tag again.
+Nothing is published when a refusal happens before the publish step. Delete the bad tag in both places with `git push origin :v0.1.2 && git tag -d v0.1.2`, fix the cause, and tag again.
+
+If the package published but the GitHub Release step failed, don’t re-run the job: it will stop at the “already on npm” check. Create the release by hand instead:
+
+```
+node scripts/release-notes.mjs 0.1.2 > notes.md
+gh release create v0.1.2 --title v0.1.2 --notes-file notes.md
+```
 
 ## One-time setup
 
