@@ -801,7 +801,6 @@ button.ver-chip:hover { color: var(--text); }
   border: 0; border-radius: var(--r-btn); background: var(--rail-hover); color: var(--soft); text-align: left;
   transition: transform 120ms var(--ease);
 }
-@media (hover: hover) and (pointer: fine) { .find:hover { background: var(--raised); color: var(--text); } }
 .find:active { transform: scale(0.97); }
 .find kbd { margin-left: auto; font: 400 var(--fs-meta) var(--sans); letter-spacing: 0; color: var(--faint); }
 .rail-scroll { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 2px; }
@@ -994,6 +993,7 @@ button.ver-chip:hover { color: var(--text); }
 
 @media (hover: hover) and (pointer: fine) {
   .ni:hover { background: var(--rail-hover); }
+  .find:hover { background: var(--raised); color: var(--text); }
   .prow:hover { background: var(--panel); }
   .gbtn:hover, .ibtn:hover, .st:hover { background: var(--raised); }
   .util:hover { background: var(--panel); color: var(--text); }
