@@ -848,7 +848,7 @@ button.ver-chip:hover { color: var(--text); }
 .bar .seg, .focus .topbar .seg { padding: 3px; border-radius: var(--r-btn); background: var(--panel); }
 .bar .seg button, .focus .topbar .seg button { height: 30px; padding: 0 14px; border-radius: var(--r-btn); transition: transform 120ms var(--ease); }
 .bar .seg button:active, .focus .topbar .seg button:active { transform: scale(0.97); }
-.bar .seg button[aria-pressed="true"], .focus .topbar .seg button[aria-pressed="true"] { background: var(--ground); color: var(--text); font-weight: 500; box-shadow: 0 0 0 1px var(--line), 0 1px 1px var(--shadow); }
+.bar .seg button[aria-pressed="true"], .focus .topbar .seg button[aria-pressed="true"] { background: var(--ground); color: var(--text); font-weight: 500; box-shadow: none; }
 .add {
   display: inline-flex; align-items: center; gap: 8px; height: var(--h-ctl-lg); padding: 0 22px 0 18px; border: 0; border-radius: var(--r-btn);
   background: var(--text); color: var(--ground); font-size: var(--fs-meta); letter-spacing: 0; font-weight: 500; transition: transform 120ms var(--ease);
@@ -1089,15 +1089,18 @@ button.ver-chip:hover { color: var(--text); }
 .focus { padding: 8px; }
 .focus-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; border-radius: var(--r-lg); background: var(--panel); box-shadow: 0 0 0 1px var(--line), 0 1px 2px var(--shadow); overflow: hidden; }
 .focus .topbar { container-type: inline-size; flex: none; gap: 8px; padding: 0 16px; border-bottom: 0; background: none; }
-.focus .btn { background: none; color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong); }
+/* Controls in the view are told apart by a soft fill, never an outline. Back and Copy link sit bare in the top bar. */
+.focus { --ctl-fill: color-mix(in srgb, var(--text) 7%, var(--panel)); --ctl-hover: color-mix(in srgb, var(--text) 12%, var(--panel)); --ctl-press: color-mix(in srgb, var(--text) 16%, var(--panel)); }
+.focus .btn { background: var(--ctl-fill); color: var(--text); box-shadow: none; }
+.focus .topbar .btn { background: none; }
 @media (hover: hover) and (pointer: fine) {
-  .focus .btn:hover { background: var(--hover); }
-  .focus .btn.ghost:hover { background: var(--hover); color: var(--text); }
+  .focus .btn:hover, .focus .topbar .btn:hover { background: var(--ctl-hover); }
+  .focus .btn.ghost:hover { background: var(--ctl-fill); color: var(--text); }
 }
-.focus .btn:active { background: var(--press); }
-.focus .btn.ghost { box-shadow: none; color: var(--soft); }
+.focus .btn:active { background: var(--ctl-press); }
+.focus .btn.ghost { box-shadow: none; background: none; color: var(--soft); }
 .focus .btn[disabled] { opacity: .45; }
-.focus .topbar .seg { background: var(--raised); }
+.focus .topbar .seg { background: var(--ctl-fill); }
 .focus .topbar .seg button[aria-pressed="true"] { background: var(--ground); }
 .focus .topbar .select { height: var(--h-ctl); border-radius: var(--r-md); background: var(--raised); }
 .topbar .back { padding: 0 18px 0 12px; gap: 6px; }
@@ -1112,7 +1115,7 @@ button.ver-chip:hover { color: var(--text); }
 .vb-name .faint { font-weight: 400; }
 .vb-ver { display: flex; align-items: center; flex: none; color: var(--soft); }
 .vb-id .vb-rename { flex: none; }
-.vb-ver .btn.icon { width: 32px; height: 32px; }
+.vb-ver .btn.icon { width: var(--h-ctl); height: var(--h-ctl); }
 .vb-ver .next svg { transform: rotate(180deg); }
 .vb-vtext { padding: 0 4px; font-size: var(--fs-meta); letter-spacing: 0; white-space: nowrap; }
 .vb-tags-wrap { display: flex; flex: 0 1 auto; min-width: 0; }
@@ -1125,9 +1128,9 @@ button.ver-chip:hover { color: var(--text); }
 .viewer-bar .btn { position: relative; }
 .viewer-bar .btn .badge { position: absolute; top: 7px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--text); }
 .viewer-bar .btn .count { font: 500 var(--fs-meta) var(--mono); letter-spacing: 0; color: var(--soft); }
-.viewer-bar .btn[aria-pressed="true"] { background: var(--raised); color: var(--text); font-weight: 600; }
-.viewer-bar .zoom-group { gap: 0; border-radius: var(--r-btn); box-shadow: inset 0 0 0 1px var(--line-strong); }
-.viewer-bar .zoom-group .btn { box-shadow: none; }
+.viewer-bar .btn[aria-pressed="true"] { background: var(--ctl-press); color: var(--text); font-weight: 600; }
+.viewer-bar .zoom-group { gap: 0; border-radius: var(--r-btn); background: var(--ctl-fill); }
+.viewer-bar .zoom-group .btn { box-shadow: none; background: none; }
 .viewer-bar .zoom-group .btn.icon { width: 34px; }
 .viewer-bar .zoom { min-width: 56px; padding: 0 6px; font: 500 var(--fs-meta) var(--mono); letter-spacing: 0; }
 .viewer-bar .bar-pop { left: auto; right: 0; transform: none; bottom: calc(100% + 12px); }
