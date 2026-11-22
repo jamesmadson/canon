@@ -15,6 +15,7 @@ import { useWheel } from './map';
 import { Composer, CommentsPanel, Pin, Thread, isComment, type Draft } from './comments';
 import { PrototypeActions, ZoomControls } from './bar';
 import { FrameBody, LiveSwitch } from './live';
+import { Modal } from './feedback';
 import {
   html, Icon, useStore, go, ago, frameSrc, previewUrl, pageCount, pageName, SANDBOX, KIND, SIZES, showsCover, coverSrc,
   addGroups, addVersion, runWay, WayButtons, NoteItem, type Way,
@@ -45,23 +46,20 @@ function Teases({ frame, onEnter }: { frame: Frame; onEnter: (page: string) => v
 }
 
 /* ── Pick from the library ─────────────────────────────────────────────── */
-function LibraryPicker({ projectId, boardId, onClose }: { projectId: string; boardId: string; onClose: () => void }) {
+export function LibraryPicker({ projectId, boardId, onClose }: { projectId: string; boardId: string; onClose: () => void }) {
   const [q, setQ] = useState('');
   const placed = new Set(store.placementsOf(boardId).map((p) => p.frameId));
   const items = store.prototypesOf(projectId).filter((f) => !placed.has(f.id) && f.name.toLowerCase().includes(q.toLowerCase()));
-  return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose()}>
-    <div class="dialog" style="width:460px">
-      <h3>Add from the library</h3>
-      <input class="field" autofocus placeholder="Search prototypes" value=${q} onInput=${(e: Event) => setQ((e.target as HTMLInputElement).value)} />
-      <div class="pick-list">
-        ${items.length === 0 && html`<p class="hint">Everything in this project is already on this board.</p>`}
-        ${items.map((f) => html`<button onClick=${async () => { await store.placeOnBoard(boardId, f.id); store.toast(`Added ${f.name}.`); }}>
-          <span>${f.name}</span><span class="faint mono" style="font-size:var(--fs-meta)">${pageCount(f) > 1 ? `${pageCount(f)} pages · ` : ''}${f.w}×${f.h}</span><${Icon} name="plus" />
-        </button>`)}
-      </div>
-      <div class="row" style="justify-content:flex-end"><button class="btn" onClick=${onClose}>Done</button></div>
+  return html`<${Modal} id="pick-title" title="Add from the library" onClose=${onClose} style="width:460px">
+    <input class="field" aria-label="Search prototypes" autocomplete="off" placeholder="Search prototypes" value=${q} onInput=${(e: Event) => setQ((e.target as HTMLInputElement).value)} />
+    <div class="pick-list">
+      ${items.length === 0 && html`<p class="hint">Everything in this project is already on this board.</p>`}
+      ${items.map((f) => html`<button onClick=${async () => { await store.placeOnBoard(boardId, f.id); store.toast(`Added ${f.name}.`); }}>
+        <span>${f.name}</span><span class="faint mono" style="font-size:var(--fs-meta)">${pageCount(f) > 1 ? `${pageCount(f)} pages · ` : ''}${f.w}×${f.h}</span><${Icon} name="plus" />
+      </button>`)}
     </div>
-  </div>`;
+    <div class="row" style="justify-content:flex-end"><button class="btn" onClick=${onClose}>Done</button></div>
+  <//>`;
 }
 
 /* ── Board ─────────────────────────────────────────────────────────────── */

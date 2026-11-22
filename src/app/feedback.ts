@@ -9,12 +9,14 @@ import { html } from './shared';
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /** A dialog that keeps focus inside, closes on Escape and hands focus back to what opened it. */
-export function Modal({ id, title, onClose, returnTo, children }: { id: string; title: string; onClose: () => void; returnTo: HTMLElement | null; children: ComponentChildren }) {
+export function Modal({ id, title, onClose, returnTo, style, children }: { id: string; title: string; onClose: () => void; returnTo?: HTMLElement | null; style?: string; children: ComponentChildren }) {
   const box = useRef<HTMLDivElement>(null);
+  // Without an explicit opener, whatever had focus when the dialog first rendered gets it back.
+  const opener = useRef<HTMLElement | null>(returnTo === undefined ? (document.activeElement as HTMLElement | null) : returnTo);
   useEffect(() => {
     const first = box.current?.querySelector<HTMLElement>('textarea, input, button');
     first?.focus();
-    return () => { if (returnTo?.isConnected) returnTo.focus(); };
+    return () => { const back = opener.current; if (back?.isConnected) back.focus(); };
   }, []);
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onClose(); return; }
@@ -28,7 +30,7 @@ export function Modal({ id, title, onClose, returnTo, children }: { id: string; 
     else if (!e.shiftKey && (active === last || !box.current.contains(active))) { e.preventDefault(); first.focus(); }
   };
   return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose()}>
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby=${id} ref=${box} onKeyDown=${onKey}>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby=${id} style=${style} ref=${box} onKeyDown=${onKey}>
       <h3 id=${id}>${title}</h3>
       ${children}
     </div>
