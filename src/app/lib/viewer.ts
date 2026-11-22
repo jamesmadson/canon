@@ -36,7 +36,7 @@ export function typingIn(target: EventTarget | null): boolean {
   return !!el.closest?.('[role="dialog"], [role="menu"], [role="listbox"]');
 }
 
-export const FRAME_BLOCKED = 'This site does not allow itself to be shown inside other pages.';
+export const FRAME_BLOCKED = 'This site can’t be shown inside\u00a0Canon';
 export const LIVE_HINT = 'Live shows the running version at its localhost address. Off shows the stored copy.';
 
 /** The first few tags the prototype bar shows, and how many more there are. */

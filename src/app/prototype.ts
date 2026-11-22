@@ -17,6 +17,7 @@ import { PageMap, START_CAMERA, type MapApi } from './map';
 import { chooseView, isMulti, takeStartPage, viewOf, type PageView } from './lib/pageview';
 import type { Camera } from './lib/layout';
 import { record } from './lib/tester';
+import { framingTip } from './lib/framing';
 import { ServerOff, adoptTitle, useShown } from './live';
 import { addVersion, html, Icon, useStore, type Way, frameSrc, pageName, previewUrl, SANDBOX, SIZES } from './shared';
 
@@ -29,8 +30,9 @@ export const openPrototype = (f: Pick<Frame, 'id'>) => openHash(buildAddress({ n
 function Blocked({ href }: { href: string }) {
   return html`<div class="frame-blocked" role="status">
     <h2>${FRAME_BLOCKED}</h2>
-    <p>Canon shows a link to it instead, so open it in a new tab. To see it here, add a build folder or a zip as another version, and Canon keeps a copy that shows inside it.</p>
+    <p>Open it in a new tab. It stays saved here with its notes and${'\u00a0'}versions.</p>
     <a class="btn primary" href=${href} target="_blank" rel="noopener" onClick=${() => record('open_new_tab')}><${Icon} name="open" />Open in new tab</a>
+    <p class="tip">${framingTip(href)}</p>
   </div>`;
 }
 
@@ -40,7 +42,7 @@ function Blocked({ href }: { href: string }) {
  */
 function LinkBar() {
   return html`<div class="link-bar" role="note">
-    <p>If the page below is blank, the site may not allow being shown inside other pages. Use Open in new tab above.</p>
+    <p>Blank below? The site may not allow being shown here. Open it in a new${'\u00a0'}tab.</p>
   </div>`;
 }
 
@@ -197,7 +199,7 @@ export function Focus({ frame, page, onClose, address, askUrl }: { frame: Frame;
       <span class="spacer"></span>
       ${address && !address.board && html`<${BoardLinks} className="show-board" boards=${boardsHere} label=${['Show on board', 'Show on board']} name=${here.name} show=${here.id} />`}
       ${address && html`<button type="button" class="btn" aria-label="Copy link" title="Copy link" onClick=${copy}><${Icon} name="link" /><span class="lbl">Copy link</span></button>`}
-      <a class="btn" href=${newTab} target="_blank" rel="noopener" aria-label="Open in new tab" title="Open in new tab" onClick=${() => record('open_new_tab')}><span class="lbl">Open in new tab</span><${Icon} name="open" /></a>
+      ${!known && html`<a class="btn" href=${newTab} target="_blank" rel="noopener" aria-label="Open in new tab" title="Open in new tab" onClick=${() => record('open_new_tab')}><span class="lbl">Open in new tab</span><${Icon} name="open" /></a>`}
     </div>
     ${view === 'map'
       ? html`<div class="focus-stage map-stage"><${PageMap} key=${here.id} frame=${here} cam=${cam} setCam=${(fn: (c: Camera) => Camera) => setCam(fn)} api=${map} startPage=${startPage.current || undefined} onPage=${pickPage} /></div>`

@@ -222,8 +222,16 @@ describe('a page that will not show', () => {
   it('says so when the version is known to refuse framing, with a way out', async () => {
     const box = await open('k');
     expect(box.querySelector('iframe')).toBeNull();
-    expect(box.querySelector('.frame-blocked')!.textContent).toContain('This site does not allow itself to be shown inside other pages.');
-    expect(box.querySelector('.frame-blocked a')!.getAttribute('href')).toBe('https://x.webflow.io/');
+    const text = box.querySelector('.frame-blocked')!.textContent!.replace(/\u00a0/g, ' ');
+    expect(text).toContain('This site can’t be shown inside Canon');
+    expect(text).toContain('Open it in a new tab. It stays saved here with its notes and versions.');
+    expect(text).toContain('To see it here, add a build folder or a zip as another version.');
+    const a = box.querySelector('.frame-blocked a.btn.primary')!;
+    expect(a.getAttribute('href')).toBe('https://x.webflow.io/');
+    expect(a.getAttribute('target')).toBe('_blank');
+    expect(a.getAttribute('rel')).toBe('noopener');
+    const opens = Array.from(box.querySelectorAll('a')).filter((x) => /open in (a )?new tab/i.test(x.getAttribute('aria-label') ?? x.textContent ?? ''));
+    expect(opens).toHaveLength(1);
   });
 
   const hints = (box: HTMLElement) => Array.from(box.querySelectorAll('.view-hints'));
@@ -231,7 +239,7 @@ describe('a page that will not show', () => {
   it('always shows a bar above a link, and offers Open in new tab once, in the toolbar', async () => {
     const box = await open('u');
     const bar = box.querySelector('.link-bar')!;
-    expect(bar.textContent).toContain('the site may not allow being shown inside other pages');
+    expect(bar.textContent!.replace(/\u00a0/g, ' ')).toContain('Blank below? The site may not allow being shown here. Open it in a new tab.');
     expect(bar.querySelector('a')).toBeNull();
     const opens = Array.from(box.querySelectorAll('a')).filter((a) => /open in (a )?new tab/i.test(a.getAttribute('aria-label') ?? a.textContent ?? ''));
     expect(opens).toHaveLength(1);
