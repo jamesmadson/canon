@@ -15,8 +15,8 @@ const TABLE: Array<[string, string, string]> = [
   ['--color-ink', '#1A1918', '#EDEBE6'],
   ['--color-ink-soft', '#5C5954', '#A29E96'],
   ['--color-input-border', '#85817A', '#77736B'],
-  ['--color-orange', '#FF4F00', '#FF4F00'],
-  ['--color-pin', '#B83A00', '#B83A00'],
+  ['--color-orange', '#007FFF', '#007FFF'],
+  ['--color-pin', '#0062CC', '#0062CC'],
 ];
 
 // Every declaration of a token in the file, in order.

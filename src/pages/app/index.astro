@@ -16,7 +16,7 @@
         var a = localStorage.getItem('canon-appearance');
         if (a === 'light' || a === 'dark') document.documentElement.setAttribute('data-theme', a);
         var dark = a === 'dark' || (a !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
-        document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#151413' : '#F7F5F2');
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#151413' : '#F2EDDB');
       } catch (e) {}
     </script>
     <link rel="manifest" href="/canon/app.webmanifest" />

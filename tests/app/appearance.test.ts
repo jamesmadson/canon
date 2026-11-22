@@ -33,7 +33,7 @@ const meta = () => document.querySelector('meta[name="theme-color"]')!.getAttrib
 describe('appearance', () => {
   it('Light and Dark set the theme and the title bar colour', () => {
     applyAppearance('light');
-    expect([root.getAttribute('data-theme'), meta()]).toEqual(['light', '#F7F5F2']);
+    expect([root.getAttribute('data-theme'), meta()]).toEqual(['light', '#F2EDDB']);
     applyAppearance('dark');
     expect([root.getAttribute('data-theme'), meta()]).toEqual(['dark', '#151413']);
   });
@@ -42,7 +42,7 @@ describe('appearance', () => {
     applyAppearance('dark');
     applyAppearance('system');
     expect(root.hasAttribute('data-theme')).toBe(false);
-    expect(meta()).toBe('#F7F5F2');
+    expect(meta()).toBe('#F2EDDB');
     dark = true;
     applyAppearance('system');
     expect(meta()).toBe('#151413');
@@ -75,11 +75,11 @@ describe('appearance', () => {
     expect(meta()).toBe('#151413');
     dark = false;
     listeners.forEach((l) => l());
-    expect(meta()).toBe('#F7F5F2');
+    expect(meta()).toBe('#F2EDDB');
     chooseAppearance('light');
     dark = true;
     listeners.forEach((l) => l());
-    expect([root.getAttribute('data-theme'), meta()]).toEqual(['light', '#F7F5F2']);
+    expect([root.getAttribute('data-theme'), meta()]).toEqual(['light', '#F2EDDB']);
   });
 });
 
@@ -120,7 +120,7 @@ describe('no flash', () => {
   });
 
   it('has a stylesheet block for each chosen theme that beats the system one', () => {
-    expect(css).toMatch(/:root\[data-theme="light"\]\s*\{[^}]*--bg: #F7F5F2/);
+    expect(css).toMatch(/:root\[data-theme="light"\]\s*\{[^}]*--bg: #F2EDDB/);
     expect(css).toMatch(/:root\[data-theme="dark"\]\s*\{[^}]*--bg: #151413/);
   });
 });

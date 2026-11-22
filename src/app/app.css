@@ -34,28 +34,28 @@
 /* Light is the default and the system's dark setting switches every token.
    bg is the sidebar and the page behind the panel, ground is the panel. */
 :root {
-  --bg: #F7F5F2;
+  --bg: #F2EDDB;
   --ground: #FFFFFF;
-  --rail: #F7F5F2;
-  --panel: #F4F1EE;
-  --raised: #EFECE8;
-  --hover: #E7E3DD;
-  --press: #DDD8D0;
+  --rail: #F2EDDB;
+  --panel: #F5F3EE;
+  --raised: #EEEBE4;
+  --hover: #E6E2D9;
+  --press: #DCD7CC;
   --pop: #FFFFFF;
-  --rail-hover: #EDEAE5;
-  --line: rgba(26, 25, 24, 0.08);
-  --line-strong: rgba(26, 25, 24, 0.16);
+  --rail-hover: #E9E3CD;
+  --line: rgba(40, 34, 20, 0.08);
+  --line-strong: rgba(40, 34, 20, 0.16);
   --text: #1A1918;
-  --soft: #5C5954;
-  --faint: #66625C;
+  --soft: #5E5A50;
+  --faint: #5E5A50;
   --input-border: #85817A;
   --focus: #1A1918;
-  --accent: #FF4F00;
-  --accent-soft: rgba(255, 79, 0, 0.14);
-  --pin: #B83A00;
+  --accent: #007FFF;
+  --accent-soft: rgba(0, 127, 255, 0.14);
+  --pin: #0062CC;
   --ink-on-orange: #1A1918;
   --ok: #1A1918;
-  --canvas: #EFECE8;
+  --canvas: #F5F3EE;
   --dot: rgba(26, 25, 24, 0.12);
   --shadow: rgba(26, 25, 24, 0.10);
   --shadow-lg: rgba(26, 25, 24, 0.20);
@@ -94,9 +94,9 @@
     --faint: #A29E96;
     --input-border: #77736B;
     --focus: #EDEBE6;
-    --accent: #FF4F00;
-    --pin: #B83A00;
-    --accent-soft: rgba(255, 79, 0, 0.18);
+    --accent: #3D9BFF;
+    --pin: #0062CC;
+    --accent-soft: rgba(61, 155, 255, 0.18);
     --ok: #EDEBE6;
     --canvas: #151413;
     --dot: rgba(237, 235, 230, 0.07);
@@ -109,28 +109,28 @@
 /* The Appearance setting: a chosen theme wins over the system one. */
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #F7F5F2;
+  --bg: #F2EDDB;
   --ground: #FFFFFF;
-  --rail: #F7F5F2;
-  --panel: #F4F1EE;
-  --raised: #EFECE8;
-  --hover: #E7E3DD;
-  --press: #DDD8D0;
+  --rail: #F2EDDB;
+  --panel: #F5F3EE;
+  --raised: #EEEBE4;
+  --hover: #E6E2D9;
+  --press: #DCD7CC;
   --pop: #FFFFFF;
-  --rail-hover: #EDEAE5;
-  --line: rgba(26, 25, 24, 0.08);
-  --line-strong: rgba(26, 25, 24, 0.16);
+  --rail-hover: #E9E3CD;
+  --line: rgba(40, 34, 20, 0.08);
+  --line-strong: rgba(40, 34, 20, 0.16);
   --text: #1A1918;
-  --soft: #5C5954;
-  --faint: #66625C;
+  --soft: #5E5A50;
+  --faint: #5E5A50;
   --input-border: #85817A;
   --focus: #1A1918;
-  --accent: #FF4F00;
-  --accent-soft: rgba(255, 79, 0, 0.14);
-  --pin: #B83A00;
+  --accent: #007FFF;
+  --accent-soft: rgba(0, 127, 255, 0.14);
+  --pin: #0062CC;
   --ink-on-orange: #1A1918;
   --ok: #1A1918;
-  --canvas: #EFECE8;
+  --canvas: #F5F3EE;
   --dot: rgba(26, 25, 24, 0.12);
   --shadow: rgba(26, 25, 24, 0.10);
   --shadow-lg: rgba(26, 25, 24, 0.20);
@@ -155,9 +155,9 @@
   --faint: #A29E96;
   --input-border: #77736B;
   --focus: #EDEBE6;
-  --accent: #FF4F00;
-  --pin: #B83A00;
-  --accent-soft: rgba(255, 79, 0, 0.18);
+  --accent: #3D9BFF;
+  --pin: #0062CC;
+  --accent-soft: rgba(61, 155, 255, 0.18);
   --ok: #EDEBE6;
   --canvas: #151413;
   --dot: rgba(237, 235, 230, 0.07);
@@ -213,7 +213,7 @@ input, textarea { caret-color: var(--accent); }
   width: 26px; height: 26px; border-radius: 8px; flex: none;
   display: grid; place-items: center; background: var(--raised);
 }
-.mark::after { content: ""; width: 13px; height: 13px; border-radius: 50%; background: #ff4f00; }
+.mark::after { content: ""; width: 13px; height: 13px; border-radius: 50%; background: var(--accent); }
 .workspace b { font-weight: 600; font-size: var(--fs-base); letter-spacing: var(--ls-text); display: block; }
 .workspace small { color: var(--faint); font-size: var(--fs-meta); letter-spacing: 0; }
 
@@ -1014,7 +1014,7 @@ button.ver-chip:hover { color: var(--text); }
   .find:active, .ibtn:active, .util:active, .add:active, .st:active, .first-drop:active, .bar .seg button:active { transform: none; }
 }
 
-/* Project view: stars, tags and a list that matches Home. Orange stays the mark on a picked card. */
+/* Project view: stars, tags and a list that matches Home. Blue stays the mark on a picked card. */
 .lib-card .st { position: absolute; top: 10px; right: 10px; z-index: 2; background: var(--ground); box-shadow: 0 0 0 1px var(--line-strong); opacity: 0; }
 .lib-card .st.on, .lib-card .st:focus-visible, .lib-card:focus-within .st { opacity: 1; }
 .lib-card:focus-within .lib-check { opacity: 1; }
@@ -1029,7 +1029,7 @@ button.ver-chip:hover { color: var(--text); }
   .lib-card:hover .st { opacity: 1; }
 }
 
-/* Canvas bottom bar: star, note, archive and zoom. A pressed star or archive is a fill, not orange. */
+/* Canvas bottom bar: star, note, archive and zoom. A pressed star or archive is a fill, not blue. */
 .bar-group { display: flex; align-items: center; gap: 2px; }
 .bar-note { position: relative; display: flex; }
 .toolbar .btn.icon { position: relative; }
@@ -1172,7 +1172,7 @@ button.ver-chip:hover { color: var(--text); }
 
 /* ── Tag filters across the top of Home ─────────────────────────────────────
    Chips are tags, not actions: rounded 9, 32px tall. A chosen one is a fill and a heavier
-   weight in ink, never orange. */
+   weight in ink, never blue. */
 .tagbar { position: relative; flex: none; display: flex; align-items: center; min-height: 52px; padding: 0 24px; border-bottom: 1px solid var(--line); }
 .tagbar-row { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
 .fchip {

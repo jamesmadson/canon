@@ -13,7 +13,7 @@ export const APPEARANCES: { value: Appearance; label: string }[] = [
   { value: 'dark', label: 'Dark' },
 ];
 /** The ground colour of each theme, for the installed app's title bar. */
-export const THEME_COLOR = { light: '#F7F5F2', dark: '#151413' } as const;
+export const THEME_COLOR = { light: '#F2EDDB', dark: '#151413' } as const;
 
 const valid = (v: unknown): v is Appearance => v === 'system' || v === 'light' || v === 'dark';
 
