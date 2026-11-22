@@ -209,7 +209,14 @@ describe('the filter through the app', () => {
     history.replaceState(null, '', '#/');
   });
   const names = () => Array.from(document.querySelectorAll('.prow .nm')).map((n) => n.textContent);
-  const settle = () => act(() => new Promise<void>((r) => setTimeout(r, 20)));
+  /** Waits until the condition holds, polling inside act so renders flush. Fails with the message after 2,000 ms. */
+  const until = async (holds: () => boolean, message: string) => {
+    const deadline = Date.now() + 2000;
+    while (!holds()) {
+      if (Date.now() > deadline) throw new Error(message);
+      await act(() => new Promise<void>((r) => setTimeout(r, 10)));
+    }
+  };
 
   it('filters by one tag, then by two, and keeps the choice in the address', async () => {
     const box = await mount(App as ComponentType, {});
@@ -231,8 +238,10 @@ describe('the filter through the app', () => {
     await click(chip(box, 'Billing'));
     expect(names()).toEqual([]);
     expect(box.querySelector('.empty p')!.textContent).toBe('No prototypes have all of these tags.');
+    const popped = new Promise<void>((r) => window.addEventListener('popstate', () => r(), { once: true }));
     await act(() => { history.back(); });
-    await settle();
+    await popped;
+    await until(() => pressed(box).join() === 'Forms' && names().join() === 'Proto d', 'Back did not return to the chip Forms alone with Proto d listed');
     expect(location.hash).toBe('#/?tag=Forms');
     expect(names()).toEqual(['Proto d']);
   });
