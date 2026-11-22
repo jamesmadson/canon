@@ -9,7 +9,7 @@ import { filterPrototypes, sortPrototypes, type LibraryFilter, type LibrarySort 
 import { Home } from './home';
 import { ActiveFilters, FilterPop } from './libfilter';
 import { AddMenu, LinkTile, ProtoRow, StarButton, Tags, metaOf } from './parts';
-import { MoveMenu, RowMenu, carries, startDrag, useDismiss } from './move';
+import { MoveMenu, RowMenu, carries, startDrag, useDismiss, useMenuKeys } from './move';
 import { pagesOf } from './lib/pageview';
 import { currentOf, stackKey } from './lib/versions';
 import { ENTER_ADDRESS, OWN_ORIGIN_MESSAGE, checkPrototypeUrl } from './lib/resolve';
@@ -27,6 +27,7 @@ import { Avatar } from './comments';
 import { ReachNote, useHomeProbe } from './live';
 import { record } from './lib/tester';
 import { html, Icon, useStore, go, ago, pageCount, frameSrc, SANDBOX, addGroups, runWay, showsCover, coverSrc, type Way } from './shared';
+import { Modal } from './feedback';
 
 export { BASE } from './shared';
 
@@ -75,12 +76,6 @@ export function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) 
   const name = typedName ?? nameFromUrl(checked.ok ? checked.url : value);
   // The address comes first, empty, so a paste lands in it. The name follows the address.
   useEffect(() => { addressBox.current?.focus(); }, []);
-  useEffect(() => {
-    // Captured, so the view behind the dialog never sees this Esc and stays where it is.
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onClose(null); } };
-    addEventListener('keydown', esc, true);
-    return () => removeEventListener('keydown', esc, true);
-  }, [onClose]);
   const submit = (e: Event) => {
     e.preventDefault();
     if (checked.ok) {
@@ -88,9 +83,8 @@ export function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) 
       onClose(checked.url);
     } else setProblem(checked.message === OWN_ORIGIN_MESSAGE ? OWN_ORIGIN_MESSAGE : ENTER_ADDRESS);
   };
-  return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose(null)}>
-    <form class="dialog" onSubmit=${submit} role="dialog" aria-modal="true" aria-labelledby="url-title">
-      <h3 id="url-title">Add a link</h3>
+  return html`<${Modal} id="url-title" title="Add a link" onClose=${() => onClose(null)}>
+    <form onSubmit=${submit} style="display:flex;flex-direction:column;gap:12px">
       <p class="soft" style="margin:0">Paste the address of a page that is already online, such as a Lovable or v0 link, or one running on your machine. Canon keeps the link and shows the live page. A site that does not allow being shown inside other pages gets an Open in a new tab button instead.</p>
       <label class="fb-label" for="url-address">Address</label>
       <input class="field" id="url-address" ref=${addressBox} type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://" value=${value} aria-invalid=${problem ? 'true' : undefined} aria-describedby=${problem ? 'url-error' : undefined} onInput=${(e: Event) => { setValue((e.target as HTMLInputElement).value); setProblem(null); }} />
@@ -102,11 +96,11 @@ export function UrlDialog({ onClose }: { onClose: (v: string | null) => void }) 
         <button class="btn primary">Add</button>
       </div>
     </form>
-  </div>`;
+  <//>`;
 }
 
 /* ── Agents: pairing and the sidebar list ───────────────────────────────── */
-function PairDialog({ pair, onClose }: { pair: PairLink; onClose: () => void }) {
+export function PairDialog({ pair, onClose }: { pair: PairLink; onClose: () => void }) {
   useEffect(() => { record('pair_start'); }, []);
   const notice = pairNotice(useBridge().agents.find((a) => a.id === pair.agentId), pair);
   const connect = async () => {
@@ -125,17 +119,14 @@ function PairDialog({ pair, onClose }: { pair: PairLink; onClose: () => void }) 
     }
     onClose();
   };
-  return html`<div class="scrim" onClick=${(e: MouseEvent) => e.target === e.currentTarget && onClose()}>
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="pair-title">
-      <h3 id="pair-title">Connect ${pair.name} to Canon?</h3>
-      <p class="soft" style="margin:0">It will be able to add prototypes to your projects, add versions, move them between boards and open views. It can't delete anything or read your files.</p>
-      ${notice && html`<p role="alert" style="margin:0;color:var(--text)">${notice}</p>`}
-      <div class="row" style="justify-content:flex-end">
-        <button type="button" class="btn ghost" autofocus onClick=${onClose}>Cancel</button>
-        <button type="button" class="btn primary" onClick=${connect}>Connect</button>
-      </div>
+  return html`<${Modal} id="pair-title" title=${`Connect ${pair.name} to Canon?`} onClose=${onClose}>
+    <p class="soft" style="margin:0">It will be able to add prototypes to your projects, add versions, move them between boards and open views. It can’t delete anything or read your files.</p>
+    ${notice && html`<p role="alert" style="margin:0;color:var(--text)">${notice}</p>`}
+    <div class="row" style="justify-content:flex-end">
+      <button type="button" class="btn ghost" onClick=${onClose}>Cancel</button>
+      <button type="button" class="btn primary" onClick=${connect}>Connect</button>
     </div>
-  </div>`;
+  <//>`;
 }
 
 /* ── A board drawn as its prototypes' outlines ─────────────────────────── */
@@ -162,7 +153,7 @@ export function ProjectMenu({ id, name, pinned }: { id: string; name: string; pi
   const wrap = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
   useDismiss(open, () => setOpen(false), wrap, button);
-  useEffect(() => { if (open) wrap.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus(); }, [open]);
+  useMenuKeys(open, wrap);
   return html`<div class=${`rowmenu${open ? ' open' : ''}`} ref=${wrap} style="position:relative">
     <button type="button" ref=${button} class="more" aria-haspopup="menu" aria-expanded=${open} aria-label=${`More actions for ${name}`} title="More actions" onClick=${() => setOpen(!open)}><${Icon} name="more" size=${16} /></button>
     ${open && html`<div class="menu rowmenu-pop" role="menu" style="top:calc(100% + 6px);bottom:auto;left:auto;right:0">

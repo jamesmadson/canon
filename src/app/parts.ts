@@ -10,7 +10,7 @@ import { tintOf } from '../lib/thumbTints';
 import { hostOf, monogramOf } from './lib/linktile';
 import { ReachNote } from './live';
 import { html, Icon, frameSrc, SANDBOX, showsCover, coverSrc, WayButtons, type Way } from './shared';
-import { RowMenu, startDrag, useDismiss } from './move';
+import { RowMenu, startDrag, useDismiss, useMenuKeys } from './move';
 
 /* ── Thumbnails: the cover if there is one, a live page for files kept here, else a neutral drawing ── */
 function LiveThumb({ frame, big }: { frame: Frame; big: boolean }) {
@@ -143,6 +143,7 @@ export function BoardLinks({ boards, label, name, show, className = '' }: { boar
   const wrap = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
   useDismiss(open, () => setOpen(false), wrap, button);
+  useMenuKeys(open, wrap);
   if (!boards.length) return null;
   const to = (b: Board): Address => ({ name: 'board', board: b.id, frame: null, ...(show ? { show } : {}) });
   if (boards.length === 1) {

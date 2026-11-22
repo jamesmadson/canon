@@ -103,6 +103,31 @@ export function useDismiss(open: boolean, close: () => void, wrap: { current: HT
   }, [open]);
 }
 
+/** Keyboard model for a role="menu" list inside wrap: focus the first item on open, Up and Down wrap, Home and End jump. */
+export function useMenuKeys(open: boolean, wrap: { current: HTMLElement | null }) {
+  useEffect(() => {
+    const node = wrap.current;
+    if (!open || !node) return;
+    const items = () => Array.from(node.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+    items()[0]?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      const list = items();
+      if (!list.length || e.altKey || e.ctrlKey || e.metaKey) return;
+      const at = list.indexOf(document.activeElement as HTMLElement);
+      let next: number;
+      if (e.key === 'ArrowDown') next = at < 0 ? 0 : (at + 1) % list.length;
+      else if (e.key === 'ArrowUp') next = at < 0 ? list.length - 1 : (at - 1 + list.length) % list.length;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = list.length - 1;
+      else return;
+      e.preventDefault();
+      list[next].focus();
+    };
+    node.addEventListener('keydown', onKey);
+    return () => node.removeEventListener('keydown', onKey);
+  }, [open]);
+}
+
 /** A small icon button on a row or card whose menu holds "Move to project". */
 export function RowMenu({ ids, name, className = '' }: { ids: string[]; name: string; className?: string }) {
   const [stage, setStage] = useState<'closed' | 'menu' | 'move'>('closed');
@@ -110,7 +135,7 @@ export function RowMenu({ ids, name, className = '' }: { ids: string[]; name: st
   const wrap = useRef<HTMLDivElement>(null);
   const button = useRef<HTMLButtonElement>(null);
   useDismiss(stage !== 'closed', () => setStage('closed'), wrap, button);
-  useEffect(() => { if (stage === 'menu') wrap.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus(); }, [stage]);
+  useMenuKeys(stage === 'menu', wrap);
   const toggle = (e: Event) => {
     e.stopPropagation();
     if (stage !== 'closed') return setStage('closed');

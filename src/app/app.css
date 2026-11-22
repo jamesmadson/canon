@@ -223,6 +223,7 @@ input, textarea { caret-color: var(--accent); }
   padding: 0 12px; height: var(--h-ctl); margin: 2px 0 8px; color: var(--faint);
 }
 .search input { flex: 1; background: none; border: 0; outline: none; min-width: 0; color: var(--text); }
+.search:focus-within { outline: 1.5px solid var(--focus); outline-offset: 0; }
 .search kbd { font: 500 var(--fs-meta) var(--mono); letter-spacing: 0; color: var(--faint); }
 
 .nav-item {
