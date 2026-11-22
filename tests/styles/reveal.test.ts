@@ -26,11 +26,12 @@ const script = read('src/scripts/mcp.ts');
 const hero = () => html.slice(html.indexOf('class="htext"'), html.indexOf('class="hpanel"'));
 
 describe('the Try the MCP reveal markup', () => {
-  it('has two buttons in a row: the solid Open the app, and an outlined Try the MCP', () => {
+  it('has two buttons in a row: the solid Open the app, and a filled Connect your agent', () => {
     const cta = hero().match(/<div class="cta[^"]*">([\s\S]*?)<\/div>/)![1];
     expect(cta).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/"[^>]*>Open the app<\/a>/);
-    expect(cta).toMatch(/<button type="button" class="hbtn" data-mcp-toggle aria-expanded="false" aria-controls="mcp-panel">Try the MCP<\/button>/);
+    expect(cta).toMatch(/<button type="button" class="hbtn" data-mcp-toggle aria-expanded="false" aria-controls="mcp-panel">Connect your[\s\u00a0]agent<\/button>/);
     expect(cta.match(/hbtn-primary/g)).toHaveLength(1);
+    expect(cta.match(/class="hbtn/g)).toHaveLength(2);
   });
 
   it('points aria-controls at a panel that exists, directly after the buttons', () => {
@@ -63,12 +64,16 @@ describe('the Try the MCP reveal markup', () => {
     expect(panel).toMatch(/<a href="https:\/\/github\.com\/jamesmadson\/canon#connect-your-agent"[^>]*>the(&nbsp;| )README<\/a>/);
   });
 
-  it('says under Open the app that Chrome can install it, in one muted line', () => {
+  it('has one muted fine-print line, and drops the Chrome install line from the hero', () => {
     const h = hero();
-    const line = h.match(/<p class="fine install-line[^"]*">([^<]*)<\/p>/)![1];
-    expect(line.replace(/&nbsp;|\u00a0/g, ' ')).toBe('Install it from Chrome and it opens in its own window.');
-    expect(h.indexOf('install-line')).toBeGreaterThan(h.indexOf('Open the app'));
-    expect(h.indexOf('install-line')).toBeLessThan(h.indexOf('id="mcp-panel"'));
+    expect(h).not.toContain('install-line');
+    expect(h).not.toContain('Install it from Chrome');
+    const lines = [...h.matchAll(/<p class="fine[^"]*"[^>]*>([^<]*)<\/p>/g)].map((m) => m[1].replace(/&nbsp;| /g, ' '));
+    expect(lines).toEqual(['Free and open source. Nothing leaves your machine.']);
+  });
+
+  it('makes the secondary hero button a light fill, not an outline', () => {
+    expect(css).toMatch(/\.htext \.hbtn:not\(\.hbtn-primary\) \{\s*border-color: transparent;\s*background: var\(--color-panel\)/);
   });
 
   it('keeps the free and open source line outside the panel, below it', () => {

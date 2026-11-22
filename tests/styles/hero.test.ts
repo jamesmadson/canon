@@ -27,47 +27,68 @@ describe('the scattered hero at /', () => {
     expect(html).toMatch(/Canon keeps them in one[\s\u00a0]place\./);
     expect(html).toMatch(/<a class="hbtn hbtn-primary" href="\/canon\/app\/"[^>]*>Open the app<\/a>/);
     expect(html).toMatch(/Connect your[\s\u00a0]agent/);
+    expect(html).not.toMatch(/Try the MCP/);
     expect(html).toContain('claude mcp add canon --scope user -- npx -y usecanon mcp');
     expect(html).not.toContain('class="term');
   });
 
-  it('draws nine cards, each with a text chip naming where it lives', () => {
+  it('draws eight cards in three projects, each with a text chip naming where it lives', () => {
     const s = stage();
-    expect(s.match(/data-card/g)).toHaveLength(9);
+    expect(s.match(/data-card/g)).toHaveLength(8);
     const chips = [...s.matchAll(/<span class="[^"]*chip[^"]*"[^>]*>([^<]+)<\/span>/g)].map((m) => m[1]);
-    expect(chips).toEqual(['Lovable', 'Claude Code', 'Figma Make', 'v0', 'Codex', 'Bolt', 'localhost:3000', 'mobile-sign-up.zip', 'Slack link']);
-    for (const name of ['Onboarding', 'Dashboard', 'Mobile navigation']) expect(s).toContain(`<b>${name}</b>`);
-    // Three rows of three, and no name long enough to be cut off.
-    expect(s.match(/<div class="shelf">/g)).toHaveLength(3);
-    for (const shelf of s.split('<div class="shelf">').slice(1)) expect(shelf.match(/data-card/g)).toHaveLength(3);
-    expect(s).toContain('>Empty dashboard<');
-    expect(s).not.toContain('with sample data');
+    expect(chips).toEqual(['v0', 'localhost:5173', 'settings-new.zip', 'Bolt', 'Lovable', 'Figma Make', 'Claude Code', 'Codex']);
+    for (const name of ['Web app', 'Marketing site', 'iPhone app']) expect(s).toContain(`<b>${name}</b>`);
+    // Three shelves of three, two and three, and a name for each prototype.
+    const shelves = s.split('<div class="shelf">').slice(1);
+    expect(shelves.map((sh) => sh.match(/data-card/g)!.length)).toEqual([3, 2, 3]);
+    for (const name of ['Dashboard', 'People', 'Settings', 'Landing page', 'Pricing', 'Onboarding', 'Today', 'Profile']) {
+      expect(s).toContain(`<div class="pname fxn">${name}</div>`);
+    }
   });
 
-  it('has a decorative prompt that types the request and then shows the reply', () => {
+  it('has a decorative terminal that types the request and then shows the reply', () => {
     const box = html.slice(html.indexOf('class="pbox"'), html.indexOf('data-scatter'));
-    expect(box).toContain('aria-hidden="true"');
+    expect(box).toContain('role="img"');
     expect(box).toContain('data-prompt="Put all my prototypes in Canon, by project."');
     expect(box.replace(/<[^>]+>/g, '').replace(/&gt;/g, '>').replace(/\s/g, '')).toContain('>Putallmyprototypesin Canon,byproject.'.replace(' ', ''));
     expect(box.match(/class="pc"/g)).toHaveLength('Put all my prototypes in Canon, by project.'.replaceAll(' ', '').length);
-    expect(box).toContain('Claude Code');
-    expect(box).toContain('canon_add  9 prototypes, 3 projects');
     expect(box).toContain('class="pcaret"');
     expect(box).not.toMatch(/<(a|button|input|select|textarea)\b|tabindex/);
   });
 
-  it('names Claude Code first, and the script cycles Claude Code, Codex, Cursor', () => {
+  it('shows a Claude Code session: title bar, four lines, and the input box with its hint', () => {
     const box = html.slice(html.indexOf('class="pbox"'), html.indexOf('data-scatter'));
-    expect(box).toMatch(/<div class="plabel" data-agent-name>Claude Code<\/div>/);
-    // The card the agent filed follows the same name, in its chip and its source line.
-    expect(stage().match(/data-agent-name[^>]*>Claude Code</g)).toHaveLength(2);
-    const script = read('src/scripts/scatter.ts');
-    expect(script).toContain("const AGENTS = ['Claude Code', 'Codex', 'Cursor'];");
-    // The swap happens in the reset, while the stage is faded out.
-    expect(script).toMatch(/snap\(\(\) => \{[^}]*nextAgent\(\);/);
-    expect(script).toMatch(/\(agent \+ 1\) % AGENTS\.length/);
-    // The typed prompt and the reply do not change with the name.
-    expect(box).toContain('canon_add  9 prototypes, 3 projects');
+    const flat = (x: string) => x.replace(/<[^>]+>/g, '').replace(/&nbsp;| /g, ' ').replace(/&gt;/g, '>').replace(/&#39;|&#x27;/g, '’');
+    expect(flat(box.slice(box.indexOf('class="pbar"'), box.indexOf('class="pbody"')))).toContain('fieldnote · claude');
+    expect(box.match(/class="pdots"><i><\/i><i><\/i><i><\/i>/g)).toHaveLength(1);
+    // 1 the typed request, 2 the tool call, 3 its result, 4 the answer.
+    expect(box.indexOf('class="ptext"')).toBeLessThan(box.indexOf('canon - canon_add (MCP)'));
+    const steps = [...box.matchAll(/<div class="pstep[^"]*">([\s\S]*?)<\/div>/g)].map((m) => flat(m[1]).trim());
+    expect(steps).toEqual([
+      '⏺canon - canon_add (MCP)',
+      '⎿  Added 8 prototypes to 3 projects',
+      '⏺Done. They’re in Canon under Web app, Marketing site and iPhone app.',
+    ]);
+    expect(box).toContain('<span class="pmark pblue">⏺</span>');
+    expect(box.indexOf('class="pinput"')).toBeGreaterThan(box.indexOf('Done.'));
+    expect(flat(box.slice(box.indexOf('class="pinput"')))).toContain('? for shortcuts');
+    expect(box).toContain('class="pcur"');
+    // No Claude or Anthropic logo, no picture at all.
+    expect(box).not.toMatch(/<img|<svg|anthropic/i);
+    // The label says what happened, for people who cannot see it.
+    expect(box).toMatch(/aria-label="A Claude Code session[^"]*8 prototypes to 3 projects[^"]*Web app, Marketing site and iPhone app/);
+  });
+
+  it('is a dark terminal in the site’s mono, with no orange', () => {
+    const css = read('src/components/home/HeroScatter.astro');
+    const pbox = css.match(/\.pbox \{[^}]*\}/)![0];
+    expect(pbox).toContain('background: #1a1918');
+    expect(pbox).toContain('border-radius: 11px');
+    expect(pbox).toContain('font-family: var(--font-mono)');
+    expect(pbox).toContain('font-size: 13px');
+    expect(css).toMatch(/--pt-ink: #edebe6/);
+    expect(css).toMatch(/--pt-muted: #a29e96/);
+    expect(css).not.toMatch(/ff4f00|--color-orange/i);
   });
 
   it('is decorative: hidden from assistive tech, with nothing to focus', () => {
@@ -143,8 +164,9 @@ describe('the scattered hero styles and script', () => {
     // The one animation is the cursor's blink, which changes opacity only.
     expect([...css.matchAll(/@keyframes (\w+)/g)].map((m) => m[1])).toEqual(['pblink']);
     expect(css.match(/@keyframes pblink \{([\s\S]*?\n {2}\})/)![1]).not.toMatch(/transform|width|height|left|top|margin/);
-    expect([...css.matchAll(/animation:/g)]).toHaveLength(1);
-    // The prompt is shown whole, without its cursor, under reduced motion.
+    // The cursor in the line and the one in the input box blink; reduced motion stops the second.
+    expect([...css.matchAll(/animation:/g)]).toHaveLength(3);
+    // The session is shown whole, without its typing cursor, under reduced motion.
     expect(css).toMatch(/prefers-reduced-motion: reduce\) \{[\s\S]*?\.pbox \.pcaret \{\s*display: none !important/);
     // The cursor is the one place the box uses Canon orange.
     expect(css).toMatch(/\.pcaret \{[^}]*background: var\(--sel\)/);

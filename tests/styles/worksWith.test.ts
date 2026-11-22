@@ -36,10 +36,10 @@ describe('the works with row', () => {
     expect(src).toMatch(/\.home \.ww-note \{[^}]*text-wrap: balance/);
   });
 
-  it('carries the framing note, and the hero lede says deployments', () => {
+  it('carries the framing note, and the hero lede is one short line', () => {
     expect(src).toContain('v0 links work once the project is deployed. Claude artifacts and Webflow staging sites do not allow framing, so add those as a zip.');
     const hero = read('src/components/home/HeroText.astro');
-    expect(hero).toContain('v0 deployments');
+    expect(hero).toContain('Links, zips and agent builds, filed by project on your machine.');
     expect(hero).not.toContain('v0 previews');
   });
 });

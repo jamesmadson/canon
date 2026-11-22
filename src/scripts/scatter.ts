@@ -1,8 +1,8 @@
 /**
  * The alternate hero. The cards are laid out in their final grid places; this
  * script gives each one a loose position as a transform (custom properties the
- * styles read). The cycle: loose cards hold, the prompt types its request, the
- * reply appears, the cards glide into the grid, hold, everything fades, resets
+ * styles read). The cycle: loose cards hold, the terminal types its request, the
+ * reply lines appear, the cards glide into the grid, hold, everything fades, resets
  * while invisible, and fades back in loose. Only transform and opacity change.
  * It pauses when the stage is off screen or the tab is hidden.
  * `?state=scattered` or `?state=filed` freezes the hero in one state.
@@ -71,9 +71,6 @@ const CARDS_PHONE: (Spot | null)[] = [
   [0.98, 610, 6, 0.9],
   null,
 ];
-
-/** The agents Canon supports, in the order the loop names them. */
-const AGENTS = ['Claude Code', 'Codex', 'Cursor'];
 
 /** How far a loose card stays from the prompt box, in pixels. */
 const CLEAR = 14;
@@ -250,16 +247,6 @@ function init(stage: HTMLElement) {
   }
   if (frozen) return;
 
-  // Each cycle names the next agent, swapped while everything is faded out.
-  // The label is a block, so its width never depends on the name. The markup
-  // says "Claude Code", which is also what reduced motion and ?state= show.
-  const names = [...document.querySelectorAll<HTMLElement>('[data-agent-name]')];
-  let agent = 0;
-  const nextAgent = () => {
-    agent = (agent + 1) % AGENTS.length;
-    names.forEach((n) => (n.textContent = AGENTS[agent]));
-  };
-
   let t = 0;
   let timer = 0;
   let visible = true;
@@ -282,7 +269,6 @@ function init(stage: HTMLElement) {
         if (variant === 'tabs') openTabs(opening());
         type(0);
         reply?.classList.remove('on');
-        nextAgent();
       });
     } else if (t === outAt + FADE + 1) {
       mark('out', false);

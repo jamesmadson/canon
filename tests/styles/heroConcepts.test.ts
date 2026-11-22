@@ -47,10 +47,10 @@ describe('the two hidden hero concepts', () => {
     expect(read('astro.config.mjs')).not.toMatch(/sitemap/);
   });
 
-  it('keep the hero text block, both buttons and the Try the MCP panel exactly as on the homepage', () => {
+  it('keep the hero text block, both buttons and the Connect your agent panel exactly as on the homepage', () => {
     expect(text(heroC)).toBe(text(home));
     expect(text(heroD)).toBe(text(home));
-    expect(text(home)).toContain('Try the MCP');
+    expect(text(home)).toContain('Connect your agent');
   });
 
   it('hold a decorative, hidden stage with no layout of their own that can scroll sideways', () => {
@@ -75,13 +75,18 @@ describe('the two hidden hero concepts', () => {
 
   it('opens on eight readable tabs and a real page, then crowds in more tabs before filing', () => {
     const tabs = [...heroD.matchAll(/<div class="btab"[^>]*>[\s\S]*?<span>([^<]+)<\/span>/g)].map((m) => m[1]);
-    expect(tabs.slice(0, 4)).toEqual(['Pricing v3 · Lovable', 'Onboarding · v0', 'Checkout · Figma Make', 'localhost:5173']);
+    expect(tabs.slice(0, 8)).toEqual(['Pricing · Lovable', 'Dashboard · v0', 'Onboarding · Figma Make', 'localhost:5173', 'Today · Claude Code', 'Landing page · Bolt', 'settings-new.zip', 'Profile · Codex']);
     // Each of the first eight names its tool or a local address.
     for (const t of tabs.slice(0, 8)) expect(t).toMatch(/ · |localhost|\.zip/);
     const page = heroD.slice(heroD.indexOf('class="bpage"'), heroD.indexOf('data-card'));
     expect(page).toContain('Simple pricing for small');
+    // Plan names are 13px and prices 24px, not display sizes.
+    const styles = read('src/components/home/HeroVariantStyles.astro');
+    expect(styles).toMatch(/\.pg-plan b \{[^}]*font-size: 13px/);
+    expect(styles).toMatch(/\.pg-plan strong \{[^}]*font-size: 24px/);
+    expect(page.match(/class="pg-plan[" ]/g)).toHaveLength(3);
     expect(page).toContain('Start a trial');
-    expect(heroD).toContain('pricing-v3.lovable.app');
+    expect(heroD).toContain('fieldnote-pricing.lovable.app');
     const script = read('src/scripts/scatter.ts');
     expect(script).toContain('const CROWD_WIDE = [8,');
     expect(script).toMatch(/CROWD_PHONE = \[4,/);

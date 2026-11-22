@@ -69,7 +69,7 @@ describe('the pictures', () => {
   it('tells the onboarding story in every picture', () => {
     for (const html of [closed, open]) {
       const t = text(html);
-      expect(t).not.toMatch(/pricing|checkout/i);
+      expect(t).not.toMatch(/checkout/i);
       expect(t).toContain('Welcome, single screen');
       expect(html).toContain('data-type="Gather every onboarding prototype into one project."');
       expect(t).toContain('canon_add');
@@ -183,8 +183,11 @@ describe('the waitlist', () => {
   });
 
   // Mutation: drop a field, or post somewhere else.
-  it('with an address shows the hero button and the short form posting to it', () => {
-    expect(text(open)).toContain('Join the hosted waitlist');
+  it('with an address shows the short form posting to it, and no waitlist button in the hero', () => {
+    const heroText = open.slice(open.indexOf('class="htext"'), open.indexOf('class="hpanel"'));
+    expect(text(heroText)).not.toMatch(/waitlist/i);
+    expect(heroText).not.toContain('href="#hosted"');
+    expect(text(open)).toContain('Join the waitlist');
     expect(text(open)).not.toContain('The waitlist opens soon.');
     const form = open.match(/<form[^>]*>/)![0];
     expect(form).toContain(`action="${WAITLIST}"`);
