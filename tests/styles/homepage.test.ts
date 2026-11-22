@@ -65,25 +65,18 @@ describe('the commands and feedback link', () => {
 });
 
 describe('the pictures', () => {
-  // Mutation: bring the pricing example back, or change the prompt or the new card's name.
-  it('tells the onboarding story in every picture', () => {
+  // Mutation: bring the old Welcome story back, or change the prompt.
+  it('tells the Fieldnote story in every picture', () => {
     for (const html of [closed, open]) {
       const t = text(html);
-      expect(t).not.toMatch(/pricing|checkout/i);
-      expect(t).toContain('Welcome, single screen');
-      expect(html).toContain('data-type="Gather every onboarding prototype into one project."');
+      const lower = text(html.slice(html.indexOf('id="projects"'), html.indexOf('id="hosted"')));
+      expect(lower).not.toMatch(/checkout|Welcome, |Invite a teammate|Mobile sign-up/);
+      expect(html).toContain('data-type="Add Today and Profile to the iPhone app project."');
       expect(t).toContain('canon_add');
-      expect(t).toContain('Welcome, three steps');
-      expect(t).toContain('Invite a teammate');
-      expect(t).toContain('Empty dashboard, with sample data');
-      expect(t).toContain('Mobile sign-up');
-      expect(t).toContain('welcome-single-screen.lovable.app');
+      expect(t).toContain('fieldnote-pricing.lovable.app');
       expect(t).toContain('Lovable · added just now');
-      expect(t).not.toContain('v0.app');
-      expect(t).toContain('mobile-sign-up.zip');
-      expect(t).toContain('Cut this to two steps.');
-      expect(t).toContain('Priya');
-      expect(t).toContain('Try the single screen first?');
+      expect(t).toContain('settings-new.zip');
+      expect(t).toContain('Make Team the default plan.');
     }
   });
 
@@ -97,7 +90,7 @@ describe('the pictures', () => {
     expect(read('src/components/home/SectionNav.astro')).toContain("{ label: 'Projects', section: 'projects', href: '/#projects' }");
   });
 
-  it('opens with projects: the heading, the nav label, and one project fed by three sources', () => {
+  it('opens with projects: the heading, the nav label, and one project fed by three ways in', () => {
     for (const html of [closed, open]) {
       const t = text(html);
       expect(t).toContain('Every prototype lands in a project.');
@@ -105,21 +98,21 @@ describe('the pictures', () => {
       expect(html).toContain('id="projects"');
       expect(t).not.toContain('Three ways in');
       const ways = html.slice(html.indexOf('id="projects"'), html.indexOf('id="agents"'));
-      expect(ways).toContain('aria-label="The Onboarding project with five prototypes in a row');
-      for (const src of ['Claude Code', 'Lovable', 'Figma Make', 'v0', 'zip']) expect(text(ways)).toContain(src);
+      expect(ways).toContain('aria-label="The Web app project with three prototypes in a row');
+      for (const src of ['v0', 'localhost:5173', 'settings-new.zip']) expect(text(ways)).toContain(src);
     }
   });
 
-  it('shows the agent filing prototypes as a move from No project to Onboarding', () => {
+  it('shows the agent filing Today and Profile as a move from No project to iPhone app', () => {
     const agents = closed.slice(closed.indexOf('id="agents"'), closed.indexOf('id="find"'));
-    expect(agents).toContain('aria-label="Three loose prototypes under No project move into the Onboarding project');
+    expect(agents).toContain('aria-label="Two loose prototypes under No project, Today and Profile, move into the iPhone app project');
     expect(text(agents)).toContain('No project');
     expect(text(agents)).toContain('Nothing loose');
   });
 
-  it('searches for onboarding', () => {
-    expect(closed).toMatch(/<span>onboarding<\/span>/);
-    expect(closed).toContain('Search results for the word onboarding.');
+  it('searches for team', () => {
+    expect(closed).toMatch(/<span>team<\/span>/);
+    expect(closed).toContain('Search results for the word team.');
   });
 
   // Mutation: drop the mask from the hero window, or put orange in a thumbnail.
@@ -183,8 +176,11 @@ describe('the waitlist', () => {
   });
 
   // Mutation: drop a field, or post somewhere else.
-  it('with an address shows the hero button and the short form posting to it', () => {
-    expect(text(open)).toContain('Join the hosted waitlist');
+  it('with an address shows the short form posting to it, and no waitlist button in the hero', () => {
+    const heroText = open.slice(open.indexOf('class="htext"'), open.indexOf('class="hpanel"'));
+    expect(text(heroText)).not.toMatch(/waitlist/i);
+    expect(heroText).not.toContain('href="#hosted"');
+    expect(text(open)).toContain('Join the waitlist');
     expect(text(open)).not.toContain('The waitlist opens soon.');
     const form = open.match(/<form[^>]*>/)![0];
     expect(form).toContain(`action="${WAITLIST}"`);
@@ -217,7 +213,7 @@ describe('what the copy claims', () => {
     for (const html of [closed, open]) {
       const hosted = html.slice(html.indexOf('id="hosted"'));
       expect(text(hosted)).toContain('Not built yet.');
-      expect(text(hosted.slice(0, hosted.indexOf('Canon, hosted')))).toContain('Available now.');
+      expect(text(hosted.slice(0, hosted.indexOf('Canon, hosted')))).toContain('Nothing leaves your machine.');
     }
   });
 
@@ -286,7 +282,7 @@ describe('words', () => {
   // Mutation: go back to a line break, or drop the tie on a sentence's last two words.
   it('sets each sentence of a two-sentence heading in its own block span, tied at the end', () => {
     const heads = [...closed.matchAll(/<h([12])\b[^>]*>((?:<span class="sent">[^<]*<\/span>)+)<\/h\1>/g)];
-    expect(heads).toHaveLength(3);
+    expect(heads).toHaveLength(5);
     for (const h of heads) {
       const spans = [...h[2].matchAll(/<span class="sent">([^<]*)<\/span>/g)].map((m) => m[1]);
       expect(spans).toHaveLength(2);

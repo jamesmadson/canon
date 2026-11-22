@@ -14,12 +14,11 @@ beforeAll(() => {
 }, 120_000);
 
 describe('the homepage describes what is shipped', () => {
-  // Mutation: delete the stored copy sentence, or the Live switch, from WaysIn.astro.
-  it('says a build from code keeps a stored copy, and shows it on one card', () => {
+  // Mutation: drop the stored copy chip from the People card.
+  it('shows the stored copy chip on one card, and keeps the long explanation off the cards', () => {
     const projects = flat(home.slice(home.indexOf('id="projects"'), home.indexOf('id="agents"')));
-    expect(projects).toContain('keeps a stored copy that opens without its dev server running');
-    expect(projects).toContain('a Live switch shows the running version when the server is on');
     expect(projects.match(/class="stored"/g)).toHaveLength(1);
+    expect(projects).not.toContain('Live switch');
   });
 
   // Mutation: put the version label back in the title, or drop the arrows.

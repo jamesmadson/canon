@@ -22,13 +22,19 @@ const links = (html: string) => [...pill(html).matchAll(/<a href="([^"]+)"([^>]*
 
 describe('the top of the page', () => {
   it('has the wordmark at the left and Open the app at the right, and no other links', () => {
-    for (const html of [home, skills]) {
-      const header = html.slice(html.indexOf('<header'), html.indexOf('</header>'));
-      expect(header.match(/<a\b/g)).toHaveLength(2);
-      expect(header).toContain('aria-label="Canon, home"');
-      expect(header).toMatch(/<a class="hbtn hbtn-small" href="\/canon\/app\/"[^>]*>Open the app<\/a>/);
-      expect(header).not.toContain('<nav');
-    }
+    const header = skills.slice(skills.indexOf('<header'), skills.indexOf('</header>'));
+    expect(header.match(/<a\b/g)).toHaveLength(2);
+    expect(header).toContain('aria-label="Canon, home"');
+    expect(header).toMatch(/<a class="hbtn hbtn-small" href="\/canon\/app\/"[^>]*>Open the app<\/a>/);
+    expect(header).not.toContain('<nav');
+  });
+
+  // Mutation: drop the hero prop from the homepage, or render the header button regardless.
+  it('leaves Open the app out of the homepage header, where the hero has its own', () => {
+    const header = home.slice(home.indexOf('<header'), home.indexOf('</header>'));
+    expect(header.match(/<a\b/g)).toHaveLength(1);
+    expect(header).toContain('aria-label="Canon, home"');
+    expect(home.match(/>Open the app<\/a>/g)).toHaveLength(1);
   });
 
   it('moves GitHub to the footer', () => {

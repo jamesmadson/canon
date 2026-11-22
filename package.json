@@ -30,6 +30,7 @@
     "geist": "^1.7.2",
     "gray-matter": "^4.0.3",
     "jsdom": "^25.0.1",
+    "simple-icons": "^16.38.1",
     "typescript": "^5.5.0",
     "vitest": "^2.0.0"
   }

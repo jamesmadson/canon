@@ -5,32 +5,28 @@ import { REPO_URL, SETUP_COMMAND } from '../../lib/site';
 import { tie } from '../../lib/words';
 import type { ThumbKey } from '../../lib/thumbs';
 
-const PROMPT = 'Gather every onboarding prototype into one project.';
+const PROMPT = 'Add Today and Profile to the iPhone app project.';
 
 type Row = [ThumbKey, string, string];
-// Three prototypes that start loose, and the two already filed under Onboarding.
+// Two prototypes that start loose, and the one already filed under iPhone app.
 const LOOSE: Row[] = [
-  ['w2', 'Welcome, single screen', 'Lovable'],
-  ['w4', 'Empty dashboard, with sample data', 'v0'],
-  ['w5', 'Mobile sign-up', 'zip'],
+  ['today', 'Today', 'Claude Code'],
+  ['prof', 'Profile', 'Codex'],
 ];
-const FILED: Row[] = [
-  ['w1', 'Welcome, three steps', 'Claude Code'],
-  ['w3', 'Invite a teammate', 'Figma Make'],
-];
+const FILED: Row[] = [['onb', 'Onboarding', 'Figma Make']];
 ---
 
 <section class="band" id="agents" aria-labelledby="h-agents">
   <div class="bhead">
     <h2 id="h-agents"><span class="sent">Say it once.</span><span class="sent">{tie('Your agent does the filing.')}</span></h2>
-    <p class="lede">{tie('Your agent can add, name, tag and move prototypes for you. Ask in plain words and they land in one project.')}</p>
+    <p class="lede">{tie('Your agent can add, name, tag and file prototypes for you. Ask in plain words and they land in the right project.')}</p>
   </div>
   <div class="tint" data-demo="agents">
     <p class="say">{tie('You, to your agent')}</p>
     <p class="big"><span data-type={PROMPT} data-type-start="0">{PROMPT}</span><span class="caret" data-caret="30" style="opacity:0" aria-hidden="true"></span></p>
-    <div class="moves" role="img" aria-label="Three loose prototypes under No project move into the Onboarding project, which grows from two prototypes to five.">
+    <div class="moves" role="img" aria-label="Two loose prototypes under No project, Today and Profile, move into the iPhone app project, which grows from one prototype to three.">
       <div class="mvbox" aria-hidden="true">
-        <div class="mvhead"><b>No project</b><span><span data-count data-from="3" data-to="0" data-at="38">0</span></span></div>
+        <div class="mvhead"><b>No project</b><span><span data-count data-from="2" data-to="0" data-at="38">0</span></span></div>
         <div class="mvbody">
           {
             LOOSE.map(([k, name, from]) => (
@@ -46,7 +42,7 @@ const FILED: Row[] = [
       </div>
       <svg class="mvarrow" width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
       <div class="mvbox" aria-hidden="true">
-        <div class="mvhead"><b>Onboarding</b><span><span data-count data-from="2" data-to="5" data-at="38">5</span></span></div>
+        <div class="mvhead"><b>iPhone app</b><span><span data-count data-from="1" data-to="3" data-at="38">3</span></span></div>
         <div class="mvbody">
           {
             LOOSE.map(([k, name, from], i) => (

@@ -5,10 +5,11 @@ import type { ThumbKey } from '../../lib/thumbs';
 import { withBase } from '../../lib/withBase';
 import HeroVariantStyles from './HeroVariantStyles.astro';
 import { EXTRAS, TABS, TAB_OF_CARD } from './heroVariants';
+import Terminal from './Terminal.astro';
 import { tie } from '../../lib/words';
 
 /**
- * The alternate hero. Nine prototypes sit loose, each with a chip naming where
+ * The alternate hero. Eight prototypes sit loose, each with a chip naming where
  * it lives, then line up in the Home shelf of Canon's window, where the chip
  * becomes the source line. The cards are laid out in their final grid places;
  * the loose state is only a transform per card, set by the script.
@@ -34,36 +35,34 @@ interface Card {
   source: string;
   when: string;
   mono?: boolean;
-  /** The card the agent filed: its source follows the agent name in the prompt box. */
-  agent?: boolean;
 }
 interface Project {
   name: string;
   cards: Card[];
 }
+/** Fieldnote is an invented company: three projects, eight prototypes. */
 const PROJECTS: Project[] = [
   {
-    name: 'Onboarding',
+    name: 'Web app',
     cards: [
-      { k: 'w2', name: 'Welcome, single screen', source: 'Lovable', when: 'just now' },
-      { k: 'w1', name: 'Welcome, three steps', source: 'Claude Code', when: 'Tuesday', agent: true },
-      { k: 'w3', name: 'Invite a teammate', source: 'Figma Make', when: 'Monday' },
+      { k: 'dash', name: 'Dashboard', source: 'v0', when: 'just now' },
+      { k: 'people', name: 'People', source: 'localhost:5173', when: 'Tuesday', mono: true },
+      { k: 'settings', name: 'Settings', source: 'settings-new.zip', when: '2 Nov', mono: true },
     ],
   },
   {
-    name: 'Dashboard',
+    name: 'Marketing site',
     cards: [
-      { k: 'w4', name: 'Empty dashboard', source: 'v0', when: 'last week' },
-      { k: 'd1', name: 'Overview, this week', source: 'Codex', when: '2 Nov' },
-      { k: 'd2', name: 'People table', source: 'Bolt', when: '30 Oct' },
+      { k: 'land', name: 'Landing page', source: 'Bolt', when: 'Monday' },
+      { k: 'price', name: 'Pricing', source: 'Lovable', when: 'last week' },
     ],
   },
   {
-    name: 'Mobile navigation',
+    name: 'iPhone app',
     cards: [
-      { k: 'd3', name: 'Navigation, notes view', source: 'localhost:3000', when: '28 Oct', mono: true },
-      { k: 'w5', name: 'Mobile sign-up', source: 'mobile-sign-up.zip', when: '26 Oct', mono: true },
-      { k: 'm1', name: 'Bottom tab bar', source: 'Slack link', when: '24 Oct' },
+      { k: 'onb', name: 'Onboarding', source: 'Figma Make', when: '30 Oct' },
+      { k: 'today', name: 'Today', source: 'Claude Code', when: '28 Oct' },
+      { k: 'prof', name: 'Profile', source: 'Codex', when: '24 Oct' },
     ],
   },
 ];
@@ -71,8 +70,10 @@ const total = PROJECTS.reduce((n, p) => n + p.cards.length, 0);
 let index = 0;
 
 const PROMPT = 'Put all my prototypes in Canon, by project.';
-const REPLY = `canon_add  ${total} prototypes, ${PROJECTS.length} projects`;
-const words = PROMPT.split(' ');
+const names = PROJECTS.map((p) => p.name);
+const DONE = `Done. They’re in Canon under ${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}.`;
+const LABEL = `A Claude Code session. You ask it: “${PROMPT}” It adds ${total} prototypes to ${PROJECTS.length} projects with the canon_add tool, then says they are in Canon under ${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}.`;
+const ADDED = `Added ${total} prototypes to ${PROJECTS.length} projects`;
 ---
 
 <section class:list={['hero hero-b', variant === 'cards' && 'hero-c', variant === 'tabs' && 'hero-tabs']} aria-labelledby="h-hero">
@@ -94,18 +95,7 @@ const words = PROMPT.split(' ');
   </div>
 
   {variant !== 'cards' && (
-  <div class="pbox" aria-hidden="true" data-prompt={PROMPT}>
-    <div class="plabel" data-agent-name>Claude Code</div>
-    <div class="ptext"><span class="pdim">&gt;</span>{' '}{
-      words.map((w, i) => (
-        <>
-          <span class="pw">{[...w].map((ch) => <span class="pc">{ch}</span>)}</span>
-          {i < words.length - 1 ? ' ' : ''}
-        </>
-      ))
-    }<span class="pcaret"></span></div>
-    <div class="preply">{REPLY}</div>
-  </div>
+    <Terminal prompt={PROMPT} added={ADDED} reply={DONE} label={LABEL} title="fieldnote · claude" />
   )}
 
   <div class="sstage" aria-hidden="true" data-scatter data-variant={variant}>
@@ -124,18 +114,24 @@ const words = PROMPT.split(' ');
           ))}
           <div class="btab canon-tab"><div class="btab-in"><i class="bico"></i><span>Canon</span></div></div>
         </div>
-        <div class="bbarline"><span class="bnav-dots"><i></i><i></i></span><span class="burl"><span class="burl-text">pricing-v3.lovable.app</span></span></div>
+        <div class="bbarline"><span class="bnav-dots"><i></i><i></i></span><span class="burl"><span class="burl-text">fieldnote-pricing.lovable.app</span></span></div>
         <div class="bpage">
           <div class="pg-nav"><b>Fieldnote</b><span>Product</span><span>Pricing</span><span>Docs</span><em>Sign in</em></div>
           <div class="pg-head">
-            <h3>{tie('Simple pricing for small teams.')}</h3>
+            <h3>{tie('Simple pricing for small teams')}</h3>
             <p>{tie('Start free. Pay when your team grows.')}</p>
             <div class="pg-switch"><span class="on">Monthly</span><span>Yearly</span></div>
           </div>
           <div class="pg-plans">
-            <div class="pg-plan"><b>Free</b><strong>$0</strong><small>per month</small><ul><li>3 notebooks</li><li>Search</li></ul><span>Start free</span></div>
-            <div class="pg-plan pg-pick"><b>Team</b><strong>$12</strong><small>per person, monthly</small><ul><li>Unlimited notebooks</li><li>Shared folders</li><li>Version history</li></ul><span class="pg-cta">Start a trial</span></div>
-            <div class="pg-plan"><b>Company</b><strong>$24</strong><small>per person, monthly</small><ul><li>Single sign-on</li><li>Audit log</li></ul><span>Talk to us</span></div>
+            <div class="pg-plan"><b>Free</b><strong>$0<small>/mo</small></strong><p>For trying it out</p><ul><li>3 notebooks</li><li>Search</li><li>1 person</li></ul><span>Start free</span></div>
+            <div class="pg-plan pg-pick"><b>Team</b><strong>$12<small>/mo</small></strong><p>Per person, billed monthly</p><ul><li>Unlimited notebooks</li><li>Shared folders</li><li>Version history</li></ul><span class="pg-cta">Start a trial</span></div>
+            <div class="pg-plan"><b>Company</b><strong>$24<small>/mo</small></strong><p>Per person, billed monthly</p><ul><li>Single sign-on</li><li>Audit log</li><li>Priority support</li></ul><span>Talk to us</span></div>
+          </div>
+          <p class="pg-note">{tie('Every plan includes search, sync and 30 days of history.')}</p>
+          <div class="pg-faq">
+            <div><b>Can I switch plans?</b><p>Yes, any time.</p></div>
+            <div><b>Is there a discount for yearly?</b><p>Two months free.</p></div>
+            <div><b>Do you have a nonprofit price?</b><p>Ask us, we do.</p></div>
           </div>
         </div>
       </div>
@@ -185,9 +181,9 @@ const words = PROMPT.split(' ');
                           <div class="sh"></div>
                           <Thumb k={c.k} />
                           {i === 0 && <div class="sring fx"></div>}
-                          <span class:list={['chip', c.mono && 'mono']} data-agent-name={c.agent ? '' : undefined}>{c.source}</span>
+                          <span class:list={['chip', c.mono && 'mono']}>{c.source}</span>
                           <div class="pname fxn">{c.name}</div>
-                          <div class="pmeta fxn"><span class:list={[c.mono && 'mono']} data-agent-name={c.agent ? '' : undefined}>{c.source}</span> · {c.when}</div>
+                          <div class="pmeta fxn"><span class:list={[c.mono && 'mono']}>{c.source}</span> · {c.when}</div>
                         </div>
                       </div>
                     );
@@ -227,7 +223,7 @@ const words = PROMPT.split(' ');
   }
   @media (min-width: 1100px) {
     .hero.hero-b {
-      grid-template-columns: minmax(0, 1fr) 400px;
+      grid-template-columns: minmax(0, 1fr) 460px;
       grid-template-areas:
         'text prompt'
         'stage stage';
@@ -308,71 +304,20 @@ const words = PROMPT.split(' ');
     }
   }
 
-  /* The prompt: a decorative agent input that types the request. The whole
-     line is in the layout from the start; characters are only revealed. */
+  /* The prompt: a dark terminal running Claude Code (the look is in
+     TerminalStyles). It types the request into its input box, sends it so the
+     text moves up into the transcript, and then the tool call, its result and
+     the answer appear in turn. The whole text is in the layout from the start;
+     characters and lines are only revealed. */
   .pbox {
     grid-area: prompt;
-    position: relative;
     z-index: 3;
     margin-top: 32px;
-    padding: 14px 18px 16px;
-    border-radius: 14px;
-    background: var(--wn-main);
-    box-shadow:
-      0 0 0 1px var(--wn-line-strong),
-      0 24px 60px -20px var(--shadow);
-    pointer-events: none;
   }
   @media (min-width: 1100px) {
     .pbox {
       margin-top: 0;
     }
-  }
-  .plabel {
-    margin-bottom: 10px;
-    font-size: 12px;
-    line-height: 16px;
-    color: var(--color-ink-soft);
-  }
-  .ptext {
-    font-size: 15px;
-    line-height: 24px;
-    color: var(--color-ink);
-  }
-  .pdim {
-    color: var(--color-ink-soft);
-  }
-  .pw {
-    white-space: nowrap;
-  }
-  .preply {
-    margin-top: 10px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    line-height: 20px;
-    color: var(--color-ink-soft);
-    white-space: pre-wrap;
-  }
-  /* The cursor takes no room, so moving it never reflows the line. */
-  .pcaret {
-    display: none;
-    width: 2px;
-    height: 18px;
-    margin-right: -2px;
-    vertical-align: -3px;
-    background: var(--sel);
-    animation: pblink 1.1s steps(1) infinite;
-  }
-  @keyframes pblink {
-    50% {
-      opacity: 0;
-    }
-  }
-  .pbox.live .pcaret {
-    display: inline-block;
-  }
-  .pbox.live .pc:not(.on) {
-    opacity: 0;
   }
   .motion .pbox {
     opacity: 0;
@@ -382,18 +327,32 @@ const words = PROMPT.split(' ');
     transition: opacity 300ms var(--ease);
   }
   .pbox.live .ptext,
-  .pbox.live .preply {
-    transition: opacity 300ms var(--ease);
+  .pbox.live .pstep {
+    transition:
+      opacity 300ms var(--ease),
+      transform 300ms var(--ease);
   }
-  .pbox.live .preply {
+  .pbox.live .pstep {
     opacity: 0;
+    transform: translateY(6px);
   }
-  .pbox.live .preply.on {
+  .pbox.live .preply.on .pstep {
     opacity: 1;
+    transform: none;
+  }
+  .pbox.live .preply.on .pstep:nth-child(2) {
+    transition-delay: 120ms;
+  }
+  .pbox.live .preply.on .pstep:nth-child(3) {
+    transition-delay: 240ms;
+  }
+  .pbox.live .preply.on .pstep:nth-child(4) {
+    transition-delay: 400ms;
   }
   .pbox.live.out .ptext,
-  .pbox.live.out .preply {
+  .pbox.live.out .pstep {
     opacity: 0;
+    transition-delay: 0s;
   }
   .pbox.snap *,
   .pbox.snap *::before,
@@ -416,10 +375,17 @@ const words = PROMPT.split(' ');
       margin: 24px 0 0;
     }
   }
+  /* The clip box reaches 700px above and 120px either side, so loose cards can
+     drift out of the window. Its padding keeps the window where it was. A mask
+     fades the bottom 110px into the panel, so the window never ends in a hard
+     cut. */
   .sclip {
     position: absolute;
-    inset: 0;
-    clip-path: inset(-700px -120px 0 -120px);
+    inset: -700px -120px 0;
+    padding: 700px 120px 0;
+    box-sizing: border-box;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 110px), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 110px), transparent 100%);
   }
   .sapp {
     position: relative;
@@ -646,20 +612,22 @@ const words = PROMPT.split(' ');
     .sstage .sh {
       opacity: 0 !important;
     }
-    /* The prompt shows whole, with its reply and no cursor. */
+    /* The session shows as sent, with its reply and an empty input box. */
     .pbox {
       opacity: 1;
     }
     .pbox * {
       transition: none !important;
     }
-    .pbox .pc,
-    .pbox .ptext,
-    .pbox .preply {
+    .pbox .pstep {
       opacity: 1 !important;
+      transform: none !important;
+    }
+    .pbox .pc {
+      opacity: 0 !important;
     }
     .pbox .pcaret {
-      display: none !important;
+      animation: none !important;
     }
   }
 

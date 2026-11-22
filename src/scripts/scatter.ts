@@ -1,14 +1,15 @@
 /**
  * The alternate hero. The cards are laid out in their final grid places; this
  * script gives each one a loose position as a transform (custom properties the
- * styles read). The cycle: loose cards hold, the prompt types its request, the
- * reply appears, the cards glide into the grid, hold, everything fades, resets
+ * styles read). The cycle: loose cards hold, the terminal types its request, the
+ * reply lines appear, the cards glide into the grid, hold, everything fades, resets
  * while invisible, and fades back in loose. Only transform and opacity change.
  * It pauses when the stage is off screen or the tab is hidden.
  * `?state=scattered` or `?state=filed` freezes the hero in one state.
  */
 
 import { avoidBox } from '../lib/scatterAvoid';
+import { CROWD_AT, CROWD_STEP, FADE, TICK, TYPE_TICKS, beats } from '../lib/heroTimeline';
 
 type Spot = [x: number, y: number, rot: number, scale: number];
 
@@ -72,21 +73,8 @@ const CARDS_PHONE: (Spot | null)[] = [
   null,
 ];
 
-/** The agents Canon supports, in the order the loop names them. */
-const AGENTS = ['Claude Code', 'Codex', 'Cursor'];
-
 /** How far a loose card stays from the prompt box, in pixels. */
 const CLEAR = 14;
-
-const TICK = 50; // ms
-const TYPE_AT = 30; // 1.5 seconds of loose cards, then the prompt types
-const TYPE_TICKS = 32; // about 1.6 seconds
-const REPLY_AT = TYPE_AT + TYPE_TICKS + 2;
-const FILED_AT = REPLY_AT + 8; // the reply is read, then the cards glide
-const GLIDE = 18; // the last card lands and its name fades in
-const HOLD_FILED = 90; // 4.5 seconds once everything has landed
-const HOLD_LOOSE = 56; // without a prompt, the loose cards are held for 2.8 seconds
-const FADE = 7; // a little over the 300ms fade
 
 /**
  * The tabs variant opens on a few readable tabs and a page, then more tabs
@@ -96,10 +84,6 @@ const FADE = 7; // a little over the 300ms fade
  */
 const CROWD_WIDE = [8, 11, 15, 20, 26, 34];
 const CROWD_PHONE = [4, 5, 7, 9, 12];
-const CROWD_AT = 44; // 2.2 seconds with the first tabs readable
-const CROWD_STEP = 4; // 200ms between steps
-/** The tabs variant starts its prompt after the squeeze: the crowding steps, then a beat. */
-const TABS_LAG = CROWD_AT + CROWD_WIDE.length * CROWD_STEP + 6 - TYPE_AT;
 
 function init(stage: HTMLElement) {
   const cards = [...stage.querySelectorAll<HTMLElement>('[data-card]')];
@@ -238,7 +222,7 @@ function init(stage: HTMLElement) {
     place();
     stage.classList.toggle('is-filed', frozen === 'filed');
     if (variant === 'tabs') openTabs(frozen === 'start' || !frozen ? opening() : squeezed());
-    type(frozen === 'filed' ? chars.length : 0);
+    type(0);
     reply?.classList.toggle('on', frozen === 'filed');
   });
   requestAnimationFrame(() => parts.forEach((p) => p.classList.add('ready')));
@@ -250,30 +234,20 @@ function init(stage: HTMLElement) {
   }
   if (frozen) return;
 
-  // Each cycle names the next agent, swapped while everything is faded out.
-  // The label is a block, so its width never depends on the name. The markup
-  // says "Claude Code", which is also what reduced motion and ?state= show.
-  const names = [...document.querySelectorAll<HTMLElement>('[data-agent-name]')];
-  let agent = 0;
-  const nextAgent = () => {
-    agent = (agent + 1) % AGENTS.length;
-    names.forEach((n) => (n.textContent = AGENTS[agent]));
-  };
-
   let t = 0;
   let timer = 0;
   let visible = true;
   const tick = () => {
     t += 1;
-    const lag = variant === 'tabs' ? TABS_LAG : 0;
-    const typeAt = TYPE_AT + lag;
-    const replyAt = REPLY_AT + lag;
-    const filedAt = box ? FILED_AT + lag : HOLD_LOOSE;
-    const outAt = filedAt + GLIDE + HOLD_FILED;
+    const { typeAt, replyAt, filedAt, outAt } = beats(variant, CROWD_WIDE.length, !!box);
     const steps = crowd();
     if (variant === 'tabs' && t >= CROWD_AT && (t - CROWD_AT) % CROWD_STEP === 0 && (t - CROWD_AT) / CROWD_STEP < steps.length) openTabs(steps[(t - CROWD_AT) / CROWD_STEP]);
     if (box && t >= typeAt && t <= typeAt + TYPE_TICKS) type(Math.ceil(((t - typeAt) / TYPE_TICKS) * chars.length));
-    else if (box && t === replyAt) reply?.classList.add('on');
+    else if (box && t === replyAt) {
+      // Sent: the input box empties and its text moves up into the transcript.
+      type(0);
+      reply?.classList.add('on');
+    }
     else if (t === filedAt) stage.classList.add('is-filed');
     else if (t === outAt) mark('out', true);
     else if (t === outAt + FADE) {
@@ -282,7 +256,6 @@ function init(stage: HTMLElement) {
         if (variant === 'tabs') openTabs(opening());
         type(0);
         reply?.classList.remove('on');
-        nextAgent();
       });
     } else if (t === outAt + FADE + 1) {
       mark('out', false);

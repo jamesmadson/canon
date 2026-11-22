@@ -1,0 +1,184 @@
+---
+/**
+ * The look of the terminals on the homepage: the hero's (.pbox) and the small
+ * one in the first "ways in" card (.pmini). One dark window in the site's mono,
+ * a request line on a soft fill, a quiet tool call with its result indented
+ * under it, the reply in the site's sans, and an input box that is a slightly
+ * lighter fill with no outline. Only the input box ever has a cursor.
+ */
+---
+
+<style is:global>
+  .pterm {
+    --pt-ink: #edebe6;
+    --pt-muted: #a29e96;
+    --pt-fill: #292826;
+    --pt-guide: #3d3b38;
+    position: relative;
+    border-radius: 14px;
+    background: #1a1918;
+    color: var(--pt-ink);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 21px;
+    box-shadow: 0 24px 60px -20px var(--shadow);
+    pointer-events: none;
+  }
+  .pbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0 16px;
+  }
+  .pdots {
+    position: absolute;
+    left: 18px;
+    top: 17px;
+    display: flex;
+    gap: 7px;
+  }
+  .pdots i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3d3b38;
+  }
+  .ptitle {
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--pt-muted);
+  }
+  .pbody {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 4px 20px 20px;
+  }
+  .preply {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .pdim {
+    color: var(--pt-muted);
+  }
+  .pw {
+    white-space: nowrap;
+  }
+
+  /* The request, once sent: a line on a soft fill. */
+  .pask {
+    display: grid;
+    grid-template-columns: 2ch minmax(0, 1fr);
+    padding: 10px 14px;
+    border-radius: 11px;
+    background: var(--pt-fill);
+  }
+  /* The tool call is small and quiet; its result sits indented under it. */
+  .pcall {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 18px;
+    color: var(--pt-muted);
+  }
+  .pdot {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--sel);
+  }
+  .pvia {
+    opacity: 0.8;
+  }
+  .pres {
+    margin: -6px 0 0 3px;
+    padding-left: 15px;
+    box-shadow: inset 1px 0 0 var(--pt-guide);
+    font-size: 12px;
+    line-height: 18px;
+    color: #cdc9c1;
+  }
+  .pnote {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 22px;
+    color: var(--pt-ink);
+  }
+
+  /* The input box: the one place that types, so the one cursor. The text is
+     always in the layout, so the box never changes height as it is typed or
+     sent. */
+  .pinput {
+    display: flex;
+    align-items: flex-start;
+    gap: 1ch;
+    min-height: 46px;
+    padding: 12px 14px;
+    border-radius: 11px;
+    background: var(--pt-fill);
+  }
+  .ptext {
+    min-width: 0;
+  }
+  .pcaret {
+    display: inline-block;
+    width: 2px;
+    height: 17px;
+    margin-right: -2px;
+    vertical-align: -3px;
+    background: var(--sel);
+  }
+  .pbox.live .pcaret {
+    animation: pblink 1.1s steps(1) infinite;
+  }
+  @keyframes pblink {
+    50% {
+      opacity: 0;
+    }
+  }
+  /* The typed characters are hidden unless the script is typing them: with no
+     script, or reduced motion, the session shows as sent, with an empty box. */
+  .pbox .pc {
+    opacity: 0;
+  }
+  .pbox.live .pc.on {
+    opacity: 1;
+  }
+
+  /* The small one, in the first card. */
+  .pmini {
+    font-size: 12px;
+    line-height: 19px;
+  }
+  .pmini .pbar {
+    height: 36px;
+  }
+  .pmini .pdots {
+    top: 13px;
+  }
+  .pmini .pdots i {
+    width: 8px;
+    height: 8px;
+  }
+  .pmini .pbody {
+    gap: 10px;
+    padding: 0 14px 16px;
+  }
+  .pmini .preply {
+    gap: 8px;
+  }
+  .pmini .pask {
+    padding: 7px 12px;
+    border-radius: 9px;
+  }
+  .pmini .pcall,
+  .pmini .pres {
+    font-size: 12px;
+  }
+</style>

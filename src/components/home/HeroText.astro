@@ -2,32 +2,27 @@
 import CopyField from './CopyField.astro';
 import { CODEX_CONFIG, CURSOR_CONFIG, REPO_URL, SETUP_COMMAND } from '../../lib/site';
 import { withBase } from '../../lib/withBase';
-import { waitlistOpen } from '../../lib/waitlist';
 import { tie } from '../../lib/words';
 
 /**
- * The hero's words and actions, shared by both hero variants. "Try the MCP"
- * opens a panel under the buttons with the setup command. Without script the
- * panel is simply open and its button is hidden.
+ * The hero's words and actions, shared by every hero variant. "Try it with
+ * your agent" opens a panel under the buttons with the setup command. Without
+ * script the panel is simply open and its button is hidden. The hosted
+ * waitlist is not in the hero; the hosted section lower down has its own form.
  */
 interface Props {
   waitlistUrl?: string;
 }
-const { waitlistUrl = '' } = Astro.props;
 ---
 
 <div class="htext">
   <h1 id="h-hero" class="rise"><span class="sent">Your prototypes are everywhere.</span><span class="sent">{tie('Canon keeps them in one place.')}</span></h1>
-  <p class="lede lede-hero rise rise-2">
-    {tie('You and your team juggle Figma Make links, v0 deployments, Lovable apps, zips and whatever an agent built this morning. Canon files every one by project on your machine, named, tagged and easy to find.')}
-  </p>
+  <p class="lede lede-hero rise rise-2">{tie('Links, zips and agent builds, filed by project on your machine.')}</p>
   <div class="mcp-scope" data-mcp>
     <div class="cta rise rise-3">
       <a class="hbtn hbtn-primary" href={withBase('/app/')} data-ga="open_app" data-ga-location="hero">Open the app</a>
-      <button type="button" class="hbtn" data-mcp-toggle aria-expanded="false" aria-controls="mcp-panel">Try the MCP</button>
-      {waitlistOpen(waitlistUrl) && <a class="hbtn" href="#hosted">Join the hosted waitlist</a>}
+      <button type="button" class="hbtn" data-mcp-toggle aria-expanded="false" aria-controls="mcp-panel">Try it with your agent</button>
     </div>
-    <p class="fine install-line rise rise-3">{tie('Install it from Chrome and it opens in its own window.')}</p>
     <div class="mcp">
       <div class="mcp-panel" id="mcp-panel" role="group" aria-labelledby="mcp-label">
         <p class="mcp-label" id="mcp-label">{tie('Connect your agent')}</p>
@@ -61,7 +56,6 @@ const { waitlistUrl = '' } = Astro.props;
       </div>
     </div>
   </div>
-  <p class="fine rise rise-3" data-mcp-after>{tie('Free and open source. No account, and nothing leaves your machine.')}</p>
 </div>
 
 <script>
@@ -190,14 +184,13 @@ const { waitlistUrl = '' } = Astro.props;
   .home .mcp-panel button:focus-visible {
     outline-color: var(--mp-ink);
   }
-  .mcp-scope [aria-expanded='true'] {
+  .htext .mcp-scope .hbtn[aria-expanded='true'] {
     background: var(--color-recess);
   }
-  .fine.install-line {
-    margin-top: 12px;
-  }
-  .fine[data-mcp-after] {
-    margin-top: 16px;
+  /* Secondary hero buttons are a light warm fill, not an outline. */
+  .htext .hbtn:not(.hbtn-primary) {
+    border-color: transparent;
+    background: var(--color-panel);
   }
 
   /* No script: the panel is open and the button that would open it is gone. */

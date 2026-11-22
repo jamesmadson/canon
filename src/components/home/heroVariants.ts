@@ -7,38 +7,40 @@ import type { ThumbKey } from '../../lib/thumbs';
 
 type Tint = 'sand' | 'sage' | 'clay' | 'slate' | 'lilac' | 'warm';
 
-/** Cards that appear loose around the page for /hero-c/, then fade out as the nine real cards file. [thumbnail, x as a fraction of the stage width, y in px, turn, scale, shown on phones] */
+/** Cards that appear loose around the page for /hero-c/, then fade out as the eight real cards file. [thumbnail, x as a fraction of the stage width, y in px, turn, scale, shown on phones] */
 export const EXTRAS: Array<[ThumbKey, number, number, number, number, boolean]> = [
-  ['w3', 0.3, 540, 4, 0.56, false],
-  ['d2', 0.52, 330, -5, 0.62, false],
-  ['m1', 0.5, 690, 5, 0.7, false],
-  ['d1', 0.985, 440, 6, 0.8, false],
-  ['w4', 1.1, 360, -5, 0.66, false],
-  ['d3', 0.8, 640, -4, 0.6, false],
-  ['w5', -0.08, 410, 4, 0.7, false],
-  ['w2', 0.6, -330, -5, 0.56, false],
-  ['w4', 1.1, 230, 5, 0.74, false],
-  ['d3', 0.52, 250, -4, 0.8, true],
-  ['m1', 0.5, 470, 5, 0.9, true],
+  ['people', 0.3, 540, 4, 0.56, false],
+  ['settings', 0.52, 330, -5, 0.62, false],
+  ['today', 0.5, 690, 5, 0.7, false],
+  ['dash', 0.985, 440, 6, 0.8, false],
+  ['land', 1.1, 360, -5, 0.66, false],
+  ['price', 0.8, 640, -4, 0.6, false],
+  ['onb', -0.08, 410, 4, 0.7, false],
+  ['prof', 0.6, -330, -5, 0.56, false],
+  ['land', 1.1, 230, 5, 0.74, false],
+  ['price', 0.52, 250, -4, 0.8, true],
+  ['today', 0.5, 470, 5, 0.9, true],
 ];
 
 /**
  * The strip of tabs for the tabs hero, in order, each with the tint of its
  * small square. The first eight are the ones the loop opens with, so they have
- * readable titles. The rest crowd in after them.
+ * readable titles, and each is one of the eight prototypes (its tint is its
+ * project's: Web app slate, Marketing site sand, iPhone app sage). The rest
+ * crowd in after them.
  */
 export const TABS: Array<[string, Tint]> = [
-  ['Pricing v3 · Lovable', 'sand'],
-  ['Onboarding · v0', 'slate'],
-  ['Checkout · Figma Make', 'lilac'],
-  ['localhost:5173', 'warm'],
-  ['Welcome flow · Claude Code', 'clay'],
-  ['Dashboard · Bolt', 'sage'],
-  ['settings-new.zip', 'clay'],
-  ['Overview · Codex', 'lilac'],
-  ['mobile-sign-up.zip', 'sage'],
+  ['Pricing · Lovable', 'sand'],
+  ['Dashboard · v0', 'slate'],
+  ['Onboarding · Figma Make', 'sage'],
+  ['localhost:5173', 'slate'],
+  ['Today · Claude Code', 'sage'],
+  ['Landing page · Bolt', 'sand'],
+  ['settings-new.zip', 'slate'],
+  ['Profile · Codex', 'sage'],
+  ['Team thread · Slack', 'warm'],
   ['localhost:3000', 'warm'],
-  ['Team thread · Slack', 'sand'],
+  ['Checkout · Figma Make', 'lilac'],
   ['Notes · Replit', 'lilac'],
   ['Empty state copy', 'sand'],
   ['Search results v2', 'sage'],
@@ -65,11 +67,12 @@ export const TABS: Array<[string, Tint]> = [
 ];
 
 /**
- * Which tab each of the nine cards comes out of, in the order the cards
- * appear, matched to the card's source. The six cards a phone shows come from
- * the first twelve tabs, the ones a phone keeps.
+ * Which tab each of the eight cards comes out of, in the order the cards
+ * appear (Dashboard, People, Settings, Landing page, Pricing, Onboarding,
+ * Today, Profile), matched to the card's source. All eight are among the first
+ * eight tabs, so a phone keeps them.
  */
-export const TAB_OF_CARD = [0, 4, 2, 1, 7, 5, 9, 8, 10];
+export const TAB_OF_CARD = [1, 3, 6, 5, 0, 2, 4, 7];
 
 /** A phone shows this many tabs at most. */
 export const PHONE_TABS = 12;
