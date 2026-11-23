@@ -33,14 +33,14 @@
   .home h1 {
     font-size: 48px;
     line-height: 52px;
-    font-weight: 400;
+    font-weight: 500;
     letter-spacing: -0.035em;
     text-wrap: balance;
   }
   .home h2 {
     font-size: 24px;
     line-height: 30px;
-    font-weight: 400;
+    font-weight: 500;
     letter-spacing: -0.025em;
     text-wrap: balance;
   }
@@ -142,6 +142,58 @@
     .util:hover {
       background: var(--color-recess);
       color: var(--color-ink);
+    }
+  }
+
+  /* Hover, for a fine pointer only. Fills deepen one step; nothing gains a
+     border. Colour changes are instant, so only transform and opacity animate. */
+  @media (hover: hover) and (pointer: fine) {
+    .hbtn-primary:hover {
+      background: color-mix(in oklab, var(--color-ink) 86%, var(--color-ground));
+      border-color: color-mix(in oklab, var(--color-ink) 86%, var(--color-ground));
+    }
+    .home .hbtn:not(.hbtn-primary):hover {
+      background: var(--color-recess);
+    }
+    .lockup:hover {
+      opacity: 0.64;
+    }
+    .home p a:hover,
+    .links a:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+  .lockup {
+    transition: opacity 160ms var(--ease);
+  }
+  /* Links inside running text are underlined faintly and darken on hover.
+     Footer links carry no line until hovered. */
+  .home p a {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+  }
+  .links a {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: transparent;
+  }
+  /* A link that leads on gets an arrow that steps forward on hover. */
+  .home .go {
+    display: inline-block;
+    margin-left: 6px;
+    transition: transform 160ms var(--ease);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .home a:hover .go {
+      transform: translateX(3px);
+    }
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+    .home a:hover .go {
+      transform: none;
     }
   }
 
@@ -1969,7 +2021,7 @@
     margin-top: 10px;
     font-size: 32px;
     line-height: 40px;
-    font-weight: 400;
+    font-weight: 500;
     letter-spacing: -0.03em;
     min-height: 80px;
     max-width: 26ch;
@@ -2594,7 +2646,11 @@
     user-select: none;
     transition: opacity 400ms var(--ease);
   }
+  /* The wordmark's letters overhang its box, so the links sit above them or
+     the overhang would take their clicks. */
   .links {
+    position: relative;
+    z-index: 1;
     display: flex;
     gap: 12px 24px;
     align-items: center;

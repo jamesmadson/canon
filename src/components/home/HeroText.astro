@@ -192,6 +192,13 @@ interface Props {
     border-color: transparent;
     background: var(--color-panel);
   }
+  /* The hero's ground is close to the recess colour, so here hover lifts the
+     fill to white instead of deepening it. */
+  @media (hover: hover) and (pointer: fine) {
+    .home .htext .hbtn:not(.hbtn-primary):hover {
+      background: var(--color-ground);
+    }
+  }
 
   /* No script: the panel is open and the button that would open it is gone. */
   html:not(.js) [data-mcp-toggle] {

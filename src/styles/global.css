@@ -375,17 +375,17 @@ summary,
     font-variant-numeric: tabular-nums;
   }
 
-  /* Display sizes, in Geist 400 (D-133). */
+  /* Display sizes, in Geist 500 (D-145). */
   .display {
     font-size: 30px;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.1;
     letter-spacing: -0.03em;
     text-wrap: balance;
   }
   .display-lg {
     font-size: 34px;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.1;
     letter-spacing: -0.03em;
     text-wrap: balance;
@@ -393,7 +393,7 @@ summary,
   /* The homepage claim: 40px at phone width, about 72px at 1440. */
   .display-xl {
     font-size: clamp(2.5rem, 2.1rem + 3.3vw, 4.5rem);
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1;
     letter-spacing: -0.035em;
     text-wrap: balance;

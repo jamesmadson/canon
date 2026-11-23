@@ -34,9 +34,10 @@ describe('the page grid', () => {
     expect(css).toMatch(/\.band\.split > \.bbody \{\s*grid-column: 5 \/ -1/);
   });
 
-  it('sets section titles at 24/30 and weight 400, and the hero title at 48/52', () => {
-    expect(css).toMatch(/\.home h2 \{\s*font-size: 24px;\s*line-height: 30px;\s*font-weight: 400/);
-    expect(css).toMatch(/\.home h1 \{\s*font-size: 48px;\s*line-height: 52px/);
+  // D-145: site headings are Geist at 500.
+  it('sets section titles at 24/30 and weight 500, and the hero title at 48/52 and weight 500', () => {
+    expect(css).toMatch(/\.home h2 \{\s*font-size: 24px;\s*line-height: 30px;\s*font-weight: 500/);
+    expect(css).toMatch(/\.home h1 \{\s*font-size: 48px;\s*line-height: 52px;\s*font-weight: 500/);
   });
 });
 
