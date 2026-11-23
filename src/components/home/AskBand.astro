@@ -1,0 +1,94 @@
+---
+import { ASK_LINKS, askHref } from '../../lib/askLinks';
+
+/**
+ * A quiet row at the end of the homepage: open your own assistant with a
+ * question about Canon already typed in. Each link names its assistant; the
+ * marks are decorative.
+ */
+---
+
+<section class="ask" aria-labelledby="h-ask">
+  <h2 id="h-ask" class="ask-h">Ask your assistant about&nbsp;Canon</h2>
+  <ul class="ask-list" role="list">
+    {
+      ASK_LINKS.map((l) => (
+        <li>
+          <a class="ask-link" href={askHref(l)} target="_blank" rel="noopener" data-ga="ask_click" data-ga-location={l.name}>
+            {l.path && (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                <path d={l.path} />
+              </svg>
+            )}
+            <span>{l.name}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style is:global>
+  .ask {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    padding: 72px 0 8px;
+    border-top: 1px solid var(--color-rule);
+  }
+  .home .ask-h {
+    font-size: 15px;
+    line-height: 22px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--color-ink-soft);
+  }
+  .ask-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ask-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--radius-btn);
+    background: var(--color-panel);
+    color: var(--color-ink);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform 160ms var(--ease);
+  }
+  .ask-link svg {
+    flex: none;
+    transition: transform 160ms var(--ease);
+  }
+  .ask-link:active {
+    transform: scale(0.97);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ask-link:hover {
+      background: var(--color-recess);
+    }
+    .ask-link:hover svg {
+      transform: rotate(-12deg) scale(1.08);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ask-link:active {
+      transform: none;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+    .ask-link:hover svg {
+      transform: none;
+    }
+  }
+</style>

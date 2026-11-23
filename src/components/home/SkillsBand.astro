@@ -28,7 +28,7 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
       </li>
     ))}
   </ul>
-  <p class="skills-all"><a href={withBase('/skills/')}>{tie('See every skill and how to install them')}</a></p>
+  <p class="skills-all"><a href={withBase('/skills/')}>{tie('See every skill and how to install them')}<span class="go" aria-hidden="true">→</span></a></p>
 </section>
 
 <style is:global>
@@ -60,7 +60,7 @@ const skills = (await getCollection('skills', ({ data }) => data.status === 'act
   .skill-tile h3 {
     font-size: 20px;
     line-height: 28px;
-    font-weight: 400;
+    font-weight: 500;
   }
   .skill-tile p {
     margin-top: 8px;
